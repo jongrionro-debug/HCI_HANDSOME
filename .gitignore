@@ -1,0 +1,14 @@
+.DS_Store
+._*
+Thumbs.db
+~$*
+*.tmp
+.env
+.env.*
+!.env.example
+__pycache__/
+*.py[cod]
+.venv/
+node_modules/
+# 개인 식별 정보와 동의서 원본은 Git에 보관하지 않습니다.
+private/
