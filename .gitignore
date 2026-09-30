@@ -1,14 +1,20 @@
+# 운영체제·편집기 임시 파일
 .DS_Store
 ._*
 Thumbs.db
 ~$*
 *.tmp
+
+# 로컬 환경과 비밀
 .env
 .env.*
 !.env.example
-__pycache__/
-*.py[cod]
 .venv/
 node_modules/
-# 개인 식별 정보와 동의서 원본은 Git에 보관하지 않습니다.
+__pycache__/
+*.py[cod]
+
+# 참여자 정보·동의서·원시 응답은 저장소 밖에서 관리
 private/
+data/raw/
+data/private/
