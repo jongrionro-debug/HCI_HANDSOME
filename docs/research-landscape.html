@@ -1,0 +1,1038 @@
+<!doctype html>
+<html lang="zh-CN" data-theme="shadcn" data-mode="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="generator" content="Answer me with HTML 0.4.6">
+<title>StyleMate와 연결되는 연구는 어디까지 왔나</title>
+<style>
+html[data-theme="blueprint"], html[data-theme="blueprint"][data-mode="light"] {
+  --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, "JetBrains Mono", Menlo, Consolas, "Liberation Mono", monospace;
+  --radius: 0px;
+  --shadow: none;
+  --bw: 1.5px;
+  --head-font: var(--font-sans);
+  --bg: #f6f6f3;
+  --paper: #ffffff;
+  --ink: #16181d;
+  --ink-2: #4b5260;
+  --ink-3: #8b929e;
+  --line: #1d2026;
+  --line-2: #d6dae1;
+  --fill: #f3f5f8;
+  --accent: #1d5fbf;
+  --accent-bg: #e4ecf8;
+  --ok: #1d5fbf;
+  --ok-bg: #e4ecf8;
+  --err: #c62828;
+  --err-bg: #fbeaea;
+  --warn: #a8620a;
+  --warn-bg: #fdf3e2;
+  --head-bg: #16181d;
+  --head-fg: #ffffff;
+}
+html[data-theme="blueprint"][data-mode="dark"] {
+  --bg: #081322;
+  --paper: #0d1c31;
+  --ink: #e6edf7;
+  --ink-2: #a9b8cc;
+  --ink-3: #6b7f99;
+  --line: #c9d6e8;
+  --line-2: #23385a;
+  --fill: #12253f;
+  --accent: #6ea8ff;
+  --accent-bg: #16305a;
+  --ok: #6ea8ff;
+  --ok-bg: #16305a;
+  --err: #ff7070;
+  --err-bg: #3b1620;
+  --warn: #f0b14a;
+  --warn-bg: #3a2a10;
+  --head-bg: #e6edf7;
+  --head-fg: #081322;
+}
+@media (prefers-color-scheme: dark) {
+html[data-theme="blueprint"][data-mode="auto"] {
+  --bg: #081322;
+  --paper: #0d1c31;
+  --ink: #e6edf7;
+  --ink-2: #a9b8cc;
+  --ink-3: #6b7f99;
+  --line: #c9d6e8;
+  --line-2: #23385a;
+  --fill: #12253f;
+  --accent: #6ea8ff;
+  --accent-bg: #16305a;
+  --ok: #6ea8ff;
+  --ok-bg: #16305a;
+  --err: #ff7070;
+  --err-bg: #3b1620;
+  --warn: #f0b14a;
+  --warn-bg: #3a2a10;
+  --head-bg: #e6edf7;
+  --head-fg: #081322;
+}
+}
+
+html[data-theme="shadcn"], html[data-theme="shadcn"][data-mode="light"] {
+  --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, "JetBrains Mono", Menlo, Consolas, "Liberation Mono", monospace;
+  --radius: 8px;
+  --shadow: 0 1px 2px 0 rgba(0,0,0,0.05);
+  --bw: 1px;
+  --head-font: var(--font-sans);
+  --bg: #fafafa;
+  --paper: #ffffff;
+  --ink: #09090b;
+  --ink-2: #71717a;
+  --ink-3: #a1a1aa;
+  --line: #e4e4e7;
+  --line-2: #f0f0f2;
+  --fill: #f4f4f5;
+  --accent: #2563eb;
+  --accent-bg: #eff6ff;
+  --ok: #16a34a;
+  --ok-bg: #f0fdf4;
+  --err: #dc2626;
+  --err-bg: #fef2f2;
+  --warn: #d97706;
+  --warn-bg: #fffbeb;
+  --head-bg: #18181b;
+  --head-fg: #fafafa;
+}
+html[data-theme="shadcn"][data-mode="dark"] {
+  --bg: #09090b;
+  --paper: #121215;
+  --ink: #fafafa;
+  --ink-2: #a1a1aa;
+  --ink-3: #71717a;
+  --line: #27272a;
+  --line-2: #1c1c1f;
+  --fill: #18181b;
+  --accent: #60a5fa;
+  --accent-bg: #172554;
+  --ok: #4ade80;
+  --ok-bg: #052e16;
+  --err: #f87171;
+  --err-bg: #450a0a;
+  --warn: #fbbf24;
+  --warn-bg: #451a03;
+  --head-bg: #fafafa;
+  --head-fg: #18181b;
+}
+@media (prefers-color-scheme: dark) {
+html[data-theme="shadcn"][data-mode="auto"] {
+  --bg: #09090b;
+  --paper: #121215;
+  --ink: #fafafa;
+  --ink-2: #a1a1aa;
+  --ink-3: #71717a;
+  --line: #27272a;
+  --line-2: #1c1c1f;
+  --fill: #18181b;
+  --accent: #60a5fa;
+  --accent-bg: #172554;
+  --ok: #4ade80;
+  --ok-bg: #052e16;
+  --err: #f87171;
+  --err-bg: #450a0a;
+  --warn: #fbbf24;
+  --warn-bg: #451a03;
+  --head-bg: #fafafa;
+  --head-fg: #18181b;
+}
+}
+
+html[lang="ja"][data-theme][data-mode] {
+  --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic UI", "Yu Gothic", Meiryo, "Noto Sans CJK JP", "Noto Sans JP", "PingFang SC", "Microsoft YaHei", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+html[lang="ja"][data-theme="3b1b"][data-mode] {
+  --v-title-font: "CMU Serif", "Latin Modern Roman", "Iowan Old Style", "Palatino", "Hiragino Mincho ProN", "Yu Mincho", "Noto Serif CJK JP", "Noto Serif JP", "Songti SC", serif;
+}
+
+/* Answer me with HTML base — 只引用主题变量，禁止写死颜色（主题 token 见 themes/index.js） */
+*, *::before, *::after { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+body {
+  background: var(--bg); color: var(--ink);
+  font-family: var(--font-sans); font-size: 14px; line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+}
+code, pre, kbd { font-family: var(--font-mono); }
+
+/* ── 工具栏 ─────────────────────────────── */
+.am-toolbar {
+  position: fixed; top: 12px; right: 12px; z-index: 10; display: flex; gap: 6px;
+}
+.am-btn {
+  font: 12px/1 var(--font-sans); color: var(--ink); background: var(--paper);
+  border: 1px solid var(--line-2); border-radius: var(--radius); padding: 7px 10px; cursor: pointer;
+}
+.am-btn:hover { border-color: var(--ink-3); }
+.am-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+/* ── 页头 ───────────────────────────────── */
+.am-head { margin: 0 0 20px; padding-right: 260px; }
+.am-head h1 { margin: 0; font-size: 24px; line-height: 1.25; letter-spacing: -0.01em; }
+.am-sub { margin: 4px 0 0; color: var(--ink-2); }
+.am-head-meta { display: flex; flex-wrap: wrap; gap: 6px 18px; margin-top: 10px; font-size: 12px; color: var(--ink-2); }
+.am-head-meta b { font-family: var(--font-mono); font-weight: 400; color: var(--ink-3); margin-right: 6px; }
+.am-intro { margin-top: 12px; max-width: 80ch; }
+
+/* ── sheet 图纸板 ────────────────────────── */
+.am-sheet { max-width: 1680px; margin: 0 auto; padding: 32px 28px 40px; }
+.am-frame { position: relative; }
+.am-grid {
+  display: grid; grid-template-columns: repeat(var(--cols, 3), minmax(0, 1fr));
+  gap: 20px; align-items: start;
+}
+.am-ruler { display: none; }
+html[data-theme="blueprint"] .am-frame { border: 1px solid var(--line); padding: 30px; }
+html[data-theme="blueprint"] .am-frame::before {
+  content: ""; position: absolute; inset: 18px; border: 1px solid var(--line); pointer-events: none;
+}
+html[data-theme="blueprint"] .am-ruler {
+  display: flex; position: absolute; font: 10px/1 var(--font-mono); color: var(--ink-3);
+}
+.am-ruler span { flex: 1; display: flex; align-items: center; justify-content: center; }
+.am-ruler--top, .am-ruler--bottom { left: 18px; right: 18px; height: 18px; }
+.am-ruler--top { top: 0; }
+.am-ruler--bottom { bottom: 0; }
+.am-ruler--left, .am-ruler--right { top: 18px; bottom: 18px; width: 18px; flex-direction: column; }
+.am-ruler--left { left: 0; }
+.am-ruler--right { right: 0; }
+.am-ruler--top span + span, .am-ruler--bottom span + span { border-left: 1px solid var(--line); }
+.am-ruler--left span + span, .am-ruler--right span + span { border-top: 1px solid var(--line); }
+
+/* ── 面板 ───────────────────────────────── */
+.am-panel {
+  background: var(--paper); border: var(--bw) solid var(--line); border-radius: var(--radius);
+  box-shadow: var(--shadow); min-width: 0; overflow: hidden;
+}
+.am-panel-head {
+  display: flex; align-items: stretch; gap: 0; border-bottom: var(--bw) solid var(--line); min-height: 34px;
+}
+.am-panel-id {
+  display: flex; align-items: center; justify-content: center; min-width: 34px; padding: 0 8px;
+  background: var(--head-bg); color: var(--head-fg); font-weight: 600; font-size: 14px;
+}
+html[data-theme="shadcn"] .am-panel-id { border-radius: 6px; min-width: 24px; height: 24px; margin: 9px 0 9px 14px; font-size: 12px; }
+html[data-theme="shadcn"] .am-panel-head { border-bottom-width: 1px; }
+.am-panel-head h2 { margin: 0; padding: 7px 12px; font-size: 15px; font-weight: 600; flex: 1; display: flex; align-items: center; }
+.am-panel-meta { align-self: center; padding: 0 12px; font: 11px/1.3 var(--font-mono); color: var(--ink-2); text-align: right; }
+.am-panel-body { padding: 14px 16px 16px; }
+.am-panel-body > * + * { margin-top: 12px; }
+
+/* ── Markdown 正文 ───────────────────────── */
+.am-md > :first-child { margin-top: 0; }
+.am-md > :last-child { margin-bottom: 0; }
+.am-md p { margin: 0 0 8px; }
+.am-md ul, .am-md ol { margin: 0 0 8px; padding-left: 20px; }
+.am-md li + li { margin-top: 3px; }
+.am-md h3, .am-md h4 { margin: 14px 0 6px; font-size: 13px; }
+.am-md a { color: var(--accent); }
+.am-md blockquote { margin: 0 0 8px; padding: 2px 12px; border-left: 3px solid var(--line-2); color: var(--ink-2); }
+.am-md :not(pre) > code { font-size: 0.9em; background: var(--fill); padding: 1px 5px; border-radius: 4px; }
+.am-md hr { border: 0; border-top: 1px solid var(--line-2); margin: 12px 0; }
+.am-md table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.am-md th {
+  text-align: left; font: 11px/1.3 var(--font-mono); color: var(--ink-2); font-weight: 400;
+  padding: 6px 10px; border-bottom: 1px solid var(--line-2);
+}
+.am-md td { padding: 7px 10px; border-bottom: 1px solid var(--line-2); vertical-align: top; }
+.am-md tbody tr:nth-child(even) td { background: var(--fill); }
+.am-table-wrap { overflow-x: auto; }
+.am-code {
+  margin: 0; padding: 12px 14px; background: var(--fill); border: 1px solid var(--line-2);
+  border-radius: var(--radius); overflow-x: auto; font-size: 12.5px; line-height: 1.5;
+}
+
+/* ── 状态徽章 ok / no / warn ──────────────── */
+.am-status { white-space: nowrap; font-weight: 500; }
+.am-status--ok { color: var(--ok); }
+.am-status--no { color: var(--err); }
+.am-status--warn { color: var(--warn); }
+.am-status-icon { display: inline-block; width: 1.1em; font-weight: 700; }
+
+/* ── callout ─────────────────────────────── */
+.am-callout {
+  border: 1px solid var(--line-2); border-left: 3px solid var(--accent); background: var(--accent-bg);
+  padding: 10px 14px; border-radius: var(--radius);
+}
+.am-callout--ok { border-left-color: var(--ok); background: var(--ok-bg); }
+.am-callout--warn { border-left-color: var(--warn); background: var(--warn-bg); }
+.am-callout--err { border-left-color: var(--err); background: var(--err-bg); }
+.am-callout-title { font-weight: 600; margin-bottom: 4px; }
+
+/* ── kv 标题栏格 ─────────────────────────── */
+.am-kv {
+  display: grid; grid-template-columns: repeat(var(--kv-cols, 2), minmax(0, 1fr)); margin: 0;
+  border-top: var(--bw) solid var(--line); border-left: var(--bw) solid var(--line);
+}
+.am-kv-cell { border-right: var(--bw) solid var(--line); border-bottom: var(--bw) solid var(--line); padding: 6px 10px 8px; min-width: 0; }
+.am-kv-cell--wide { grid-column: 1 / -1; }
+.am-kv dt { font: 11px/1.4 var(--font-mono); color: var(--ink-2); }
+.am-kv dd { margin: 2px 0 0; font-size: 14px; font-weight: 500; overflow-wrap: anywhere; }
+.am-kv-cell--wide dd { font-size: 17px; font-weight: 600; }
+html[data-theme="shadcn"] .am-kv { border-color: var(--line); border-radius: var(--radius); overflow: hidden; }
+
+/* ── timeline ────────────────────────────── */
+.am-timeline { list-style: none; margin: 0; padding: 0; }
+.am-timeline--h { display: grid; grid-template-columns: repeat(var(--n, 1), minmax(0, 1fr)); padding-top: 4px; }
+.am-timeline--h li { position: relative; text-align: center; padding: 0 6px; }
+.am-timeline--h li::before {
+  content: ""; position: absolute; top: 31px; left: 0; right: 0; border-top: var(--bw) solid var(--line);
+}
+.am-timeline--h li:first-child::before { left: 50%; }
+.am-timeline--h li:last-child::before { right: 50%; }
+.am-tl-when { display: block; font-size: 15px; font-weight: 500; height: 24px; }
+.am-tl-dot {
+  position: relative; display: block; width: 11px; height: 11px; margin: 2px auto 8px;
+  border: var(--bw) solid var(--line); border-radius: 50%; background: var(--paper);
+}
+.am-tl-item--hi .am-tl-dot { background: var(--accent); border-color: var(--accent); }
+.am-tl-title { display: block; font-size: 12.5px; font-weight: 500; }
+.am-tl-text { display: block; font-size: 12px; color: var(--ink-2); line-height: 1.45; }
+.am-timeline--v li { position: relative; padding: 0 0 14px 22px; }
+.am-timeline--v li::before { content: ""; position: absolute; left: 5px; top: 6px; bottom: -6px; border-left: var(--bw) solid var(--line-2); }
+.am-timeline--v li:last-child::before { display: none; }
+.am-timeline--v .am-tl-dot { position: absolute; left: 0; top: 4px; margin: 0; }
+.am-timeline--v .am-tl-when { display: inline; height: auto; font: 12px var(--font-mono); color: var(--ink-2); margin-right: 8px; }
+.am-timeline--v .am-tl-title { display: inline; font-size: 14px; }
+.am-timeline--v .am-tl-text { margin-top: 2px; }
+
+/* ── annot 句子标注 ──────────────────────── */
+.am-annot + .am-annot { border-top: 1px solid var(--line-2); padding-top: 12px; }
+.am-annot-head { display: flex; justify-content: space-between; gap: 12px; font-size: 13px; font-weight: 600; margin-bottom: 8px; }
+.am-annot-meta { font: 11px var(--font-mono); font-weight: 400; color: var(--ink-2); }
+.am-annot-scroll { overflow-x: auto; }
+.am-annot-line {
+  position: relative; display: inline-block; white-space: pre; font: 14px/1.6 var(--font-mono);
+  padding-bottom: calc(var(--rows, 0) * 17px + 14px);
+}
+.am-annot-line--wrap { display: block; white-space: normal; padding-bottom: 10px; }
+.am-annot-line--wrap .am-seg { white-space: nowrap; }
+.am-seg { position: relative; }
+.am-seg::after {
+  content: ""; position: absolute; left: 1px; right: 1px; top: calc(100% + 1px); height: 5px;
+  border: 1px solid var(--accent); border-top: 0;
+}
+.am-seg-n {
+  position: absolute; left: 0; top: calc(100% + 8px + var(--row, 0) * 17px);
+  font: 11px/16px var(--font-sans); color: var(--accent); white-space: nowrap;
+}
+.am-seg--err { color: var(--err); }
+.am-seg--err::after { border-color: var(--err); }
+.am-seg--err .am-seg-n { color: var(--err); }
+.am-annot-caption { font-size: 12px; color: var(--ink-2); }
+
+/* ── limits 限值条 ───────────────────────── */
+.am-lim + .am-lim { margin-top: 14px; }
+.am-lim-head { display: flex; justify-content: space-between; gap: 12px; font-size: 13px; margin-bottom: 4px; }
+.am-lim-val { font: 12px var(--font-mono); color: var(--accent); white-space: nowrap; }
+.am-lim-track { position: relative; height: 12px; border: 1px solid var(--line-2); background: var(--fill); border-radius: calc(var(--radius) / 2); }
+.am-lim-fill { position: absolute; left: 0; top: 0; bottom: 0; background: var(--accent-bg); border-right: 1px solid var(--accent); }
+.am-lim-mark { position: absolute; top: -4px; bottom: -4px; border-left: 2px solid var(--accent); }
+.am-lim.is-over .am-lim-fill { background: var(--err-bg); border-right-color: var(--err); }
+.am-lim.is-over .am-lim-val { color: var(--err); }
+.am-lim-ticks { position: relative; height: 16px; font: 10px/16px var(--font-mono); color: var(--ink-3); }
+.am-lim-ticks span { position: absolute; transform: translateX(-50%); }
+.am-lim-ticks span:first-child { transform: none; }
+.am-lim-note { font-size: 11px; color: var(--ink-2); margin-left: 6px; }
+
+/* ── tree 结构树 ─────────────────────────── */
+.am-tree { font-size: 13px; }
+.am-tree-root { display: flex; justify-content: center; position: relative; padding-bottom: 18px; }
+.am-tree-root::after { content: ""; position: absolute; bottom: 0; left: 50%; height: 18px; border-left: var(--bw) solid var(--line); }
+.am-tree-root--solo { padding-bottom: 12px; }
+.am-tree-root--solo::after { display: none; }
+.am-tree-box {
+  border: var(--bw) solid var(--line); background: var(--paper); padding: 6px 14px; text-align: center;
+  border-radius: var(--radius); font-weight: 600;
+}
+.am-tree-box small { display: block; font-weight: 400; color: var(--ink-2); font-size: 12px; }
+.am-tree-box--root { background: var(--accent-bg); font-size: 15px; padding: 8px 28px; }
+.am-tree-cols { display: grid; grid-template-columns: repeat(var(--n, 1), minmax(0, 1fr)); }
+.am-tree-col { position: relative; padding: 18px 8px 0; min-width: 0; }
+.am-tree-col::before { content: ""; position: absolute; top: 0; left: 0; right: 0; border-top: var(--bw) solid var(--line); }
+.am-tree-col:first-child::before { left: 50%; }
+.am-tree-col:last-child::before { right: 50%; }
+.am-tree-col::after { content: ""; position: absolute; top: 0; left: 50%; height: 18px; border-left: var(--bw) solid var(--line); }
+.am-tree-list, .am-tree-list ul { list-style: none; margin: 0; padding: 0; }
+.am-tree-col > .am-tree-list { margin: 8px 0 0 14px; }
+.am-tree-list ul { margin-left: 16px; }
+.am-tree-list li { position: relative; padding: 3px 0 3px 18px; }
+.am-tree-list li::before { content: ""; position: absolute; left: 0; top: 0.95em; width: 12px; border-top: 1px solid var(--ink-3); }
+.am-tree-list li::after { content: ""; position: absolute; left: 0; top: 0; bottom: 0; border-left: 1px solid var(--ink-3); }
+.am-tree-list li:last-child::after { bottom: auto; height: 0.95em; }
+.am-tree-tag { font: 11px var(--font-mono); color: var(--ink-3); margin-right: 4px; }
+.am-tree code { font: 12px var(--font-mono); }
+.am-tree-sub { display: block; font-size: 11.5px; color: var(--ink-2); }
+.am-tree-hi > .am-tree-label { color: var(--accent); font-weight: 600; }
+
+/* ── 图（flow / sequence）───────────────── */
+.am-diagram { margin: 0; overflow-x: auto; text-align: center; }
+.am-diagram svg { max-width: 100%; height: auto; font-family: var(--font-sans); }
+.am-diagram text { fill: var(--ink); font-size: 13px; }
+.am-node-shape { fill: var(--paper); stroke: var(--line); stroke-width: var(--bw); }
+.am-node--hi .am-node-shape { fill: var(--accent-bg); stroke: var(--accent); }
+.am-node--hi text { fill: var(--accent); font-weight: 600; }
+.am-edge { fill: none; stroke: var(--ink-2); stroke-width: 1.3; }
+.am-edge--dashed { stroke-dasharray: 5 4; }
+.am-arrow { fill: var(--ink-2); }
+.am-edge-label rect { fill: var(--paper); }
+.am-diagram .am-edge-label text { fill: var(--accent); font-size: 11.5px; }
+.am-cluster { fill: var(--fill); stroke: var(--line-2); stroke-width: 1; stroke-dasharray: 4 3; }
+.am-diagram .am-cluster-label { fill: var(--ink-2); font: 11px var(--font-mono); }
+.am-lifeline { stroke: var(--ink-3); stroke-width: 1; stroke-dasharray: 4 4; }
+.am-actor { fill: var(--paper); stroke: var(--line); stroke-width: var(--bw); }
+.am-note { fill: var(--warn-bg); stroke: var(--warn); stroke-width: 1; }
+.am-diagram .am-step { fill: var(--ink-3); font: 10px var(--font-mono); }
+
+/* ── doc 线性讲解 ────────────────────────── */
+.am-doc { max-width: 1120px; margin: 0 auto; padding: 40px 28px 64px; }
+.am-doc-layout { display: grid; grid-template-columns: 200px minmax(0, 1fr); gap: 32px; align-items: start; }
+.am-doc-layout--notoc { grid-template-columns: minmax(0, 1fr); max-width: 860px; }
+.am-toc { position: sticky; top: 24px; font-size: 13px; }
+.am-toc a { display: block; color: var(--ink-2); text-decoration: none; padding: 4px 0 4px 10px; border-left: 2px solid var(--line-2); }
+.am-toc a:hover { color: var(--ink); border-left-color: var(--accent); }
+.am-doc-body > .am-panel + .am-panel { margin-top: 20px; }
+
+/* ── 响应式与打印 ─────────────────────────── */
+@media (max-width: 1100px) {
+  .am-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .am-grid > .am-panel { grid-column: auto !important; }
+  .am-grid > .am-panel.am-span-wide { grid-column: 1 / -1 !important; }
+}
+@media (max-width: 760px) {
+  .am-sheet, .am-doc { padding: 56px 12px 24px; }
+  .am-head { padding-right: 0; }
+  .am-grid { grid-template-columns: minmax(0, 1fr); }
+  .am-grid > .am-panel.am-span-wide { grid-column: auto !important; }
+  html[data-theme="blueprint"] .am-frame { padding: 0; border: 0; }
+  html[data-theme="blueprint"] .am-frame::before, html[data-theme="blueprint"] .am-ruler { display: none; }
+  .am-doc-layout { grid-template-columns: minmax(0, 1fr); }
+  .am-toc { position: static; }
+  .am-timeline--h { grid-template-columns: minmax(0, 1fr); }
+  .am-tree-cols { grid-template-columns: minmax(0, 1fr); }
+}
+.am-colophon { text-align: center; padding: 0 0 28px; font: 11px var(--font-mono); color: var(--ink-3); }
+
+@media print {
+  .am-toolbar { display: none; }
+  body { background: var(--paper); }
+  .am-panel { break-inside: avoid; box-shadow: none; }
+}
+.am-panel--bare { border: 0; background: transparent; box-shadow: none; }
+.am-panel--bare > .am-panel-body { padding: 0; }
+.am-panel--bare .am-kv { background: var(--paper); }
+
+</style>
+</head>
+<body>
+<div class="am-toolbar">
+<button class="am-btn" type="button" data-am="theme" data-labels="{&quot;blueprint&quot;:&quot;主题：图纸&quot;,&quot;shadcn&quot;:&quot;主题：卡片&quot;}">主题：卡片</button>
+<button class="am-btn" type="button" data-am="mode" data-labels="{&quot;auto&quot;:&quot;明暗：跟随系统&quot;,&quot;light&quot;:&quot;明暗：亮&quot;,&quot;dark&quot;:&quot;明暗：暗&quot;}">明暗：亮</button>
+<button class="am-btn" type="button" data-am="copy" data-done="已复制 ✓">复制源稿</button>
+</div>
+<main class="am-doc">
+<header class="am-head"><h1>StyleMate와 연결되는 연구는 어디까지 왔나</h1><p class="am-sub">논문 15편으로 읽는 선호의 적용 범위, 사용자 제어, 적응형 멀티모달 대화</p><div class="am-head-meta"><span><b>date</b>2026-10-04</span><span><b>source</b>docs/master.md · docs/workflow.md</span><span><b>reading</b>A 결론 → B–F 논문 → G–H 연구 기여와 평가</span></div><div class="am-intro am-md"><div class="am-md"><p>추천의 기반 기술은 여러 모델과 데이터셋에서 성과를 쌓았다. StyleMate는 <strong>선호의 적용 범위를 사용자가 제어하는 방식</strong>을 다룬다. 또한 <strong>필요한 정보에 따라 글·이미지 질문을 고르는 방식</strong>을 다룬다. 두 방식의 효과를 검증하는 데 연구 가능성이 있다.</p>
+</div></div></header>
+<div class="am-doc-layout">
+<nav class="am-toc" aria-label="目录"><a href="#panel-A">A · 현재 연구 수준과 StyleMate의 위치</a><a href="#panel-B">B · RQ1의 기반 — 선호와 맥락을 분리하는 기술</a><a href="#panel-C">C · RQ1의 직접 근거 — 사용자가 프로필을 수정하면 무엇이 달라지나</a><a href="#panel-D">D · RQ2의 기반 — 이미지와 말로 스타일을 구체화하는 연구</a><a href="#panel-E">E · RQ2의 다음 단계 — 무엇을 묻고 언제 추천해야 하나</a><a href="#panel-F">F · 패션 추천의 성과와 2025–2026년의 남은 한계</a><a href="#panel-G">G · StyleMate는 어떤 연구 기여를 만들 수 있나</a><a href="#panel-H">H · 문서의 RQ를 검증하는 방법과 읽기 순서</a></nav><div class="am-doc-body">
+<section class="am-panel" id="panel-A">
+<header class="am-panel-head"><span class="am-panel-id">A</span><h2>현재 연구 수준과 StyleMate의 위치</h2></header>
+<div class="am-panel-body"><div class="am-md"><p><a href="./master.md">master.md</a>의 대상은 평소 스타일을 유지하며 고객 미팅·발표에 맞게 코디를 조정하는 사용자다. <a href="./workflow.md">workflow.md</a>는 기본 취향, 이번 요청, 선택적 기억을 분리한 화면 흐름을 설명한다. 문서가 기록한 현재 상태는 연구 질문과 화면 설계이며, 실행 앱과 사용자 평가 결과는 확인되지 않았다.</p>
+<div class="am-table-wrap"><table>
+<thead>
+<tr>
+<th>연구 축</th>
+<th>문헌에서 확인한 진전</th>
+<th>아직 구분해서 검증할 질문</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>장기·단기 선호 모델링</td>
+<td>별도 표현을 학습해 추천 성능을 개선한다. <a href="https://doi.org/10.1016/j.eswa.2025.127850">DLSPRec</a></td>
+<td>최근 행동이 일시적 요구인지 새 기본 취향인지는 누가 결정하는가?</td>
+</tr>
+<tr>
+<td>사용자가 편집하는 프로필</td>
+<td>실제 사용자의 프로필 편집 뒤 추천 품질이 개선됐다. <a href="https://doi.org/10.1145/3539618.3591677">LACE</a></td>
+<td>사용자가 현재 요청과 이후 요청의 적용 범위를 이해하고 제어하는가?</td>
+</tr>
+<tr>
+<td>이미지와 텍스트의 결합</td>
+<td>상대적 표현, 주관적 스타일, 상황을 추천에 반영한다. <a href="https://arxiv.org/abs/1905.12794">Fashion IQ</a>, <a href="https://aclanthology.org/2025.findings-acl.58/">MUSE</a></td>
+<td>어떤 정보에 이미지 비교가 필요한지, 글 질문이 필요한지 선택하는가?</td>
+</tr>
+<tr>
+<td>다음 질문과 종료 시점</td>
+<td>질문·추천 행동과 정보이득을 최적화한다. <a href="https://hexiangnan.github.io/papers/wsdm20-EAR.pdf">EAR</a>, <a href="https://aclanthology.org/2026.acl-long.1465/">DECISIVE</a></td>
+<td>그 선택이 실제 사용자의 표현 부담과 이해감을 개선하는가?</td>
+</tr>
+<tr>
+<td>실제 패션 대화의 평가</td>
+<td>사람의 대화와 취향 평점으로 모델의 한계를 분석한다. <a href="https://ssanner.github.io/papers/umap26_vogue.pdf">VOGUE</a></td>
+<td>대화에서 직접 다루지 않은 상품과 다음 요청에도 취향 이해가 이어지는가?</td>
+</tr>
+</tbody></table></div>
+<p>이 표의 연구 수준은 <strong>선정 문헌을 종합한 해석</strong>이다. 연구 분야 전체에 대한 완결성 순위는 아니다.</p>
+</div>
+<figure class="am-diagram am-flow"><svg viewBox="0 0 872 134" width="872" height="134" role="img" aria-label="流程图：기본 취향、현재 코디 추천、이번 요청、저장 범위 선택、다음 요청" xmlns="http://www.w3.org/2000/svg"><defs><marker id="am1-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="am-arrow" d="M0,0 L10,5 L0,10 z"/></marker></defs><g></g><g><g data-step="0"><path class="am-edge" d="M97.9,102.5 L134.3,102.5 Q170.6,102.5 207,92.5 L243.3,82.6" marker-end="url(#am1-arrow)"/><g class="am-edge-label"><rect x="121.9" y="93.5" width="97.4" height="18" rx="3"/><text x="170.6" y="102.5" text-anchor="middle" dominant-baseline="central">평소 스타일 참고</text></g></g><g data-step="1"><path class="am-edge" d="M97.9,31.5 L134.3,31.5 Q170.6,31.5 207,41.5 L243.3,51.4" marker-end="url(#am1-arrow)"/><g class="am-edge-label"><rect x="121.9" y="22.5" width="97.4" height="18" rx="3"/><text x="170.6" y="31.5" text-anchor="middle" dominant-baseline="central">상황과 임시 조건</text></g></g><g data-step="2"><path class="am-edge" d="M357.1,67 L389.7,67 Q422.3,67 454.9,67 L487.6,67" marker-end="url(#am1-arrow)"/><g class="am-edge-label"><rect x="381.1" y="58" width="82.5" height="18" rx="3"/><text x="422.3" y="67" text-anchor="middle" dominant-baseline="central">사용자가 결정</text></g></g><g data-step="3"><path class="am-edge" d="M601.4,67 L644.3,67 Q687.3,67 730.2,67 L773.2,67" marker-end="url(#am1-arrow)"/><g class="am-edge-label"><rect x="625.4" y="58" width="123.9" height="18" rx="3"/><text x="687.3" y="67" text-anchor="middle" dominant-baseline="central">선택한 기본 취향 반영</text></g></g></g><g><g class="am-node am-node--rect" data-key="기본 취향" data-step="0"><rect class="am-node-shape" x="14" y="85" width="83.9" height="35" rx="3"/><text x="56" y="102.5" text-anchor="middle" dominant-baseline="central">기본 취향</text></g><g class="am-node am-node--rect" data-key="현재 코디 추천" data-step="0"><rect class="am-node-shape" x="243.3" y="49.5" width="113.8" height="35" rx="3"/><text x="300.2" y="67" text-anchor="middle" dominant-baseline="central">현재 코디 추천</text></g><g class="am-node am-node--rect" data-key="이번 요청" data-step="1"><rect class="am-node-shape" x="14" y="14" width="83.9" height="35" rx="3"/><text x="56" y="31.5" text-anchor="middle" dominant-baseline="central">이번 요청</text></g><g class="am-node am-node--rect" data-key="저장 범위 선택" data-step="2"><rect class="am-node-shape" x="487.6" y="49.5" width="113.8" height="35" rx="3"/><text x="544.5" y="67" text-anchor="middle" dominant-baseline="central">저장 범위 선택</text></g><g class="am-node am-node--rect" data-key="다음 요청" data-step="3"><rect class="am-node-shape" x="773.2" y="49.5" width="83.9" height="35" rx="3"/><text x="815.2" y="67" text-anchor="middle" dominant-baseline="central">다음 요청</text></g></g></svg></figure>
+<div class="am-md"><p>예를 들어 “평소 오버핏을 좋아한다”와 “오늘 발표에는 후디를 피한다”는 함께 추천에 쓰인다. 이후에도 기억할 요소는 사용자가 고른다. 이는 문서의 설계를 설명한 예시다.</p>
+</div></div>
+</section>
+<section class="am-panel" id="panel-B">
+<header class="am-panel-head"><span class="am-panel-id">B</span><h2>RQ1의 기반 — 선호와 맥락을 분리하는 기술</h2></header>
+<div class="am-panel-body"><div class="am-md"><h3>01 · DLSPRec: 장기·단기 선호를 서로 다른 표현으로 학습</h3>
+<p><strong>Zhang et al. · 2025 · Expert Systems with Applications</strong><br><a href="https://doi.org/10.1016/j.eswa.2025.127850">Disentangling Long- and Short-term Preferences Based on Latent Commonalities Enhancement for Next Point-of-Interest Recommendation</a></p>
+<p>장기 선호와 단기 선호를 별도로 표현한다. 대조 학습으로 공통성과 차이를 학습하고 다음 방문 장소를 예측한다. 세 실제 장소 방문 데이터셋의 오프라인 평가에서 비교 모델보다 성능이 개선됐다.</p>
+<p><strong>StyleMate와 연결:</strong> 기본 취향과 현재 조건을 각각 표현하는 기술적 근거가 된다. 다만 방문 이력으로 자동 추론하는 연구다. 사용자가 특정 선호의 저장 범위를 결정하는 인터페이스는 평가하지 않는다.</p>
+<h3>02 · Evolving Conditional Memory: 상황 조건이 붙은 기억</h3>
+<p><strong>Yuan et al. · 2025 · COLING</strong><br><a href="https://aclanthology.org/2025.coling-main.254/">Personalized Large Language Model Assistant with Evolving Conditional Memory</a></p>
+<p>대화에서 기억할 내용을 추출하고, 상황과 학습 내용을 함께 저장한다. 새 요청에 관련된 기억을 검색해 답변에 사용한다. 합성 평가에서 조건부 기억은 기억 없음·대화 원문·요약 기억보다 새 지식 활용에 유리했다.</p>
+<p><strong>StyleMate와 연결:</strong> “어떤 상황에서 유효한 취향인가”를 기억에 붙이는 설계와 가깝다. 하지만 기억 추출과 검색은 자동 처리다. 사용자의 저장·수정·범위 선택을 검증한 연구는 아니며, 시간 정보와 망각도 남은 과제로 제시한다.</p>
+</div>
+<div class="am-callout am-callout--info" role="note"><div class="am-callout-title">시간의 길이와 적용 범위는 다른 개념이다</div><div class="am-callout-body am-md"><p>방금 발견한 취향도 앞으로 계속 적용할 기본 취향일 수 있다. 오래된 요청도 당시 상황에만 적용한 조건일 수 있다. RQ1의 분리는 최근·과거의 분류를 넘어, 사용자가 인정한 적용 범위를 다룬다.</p>
+</div></div>
+<div class="am-md"><p>“이번에만 블레이저를 피하고 싶다”는 문서의 예시다. 이런 조건은 적용 범위를 명시적으로 확인해야 한다. 이 연결은 문서와 두 논문을 종합한 설계 해석이다.</p>
+</div></div>
+</section>
+<section class="am-panel" id="panel-C">
+<header class="am-panel-head"><span class="am-panel-id">C</span><h2>RQ1의 직접 근거 — 사용자가 프로필을 수정하면 무엇이 달라지나</h2></header>
+<div class="am-panel-body"><div class="am-md"><h3>03 · LACE: 읽고 편집할 수 있는 취향 프로필</h3>
+<p><strong>Mysore, Jasim, McCallum, Zamani · 2023 · SIGIR</strong><br><a href="https://doi.org/10.1145/3539618.3591677">Editable User Profiles for Controllable Text Recommendations</a> · <a href="https://arxiv.org/pdf/2304.04250">공개 원문</a></p>
+<p>사용자의 문서 이력에서 사람이 읽을 수 있는 관심 개념을 만든다. 사용자는 개념을 추가·삭제·수정하고 추천 방향을 바꾼다. 20명의 컴퓨터과학 연구자가 참여한 사용자 연구에서, 편집 후 LACE의 MRR은 0.7076에서 0.9000으로 높아졌다. 원문 표는 이를 100배 값으로 표시한다.</p>
+<p><strong>해석의 범위:</strong> 실제 사용자가 추천을 조정한 근거다. 다만 LACE가 비교 모델보다 더 큰 편집 효과를 냈다는 차이는 통계적으로 유의하지 않았다. 대상은 논문 추천이며, 프로필 편집이 일시적·지속적 선호의 범위 통제를 검증한 것은 아니다.</p>
+<p><strong>StyleMate에 적용:</strong> 오른쪽 조건 패널을 읽기 전용 요약에 그치지 않고 수정 가능한 항목으로 만들어야 RQ1을 평가할 수 있다. 수정이 추천에 실제로 반영됐다는 피드백도 필요하다.</p>
+<h3>04 · User-Controllable Profiles: LLM이 이해한 취향을 자연어로 조정</h3>
+<p><strong>Woźniak, Duszenko, Kocoń, Kazienko · 2025 · WWW Companion</strong><br><a href="https://doi.org/10.1145/3701716.3717734">Improving LLM-Based Recommender Systems with User-Controllable Profiles</a> · <a href="https://human-centeredrec.github.io/program/12_Improving_LLM_Based_Recomme.pdf">저자 원문</a></p>
+<p>과거 행동을 직접 넣는 방식과 자연어 프로필을 제공하는 방식을 비교한다. 영화 사용자 50명의 데이터에서 프로필을 수동으로 수정해 사용자 제어를 시뮬레이션한다. 수정된 선호에 맞춘 추천 순위가 개선되는지를 오프라인으로 평가한다.</p>
+<p><strong>해석의 범위:</strong> 실제 사용자가 인터페이스에서 프로필을 수정한 실험은 아니다. 논문의 “최대 50%”는 별도로 정의한 NDCG 기반 Gain이다. 사용자 만족도나 주도성이 50% 향상됐다는 뜻으로 읽으면 안 된다.</p>
+<p><strong>StyleMate에 적용:</strong> 시스템이 해석한 취향을 자연어로 보여주는 방식의 기술적 근거다. 사용자가 저장 범위를 이해하고 결정할 수 있다고 느끼는지는 별도 사용자 평가가 필요하다.</p>
+<div class="am-table-wrap"><table>
+<thead>
+<tr>
+<th>RQ1에서 구분할 층위</th>
+<th>위 문헌이 제공하는 근거</th>
+<th>StyleMate에서 확인할 내용</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>내부 모델의 분리</td>
+<td>장기·단기 표현, 상황 조건부 기억</td>
+<td>이번 요청의 조건이 기본 취향을 자동으로 덮어쓰지 않는가?</td>
+</tr>
+<tr>
+<td>프로필의 편집 가능성</td>
+<td>편집으로 추천 순위를 바꿀 수 있음</td>
+<td>사용자가 해석 오류를 찾고 수정할 수 있는가?</td>
+</tr>
+<tr>
+<td>적용 범위의 통제</td>
+<td>직접적인 비교 근거는 제한적</td>
+<td>이번에만 적용·기본 취향 저장을 이해하고 선택하는가?</td>
+</tr>
+<tr>
+<td>주관적 사용자 주도성</td>
+<td>추천 성능만으로 대신할 수 없음</td>
+<td>추천 조건과 방향을 스스로 조정한다고 느끼는가?</td>
+</tr>
+</tbody></table></div>
+</div></div>
+</section>
+<section class="am-panel" id="panel-D">
+<header class="am-panel-head"><span class="am-panel-id">D</span><h2>RQ2의 기반 — 이미지와 말로 스타일을 구체화하는 연구</h2></header>
+<div class="am-panel-body"><div class="am-md"><h3>05 · Fashion IQ: “이 이미지보다 조금 더…”라는 표현</h3>
+<p><strong>Wu et al. · 2021 · CVPR</strong><br><a href="https://arxiv.org/abs/1905.12794">Fashion IQ: A New Dataset Towards Retrieving Images by Natural Language Feedback</a> · <a href="https://openaccess.thecvf.com/content/CVPR2021/papers/Wu_Fashion_IQ_A_New_Dataset_Towards_Retrieving_Images_by_Natural_CVPR_2021_paper.pdf">학회 원문</a></p>
+<p>비슷한 의류 이미지 쌍을 구분하는 사람의 상대적 설명을 수집한다. 기준 이미지, 자연어 피드백, 속성, 대화 이력을 함께 사용해 상품 이미지를 검색한다. 제안한 검색 모델은 데이터셋의 대화형 검색 성능을 개선했다.</p>
+<p><strong>StyleMate와 연결:</strong> “단정하지만 정장 같지는 않게”를 이미지와 비교 설명으로 구체화하는 근거다. 그러나 목표 상품을 찾는 검색 과제다. 전체 코디의 상황 적합성이나 적응형 모달리티 선택의 사용자 부담을 검증한 연구는 아니다.</p>
+<h3>06 · SURE: 주관적 표현을 시각적 속성과 연결</h3>
+<p><strong>Long et al. · 2023 · Findings of ACL</strong><br><a href="https://aclanthology.org/2023.findings-acl.217/">Multimodal Recommendation Dialog with Subjective Preference: A New Challenge and Benchmark</a></p>
+<p>의류·가구 장면에서 주관적 선호를 명확히 하는 멀티모달 대화 과제를 제시한다. 질문, 선호 제외, 후보 속성 제시, 이미지 영역 참조 등을 행동으로 구분한다. 이미지나 메타데이터를 제거하면 대부분의 과제 성능이 낮아졌다.</p>
+<p><strong>StyleMate와 연결:</strong> 색감·핏·분위기처럼 선택 이유를 확인하는 행동 분류에 유용하다. 평가 환경에는 텍스트와 장면 이미지가 함께 주어진다. 텍스트 질문과 이미지 선택을 언제 각각 제시할지 비교한 사용자 실험은 없다.</p>
+<h3>07 · MUSE: 상황과 프로필이 들어간 패션 대화</h3>
+<p><strong>Wang et al. · 2025 · Findings of ACL</strong><br><a href="https://aclanthology.org/2025.findings-acl.58/">MUSE: A Multimodal Conversational Recommendation Dataset with Scenario-Grounded User Profiles</a></p>
+<p>상황 기반 프로필과 상품 이미지를 바탕으로 7,000개 의류 대화를 생성한다. 대화는 멀티모달 LLM을 이용한 합성 데이터다. 이를 이용한 미세조정은 오프라인 추천 성능을 개선했다.</p>
+<p><strong>평가의 구분:</strong> 사람의 응답 품질 비교도 포함한다. 그러나 실제 사용자가 시스템과 추천 세션을 진행한 평가와는 다르다. 의도 표현 부담, 이해받는 느낌, 모달리티 선택의 효과는 측정하지 않는다.</p>
+<p><strong>StyleMate와 연결:</strong> 상황·이미지·프로필을 함께 표현하는 데이터 구조를 참고할 수 있다. RQ2의 세 비교 조건을 대신하는 증거로 쓰기는 어렵다.</p>
+</div>
+<div class="am-callout am-callout--info" role="note"><div class="am-callout-title">멀티모달 모델과 적응형 질문은 별도로 평가한다</div><div class="am-callout-body am-md"><p>이미지와 텍스트를 모델에 넣는 기술은 두 정보를 함께 처리하는 방법이다. RQ2는 사용자에게 지금 어떤 질문 형식을 제공할지 결정하는 상호작용을 다룬다. 두 논점을 구분해야 한다.</p>
+</div></div>
+<div class="am-md"><p>또한 한 이미지를 골랐다는 사실만으로 색상·핏·소재를 모두 좋아한다고 확정하면 안 된다. 선택 이유를 묻는 문서의 세부 취향 단계는 이 해석 문제를 줄이기 위한 설계다.</p>
+</div></div>
+</section>
+<section class="am-panel" id="panel-E">
+<header class="am-panel-head"><span class="am-panel-id">E</span><h2>RQ2의 다음 단계 — 무엇을 묻고 언제 추천해야 하나</h2></header>
+<div class="am-panel-body"><div class="am-md"><h3>08 · EAR: 질문할지 추천할지 행동 정책으로 선택</h3>
+<p><strong>Lei et al. · 2020 · WSDM</strong><br><a href="https://hexiangnan.github.io/papers/wsdm20-EAR.pdf">Estimation–Action–Reflection: Towards Deep Interaction Between Conversational and Recommender Systems</a></p>
+<p>선호를 추정하고, 속성 질문 또는 추천을 선택한다. 추천을 거절하면 모델을 갱신한다. Yelp·LastFM의 대화 시뮬레이션에서 추천 성공률을 높이고 평균 대화 턴을 줄였다.</p>
+<p><strong>StyleMate와 연결:</strong> 질문 종료와 추천 실행을 정하는 정책의 선행 근거다. 다만 질문은 미리 정의된 속성을 다루며 사용자도 시뮬레이터다. 글·이미지의 형식 선택이나 실제 사용자의 부담은 검증하지 않는다.</p>
+<h3>09 · PEBOL: 불확실성을 줄일 질문을 고른 뒤 자연어로 생성</h3>
+<p><strong>Austin, Korikov, Toroghi, Sanner · 2024 · RecSys</strong><br><a href="https://ssanner.github.io/papers/recsys24_pebol.pdf">Bayesian Optimization with LLM-Based Acquisition Functions for Natural Language Preference Elicitation</a></p>
+<p>베이지안 최적화로 다음 질문의 근거가 될 아이템 설명을 고른다. LLM은 그 설명에서 짧은 질문을 만든다. 응답으로 선호에 대한 추정을 갱신한다. 음식점·영화·레시피의 시뮬레이션에서 질문을 LLM에만 맡긴 기준보다 추천 순위가 개선됐다.</p>
+<p><strong>StyleMate와 연결:</strong> 질문의 유창함과 질문의 정보 가치를 나눠 설계할 수 있다. 그러나 텍스트 yes/no 질문이 중심이다. 표현 부담과 이해감을 실제 사용자에게서 검증한 결과는 아니다.</p>
+<h3>10 · DECISIVE: 최종 선택에 필요한 정보만 묻기</h3>
+<p><strong>Jain et al. · 2026년 7월 · ACL Long Papers</strong><br><a href="https://aclanthology.org/2026.acl-long.1465/">DECISIVE: Guiding User Decisions with Optimal Preference Elicitation from Unstructured Documents</a></p>
+<p>문서에서 후보의 속성 점수를 만들고 선호를 추정한다. 최종 추천의 불확실성을 줄이는 정보이득으로 비교 질문을 고른다. 충분한 확신을 얻으면 질문을 멈춘다. 교육·금융·채용 과제에서 사용자 시뮬레이션으로 평가했다.</p>
+<p><strong>StyleMate와 연결:</strong> 모든 취향을 끝까지 묻기보다 현재 후보를 구분하는 데 필요한 조건부터 묻는 방향을 제시한다. 패션·이미지 선택·실제 사용자 부담을 검증한 논문은 아니다.</p>
+<div class="am-table-wrap"><table>
+<thead>
+<tr>
+<th>문헌을 연결한 질문 선택 제안</th>
+<th>확인할 정보</th>
+<th>제공할 상호작용</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>상황 사실이 빠져 있음</td>
+<td>일정, 활동, 이동량</td>
+<td>짧은 텍스트 질문</td>
+</tr>
+<tr>
+<td>시각적 정도가 불분명함</td>
+<td>격식, 실루엣, 단정함의 경계</td>
+<td>차이를 비교할 수 있는 이미지 선택</td>
+</tr>
+<tr>
+<td>이미지 선택 이유가 불분명함</td>
+<td>색감인지 핏인지 전체 분위기인지</td>
+<td>요소 선택과 추가 질문</td>
+</tr>
+<tr>
+<td>후보 선택에 충분한 조건이 모임</td>
+<td>남은 불확실성이 결과를 바꾸는지</td>
+<td>추천 제시 또는 사용자의 조기 종료</td>
+</tr>
+</tbody></table></div>
+<p>이 표는 <strong>StyleMate의 구현 제안</strong>이다. 위 논문이 이 규칙의 효과를 직접 입증했다는 뜻은 아니다. 검토한 문헌에서는 문서의 세 모달리티 조건을 비교한 직접 근거를 찾지 못했다.</p>
+</div></div>
+</section>
+<section class="am-panel" id="panel-F">
+<header class="am-panel-head"><span class="am-panel-id">F</span><h2>패션 추천의 성과와 2025–2026년의 남은 한계</h2></header>
+<div class="am-panel-body"><div class="am-md"><h3>11 · Fashion++: 스타일을 크게 바꾸지 않고 코디 개선</h3>
+<p><strong>Hsiao et al. · 2019 · ICCV</strong><br><a href="https://www.cs.utexas.edu/~grauman/papers/fashion-plus-plus-iccv2019.pdf">Fashion++: Minimal Edits for Outfit Improvement</a></p>
+<p>옷의 형태와 질감 표현을 분리하고 기존 코디에 작은 변화를 제안한다. 아이템 교체, 색상 변경, 착용 방식 변경 등을 다룬다. 자동 평가와 사람의 판단에서 코디 개선을 확인했다.</p>
+<p><strong>StyleMate와 연결:</strong> “평소 스타일을 유지하면서 일부만 바꾸기”의 기술적 선행 사례다. 목표는 모델이 정의한 패션성의 향상이다. 사용자의 정체성 유지나 고객 미팅 적합성과 같은 목적은 추가로 정의하고 평가해야 한다.</p>
+<h3>12 · POSM: 개인 취향에 맞는 코디와 멀티모달 스타일 표현</h3>
+<p><strong>You, Cao, Gu, Cai · ECAI 2025 · 출판사 온라인 표기 2026-08-25</strong><br><a href="https://journals.sagepub.com/doi/10.3233/FAIA250922">POSM: A Personalized Outfit Recommendation System with Style-Guided Multi-Modal Feature Fusion</a></p>
+<p>이미지·텍스트의 공통 특징과 각 모달리티의 고유 특징을 분리한다. 코디 전체의 스타일 표현을 만들어 사용자의 과거 코디 선호와 연결한다. IQON-550에서 NDCG@10은 0.6955로, 비교 모델 LPAE의 0.6698보다 높았다.</p>
+<p><strong>StyleMate와 연결:</strong> 개인 취향과 코디 조합을 계산하는 추천 기반의 근거다. 이는 순위 평가 결과다. 현재 상황의 임시 조건, 사용자의 기억 범위 선택, 질문 형식 선택의 효과를 입증한 수치는 아니다. 학회 연도와 온라인 게시일은 구분해 읽는다.</p>
+<h3>13 · FashionM3: 상황 기반 코디를 대화로 계속 수정</h3>
+<p><strong>Pang, Zou, Wong · 2025 · arXiv 공개본 기준</strong><br><a href="https://arxiv.org/abs/2504.17826">FashionM3: Multimodal, Multitask, and Multiround Fashion Assistant based on Unified Vision-Language Model</a> · <a href="https://arxiv.org/html/2504.17826v1">평가를 포함한 원문</a></p>
+<p>추천, 대체 아이템, 이미지 생성, 가상 착용을 한 시스템에 연결한다. 기존 패션 데이터에서 만든 FashionRec의 331,124개 이미지·대화 샘플로 모델을 학습한다. 12명 사용자 연구에서 83.3%가 선택한 상황의 코디 생성에 전반적으로 만족했다고 응답했다.</p>
+<p><strong>StyleMate와 연결:</strong> “이미지·대화·상황 기반 패션 에이전트” 자체는 이미 선행 연구에 있다. 이 사용자 연구는 프로토타입의 가능성을 보여준다. 문서의 저장 범위와 세 질문 방식의 효과를 각각 분리한 비교 실험은 아니다.</p>
+<h3>14 · AMMR 관점 논문: 이미지 기준점과 언어 제약을 함께 수정</h3>
+<p><strong>Deldjoo, Rafiee, Ravanbakhsh · 2025 · arXiv 공개 관점 논문</strong><br><a href="https://arxiv.org/abs/2508.02342">Agentic Personalized Fashion Recommendation in the Age of Generative AI: Challenges, Opportunities, and Evaluation</a></p>
+<p>사용자가 보여준 이미지에 세부적인 언어 제약을 더하는 mixed-modality refinement를 핵심 과제로 제시한다. 멀티모달 인코더, LLM 계획, 동적 검색을 연결한 AMMR 구조를 제안한다.</p>
+<p><strong>StyleMate와 연결:</strong> “이 핏은 유지하고 미팅에 맞게 더 단정하게” 같은 요청의 설계 방향과 가깝다. 연구 의제와 파이프라인 제안의 근거로 읽어야 한다. 저장 범위 통제나 표현 부담 감소를 입증한 사용자 실험으로 인용할 수는 없다.</p>
+<h3>15 · VOGUE: 실제 패션 대화에서도 취향 일반화는 어렵다</h3>
+<p><strong>Guo, Sun, Jiang, Liang, Sanner · 2026년 6월 · UMAP</strong><br><a href="https://doi.org/10.1145/3774935.3806177">VOGUE: A Multimodal Dataset for Conversational Recommendation in Fashion</a> · <a href="https://ssanner.github.io/papers/umap26_vogue.pdf">저자 원문</a></p>
+<p>20명이 참여한 60개 사람 간 대화와 2,100개 발화를 수집했다. 실제 프로필, 상황별 목표, 상품 이미지, 상품별 평점, 만족도를 함께 기록한다. 모델은 이 대화 기록을 바탕으로 사용자 평점을 예측하는 평가를 받는다.</p>
+<p><strong>핵심 결과:</strong> 집계 정확도만 보면 모델이 사람과 비슷해 보일 수 있다. 그러나 평점 분포가 왜곡되고, 직접 논의하지 않은 상품으로 취향을 일반화하는 성능은 사람 추천자에 못 미쳤다. 이는 평가한 모델과 이 데이터셋에서 관찰한 결과다.</p>
+<p><strong>StyleMate와 연결:</strong> 파악한 조건을 사용자에게 확인받는 설계에 실질적인 이유가 있다. 선택적 기억과 적응형 질문 자체의 효과는 이 논문도 직접 비교하지 않는다. 모델이 실제 사용자와 실시간으로 대화한 실험으로 해석해서도 안 된다.</p>
+</div>
+<div class="am-callout am-callout--info" role="note"><div class="am-callout-title">현재의 도달점</div><div class="am-callout-body am-md"><p>개인화 코디 모델, 멀티모달 대화 시스템, 질문 최적화, 실제 대화 벤치마크까지 연구가 진행됐다. 그 성과가 사용자 주도성과 의도 표현 부담의 개선으로 이어지는지는 상호작용 조건을 통제한 평가가 필요하다.</p>
+</div></div></div>
+</section>
+<section class="am-panel" id="panel-G">
+<header class="am-panel-head"><span class="am-panel-id">G</span><h2>StyleMate는 어떤 연구 기여를 만들 수 있나</h2></header>
+<div class="am-panel-body"><div class="am-md"><p>아래 연결은 검토한 논문과 문서에서 도출한 <strong>연구 제안</strong>이다. 최초의 시스템이라는 판정은 아니다.</p>
+<div class="am-table-wrap"><table>
+<thead>
+<tr>
+<th>문서의 핵심 설계</th>
+<th>가까운 선행 연구</th>
+<th>추가로 보여줄 수 있는 기여</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>기본 취향과 이번 요청을 분리</td>
+<td>DLSPRec, 조건부 기억</td>
+<td>사용자가 선호의 적용 범위를 이해하고 관리하는 방식</td>
+</tr>
+<tr>
+<td>파악한 조건의 확인·수정</td>
+<td>LACE, User-Controllable Profiles</td>
+<td>패션 상황에서 해석을 바로잡고 추천을 조정하는 경험</td>
+</tr>
+<tr>
+<td>기본 취향으로 저장할 요소 선택</td>
+<td>조건부 기억, VOGUE의 프로필·상황별 목표 구조</td>
+<td>일시적 요구가 다음 요청에 잘못 이어지는 문제와 범위 통제의 효과</td>
+</tr>
+<tr>
+<td>필요한 정보에 따라 글·이미지 선택</td>
+<td>EAR, PEBOL, DECISIVE + Fashion IQ, SURE</td>
+<td>질문 정책과 시각적 의도 표현을 연결한 실제 사용자 평가</td>
+</tr>
+<tr>
+<td>좋아하는 이미지의 요소 확인</td>
+<td>Fashion IQ, SURE</td>
+<td>전체 이미지 선택을 세부 속성 선호로 과잉 해석하는 문제의 감소</td>
+</tr>
+<tr>
+<td>평소 스타일을 유지하며 상황에 맞게 조정</td>
+<td>Fashion++, FashionM3, AMMR</td>
+<td>유지한 취향과 상황 때문에 바꾼 요소를 사용자가 납득하는 과정</td>
+</tr>
+</tbody></table></div>
+<p><strong>RQ1의 기여 후보:</strong> 선호 분리·확인·수정·저장 선택을 제공한다. 사용자가 추천 조건과 방향을 제어한다고 느끼는지 밝힌다.</p>
+<p><strong>RQ2의 기여 후보:</strong> 필요한 정보에 따라 글·이미지 질문을 고른다. 의도 표현 부담과 이해받는 느낌이 어떻게 달라지는지 밝힌다.</p>
+<p>두 RQ는 다른 결과를 측정한다. 편집으로 추천 순위가 좋아져도 범위 선택을 이해하지 못할 수 있다. 질문 수가 줄어도 사용자가 원하는 스타일을 표현하지 못할 수 있다. 따라서 각 RQ의 주관적 지표와 행동 근거를 함께 봐야 한다.</p>
+</div></div>
+</section>
+<section class="am-panel" id="panel-H">
+<header class="am-panel-head"><span class="am-panel-id">H</span><h2>문서의 RQ를 검증하는 방법과 읽기 순서</h2></header>
+<div class="am-panel-body"><div class="am-md"><h3>비교 조건과 평가 제안</h3>
+<div class="am-table-wrap"><table>
+<thead>
+<tr>
+<th>연구 질문</th>
+<th>문서에 정해진 비교</th>
+<th>주 평가</th>
+<th>보조 관찰</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>RQ1</td>
+<td>선호를 구분하지 않는 방식 ↔ 별도 관리와 확인·수정</td>
+<td>조건 확인·수정 가능성, 추천 방향을 조정한다는 느낌</td>
+<td>적용 범위 이해, 수정 성공, 다음 요청에 임시 조건이 남는지</td>
+</tr>
+<tr>
+<td>RQ2</td>
+<td>텍스트만 / 텍스트·이미지 고정 순서 / 필요에 따른 선택 제공</td>
+<td>의도 표현 부담, 시스템이 의도를 이해한다는 느낌</td>
+<td>시간·질문 수, 형식 선택 이유, 반복 설명, 추천 만족도</td>
+</tr>
+</tbody></table></div>
+<p><strong>RQ1에는 이어지는 두 요청이 유용하다.</strong> 첫 요청에서 고객 미팅용 조건을 만들고, 다음 요청에서 일상 코디를 찾게 한다. 사용자가 이번에만 적용한 조건이 넘어가는지 확인한다. 새로 발견한 기본 취향은 저장한 선택에 따라 다음 요청에 반영되는지도 본다.</p>
+<p><strong>RQ2에서는 추천 모델과 이미지 후보의 품질을 맞춘다.</strong> 질문 형식 외의 차이가 결과를 설명하지 않도록 한다. 이미지 비교는 어떤 속성을 구분하기 위한 것인지 기록한다. 사용자는 조건을 수정하거나 질문을 멈추고 추천받을 수 있어야 한다.</p>
+<p><strong>측정에서는 효과와 원인을 구분한다.</strong> 현재 RQ1 비교는 선호 분리와 확인·수정의 결합 효과를 측정한다. 각 기능의 개별 효과까지 주장하려면 추가 비교가 필요하다. RQ2도 질문 수의 변화만으로 의도 표현이 쉬워졌다고 판정하지 않는다.</p>
+<p>대화 중 취향이 구체화될 수 있다. 처음 입력만을 고정된 정답으로 삼기보다, 마지막에 사용자가 확인한 조건과 추천의 일치도도 확인한다. 만족도와 주도성 질문은 파일의 RQ에 맞춰 작성하고 파일럿에서 이해 여부를 점검한다.</p>
+<h3>먼저 읽을 논문</h3>
+<ol>
+<li><strong><a href="https://ssanner.github.io/papers/umap26_vogue.pdf">VOGUE · 2026</a></strong> — 실제 패션 대화, 프로필, 평점과 사용자 경험을 어떻게 함께 평가하는지 본다.</li>
+<li><strong><a href="https://arxiv.org/pdf/2304.04250">LACE · 2023</a></strong> — 사용자가 읽고 수정할 수 있는 프로필과 실제 편집 실험을 본다.</li>
+<li><strong><a href="https://aclanthology.org/2023.findings-acl.217/">SURE · 2023</a>, <a href="https://arxiv.org/abs/1905.12794">Fashion IQ · 2021</a></strong> — 주관적 표현과 이미지 비교를 연결하는 방법을 본다.</li>
+<li><strong><a href="https://hexiangnan.github.io/papers/wsdm20-EAR.pdf">EAR · 2020</a>, <a href="https://ssanner.github.io/papers/recsys24_pebol.pdf">PEBOL · 2024</a>, <a href="https://aclanthology.org/2026.acl-long.1465/">DECISIVE · 2026</a></strong> — 질문의 정보 가치와 종료 정책을 본다.</li>
+<li><strong><a href="https://arxiv.org/html/2504.17826v1">FashionM3 · 2025</a>, <a href="https://aclanthology.org/2025.coling-main.254/">조건부 기억 · 2025</a></strong> — 시스템 구성과 기억 구조를 참고한다.</li>
+</ol>
+<p><strong>검토 범위:</strong> 2026-10-04까지 공개된 선정 문헌 15편의 출판사·학회·저자 원문과 공개 논문을 확인한 서술형 검토다. 관련 연구 전체를 빠짐없이 수집한 체계적 문헌고찰은 아니다. 논문의 검증 결과, 문서의 설계, 이 페이지의 연구 제안을 구분해 적었다.</p>
+</div></div>
+</section>
+</div>
+</div>
+</main>
+<footer class="am-colophon">Generated by Answer me with HTML 0.4.6 · 2026-10-04 23:07</footer>
+<textarea id="am-source" hidden readonly aria-hidden="true">---
+template: doc
+theme: shadcn
+mode: light
+style: 80
+title: StyleMate와 연결되는 연구는 어디까지 왔나
+subtitle: 논문 15편으로 읽는 선호의 적용 범위, 사용자 제어, 적응형 멀티모달 대화
+date: 2026-10-04
+source: docs/master.md · docs/workflow.md
+reading: A 결론 → B–F 논문 → G–H 연구 기여와 평가
+---
+추천의 기반 기술은 여러 모델과 데이터셋에서 성과를 쌓았다. StyleMate는 **선호의 적용 범위를 사용자가 제어하는 방식**을 다룬다. 또한 **필요한 정보에 따라 글·이미지 질문을 고르는 방식**을 다룬다. 두 방식의 효과를 검증하는 데 연구 가능성이 있다.
+
+## A 현재 연구 수준과 StyleMate의 위치
+
+[master.md](./master.md)의 대상은 평소 스타일을 유지하며 고객 미팅·발표에 맞게 코디를 조정하는 사용자다. [workflow.md](./workflow.md)는 기본 취향, 이번 요청, 선택적 기억을 분리한 화면 흐름을 설명한다. 문서가 기록한 현재 상태는 연구 질문과 화면 설계이며, 실행 앱과 사용자 평가 결과는 확인되지 않았다.
+
+| 연구 축 | 문헌에서 확인한 진전 | 아직 구분해서 검증할 질문 |
+|---|---|---|
+| 장기·단기 선호 모델링 | 별도 표현을 학습해 추천 성능을 개선한다. [DLSPRec](https://doi.org/10.1016/j.eswa.2025.127850) | 최근 행동이 일시적 요구인지 새 기본 취향인지는 누가 결정하는가? |
+| 사용자가 편집하는 프로필 | 실제 사용자의 프로필 편집 뒤 추천 품질이 개선됐다. [LACE](https://doi.org/10.1145/3539618.3591677) | 사용자가 현재 요청과 이후 요청의 적용 범위를 이해하고 제어하는가? |
+| 이미지와 텍스트의 결합 | 상대적 표현, 주관적 스타일, 상황을 추천에 반영한다. [Fashion IQ](https://arxiv.org/abs/1905.12794), [MUSE](https://aclanthology.org/2025.findings-acl.58/) | 어떤 정보에 이미지 비교가 필요한지, 글 질문이 필요한지 선택하는가? |
+| 다음 질문과 종료 시점 | 질문·추천 행동과 정보이득을 최적화한다. [EAR](https://hexiangnan.github.io/papers/wsdm20-EAR.pdf), [DECISIVE](https://aclanthology.org/2026.acl-long.1465/) | 그 선택이 실제 사용자의 표현 부담과 이해감을 개선하는가? |
+| 실제 패션 대화의 평가 | 사람의 대화와 취향 평점으로 모델의 한계를 분석한다. [VOGUE](https://ssanner.github.io/papers/umap26_vogue.pdf) | 대화에서 직접 다루지 않은 상품과 다음 요청에도 취향 이해가 이어지는가? |
+
+이 표의 연구 수준은 **선정 문헌을 종합한 해석**이다. 연구 분야 전체에 대한 완결성 순위는 아니다.
+
+```flow LR
+기본 취향 -&gt; 현재 코디 추천: 평소 스타일 참고
+이번 요청 -&gt; 현재 코디 추천: 상황과 임시 조건
+현재 코디 추천 -&gt; 저장 범위 선택: 사용자가 결정
+저장 범위 선택 -&gt; 다음 요청: 선택한 기본 취향 반영
+```
+
+예를 들어 “평소 오버핏을 좋아한다”와 “오늘 발표에는 후디를 피한다”는 함께 추천에 쓰인다. 이후에도 기억할 요소는 사용자가 고른다. 이는 문서의 설계를 설명한 예시다.
+
+## B RQ1의 기반 — 선호와 맥락을 분리하는 기술
+
+### 01 · DLSPRec: 장기·단기 선호를 서로 다른 표현으로 학습
+
+**Zhang et al. · 2025 · Expert Systems with Applications**  
+[Disentangling Long- and Short-term Preferences Based on Latent Commonalities Enhancement for Next Point-of-Interest Recommendation](https://doi.org/10.1016/j.eswa.2025.127850)
+
+장기 선호와 단기 선호를 별도로 표현한다. 대조 학습으로 공통성과 차이를 학습하고 다음 방문 장소를 예측한다. 세 실제 장소 방문 데이터셋의 오프라인 평가에서 비교 모델보다 성능이 개선됐다.
+
+**StyleMate와 연결:** 기본 취향과 현재 조건을 각각 표현하는 기술적 근거가 된다. 다만 방문 이력으로 자동 추론하는 연구다. 사용자가 특정 선호의 저장 범위를 결정하는 인터페이스는 평가하지 않는다.
+
+### 02 · Evolving Conditional Memory: 상황 조건이 붙은 기억
+
+**Yuan et al. · 2025 · COLING**  
+[Personalized Large Language Model Assistant with Evolving Conditional Memory](https://aclanthology.org/2025.coling-main.254/)
+
+대화에서 기억할 내용을 추출하고, 상황과 학습 내용을 함께 저장한다. 새 요청에 관련된 기억을 검색해 답변에 사용한다. 합성 평가에서 조건부 기억은 기억 없음·대화 원문·요약 기억보다 새 지식 활용에 유리했다.
+
+**StyleMate와 연결:** “어떤 상황에서 유효한 취향인가”를 기억에 붙이는 설계와 가깝다. 하지만 기억 추출과 검색은 자동 처리다. 사용자의 저장·수정·범위 선택을 검증한 연구는 아니며, 시간 정보와 망각도 남은 과제로 제시한다.
+
+```callout info 시간의 길이와 적용 범위는 다른 개념이다
+방금 발견한 취향도 앞으로 계속 적용할 기본 취향일 수 있다. 오래된 요청도 당시 상황에만 적용한 조건일 수 있다. RQ1의 분리는 최근·과거의 분류를 넘어, 사용자가 인정한 적용 범위를 다룬다.
+```
+
+“이번에만 블레이저를 피하고 싶다”는 문서의 예시다. 이런 조건은 적용 범위를 명시적으로 확인해야 한다. 이 연결은 문서와 두 논문을 종합한 설계 해석이다.
+
+## C RQ1의 직접 근거 — 사용자가 프로필을 수정하면 무엇이 달라지나
+
+### 03 · LACE: 읽고 편집할 수 있는 취향 프로필
+
+**Mysore, Jasim, McCallum, Zamani · 2023 · SIGIR**  
+[Editable User Profiles for Controllable Text Recommendations](https://doi.org/10.1145/3539618.3591677) · [공개 원문](https://arxiv.org/pdf/2304.04250)
+
+사용자의 문서 이력에서 사람이 읽을 수 있는 관심 개념을 만든다. 사용자는 개념을 추가·삭제·수정하고 추천 방향을 바꾼다. 20명의 컴퓨터과학 연구자가 참여한 사용자 연구에서, 편집 후 LACE의 MRR은 0.7076에서 0.9000으로 높아졌다. 원문 표는 이를 100배 값으로 표시한다.
+
+**해석의 범위:** 실제 사용자가 추천을 조정한 근거다. 다만 LACE가 비교 모델보다 더 큰 편집 효과를 냈다는 차이는 통계적으로 유의하지 않았다. 대상은 논문 추천이며, 프로필 편집이 일시적·지속적 선호의 범위 통제를 검증한 것은 아니다.
+
+**StyleMate에 적용:** 오른쪽 조건 패널을 읽기 전용 요약에 그치지 않고 수정 가능한 항목으로 만들어야 RQ1을 평가할 수 있다. 수정이 추천에 실제로 반영됐다는 피드백도 필요하다.
+
+### 04 · User-Controllable Profiles: LLM이 이해한 취향을 자연어로 조정
+
+**Woźniak, Duszenko, Kocoń, Kazienko · 2025 · WWW Companion**  
+[Improving LLM-Based Recommender Systems with User-Controllable Profiles](https://doi.org/10.1145/3701716.3717734) · [저자 원문](https://human-centeredrec.github.io/program/12_Improving_LLM_Based_Recomme.pdf)
+
+과거 행동을 직접 넣는 방식과 자연어 프로필을 제공하는 방식을 비교한다. 영화 사용자 50명의 데이터에서 프로필을 수동으로 수정해 사용자 제어를 시뮬레이션한다. 수정된 선호에 맞춘 추천 순위가 개선되는지를 오프라인으로 평가한다.
+
+**해석의 범위:** 실제 사용자가 인터페이스에서 프로필을 수정한 실험은 아니다. 논문의 “최대 50%”는 별도로 정의한 NDCG 기반 Gain이다. 사용자 만족도나 주도성이 50% 향상됐다는 뜻으로 읽으면 안 된다.
+
+**StyleMate에 적용:** 시스템이 해석한 취향을 자연어로 보여주는 방식의 기술적 근거다. 사용자가 저장 범위를 이해하고 결정할 수 있다고 느끼는지는 별도 사용자 평가가 필요하다.
+
+| RQ1에서 구분할 층위 | 위 문헌이 제공하는 근거 | StyleMate에서 확인할 내용 |
+|---|---|---|
+| 내부 모델의 분리 | 장기·단기 표현, 상황 조건부 기억 | 이번 요청의 조건이 기본 취향을 자동으로 덮어쓰지 않는가? |
+| 프로필의 편집 가능성 | 편집으로 추천 순위를 바꿀 수 있음 | 사용자가 해석 오류를 찾고 수정할 수 있는가? |
+| 적용 범위의 통제 | 직접적인 비교 근거는 제한적 | 이번에만 적용·기본 취향 저장을 이해하고 선택하는가? |
+| 주관적 사용자 주도성 | 추천 성능만으로 대신할 수 없음 | 추천 조건과 방향을 스스로 조정한다고 느끼는가? |
+
+## D RQ2의 기반 — 이미지와 말로 스타일을 구체화하는 연구
+
+### 05 · Fashion IQ: “이 이미지보다 조금 더…”라는 표현
+
+**Wu et al. · 2021 · CVPR**  
+[Fashion IQ: A New Dataset Towards Retrieving Images by Natural Language Feedback](https://arxiv.org/abs/1905.12794) · [학회 원문](https://openaccess.thecvf.com/content/CVPR2021/papers/Wu_Fashion_IQ_A_New_Dataset_Towards_Retrieving_Images_by_Natural_CVPR_2021_paper.pdf)
+
+비슷한 의류 이미지 쌍을 구분하는 사람의 상대적 설명을 수집한다. 기준 이미지, 자연어 피드백, 속성, 대화 이력을 함께 사용해 상품 이미지를 검색한다. 제안한 검색 모델은 데이터셋의 대화형 검색 성능을 개선했다.
+
+**StyleMate와 연결:** “단정하지만 정장 같지는 않게”를 이미지와 비교 설명으로 구체화하는 근거다. 그러나 목표 상품을 찾는 검색 과제다. 전체 코디의 상황 적합성이나 적응형 모달리티 선택의 사용자 부담을 검증한 연구는 아니다.
+
+### 06 · SURE: 주관적 표현을 시각적 속성과 연결
+
+**Long et al. · 2023 · Findings of ACL**  
+[Multimodal Recommendation Dialog with Subjective Preference: A New Challenge and Benchmark](https://aclanthology.org/2023.findings-acl.217/)
+
+의류·가구 장면에서 주관적 선호를 명확히 하는 멀티모달 대화 과제를 제시한다. 질문, 선호 제외, 후보 속성 제시, 이미지 영역 참조 등을 행동으로 구분한다. 이미지나 메타데이터를 제거하면 대부분의 과제 성능이 낮아졌다.
+
+**StyleMate와 연결:** 색감·핏·분위기처럼 선택 이유를 확인하는 행동 분류에 유용하다. 평가 환경에는 텍스트와 장면 이미지가 함께 주어진다. 텍스트 질문과 이미지 선택을 언제 각각 제시할지 비교한 사용자 실험은 없다.
+
+### 07 · MUSE: 상황과 프로필이 들어간 패션 대화
+
+**Wang et al. · 2025 · Findings of ACL**  
+[MUSE: A Multimodal Conversational Recommendation Dataset with Scenario-Grounded User Profiles](https://aclanthology.org/2025.findings-acl.58/)
+
+상황 기반 프로필과 상품 이미지를 바탕으로 7,000개 의류 대화를 생성한다. 대화는 멀티모달 LLM을 이용한 합성 데이터다. 이를 이용한 미세조정은 오프라인 추천 성능을 개선했다.
+
+**평가의 구분:** 사람의 응답 품질 비교도 포함한다. 그러나 실제 사용자가 시스템과 추천 세션을 진행한 평가와는 다르다. 의도 표현 부담, 이해받는 느낌, 모달리티 선택의 효과는 측정하지 않는다.
+
+**StyleMate와 연결:** 상황·이미지·프로필을 함께 표현하는 데이터 구조를 참고할 수 있다. RQ2의 세 비교 조건을 대신하는 증거로 쓰기는 어렵다.
+
+```callout info 멀티모달 모델과 적응형 질문은 별도로 평가한다
+이미지와 텍스트를 모델에 넣는 기술은 두 정보를 함께 처리하는 방법이다. RQ2는 사용자에게 지금 어떤 질문 형식을 제공할지 결정하는 상호작용을 다룬다. 두 논점을 구분해야 한다.
+```
+
+또한 한 이미지를 골랐다는 사실만으로 색상·핏·소재를 모두 좋아한다고 확정하면 안 된다. 선택 이유를 묻는 문서의 세부 취향 단계는 이 해석 문제를 줄이기 위한 설계다.
+
+## E RQ2의 다음 단계 — 무엇을 묻고 언제 추천해야 하나
+
+### 08 · EAR: 질문할지 추천할지 행동 정책으로 선택
+
+**Lei et al. · 2020 · WSDM**  
+[Estimation–Action–Reflection: Towards Deep Interaction Between Conversational and Recommender Systems](https://hexiangnan.github.io/papers/wsdm20-EAR.pdf)
+
+선호를 추정하고, 속성 질문 또는 추천을 선택한다. 추천을 거절하면 모델을 갱신한다. Yelp·LastFM의 대화 시뮬레이션에서 추천 성공률을 높이고 평균 대화 턴을 줄였다.
+
+**StyleMate와 연결:** 질문 종료와 추천 실행을 정하는 정책의 선행 근거다. 다만 질문은 미리 정의된 속성을 다루며 사용자도 시뮬레이터다. 글·이미지의 형식 선택이나 실제 사용자의 부담은 검증하지 않는다.
+
+### 09 · PEBOL: 불확실성을 줄일 질문을 고른 뒤 자연어로 생성
+
+**Austin, Korikov, Toroghi, Sanner · 2024 · RecSys**  
+[Bayesian Optimization with LLM-Based Acquisition Functions for Natural Language Preference Elicitation](https://ssanner.github.io/papers/recsys24_pebol.pdf)
+
+베이지안 최적화로 다음 질문의 근거가 될 아이템 설명을 고른다. LLM은 그 설명에서 짧은 질문을 만든다. 응답으로 선호에 대한 추정을 갱신한다. 음식점·영화·레시피의 시뮬레이션에서 질문을 LLM에만 맡긴 기준보다 추천 순위가 개선됐다.
+
+**StyleMate와 연결:** 질문의 유창함과 질문의 정보 가치를 나눠 설계할 수 있다. 그러나 텍스트 yes/no 질문이 중심이다. 표현 부담과 이해감을 실제 사용자에게서 검증한 결과는 아니다.
+
+### 10 · DECISIVE: 최종 선택에 필요한 정보만 묻기
+
+**Jain et al. · 2026년 7월 · ACL Long Papers**  
+[DECISIVE: Guiding User Decisions with Optimal Preference Elicitation from Unstructured Documents](https://aclanthology.org/2026.acl-long.1465/)
+
+문서에서 후보의 속성 점수를 만들고 선호를 추정한다. 최종 추천의 불확실성을 줄이는 정보이득으로 비교 질문을 고른다. 충분한 확신을 얻으면 질문을 멈춘다. 교육·금융·채용 과제에서 사용자 시뮬레이션으로 평가했다.
+
+**StyleMate와 연결:** 모든 취향을 끝까지 묻기보다 현재 후보를 구분하는 데 필요한 조건부터 묻는 방향을 제시한다. 패션·이미지 선택·실제 사용자 부담을 검증한 논문은 아니다.
+
+| 문헌을 연결한 질문 선택 제안 | 확인할 정보 | 제공할 상호작용 |
+|---|---|---|
+| 상황 사실이 빠져 있음 | 일정, 활동, 이동량 | 짧은 텍스트 질문 |
+| 시각적 정도가 불분명함 | 격식, 실루엣, 단정함의 경계 | 차이를 비교할 수 있는 이미지 선택 |
+| 이미지 선택 이유가 불분명함 | 색감인지 핏인지 전체 분위기인지 | 요소 선택과 추가 질문 |
+| 후보 선택에 충분한 조건이 모임 | 남은 불확실성이 결과를 바꾸는지 | 추천 제시 또는 사용자의 조기 종료 |
+
+이 표는 **StyleMate의 구현 제안**이다. 위 논문이 이 규칙의 효과를 직접 입증했다는 뜻은 아니다. 검토한 문헌에서는 문서의 세 모달리티 조건을 비교한 직접 근거를 찾지 못했다.
+
+## F 패션 추천의 성과와 2025–2026년의 남은 한계
+
+### 11 · Fashion++: 스타일을 크게 바꾸지 않고 코디 개선
+
+**Hsiao et al. · 2019 · ICCV**  
+[Fashion++: Minimal Edits for Outfit Improvement](https://www.cs.utexas.edu/~grauman/papers/fashion-plus-plus-iccv2019.pdf)
+
+옷의 형태와 질감 표현을 분리하고 기존 코디에 작은 변화를 제안한다. 아이템 교체, 색상 변경, 착용 방식 변경 등을 다룬다. 자동 평가와 사람의 판단에서 코디 개선을 확인했다.
+
+**StyleMate와 연결:** “평소 스타일을 유지하면서 일부만 바꾸기”의 기술적 선행 사례다. 목표는 모델이 정의한 패션성의 향상이다. 사용자의 정체성 유지나 고객 미팅 적합성과 같은 목적은 추가로 정의하고 평가해야 한다.
+
+### 12 · POSM: 개인 취향에 맞는 코디와 멀티모달 스타일 표현
+
+**You, Cao, Gu, Cai · ECAI 2025 · 출판사 온라인 표기 2026-08-25**  
+[POSM: A Personalized Outfit Recommendation System with Style-Guided Multi-Modal Feature Fusion](https://journals.sagepub.com/doi/10.3233/FAIA250922)
+
+이미지·텍스트의 공통 특징과 각 모달리티의 고유 특징을 분리한다. 코디 전체의 스타일 표현을 만들어 사용자의 과거 코디 선호와 연결한다. IQON-550에서 NDCG@10은 0.6955로, 비교 모델 LPAE의 0.6698보다 높았다.
+
+**StyleMate와 연결:** 개인 취향과 코디 조합을 계산하는 추천 기반의 근거다. 이는 순위 평가 결과다. 현재 상황의 임시 조건, 사용자의 기억 범위 선택, 질문 형식 선택의 효과를 입증한 수치는 아니다. 학회 연도와 온라인 게시일은 구분해 읽는다.
+
+### 13 · FashionM3: 상황 기반 코디를 대화로 계속 수정
+
+**Pang, Zou, Wong · 2025 · arXiv 공개본 기준**  
+[FashionM3: Multimodal, Multitask, and Multiround Fashion Assistant based on Unified Vision-Language Model](https://arxiv.org/abs/2504.17826) · [평가를 포함한 원문](https://arxiv.org/html/2504.17826v1)
+
+추천, 대체 아이템, 이미지 생성, 가상 착용을 한 시스템에 연결한다. 기존 패션 데이터에서 만든 FashionRec의 331,124개 이미지·대화 샘플로 모델을 학습한다. 12명 사용자 연구에서 83.3%가 선택한 상황의 코디 생성에 전반적으로 만족했다고 응답했다.
+
+**StyleMate와 연결:** “이미지·대화·상황 기반 패션 에이전트” 자체는 이미 선행 연구에 있다. 이 사용자 연구는 프로토타입의 가능성을 보여준다. 문서의 저장 범위와 세 질문 방식의 효과를 각각 분리한 비교 실험은 아니다.
+
+### 14 · AMMR 관점 논문: 이미지 기준점과 언어 제약을 함께 수정
+
+**Deldjoo, Rafiee, Ravanbakhsh · 2025 · arXiv 공개 관점 논문**  
+[Agentic Personalized Fashion Recommendation in the Age of Generative AI: Challenges, Opportunities, and Evaluation](https://arxiv.org/abs/2508.02342)
+
+사용자가 보여준 이미지에 세부적인 언어 제약을 더하는 mixed-modality refinement를 핵심 과제로 제시한다. 멀티모달 인코더, LLM 계획, 동적 검색을 연결한 AMMR 구조를 제안한다.
+
+**StyleMate와 연결:** “이 핏은 유지하고 미팅에 맞게 더 단정하게” 같은 요청의 설계 방향과 가깝다. 연구 의제와 파이프라인 제안의 근거로 읽어야 한다. 저장 범위 통제나 표현 부담 감소를 입증한 사용자 실험으로 인용할 수는 없다.
+
+### 15 · VOGUE: 실제 패션 대화에서도 취향 일반화는 어렵다
+
+**Guo, Sun, Jiang, Liang, Sanner · 2026년 6월 · UMAP**  
+[VOGUE: A Multimodal Dataset for Conversational Recommendation in Fashion](https://doi.org/10.1145/3774935.3806177) · [저자 원문](https://ssanner.github.io/papers/umap26_vogue.pdf)
+
+20명이 참여한 60개 사람 간 대화와 2,100개 발화를 수집했다. 실제 프로필, 상황별 목표, 상품 이미지, 상품별 평점, 만족도를 함께 기록한다. 모델은 이 대화 기록을 바탕으로 사용자 평점을 예측하는 평가를 받는다.
+
+**핵심 결과:** 집계 정확도만 보면 모델이 사람과 비슷해 보일 수 있다. 그러나 평점 분포가 왜곡되고, 직접 논의하지 않은 상품으로 취향을 일반화하는 성능은 사람 추천자에 못 미쳤다. 이는 평가한 모델과 이 데이터셋에서 관찰한 결과다.
+
+**StyleMate와 연결:** 파악한 조건을 사용자에게 확인받는 설계에 실질적인 이유가 있다. 선택적 기억과 적응형 질문 자체의 효과는 이 논문도 직접 비교하지 않는다. 모델이 실제 사용자와 실시간으로 대화한 실험으로 해석해서도 안 된다.
+
+```callout info 현재의 도달점
+개인화 코디 모델, 멀티모달 대화 시스템, 질문 최적화, 실제 대화 벤치마크까지 연구가 진행됐다. 그 성과가 사용자 주도성과 의도 표현 부담의 개선으로 이어지는지는 상호작용 조건을 통제한 평가가 필요하다.
+```
+
+## G StyleMate는 어떤 연구 기여를 만들 수 있나
+
+아래 연결은 검토한 논문과 문서에서 도출한 **연구 제안**이다. 최초의 시스템이라는 판정은 아니다.
+
+| 문서의 핵심 설계 | 가까운 선행 연구 | 추가로 보여줄 수 있는 기여 |
+|---|---|---|
+| 기본 취향과 이번 요청을 분리 | DLSPRec, 조건부 기억 | 사용자가 선호의 적용 범위를 이해하고 관리하는 방식 |
+| 파악한 조건의 확인·수정 | LACE, User-Controllable Profiles | 패션 상황에서 해석을 바로잡고 추천을 조정하는 경험 |
+| 기본 취향으로 저장할 요소 선택 | 조건부 기억, VOGUE의 프로필·상황별 목표 구조 | 일시적 요구가 다음 요청에 잘못 이어지는 문제와 범위 통제의 효과 |
+| 필요한 정보에 따라 글·이미지 선택 | EAR, PEBOL, DECISIVE + Fashion IQ, SURE | 질문 정책과 시각적 의도 표현을 연결한 실제 사용자 평가 |
+| 좋아하는 이미지의 요소 확인 | Fashion IQ, SURE | 전체 이미지 선택을 세부 속성 선호로 과잉 해석하는 문제의 감소 |
+| 평소 스타일을 유지하며 상황에 맞게 조정 | Fashion++, FashionM3, AMMR | 유지한 취향과 상황 때문에 바꾼 요소를 사용자가 납득하는 과정 |
+
+**RQ1의 기여 후보:** 선호 분리·확인·수정·저장 선택을 제공한다. 사용자가 추천 조건과 방향을 제어한다고 느끼는지 밝힌다.
+
+**RQ2의 기여 후보:** 필요한 정보에 따라 글·이미지 질문을 고른다. 의도 표현 부담과 이해받는 느낌이 어떻게 달라지는지 밝힌다.
+
+두 RQ는 다른 결과를 측정한다. 편집으로 추천 순위가 좋아져도 범위 선택을 이해하지 못할 수 있다. 질문 수가 줄어도 사용자가 원하는 스타일을 표현하지 못할 수 있다. 따라서 각 RQ의 주관적 지표와 행동 근거를 함께 봐야 한다.
+## H 문서의 RQ를 검증하는 방법과 읽기 순서
+
+### 비교 조건과 평가 제안
+
+| 연구 질문 | 문서에 정해진 비교 | 주 평가 | 보조 관찰 |
+|---|---|---|---|
+| RQ1 | 선호를 구분하지 않는 방식 ↔ 별도 관리와 확인·수정 | 조건 확인·수정 가능성, 추천 방향을 조정한다는 느낌 | 적용 범위 이해, 수정 성공, 다음 요청에 임시 조건이 남는지 |
+| RQ2 | 텍스트만 / 텍스트·이미지 고정 순서 / 필요에 따른 선택 제공 | 의도 표현 부담, 시스템이 의도를 이해한다는 느낌 | 시간·질문 수, 형식 선택 이유, 반복 설명, 추천 만족도 |
+
+**RQ1에는 이어지는 두 요청이 유용하다.** 첫 요청에서 고객 미팅용 조건을 만들고, 다음 요청에서 일상 코디를 찾게 한다. 사용자가 이번에만 적용한 조건이 넘어가는지 확인한다. 새로 발견한 기본 취향은 저장한 선택에 따라 다음 요청에 반영되는지도 본다.
+
+**RQ2에서는 추천 모델과 이미지 후보의 품질을 맞춘다.** 질문 형식 외의 차이가 결과를 설명하지 않도록 한다. 이미지 비교는 어떤 속성을 구분하기 위한 것인지 기록한다. 사용자는 조건을 수정하거나 질문을 멈추고 추천받을 수 있어야 한다.
+
+**측정에서는 효과와 원인을 구분한다.** 현재 RQ1 비교는 선호 분리와 확인·수정의 결합 효과를 측정한다. 각 기능의 개별 효과까지 주장하려면 추가 비교가 필요하다. RQ2도 질문 수의 변화만으로 의도 표현이 쉬워졌다고 판정하지 않는다.
+
+대화 중 취향이 구체화될 수 있다. 처음 입력만을 고정된 정답으로 삼기보다, 마지막에 사용자가 확인한 조건과 추천의 일치도도 확인한다. 만족도와 주도성 질문은 파일의 RQ에 맞춰 작성하고 파일럿에서 이해 여부를 점검한다.
+
+### 먼저 읽을 논문
+
+1. **[VOGUE · 2026](https://ssanner.github.io/papers/umap26_vogue.pdf)** — 실제 패션 대화, 프로필, 평점과 사용자 경험을 어떻게 함께 평가하는지 본다.
+2. **[LACE · 2023](https://arxiv.org/pdf/2304.04250)** — 사용자가 읽고 수정할 수 있는 프로필과 실제 편집 실험을 본다.
+3. **[SURE · 2023](https://aclanthology.org/2023.findings-acl.217/), [Fashion IQ · 2021](https://arxiv.org/abs/1905.12794)** — 주관적 표현과 이미지 비교를 연결하는 방법을 본다.
+4. **[EAR · 2020](https://hexiangnan.github.io/papers/wsdm20-EAR.pdf), [PEBOL · 2024](https://ssanner.github.io/papers/recsys24_pebol.pdf), [DECISIVE · 2026](https://aclanthology.org/2026.acl-long.1465/)** — 질문의 정보 가치와 종료 정책을 본다.
+5. **[FashionM3 · 2025](https://arxiv.org/html/2504.17826v1), [조건부 기억 · 2025](https://aclanthology.org/2025.coling-main.254/)** — 시스템 구성과 기억 구조를 참고한다.
+
+**검토 범위:** 2026-10-04까지 공개된 선정 문헌 15편의 출판사·학회·저자 원문과 공개 논문을 확인한 서술형 검토다. 관련 연구 전체를 빠짐없이 수집한 체계적 문헌고찰은 아니다. 논문의 검증 결과, 문서의 설계, 이 페이지의 연구 제안을 구분해 적었다.
+</textarea>
+<script>
+(() => {
+  const root = document.documentElement;
+  const cycle = (list, cur) => list[(list.indexOf(cur) + 1) % list.length];
+  const label = (btn, value) => {
+    const map = JSON.parse(btn.dataset.labels || '{}');
+    btn.textContent = map[value] || value;
+  };
+  const bind = (name, attr, values) => {
+    const btn = document.querySelector(`[data-am="${name}"]`);
+    if (!btn) return;
+    label(btn, root.getAttribute(attr));
+    btn.addEventListener('click', () => {
+      const next = cycle(values, root.getAttribute(attr));
+      root.setAttribute(attr, next);
+      label(btn, next);
+    });
+  };
+  bind('theme', 'data-theme', ['blueprint', 'shadcn']);
+  bind('mode', 'data-mode', ['auto', 'light', 'dark']);
+
+  const copyBtn = document.querySelector('[data-am="copy"]');
+  copyBtn?.addEventListener('click', async () => {
+    const nodes = document.querySelectorAll('#am-source');
+    const text = nodes[nodes.length - 1]?.value ?? '';
+    try {
+      await navigator.clipboard.writeText(text);
+    } catch {
+      const ta = Object.assign(document.createElement('textarea'), { value: text });
+      document.body.append(ta);
+      ta.select();
+      document.execCommand('copy');
+      ta.remove();
+    }
+    const original = copyBtn.textContent;
+    copyBtn.textContent = copyBtn.dataset.done;
+    setTimeout(() => { copyBtn.textContent = original; }, 1400);
+  });
+})();
+</script>
+</body>
+</html>
