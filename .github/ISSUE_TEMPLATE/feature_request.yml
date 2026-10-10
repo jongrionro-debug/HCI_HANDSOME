@@ -1,0 +1,69 @@
+name: Feature Request
+description: 새로운 기능이나 개선 목표를 제안합니다.
+title: "[Feature] "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        구현 방법보다 해결할 문제와 기대하는 결과를 구체적으로 적어 주세요.
+        Acceptance Criteria는 나중에 확인할 수 있는 문장으로 작성합니다.
+
+  - type: textarea
+    id: background
+    attributes:
+      label: Background
+      description: 이 기능이 필요한 배경과 현재의 문제를 설명해 주세요.
+      placeholder: 사용자 또는 연구·운영 관점에서 어떤 문제가 발생하는지 적어 주세요.
+    validations:
+      required: true
+
+  - type: textarea
+    id: goal
+    attributes:
+      label: Goal
+      description: 이번 작업으로 달성하려는 결과를 설명해 주세요.
+      placeholder: 작업이 완료되면 무엇이 달라져야 하는지 적어 주세요.
+    validations:
+      required: true
+
+  - type: textarea
+    id: requirements
+    attributes:
+      label: Requirements
+      description: 반드시 충족해야 할 기능·동작·제약을 적어 주세요. 구현 방법은 제한하지 않아도 됩니다.
+      placeholder: |
+        - 사용자가 ...할 수 있어야 한다.
+        - 기존 ... 조건을 유지해야 한다.
+    validations:
+      required: true
+
+  - type: textarea
+    id: acceptance-criteria
+    attributes:
+      label: Acceptance Criteria
+      description: 테스트나 리뷰로 확인할 수 있는 완료 조건을 Given/When/Then 또는 체크 가능한 문장으로 적어 주세요.
+      placeholder: |
+        - [ ] ...한 조건에서 ...하면 ...이 확인된다.
+        - [ ] 오류·경계 조건에서 ...이 보장된다.
+    validations:
+      required: true
+
+  - type: textarea
+    id: out-of-scope
+    attributes:
+      label: Out of Scope
+      description: 이번 작업에 포함하지 않을 범위를 적어 주세요. 없으면 '없음'이라고 적습니다.
+      placeholder: 이번 Issue에서 다루지 않는 기능, 후속 작업 또는 논의 사항을 적어 주세요.
+    validations:
+      required: true
+
+  - type: textarea
+    id: references
+    attributes:
+      label: References
+      description: 관련 설계 문서, 기존 ADR, Issue 또는 외부 근거를 링크해 주세요. 없으면 '없음'이라고 적습니다.
+      placeholder: |
+        - Related Issue: #123
+        - Design / ADR: docs/...
+    validations:
+      required: true
