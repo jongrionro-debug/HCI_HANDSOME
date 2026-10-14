@@ -60,17 +60,6 @@ ISSUE_FORMS = {
         "Acceptance Criteria",
     ),
 }
-PR_HEADINGS = (
-    "Summary",
-    "Related Issue",
-    "Acceptance Criteria Traceability",
-    "Changes",
-    "Testing",
-    "Documentation",
-    "Architecture Decision",
-    "Risks / Trade-offs",
-    "Review Checklist",
-)
 INLINE_LINK_RE = re.compile(
     r"(?<!!)\[[^\]]+\]\(\s*(?P<target><[^>]*>|[^\s)]+)"
     r"(?:\s+(?:\"[^\"]*\"|'[^']*'|\([^)]*\)))?\s*\)"
@@ -293,18 +282,13 @@ def check_templates(root: Path, problems: list[Problem]) -> tuple[int, int]:
                 problems.append(Problem(path, f"'{label}' must be required"))
 
     pr_path = root / ".github" / "pull_request_template.md"
-    if not pr_path.is_file():
-        problems.append(Problem(pr_path, "Pull Request template is missing"))
-    else:
+    # PR guidance is optional; neither headings nor review checkboxes are
+    # required. If a reusable template includes checkboxes, keep them unchecked
+    # so it does not imply verification before a contributor has done the work.
+    if pr_path.is_file():
         text = pr_path.read_text(encoding="utf-8")
-        headings = set(re.findall(r"^##\s+(.+?)\s*$", text, re.MULTILINE))
-        for heading in PR_HEADINGS:
-            if heading not in headings:
-                problems.append(Problem(pr_path, f"Pull Request template is missing '## {heading}'"))
         if re.search(r"^\s*-\s*\[[xX]\]", text, re.MULTILINE):
             problems.append(Problem(pr_path, "Pull Request template contains a pre-checked checkbox"))
-        if not re.search(r"^\s*-\s*\[\s\]", text, re.MULTILINE):
-            problems.append(Problem(pr_path, "Pull Request template must include unchecked review checkboxes"))
 
     return forms_checked, int(pr_path.is_file())
 

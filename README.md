@@ -11,14 +11,14 @@ StyleMate는 평소 취향을 유지하면서 고객 미팅·발표 등 현재 �
 - [Issue #1의 메모리 설계](docs/memory-design.md)와 [구현 계획](docs/memory-implementation-plan.md)은 2026-10-13 Accepted v0.2의 설계·가상 검증 기록이다. 현재 실행 DTO와 같은 JSON 형식이 아니며 핵심 확인/동의·범위·보관 원칙을 이어받았다.
 - [목표 feature 계획](docs/target-feature-inference-plan.md)의 방향은 2026-10-14 사용자가 승인했다. 일반 쇼핑에 맞춘 축소·구현 위임의 범위와 65+9에서17개로 줄인 이유는 [ADR 0003](docs/decisions/0003-consumer-shopping-prototype.md)에 기록했다. 현재 실행 계약은 프로토타입 문서와 코드가 정본이다.
 - 기존 산출물은 Markdown과 HTML 문서다. HTML에는 CSS·JavaScript와 Markdown 원문이 포함되어 있으며, 생성기 표기는 `Answer me with HTML 0.4.6`이다. 재생성 도구와 명령은 저장소에 포함되어 있지 않다.
-- 개발 절차 검증에는 Python 3.11 이상과 GitHub Actions를 사용한다. 제품 스택 선택은 관련 Issue에서 제안·승인하고 필요한 경우 ADR로 기록한다.
+- 개발 절차 검증에는 Python 3.11 이상과 GitHub Actions를 사용한다. 제품 스택 선택은 작업 요청·팀 논의에서 제안·승인하고 필요한 경우 ADR로 기록한다. 관련 Issue가 있으면 함께 연결한다.
 
 ## 문서와 폴더
 
 | 경로 | 역할 |
 |---|---|
 | [AGENTS.md](AGENTS.md) | Codex의 작업·승인·검증 규칙 |
-| [docs/engineering-workflow.md](docs/engineering-workflow.md) | Issue → 계획 → 구현 → 테스트 → PR → 리뷰 → 병합 절차 |
+| [docs/engineering-workflow.md](docs/engineering-workflow.md) | 담당 작업별 브랜치 → 기획·구현 → 테스트 → PR → 리뷰·병합 절차 |
 | [docs/master.md](docs/master.md) | 확정된 연구 문제와 RQ |
 | [docs/workflow.md](docs/workflow.md) · [HTML](docs/workflow.html) | 제품의 화면·상태 흐름과 구현 제안 |
 | [docs/memory-design.md](docs/memory-design.md) · [구현 계획](docs/memory-implementation-plan.md) | Issue #1의 메모리 결정표·계약·보관/삭제·연구 경계와 승인 후 구현·검증 순서 |
@@ -31,8 +31,8 @@ StyleMate는 평소 취향을 유지하면서 고객 미팅·발표 등 현재 �
 | [docs/research-landscape.md](docs/research-landscape.md) · [HTML](docs/research-landscape.html) | 선행 연구 조사와 평가 제안 |
 | [Assignment/Readme.md](Assignment/Readme.md) | 과제 자료의 사용 범위. 이 문서가 제외한 PDF는 개발 기준으로 사용하지 않는다. |
 | [Assignment/Figma.url](Assignment/Figma.url) | 기존 디자인 참조 |
-| [.github/ISSUE_TEMPLATE/](.github/ISSUE_TEMPLATE/) | Feature Request·Bug Report 입력 양식 |
-| [.github/pull_request_template.md](.github/pull_request_template.md) | 변경·검증·위험·리뷰 기록 |
+| [.github/ISSUE_TEMPLATE/](.github/ISSUE_TEMPLATE/) | 필요할 때 사용하는 Feature Request·Bug Report 양식 |
+| [.github/pull_request_template.md](.github/pull_request_template.md) | 짧은 PR 설명을 위한 선택 안내 |
 | [.github/workflows/repository-checks.yml](.github/workflows/repository-checks.yml) | 저장소 문서·워크플로 구성 검사 CI |
 | [scripts/check_repository.py](scripts/check_repository.py) · [메모리 CI](.github/workflows/memory-tests.yml) | 저장소 검사와 Python 3.11/3.14 오프라인 테스트·가상 데모 CI |
 
@@ -40,11 +40,12 @@ Markdown을 문서 내용의 정본으로 사용한다. 대응 HTML이 있으면
 
 ## 개발 시작
 
-1. GitHub에서 Feature Request 또는 Bug Report를 작성하고 검증 가능한 Acceptance Criteria를 정한다.
-2. GitHub Desktop에서 최신 기준 브랜치를 확인하고 `codex/<Issue번호>-<설명>` 작업 브랜치를 준비한다.
-3. Codex에 Issue 내용과 관련 문서를 전달한다. Codex는 영향받는 파일·구현 계획·테스트 계획을 제시한 뒤 구현한다. 중요한 설계 변경은 사용자 승인 후 진행한다.
-4. 테스트와 diff 검토를 마치면 사용자가 GitHub Desktop에서 Commit·Push를 수행하고 GitHub에서 PR을 연다.
-5. Codex 리뷰와 사용자 검토를 반영한 최신 변경을 다시 검증하고, 사용자가 병합한다.
+1. 팀원은 최신 `main`을 기준으로 담당 작업의 새 브랜치를 준비한다. 브랜치 이름에 Issue 번호나 특정 도구 이름을 넣을 필요는 없다.
+2. 담당 작업의 목표·범위·완료 조건을 정하고 기획·구현한다. Codex를 쓰면 요청과 관련 자료를 전달하고 구현·테스트 계획을 확인한다. 중요한 설계 변경은 사용자 승인 후 진행한다.
+3. 필요한 테스트와 diff 검토를 마치고, 담당자가 Commit·Push 후 PR을 연다. 변경 목적·핵심 변경·검증 결과를 간단히 설명한다.
+4. 팀원 리뷰를 반영하고 최신 변경을 검증한 뒤 `main`에 병합한다.
+
+Issue 등록·연결, 별도 기획 문서, 정형 PR 문서·체크리스트는 필수가 아니다. 기존 Issue 양식과 PR 안내는 필요할 때 사용한다. AI의 Commit·Push·원격 PR 생성·병합 등은 명시적인 요청이 있을 때만 수행한다. 개인 Mac 경로·복귀 노트 관리 규칙은 각자의 개인 AI 지침에서 관리하며 저장소 공통 규칙에 포함하지 않는다.
 
 단계별 완료 기준, ADR 기준, 리뷰 요청 예시는 [개발 워크플로](docs/engineering-workflow.md)를 따른다.
 
@@ -83,6 +84,6 @@ python3 -m venv /tmp/stylemate-memory-check
 
 ## GitHub 적용 상태
 
-Issue·PR 양식과 CI 정의는 저장소 파일로 제공한다. GitHub에서의 활성화에는 사용자의 Commit·Push 및 기본 브랜치 반영이 필요하다. 원격의 Actions 실행 결과, 브랜치 보호, 권한·요금제 설정은 이번 로컬 작업에서 확인하거나 변경하지 않았다.
+선택적인 Issue 양식·PR 안내와 CI 정의는 저장소 파일로 제공한다. GitHub에 적용하려면 Commit·Push 및 기본 브랜치 반영이 필요하다. 이 안내만으로 현재 원격 Actions 실행 결과·브랜치 보호·권한 설정이 확인됐다고 보지 않는다.
 
-브랜치 보호로 PR과 검사 통과를 필수화하는 방법 및 1인 개발의 리뷰 제한은 [최초 적용](docs/engineering-workflow.md#최초-적용과-github-설정)에 정리되어 있다.
+팀에서 필요에 따라 적용할 PR·검사·리뷰 설정은 [GitHub 설정 안내](docs/engineering-workflow.md#최초-적용과-github-설정)에 정리되어 있다.
