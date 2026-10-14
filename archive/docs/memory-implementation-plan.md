@@ -1,5 +1,7 @@
 # 메모리 구현 계획과 검증 기록
 
+**자료의 역할 · 2026-10-14:** 아래 계획·검증은 해당 작업 시점의 기록이다. 현재 시스템 흐름은 [LUMI 보고서](../LUMI_시스템_설계_보고서_수정본.html), 구현 여부와 남은 범위는 [현재 workflow](workflow.md)를 따른다. 과거 검사 결과를 이번 실행 결과로 해석하지 않는다.
+
 - 상태: **Accepted — 2026-10-13 설계·기술·P0–P6 계획의 역사적 기록**. 2026-10-14 사용자가 목표 feature 방향의 구현·소비자용 축소를 위임했다. 실제 범위·축소 DTO·검증은 [현재 실행 문서](shopping-memory-prototype.md)와 [ADR 0003](decisions/0003-consumer-shopping-prototype.md)을 따른다. 아래 예정 모듈/전체 운영이 모두 구현됐다는 뜻이 아니다.
 - 승인 근거: 2026-10-13 · 현재 채팅의 승인 질문(D01–D12·ADR 0001/0002·보관 기간·Python+SQLite 최소안)에 사용자가 **“권고안 전체 승인”**으로 응답했다.
 - 초기 설계 기준: 2026-10-13 · `codex/1-memory-design` · HEAD `77f38f28a1e0c43bde96f9f46b961cbc4b737a7b` + 당시 미커밋 설계 자료, 기존 `AGENTS.md` 변경. 최신 문서 검증 기준은 8절에 기록한다.
@@ -19,7 +21,7 @@
 | [memory-cases.json](../schemas/examples/memory-cases.json) | 가상 사용자·현재 입력 근거와 상태, 정책 시나리오·기대값·부정 fixture |
 | [validate_memory_design.py](../scripts/validate_memory_design.py) | 스키마와 가상 정책의 정합성 검증. 제품 저장/모델 실행은 하지 않음 |
 | [검증 의존성](../scripts/requirements-memory-design.txt) | 재현 가능한 schema validator 설치 |
-| [workflow.md](workflow.md) · [HTML](workflow.html), [README](../README.md) | 기존 화면 근거와 승인된 메모리 상세 설계의 연결 |
+| [당시 workflow](archive/stylemate-workflow.md) · [HTML](archive/stylemate-workflow.html), [README](../README.md) | 기존 화면 근거와 승인된 메모리 상세 설계의 연결 |
 
 ### 1.1. 2026-10-14 사용자 목적 구체화 — 목표 feature 추론용 context
 

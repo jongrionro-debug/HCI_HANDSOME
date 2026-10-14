@@ -1,8 +1,10 @@
 # 장·단기 메모리 설계 v0.2
 
+**자료의 역할 · 2026-10-14:** 이 문서는 승인 당시 메모리 계약의 역사적 기록이다. 현재 시스템 흐름은 [LUMI 보고서](../LUMI_시스템_설계_보고서_수정본.html), 실제 저장·context·목표값 계약은 [실행 문서](shopping-memory-prototype.md)를 따른다. LUMI의 세션 가설을 이용한 재추천은 아래 미확인 후보 제외 정책과 별도로 구현 경계를 정해야 한다.
+
 - 상태: **Accepted — 사용자 승인 완료**. 메모리 설계·후속 구현 계획이 확정됐으며 실행 제품이나 저장 정책의 운영 완료를 뜻하지 않는다.
 - 작성: 2026-10-13 · Codex · [Issue #1](https://github.com/jongrionro-debug/HCI_HANDSOME/issues/1)
-- 기준: `77f38f28a1e0c43bde96f9f46b961cbc4b737a7b`의 [연구 기준](master.md), [제품 흐름](workflow.md). 기존 `AGENTS.md` 미커밋 변경은 보존했다.
+- 기준: `77f38f28a1e0c43bde96f9f46b961cbc4b737a7b`의 [연구 기준](master.md), [당시 제품 흐름](archive/stylemate-workflow.md). 기존 `AGENTS.md` 미커밋 변경은 보존했다.
 - 승인 근거: 2026-10-13 · 현재 채팅의 승인 질문(D01–D12·ADR 0001/0002·보관 기간·Python+SQLite 최소안)에 사용자가 **“권고안 전체 승인”**으로 응답했다.
 - 역할: 승인된 v0.2 메모리 동작·계약의 기준. [구현 계획](memory-implementation-plan.md)은 후속 순서·검증, ADR은 선택 이유를 기록한다. 아래 수치와 정책은 위 회신의 승인 범위다.
 - 현재 실행과의 관계 · 2026-10-14: 후속 Issue #2의 축소된 프로토타입은 [현재 실행 문서](shopping-memory-prototype.md)와 [ADR 0003](decisions/0003-consumer-shopping-prototype.md)을 따른다. 이 문서·schema·fixture는 승인 당시의 설계 기록이며 실행 DTO와 동일한 JSON 형식이 아니다. 아래 미구현·후속 표현은 2026-10-13 설계 작업의 범위를 설명한다.

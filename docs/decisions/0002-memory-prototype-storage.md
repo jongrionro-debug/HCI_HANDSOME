@@ -12,7 +12,7 @@
 
 ## Decision
 
-[메모리 설계](../memory-design.md) D06–D09·D11의 최소안은 **Python 3.11 이상 단일 프로세스 메모리 모듈 + SQLite + JSON Schema 2020-12**다. 일반 제품 UI·인증·추천 모델 프레임워크는 선택하지 않는다.
+[메모리 설계](../../archive/docs/memory-design.md) D06–D09·D11의 최소안은 **Python 3.11 이상 단일 프로세스 메모리 모듈 + SQLite + JSON Schema 2020-12**다. 일반 제품 UI·인증·추천 모델 프레임워크는 선택하지 않는다.
 
 SQLite는 별도 서버 없이 로컬 저장이 가능하고 Python 표준 `sqlite3` 인터페이스를 제공한다. SQLite 트랜잭션의 원자성을 item·event·성공 result 동시 반영에 사용할 계획이다. 이는 저장소 선택의 근거이며 이번에 DB 원자성을 검증했다는 뜻은 아니다. [Python 3.11 문서](https://docs.python.org/3.11/library/sqlite3.html), [SQLite 트랜잭션](https://www.sqlite.org/transactional.html).
 
@@ -20,7 +20,7 @@ SQLite는 별도 서버 없이 로컬 저장이 가능하고 Python 표준 `sqli
 
 조회는 소유권·요청·상태·기간·조건의 필터 뒤 결정적 key/태그 랭킹을 사용한다. 현재 단기의 명시 예외가 장기를 일시 대체하며 같은 우선순위 충돌은 보류한다. 관련성 초기 점수 3/2/1, 장기 12개·단기 20개·문자 예산 6,000을 승인된 초기값으로 사용한다. 별도 벡터 저장소·검색 서비스·공개 HTTP API는 최소안에 도입하지 않는다.
 
-검증 자료는 [단일 스키마](../../schemas/memory-contract.schema.json), [가상 사례](../../schemas/examples/memory-cases.json), [검증기](../../scripts/validate_memory_design.py)다. 스키마는 형식과 필드 간 제약, 정책 모델은 가상 전이/조회/실패 기대값을 검사한다. 동의 진위·자연어/이미지 판단은 사람이 만든 fixture oracle로 대신하며 실제 모델 품질과 구분한다. Draft 2020-12 validator와 format 검사를 사용한다. [JSON Schema 2020-12](https://json-schema.org/draft/2020-12), [jsonschema 검증 문서](https://python-jsonschema.readthedocs.io/en/stable/validate/).
+검증 자료는 [단일 스키마](../../archive/schemas/memory-contract.schema.json), [가상 사례](../../archive/schemas/examples/memory-cases.json), [검증기](../../archive/scripts/validate_memory_design.py)다. 스키마는 형식과 필드 간 제약, 정책 모델은 가상 전이/조회/실패 기대값을 검사한다. 동의 진위·자연어/이미지 판단은 사람이 만든 fixture oracle로 대신하며 실제 모델 품질과 구분한다. Draft 2020-12 validator와 format 검사를 사용한다. [JSON Schema 2020-12](https://json-schema.org/draft/2020-12), [jsonschema 검증 문서](https://python-jsonschema.readthedocs.io/en/stable/validate/).
 
 삭제는 SQL 행 제거만으로 완료 선언하지 않는다. 후속 SQLite 구현은 `secure_delete=ON`, 지속 WAL·디스크 캐시를 쓰지 않는 최소 설정, 삭제 후 DB 정리와 journal/파생 파일 확인을 포함한다. SQLite 문서는 삭제 흔적 제거 방법과 제한을 설명한다. 완료의 범위는 시스템이 관리하는 DB/파일/캐시이며 저장매체·사용자 외부 사본의 복구 불가를 약속하지 않는다. 실데이터 수집·자동 백업 도입은 추가 운영 승인과 삭제 검증이 필요하다. [secure_delete](https://www.sqlite.org/pragma.html#pragma_secure_delete), [VACUUM](https://www.sqlite.org/lang_vacuum.html).
 
@@ -43,6 +43,6 @@ JSON Schema를 통과한 제안도 내용·권한 검증을 통과해야 한다.
 
 ## Consequences
 
-후속 모듈은 request 관리 → evidence/의도 → 정책/CAS/배치 → SQLite 저장 → 조회/결합 → 삭제/보관 → UI adapter·가상 연구 비교 순으로 구현한다. 각 단계의 입력·출력·테스트·오류·예정 파일과 명령은 [구현 계획](../memory-implementation-plan.md)에 둔다. 이번 브랜치에는 제품 DB·외부 호출·API를 생성하지 않는다.
+후속 모듈은 request 관리 → evidence/의도 → 정책/CAS/배치 → SQLite 저장 → 조회/결합 → 삭제/보관 → UI adapter·가상 연구 비교 순으로 구현한다. 각 단계의 입력·출력·테스트·오류·예정 파일과 명령은 [구현 계획](../../archive/docs/memory-implementation-plan.md)에 둔다. 이번 브랜치에는 제품 DB·외부 호출·API를 생성하지 않는다.
 
 이번 승인으로 스키마 v0.2·운영 파라미터를 설계 기준으로 고정했다. fixture 검증은 수행했고 CI 연결은 후속 구현 계획이다. 실제 스택 확장은 새 근거·승인·ADR로 추적한다.

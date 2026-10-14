@@ -11,7 +11,7 @@
 
 ## Decision
 
-승인된 결정은 [메모리 설계](../memory-design.md)의 D01–D05·D10이다.
+승인된 결정은 [메모리 설계](../../archive/docs/memory-design.md)의 D01–D05·D10이다.
 
 - 독립적으로 수정 가능한 문장과 최소 claim/조건/기간을 저장한다. 취향과 반복 상황은 항목별 명시 동의가 있으면 장기가 될 수 있다.
 - 현재 요청 단기와 이후 활용 장기, 내용 확인과 활용 동의를 분리한다. 명시된 현재 발화는 확인 근거가 될 수 있으나 반복·“평소”·인용은 동의가 아니다.
@@ -43,6 +43,6 @@
 
 ## Consequences
 
-Request·MemoryItem·UserEvidence·삭제 closure가 필요하다. 원문 삭제 이후의 redacted 참조와 독립 장기 snapshot을 분리한다. 신규·재개·복제·선택 저장·수정·철회·삭제 및 과거 재유입을 가상 사례로 검증하고, 후속 구현에서는 실제 저장소·파일 삭제와 UI 결과를 통합 검증한다. 구현 순서는 [계획](../memory-implementation-plan.md)을 따른다.
+Request·MemoryItem·UserEvidence·삭제 closure가 필요하다. 원문 삭제 이후의 redacted 참조와 독립 장기 snapshot을 분리한다. 신규·재개·복제·선택 저장·수정·철회·삭제 및 과거 재유입을 가상 사례로 검증하고, 후속 구현에서는 실제 저장소·파일 삭제와 UI 결과를 통합 검증한다. 구현 순서는 [계획](../../archive/docs/memory-implementation-plan.md)을 따른다.
 
 Issue #1의 설계 범위는 승인 완료다. 실제 제품 구현·원격 Issue 종료·병합은 별도 작업이다.

@@ -41,6 +41,9 @@ EXCLUDED_DIRS = {
 EXCLUDED_PATH_PREFIXES = {
     ("data", "private"),
     ("data", "raw"),
+    # Frozen pre-LUMI records keep their original relative links and are not
+    # maintained; see archive/README.md.
+    ("archive",),
 }
 ISSUE_FORMS = {
     "feature_request.yml": (

@@ -2,7 +2,9 @@
 
 - Related Issue: [#2](https://github.com/jongrionro-debug/HCI_HANDSOME/issues/2)
 - 승인·축소 이유: [ADR 0003](decisions/0003-consumer-shopping-prototype.md)
-- 역할: `src/stylemate_memory/`의 현재 실행 계약. [v0.2 설계](memory-design.md)와 [전체 목표 feature 계획](target-feature-inference-plan.md)은 역사적 설계/확장 참조이며 실행 객체와 동일한 JSON 형식이 아니다.
+- 역할: `src/stylemate_memory/`의 현재 실행 계약. 보관된 [v0.2 설계](../archive/docs/memory-design.md)와 [전체 목표 feature 계획](../archive/docs/target-feature-inference-plan.md)은 역사적 설계/확장 참조이며 실행 객체와 동일한 JSON 형식이 아니다.
+
+**LUMI 설계와의 관계 · 2026-10-14:** 시스템 설계는 [LUMI 보고서](../LUMI_system_design.html)를 따른다. 이 프로토타입은 Memory Layer와 아이템 목표 속성 추론의 실행 기반이다. 출력은 전체 User Preference Map·Candidate Look·실제 Product Feature Map이 아니며, 이미지 선택·상품 추천·Decision Agent는 미구현이다. [단계별 구현 대응](workflow.md)을 따른다. 기존 `stylemate_memory` 이름과 저장·확인·동의·API 계약은 유지한다.
 
 ## 1. 구현 흐름과 범위
 

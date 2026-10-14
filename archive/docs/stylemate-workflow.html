@@ -437,8 +437,9 @@ html[data-theme="shadcn"] .am-kv { border-color: var(--line); border-radius: var
 <button class="am-btn" type="button" data-am="copy" data-done="已复制 ✓">复制源稿</button>
 </div>
 <main class="am-doc">
+<aside style="margin:0 0 20px;padding:16px;border:2px solid #087e84;border-radius:12px;background:#e8f5f3;color:#122538"><strong>보관 자료 · 2026-10-14</strong><p>기존 Figma 화면·흐름의 역사적 기록입니다. 현재 시스템 설계는 <a href="../../LUMI_시스템_설계_보고서_수정본.html">LUMI 보고서</a>, 구현 대응은 <a href="../workflow.html">현재 workflow</a>를 따릅니다.</p></aside>
 <header class="am-head"><h1>StyleMate 시스템 동작 방식</h1><p class="am-sub">기본 취향과 이번 요청을 분리하는 대화형 코디 추천</p><div class="am-head-meta"><span><b>date</b>2026-10-04</span><span><b>design</b>Figma · Web Flow V2</span><span><b>research</b>docs/master.md · RQ1·RQ2</span></div><div class="am-intro am-md"><div class="am-md"><p>StyleMate는 텍스트·이미지 상호작용과 우리가 설계한 장·단기 메모리 시스템으로 아이템·조건별 취향을 축적하고, 기존 취향과 현재 요구에 맞는 패션 아이템을 찾는 에이전트를 목표로 한다. 이 시스템을 활용한 아이템 선호 판단이 사용자의 판단을 얼마나 충실하게 재현하는지 연구한다.</p>
-<p><strong>목적 범위 · 2026-10-14:</strong> 아래 Figma 화면과 코디 흐름은 기존 설계 사례다. 고객 미팅·발표 등 특정 상황의 코디 조정으로 프로젝트 전체를 한정하지 않는다. 사용자 동의를 반영한 목적·RQ 분리 방향과 구체 문안·평가 검토안은 <a href="master.md">연구 기준</a>을 따른다. 취향 판단 재현은 연구 목표이며 새 상품 추천 UI나 효과의 구현·검증을 뜻하지 않는다.</p>
+<p><strong>목적 범위 · 2026-10-14:</strong> 아래 Figma 화면과 코디 흐름은 기존 설계 사례다. 고객 미팅·발표 등 특정 상황의 코디 조정으로 프로젝트 전체를 한정하지 않는다. 사용자 동의를 반영한 목적·RQ 분리 방향과 구체 문안·평가 검토안은 <a href="../master.md">연구 기준</a>을 따른다. 취향 판단 재현은 연구 목표이며 새 상품 추천 UI나 효과의 구현·검증을 뜻하지 않는다.</p>
 <p><strong>현재 초기 UI 방향 · 2026-10-14 사용자 지정:</strong> Feature Map과 메모리의 채워진 상태·전체 조건표·채움률·확정/추론 표시는 사용자 화면에 기본 노출하지 않는다. 사용자는 짧은 질문, 선택 버튼, 비교 이미지, 추천과 수정 동작으로 취향을 표현한다. 기존 오른쪽 조건 패널은 Figma 참조 기록이며 현재 초기 UI의 필수 구성이 아니다. 상세 표시 원칙은 D절을 따른다. 정보량을 줄이려는 설계 의도이며 실제 피로도 감소를 검증한 결과는 아니다.</p>
 </div></div></header>
 <div class="am-doc-layout">
@@ -501,10 +502,10 @@ html[data-theme="shadcn"] .am-kv { border-color: var(--line); border-radius: var
 <td>기본 취향으로 저장할 요소를 선택한다.</td>
 </tr>
 </tbody></table></div>
-<p><strong>근거의 범위:</strong> <a href="../Assignment/Figma.url">저장소의 Figma 링크</a>가 가리키는 <code>Web Flow V2 · StyleMate Reference</code>의 9개 화면을 확인했다. 연구 목적과 선호 분리 원칙은 <a href="./master.md">master.md</a>를 따른다. <a href="../Assignment/Readme.md">Assignment/Readme.md</a>에 따라 과제 PDF 두 개는 기준 자료에서 제외했다.</p>
+<p><strong>근거의 범위:</strong> <a href="../../Assignment/Figma.url">저장소의 Figma 링크</a>가 가리키는 <code>Web Flow V2 · StyleMate Reference</code>의 9개 화면을 확인했다. 연구 목적과 선호 분리 원칙은 <a href="../master.md">master.md</a>를 따른다. <a href="../../Assignment/Readme.md">Assignment/Readme.md</a>에 따라 과제 PDF 두 개는 기준 자료에서 제외했다.</p>
 <p><strong>표기 원칙:</strong> 기존 Figma 화면의 구성, <strong>승인된 메모리 설계</strong>, 후속 UI의 <strong>구현 제안·미정</strong>을 구분한다. 이 문서는 제품 화면의 설계이며 현재 실행 앱의 명세가 아니다. 최신 Figma를 이번 문서 정리에서 다시 검증하지 않았다.</p>
-<p><strong>메모리 상세 설계 상태 · 2026-10-14 확인:</strong> <a href="https://github.com/jongrionro-debug/HCI_HANDSOME/issues/1">Issue #1</a>의 <a href="memory-design.md">장·단기 메모리 설계</a>와 <a href="memory-implementation-plan.md">구현 계획</a>은 범위·확인·동의·조회·충돌·보관·삭제·처리 계약을 정의한다. ADR 0001/0002와 v0.2 계약은 <strong>Accepted — 2026-10-13 사용자 전체 승인</strong>이다. 아래 승인된 조작은 UI가 구현됐다는 뜻이 아니다.</p>
-<p><strong>현재 실행 범위:</strong> 후속 Issue #2에서 Python·SQLite·CLI 기반 메모리/context·쇼핑용 17개 목표 feature와 LLM 연결 코드를 구현했다. <a href="shopping-memory-prototype.md">현재 실행 문서</a>와 <a href="decisions/0003-consumer-shopping-prototype.md">ADR 0003</a>이 축소된 실행 계약의 기준이다. v0.2와 실행 DTO는 동일한 JSON 형식이 아니다. 로그인·이미지 해석·상품 추천·전체 UI는 구현 범위 밖이며 실제 LLM 호출은 나중으로 정했다.</p>
+<p><strong>메모리 상세 설계 상태 · 2026-10-14 확인:</strong> <a href="https://github.com/jongrionro-debug/HCI_HANDSOME/issues/1">Issue #1</a>의 <a href="../memory-design.md">장·단기 메모리 설계</a>와 <a href="../memory-implementation-plan.md">구현 계획</a>은 범위·확인·동의·조회·충돌·보관·삭제·처리 계약을 정의한다. ADR 0001/0002와 v0.2 계약은 <strong>Accepted — 2026-10-13 사용자 전체 승인</strong>이다. 아래 승인된 조작은 UI가 구현됐다는 뜻이 아니다.</p>
+<p><strong>현재 실행 범위:</strong> 후속 Issue #2에서 Python·SQLite·CLI 기반 메모리/context·쇼핑용 17개 목표 feature와 LLM 연결 코드를 구현했다. <a href="../shopping-memory-prototype.md">현재 실행 문서</a>와 <a href="../decisions/0003-consumer-shopping-prototype.md">ADR 0003</a>이 축소된 실행 계약의 기준이다. v0.2와 실행 DTO는 동일한 JSON 형식이 아니다. 로그인·이미지 해석·상품 추천·전체 UI는 구현 범위 밖이며 실제 LLM 호출은 나중으로 정했다.</p>
 </div></div>
 </section>
 <section class="am-panel" id="panel-B">
@@ -604,7 +605,7 @@ html[data-theme="shadcn"] .am-kv { border-color: var(--line); border-radius: var
 <figure class="am-diagram am-flow"><svg viewBox="0 0 433 360" width="433" height="360" role="img" aria-label="流程图：사용자 응답、조건 갱신、질문 선택、텍스트 질문、이미지 비교、추천 생성" xmlns="http://www.w3.org/2000/svg"><defs><marker id="am2-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="am-arrow" d="M0,0 L10,5 L0,10 z"/></marker></defs><g></g><g><g data-step="0"><path class="am-edge" d="M155.9,49 L155.9,65 Q155.9,81 155.9,97 L155.9,113" marker-end="url(#am2-arrow)"/><g class="am-edge-label"><rect x="107.2" y="72" width="97.4" height="18" rx="3"/><text x="155.9" y="81" text-anchor="middle" dominant-baseline="central">이번 요청에 반영</text></g></g><g data-step="1"><path class="am-edge" d="M184.4,148 L210.5,164 Q236.6,180 236.6,196 L236.6,212" marker-end="url(#am2-arrow)"/><g class="am-edge-label"><rect x="157.4" y="171" width="158.4" height="18" rx="3"/><text x="236.6" y="180" text-anchor="middle" dominant-baseline="central">부족하거나 모호한 정보 확인</text></g></g><g data-step="2"><path class="am-edge" d="M278.5,243.3 L333,261.1 Q387.5,279 379.3,295 L371.1,311" marker-end="url(#am2-arrow)"/><g class="am-edge-label"><rect x="357.7" y="270" width="59.5" height="18" rx="3"/><text x="387.5" y="279" text-anchor="middle" dominant-baseline="central">상황 사실</text></g></g><g data-step="3"><path class="am-edge" d="M236.6,247 L236.6,263 Q236.6,279 197.4,295 L158.2,311" marker-end="url(#am2-arrow)"/><g class="am-edge-label"><rect x="201.1" y="270" width="71" height="18" rx="3"/><text x="236.6" y="279" text-anchor="middle" dominant-baseline="central">시각적 경계</text></g></g><g data-step="4"><path class="am-edge" d="M353.1,311 L344.9,295 Q336.8,279 336.8,254.3 Q336.8,229.5 336.8,204.8 Q336.8,180 336.8,155.3 Q336.8,130.5 336.8,105.8 Q336.8,81 270.5,62.9 L204.3,44.8" marker-end="url(#am2-arrow)"/></g><g data-step="5"><path class="am-edge" d="M72.4,311 L33.2,295 Q-6,279 -6,254.3 Q-6,229.5 -6,204.8 Q-6,180 -6,155.3 Q-6,130.5 -6,105.8 Q-6,81 50.7,63.7 L107.4,46.3" marker-end="url(#am2-arrow)"/></g><g data-step="6"><path class="am-edge" d="M127.4,148 L101.3,164 Q75.2,180 75.2,196 L75.2,212" marker-end="url(#am2-arrow)"/><g class="am-edge-label"><rect x="15" y="171" width="120.4" height="18" rx="3"/><text x="75.2" y="180" text-anchor="middle" dominant-baseline="central">이 내용으로 추천받기</text></g></g></g><g><g class="am-node am-node--rect" data-key="사용자 응답" data-step="0"><rect class="am-node-shape" x="107.4" y="14" width="96.9" height="35" rx="3"/><text x="155.9" y="31.5" text-anchor="middle" dominant-baseline="central">사용자 응답</text></g><g class="am-node am-node--rect" data-key="조건 갱신" data-step="0"><rect class="am-node-shape" x="113.9" y="113" width="83.9" height="35" rx="3"/><text x="155.9" y="130.5" text-anchor="middle" dominant-baseline="central">조건 갱신</text></g><g class="am-node am-node--rect" data-key="질문 선택" data-step="1"><rect class="am-node-shape" x="194.6" y="212" width="83.9" height="35" rx="3"/><text x="236.6" y="229.5" text-anchor="middle" dominant-baseline="central">질문 선택</text></g><g class="am-node am-node--rect" data-key="텍스트 질문" data-step="2"><rect class="am-node-shape" x="313.7" y="311" width="96.9" height="35" rx="3"/><text x="362.1" y="328.5" text-anchor="middle" dominant-baseline="central">텍스트 질문</text></g><g class="am-node am-node--rect" data-key="이미지 비교" data-step="3"><rect class="am-node-shape" x="66.8" y="311" width="96.9" height="35" rx="3"/><text x="115.3" y="328.5" text-anchor="middle" dominant-baseline="central">이미지 비교</text></g><g class="am-node am-node--rect" data-key="추천 생성" data-step="6"><rect class="am-node-shape" x="33.2" y="212" width="83.9" height="35" rx="3"/><text x="75.2" y="229.5" text-anchor="middle" dominant-baseline="central">추천 생성</text></g></g></svg></figure>
 <div class="am-md"><p><strong>승인된 메모리 설계:</strong> 이번 요청의 응답은 기본 취향을 자동으로 덮어쓰지 않는다. 조건 변경 뒤 이전 추천은 갱신 필요로 표시한다.</p>
 <p><strong>기존 Figma 기반 UI 제안:</strong> 사용자가 새 조건을 보내면 대화와 조건 패널을 함께 갱신하고 현재 조건으로 후보를 다시 계산하는 방식이었다. 현재 초기 UI에서는 내부 조건과 후보를 갱신하되 전체 조건 패널을 기본 노출하지 않는다.</p>
-<p><strong>연구 기준:</strong> <a href="./master.md">RQ2</a>는 추가 정보가 필요할 때 텍스트와 이미지를 선택적으로 제공하는 방식이다. Figma의 가을 아우터 예시 순서를 모든 요청에 고정 적용하면 이 기준과 달라진다.</p>
+<p><strong>연구 기준:</strong> <a href="../master.md">RQ2</a>는 추가 정보가 필요할 때 텍스트와 이미지를 선택적으로 제공하는 방식이다. Figma의 가을 아우터 예시 순서를 모든 요청에 고정 적용하면 이 기준과 달라진다.</p>
 <p><strong>미정:</strong> RQ2의 질문 종료 조건·형식 선택과 후보 이미지 공급은 별도 정책이 필요하다. 메모리 설계는 확인 중·기본·이번 조건, 이번 요청 제외·장기 수정·철회·삭제의 승인된 조작 계약을 정의한다. 현재 Figma에서 이 조작들을 구현 확인한 것은 아니다.</p>
 </div></div>
 </section>
@@ -758,7 +759,7 @@ html[data-theme="shadcn"] .am-kv { border-color: var(--line); border-radius: var
 <li>저장 버튼은 선택한 요소만 반영하는지 확인한다.</li>
 <li><code>이번에만 적용하기</code> 뒤 새 요청에 임시 조건이 이어지지 않는지 확인한다.</li>
 </ol>
-<p>아래는 2026-10-04 기존 RQ의 비교·평가이며, 우리가 설계한 메모리 시스템을 통한 취향 판단 재현의 RQ·평가 검토안과 구분한다. 연구 비교 조건은 별도로 구성해야 한다. <a href="./master.md">RQ1</a>은 선호 분리와 확인·수정의 효과를 비교한다. <a href="./master.md">RQ2</a>는 텍스트만 제공, 텍스트·이미지 고정 순서, 필요에 따른 선택 제공을 비교한다. 질문 수와 소요 시간은 보조 지표이며, 현재 화면의 단계 수를 실험 지표로 대신하지 않는다.</p>
+<p>아래는 2026-10-04 기존 RQ의 비교·평가이며, 우리가 설계한 메모리 시스템을 통한 취향 판단 재현의 RQ·평가 검토안과 구분한다. 연구 비교 조건은 별도로 구성해야 한다. <a href="../master.md">RQ1</a>은 선호 분리와 확인·수정의 효과를 비교한다. <a href="../master.md">RQ2</a>는 텍스트만 제공, 텍스트·이미지 고정 순서, 필요에 따른 선택 제공을 비교한다. 질문 수와 소요 시간은 보조 지표이며, 현재 화면의 단계 수를 실험 지표로 대신하지 않는다.</p>
 </div></div>
 </section>
 </div>
@@ -775,9 +776,11 @@ design: Figma · Web Flow V2
 research: docs/master.md · RQ1·RQ2
 ---
 
+**보관 자료 · 2026-10-14:** LUMI 정본 채택 전의 Figma 화면·설계 기록이다. 아래의 당시 화면 구성·제안은 현재 제품 흐름의 기준이 아니다. 현재 시스템 설계는 [LUMI 보고서](../../LUMI_시스템_설계_보고서_수정본.html), 구현 대응은 [현재 workflow](../workflow.md)를 따른다.
+
 StyleMate는 텍스트·이미지 상호작용과 우리가 설계한 장·단기 메모리 시스템으로 아이템·조건별 취향을 축적하고, 기존 취향과 현재 요구에 맞는 패션 아이템을 찾는 에이전트를 목표로 한다. 이 시스템을 활용한 아이템 선호 판단이 사용자의 판단을 얼마나 충실하게 재현하는지 연구한다.
 
-**목적 범위 · 2026-10-14:** 아래 Figma 화면과 코디 흐름은 기존 설계 사례다. 고객 미팅·발표 등 특정 상황의 코디 조정으로 프로젝트 전체를 한정하지 않는다. 사용자 동의를 반영한 목적·RQ 분리 방향과 구체 문안·평가 검토안은 [연구 기준](master.md)을 따른다. 취향 판단 재현은 연구 목표이며 새 상품 추천 UI나 효과의 구현·검증을 뜻하지 않는다.
+**목적 범위 · 2026-10-14:** 아래 Figma 화면과 코디 흐름은 기존 설계 사례다. 고객 미팅·발표 등 특정 상황의 코디 조정으로 프로젝트 전체를 한정하지 않는다. 사용자 동의를 반영한 목적·RQ 분리 방향과 구체 문안·평가 검토안은 [연구 기준](../master.md)을 따른다. 취향 판단 재현은 연구 목표이며 새 상품 추천 UI나 효과의 구현·검증을 뜻하지 않는다.
 
 **현재 초기 UI 방향 · 2026-10-14 사용자 지정:** Feature Map과 메모리의 채워진 상태·전체 조건표·채움률·확정/추론 표시는 사용자 화면에 기본 노출하지 않는다. 사용자는 짧은 질문, 선택 버튼, 비교 이미지, 추천과 수정 동작으로 취향을 표현한다. 기존 오른쪽 조건 패널은 Figma 참조 기록이며 현재 초기 UI의 필수 구성이 아니다. 상세 표시 원칙은 D절을 따른다. 정보량을 줄이려는 설계 의도이며 실제 피로도 감소를 검증한 결과는 아니다.
 
@@ -808,13 +811,13 @@ StyleMate는 텍스트·이미지 상호작용과 우리가 설계한 장·단�
 | 06 | [Final Recommendation](https://www.figma.com/design/LAU2SC2gHCR1jlCh41K7PD?node-id=70-262) | 추천 방향과 이유를 비교하고 코디를 선택한다. |
 | 07 | [Selective Memory](https://www.figma.com/design/LAU2SC2gHCR1jlCh41K7PD?node-id=70-263) | 기본 취향으로 저장할 요소를 선택한다. |
 
-**근거의 범위:** [저장소의 Figma 링크](../Assignment/Figma.url)가 가리키는 `Web Flow V2 · StyleMate Reference`의 9개 화면을 확인했다. 연구 목적과 선호 분리 원칙은 [master.md](./master.md)를 따른다. [Assignment/Readme.md](../Assignment/Readme.md)에 따라 과제 PDF 두 개는 기준 자료에서 제외했다.
+**근거의 범위:** [저장소의 Figma 링크](../../Assignment/Figma.url)가 가리키는 `Web Flow V2 · StyleMate Reference`의 9개 화면을 확인했다. 연구 목적과 선호 분리 원칙은 [master.md](../master.md)를 따른다. [Assignment/Readme.md](../../Assignment/Readme.md)에 따라 과제 PDF 두 개는 기준 자료에서 제외했다.
 
 **표기 원칙:** 기존 Figma 화면의 구성, **승인된 메모리 설계**, 후속 UI의 **구현 제안·미정**을 구분한다. 이 문서는 제품 화면의 설계이며 현재 실행 앱의 명세가 아니다. 최신 Figma를 이번 문서 정리에서 다시 검증하지 않았다.
 
-**메모리 상세 설계 상태 · 2026-10-14 확인:** [Issue #1](https://github.com/jongrionro-debug/HCI_HANDSOME/issues/1)의 [장·단기 메모리 설계](memory-design.md)와 [구현 계획](memory-implementation-plan.md)은 범위·확인·동의·조회·충돌·보관·삭제·처리 계약을 정의한다. ADR 0001/0002와 v0.2 계약은 **Accepted — 2026-10-13 사용자 전체 승인**이다. 아래 승인된 조작은 UI가 구현됐다는 뜻이 아니다.
+**메모리 상세 설계 상태 · 2026-10-14 확인:** [Issue #1](https://github.com/jongrionro-debug/HCI_HANDSOME/issues/1)의 [장·단기 메모리 설계](../memory-design.md)와 [구현 계획](../memory-implementation-plan.md)은 범위·확인·동의·조회·충돌·보관·삭제·처리 계약을 정의한다. ADR 0001/0002와 v0.2 계약은 **Accepted — 2026-10-13 사용자 전체 승인**이다. 아래 승인된 조작은 UI가 구현됐다는 뜻이 아니다.
 
-**현재 실행 범위:** 후속 Issue #2에서 Python·SQLite·CLI 기반 메모리/context·쇼핑용 17개 목표 feature와 LLM 연결 코드를 구현했다. [현재 실행 문서](shopping-memory-prototype.md)와 [ADR 0003](decisions/0003-consumer-shopping-prototype.md)이 축소된 실행 계약의 기준이다. v0.2와 실행 DTO는 동일한 JSON 형식이 아니다. 로그인·이미지 해석·상품 추천·전체 UI는 구현 범위 밖이며 실제 LLM 호출은 나중으로 정했다.
+**현재 실행 범위:** 후속 Issue #2에서 Python·SQLite·CLI 기반 메모리/context·쇼핑용 17개 목표 feature와 LLM 연결 코드를 구현했다. [현재 실행 문서](../shopping-memory-prototype.md)와 [ADR 0003](../decisions/0003-consumer-shopping-prototype.md)이 축소된 실행 계약의 기준이다. v0.2와 실행 DTO는 동일한 JSON 형식이 아니다. 로그인·이미지 해석·상품 추천·전체 UI는 구현 범위 밖이며 실제 LLM 호출은 나중으로 정했다.
 
 ## B 로그인과 세 가지 초기 취향 설정 경로
 
@@ -897,7 +900,7 @@ StyleMate는 텍스트·이미지 상호작용과 우리가 설계한 장·단�
 
 **기존 Figma 기반 UI 제안:** 사용자가 새 조건을 보내면 대화와 조건 패널을 함께 갱신하고 현재 조건으로 후보를 다시 계산하는 방식이었다. 현재 초기 UI에서는 내부 조건과 후보를 갱신하되 전체 조건 패널을 기본 노출하지 않는다.
 
-**연구 기준:** [RQ2](./master.md)는 추가 정보가 필요할 때 텍스트와 이미지를 선택적으로 제공하는 방식이다. Figma의 가을 아우터 예시 순서를 모든 요청에 고정 적용하면 이 기준과 달라진다.
+**연구 기준:** [RQ2](../master.md)는 추가 정보가 필요할 때 텍스트와 이미지를 선택적으로 제공하는 방식이다. Figma의 가을 아우터 예시 순서를 모든 요청에 고정 적용하면 이 기준과 달라진다.
 
 **미정:** RQ2의 질문 종료 조건·형식 선택과 후보 이미지 공급은 별도 정책이 필요하다. 메모리 설계는 확인 중·기본·이번 조건, 이번 요청 제외·장기 수정·철회·삭제의 승인된 조작 계약을 정의한다. 현재 Figma에서 이 조작들을 구현 확인한 것은 아니다.
 
@@ -1014,7 +1017,7 @@ UI -&gt; 취향 저장: 확정한 요소만 전달
 6. 저장 버튼은 선택한 요소만 반영하는지 확인한다.
 7. `이번에만 적용하기` 뒤 새 요청에 임시 조건이 이어지지 않는지 확인한다.
 
-아래는 2026-10-04 기존 RQ의 비교·평가이며, 우리가 설계한 메모리 시스템을 통한 취향 판단 재현의 RQ·평가 검토안과 구분한다. 연구 비교 조건은 별도로 구성해야 한다. [RQ1](./master.md)은 선호 분리와 확인·수정의 효과를 비교한다. [RQ2](./master.md)는 텍스트만 제공, 텍스트·이미지 고정 순서, 필요에 따른 선택 제공을 비교한다. 질문 수와 소요 시간은 보조 지표이며, 현재 화면의 단계 수를 실험 지표로 대신하지 않는다.
+아래는 2026-10-04 기존 RQ의 비교·평가이며, 우리가 설계한 메모리 시스템을 통한 취향 판단 재현의 RQ·평가 검토안과 구분한다. 연구 비교 조건은 별도로 구성해야 한다. [RQ1](../master.md)은 선호 분리와 확인·수정의 효과를 비교한다. [RQ2](../master.md)는 텍스트만 제공, 텍스트·이미지 고정 순서, 필요에 따른 선택 제공을 비교한다. 질문 수와 소요 시간은 보조 지표이며, 현재 화면의 단계 수를 실험 지표로 대신하지 않는다.
 </textarea>
 <script>
 (() => {

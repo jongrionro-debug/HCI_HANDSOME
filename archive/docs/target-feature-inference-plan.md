@@ -1,5 +1,7 @@
 # 메모리 context와 목표 feature 추론 계획
 
+**자료의 역할 · 2026-10-14:** 이 문서는 전체 feature 확장 참조와 승인 당시 계획이다. 현재 시스템 설계는 [LUMI 보고서](../LUMI_시스템_설계_보고서_수정본.html), 현재 실행은 [17개 아이템 속성 계약](shopping-memory-prototype.md)을 따른다. User Preference Map·Candidate Look·Product Feature Map을 구분하고, 이 계획의 목표값을 실제 상품 속성이나 전체 LUMI 구현으로 해석하지 않는다.
+
 - 상태: **방향 승인 · 2026-10-14 구현·축소 위임**. 아래 item65/outfit9와 F0–F5는 계획 작성 당시의 전체 설계 기록이다. 사용자가 일반 쇼핑에 맞게 줄여 구현하도록 승인했으며 현재 범위는 [ADR 0003](decisions/0003-consumer-shopping-prototype.md)·[실행 문서](shopping-memory-prototype.md)의17개 속성/로컬 메모리·LLM adapter다. 전체 계획이 전부 구현됐다는 뜻이 아니다.
 - 작성: 2026-10-14 · Codex. 기준: `codex/1-memory-design`, HEAD `77f38f28a1e0c43bde96f9f46b961cbc4b737a7b` + 기존 미커밋 자료.
 - 사용자 요구: 장·단기 메모리를 context로 주어 **사용자가 원하는 아이템의 목표 feature 값**을 LLM이 추론하도록 한다.

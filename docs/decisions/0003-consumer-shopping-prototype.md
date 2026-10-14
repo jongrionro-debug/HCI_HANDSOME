@@ -8,7 +8,7 @@
 
 ## Context
 
-승인된 v0.2는 기억·근거·명령·조회·삭제 설계와 가상 검증 자료다. 실제 앱·DB는 없었다. 후속 [목표 feature 계획](../target-feature-inference-plan.md)은 item65/outfit9와 새로운 projection을 제안했으나 일반 쇼핑에서 모든 디자인 속성을 입력/추론할 필요는 없다. 사용자는 계획을 승인하고 축소·구현·Issue/PR 작업을 위임했다.
+승인된 v0.2는 기억·근거·명령·조회·삭제 설계와 가상 검증 자료다. 실제 앱·DB는 없었다. 후속 [목표 feature 계획](../../archive/docs/target-feature-inference-plan.md)은 item65/outfit9와 새로운 projection을 제안했으나 일반 쇼핑에서 모든 디자인 속성을 입력/추론할 필요는 없다. 사용자는 계획을 승인하고 축소·구현·Issue/PR 작업을 위임했다.
 
 ## Decision
 
