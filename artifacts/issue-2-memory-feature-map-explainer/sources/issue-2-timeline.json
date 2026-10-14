@@ -1,0 +1,25 @@
+[
+  {
+    "commit_id": "6ca871a878782a6ece8932ad0d1451d818972445",
+    "created_at": "2026-10-13T17:47:23Z",
+    "event": "referenced",
+    "source": null
+  },
+  {
+    "commit_id": null,
+    "created_at": "2026-10-13T17:47:55Z",
+    "event": "cross-referenced",
+    "source": {
+      "number": 3,
+      "title": "쇼핑용 메모리 context와 목표 feature 추론·LLM adapter 구현",
+      "type": "issue",
+      "url": "https://github.com/jongrionro-debug/HCI_HANDSOME/pull/3"
+    }
+  },
+  {
+    "commit_id": null,
+    "created_at": "2026-10-14T02:41:04Z",
+    "event": "closed",
+    "source": null
+  }
+]

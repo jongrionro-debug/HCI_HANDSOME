@@ -1,0 +1,923 @@
+<!doctype html>
+<html lang="zh-CN" data-theme="shadcn" data-mode="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="generator" content="Answer me with HTML 0.4.6">
+<title>이미지는 언제, 텍스트는 언제?</title>
+<style>
+html[data-theme="blueprint"], html[data-theme="blueprint"][data-mode="light"] {
+  --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, "JetBrains Mono", Menlo, Consolas, "Liberation Mono", monospace;
+  --radius: 0px;
+  --shadow: none;
+  --bw: 1.5px;
+  --head-font: var(--font-sans);
+  --bg: #f6f6f3;
+  --paper: #ffffff;
+  --ink: #16181d;
+  --ink-2: #4b5260;
+  --ink-3: #8b929e;
+  --line: #1d2026;
+  --line-2: #d6dae1;
+  --fill: #f3f5f8;
+  --accent: #1d5fbf;
+  --accent-bg: #e4ecf8;
+  --ok: #1d5fbf;
+  --ok-bg: #e4ecf8;
+  --err: #c62828;
+  --err-bg: #fbeaea;
+  --warn: #a8620a;
+  --warn-bg: #fdf3e2;
+  --head-bg: #16181d;
+  --head-fg: #ffffff;
+}
+html[data-theme="blueprint"][data-mode="dark"] {
+  --bg: #081322;
+  --paper: #0d1c31;
+  --ink: #e6edf7;
+  --ink-2: #a9b8cc;
+  --ink-3: #6b7f99;
+  --line: #c9d6e8;
+  --line-2: #23385a;
+  --fill: #12253f;
+  --accent: #6ea8ff;
+  --accent-bg: #16305a;
+  --ok: #6ea8ff;
+  --ok-bg: #16305a;
+  --err: #ff7070;
+  --err-bg: #3b1620;
+  --warn: #f0b14a;
+  --warn-bg: #3a2a10;
+  --head-bg: #e6edf7;
+  --head-fg: #081322;
+}
+@media (prefers-color-scheme: dark) {
+html[data-theme="blueprint"][data-mode="auto"] {
+  --bg: #081322;
+  --paper: #0d1c31;
+  --ink: #e6edf7;
+  --ink-2: #a9b8cc;
+  --ink-3: #6b7f99;
+  --line: #c9d6e8;
+  --line-2: #23385a;
+  --fill: #12253f;
+  --accent: #6ea8ff;
+  --accent-bg: #16305a;
+  --ok: #6ea8ff;
+  --ok-bg: #16305a;
+  --err: #ff7070;
+  --err-bg: #3b1620;
+  --warn: #f0b14a;
+  --warn-bg: #3a2a10;
+  --head-bg: #e6edf7;
+  --head-fg: #081322;
+}
+}
+
+html[data-theme="shadcn"], html[data-theme="shadcn"][data-mode="light"] {
+  --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, "JetBrains Mono", Menlo, Consolas, "Liberation Mono", monospace;
+  --radius: 8px;
+  --shadow: 0 1px 2px 0 rgba(0,0,0,0.05);
+  --bw: 1px;
+  --head-font: var(--font-sans);
+  --bg: #fafafa;
+  --paper: #ffffff;
+  --ink: #09090b;
+  --ink-2: #71717a;
+  --ink-3: #a1a1aa;
+  --line: #e4e4e7;
+  --line-2: #f0f0f2;
+  --fill: #f4f4f5;
+  --accent: #2563eb;
+  --accent-bg: #eff6ff;
+  --ok: #16a34a;
+  --ok-bg: #f0fdf4;
+  --err: #dc2626;
+  --err-bg: #fef2f2;
+  --warn: #d97706;
+  --warn-bg: #fffbeb;
+  --head-bg: #18181b;
+  --head-fg: #fafafa;
+}
+html[data-theme="shadcn"][data-mode="dark"] {
+  --bg: #09090b;
+  --paper: #121215;
+  --ink: #fafafa;
+  --ink-2: #a1a1aa;
+  --ink-3: #71717a;
+  --line: #27272a;
+  --line-2: #1c1c1f;
+  --fill: #18181b;
+  --accent: #60a5fa;
+  --accent-bg: #172554;
+  --ok: #4ade80;
+  --ok-bg: #052e16;
+  --err: #f87171;
+  --err-bg: #450a0a;
+  --warn: #fbbf24;
+  --warn-bg: #451a03;
+  --head-bg: #fafafa;
+  --head-fg: #18181b;
+}
+@media (prefers-color-scheme: dark) {
+html[data-theme="shadcn"][data-mode="auto"] {
+  --bg: #09090b;
+  --paper: #121215;
+  --ink: #fafafa;
+  --ink-2: #a1a1aa;
+  --ink-3: #71717a;
+  --line: #27272a;
+  --line-2: #1c1c1f;
+  --fill: #18181b;
+  --accent: #60a5fa;
+  --accent-bg: #172554;
+  --ok: #4ade80;
+  --ok-bg: #052e16;
+  --err: #f87171;
+  --err-bg: #450a0a;
+  --warn: #fbbf24;
+  --warn-bg: #451a03;
+  --head-bg: #fafafa;
+  --head-fg: #18181b;
+}
+}
+
+html[lang="ja"][data-theme][data-mode] {
+  --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic UI", "Yu Gothic", Meiryo, "Noto Sans CJK JP", "Noto Sans JP", "PingFang SC", "Microsoft YaHei", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+html[lang="ja"][data-theme="3b1b"][data-mode] {
+  --v-title-font: "CMU Serif", "Latin Modern Roman", "Iowan Old Style", "Palatino", "Hiragino Mincho ProN", "Yu Mincho", "Noto Serif CJK JP", "Noto Serif JP", "Songti SC", serif;
+}
+
+/* Answer me with HTML base — 只引用主题变量，禁止写死颜色（主题 token 见 themes/index.js） */
+*, *::before, *::after { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+body {
+  background: var(--bg); color: var(--ink);
+  font-family: var(--font-sans); font-size: 14px; line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+}
+code, pre, kbd { font-family: var(--font-mono); }
+
+/* ── 工具栏 ─────────────────────────────── */
+.am-toolbar {
+  position: fixed; top: 12px; right: 12px; z-index: 10; display: flex; gap: 6px;
+}
+.am-btn {
+  font: 12px/1 var(--font-sans); color: var(--ink); background: var(--paper);
+  border: 1px solid var(--line-2); border-radius: var(--radius); padding: 7px 10px; cursor: pointer;
+}
+.am-btn:hover { border-color: var(--ink-3); }
+.am-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+/* ── 页头 ───────────────────────────────── */
+.am-head { margin: 0 0 20px; padding-right: 260px; }
+.am-head h1 { margin: 0; font-size: 24px; line-height: 1.25; letter-spacing: -0.01em; }
+.am-sub { margin: 4px 0 0; color: var(--ink-2); }
+.am-head-meta { display: flex; flex-wrap: wrap; gap: 6px 18px; margin-top: 10px; font-size: 12px; color: var(--ink-2); }
+.am-head-meta b { font-family: var(--font-mono); font-weight: 400; color: var(--ink-3); margin-right: 6px; }
+.am-intro { margin-top: 12px; max-width: 80ch; }
+
+/* ── sheet 图纸板 ────────────────────────── */
+.am-sheet { max-width: 1680px; margin: 0 auto; padding: 32px 28px 40px; }
+.am-frame { position: relative; }
+.am-grid {
+  display: grid; grid-template-columns: repeat(var(--cols, 3), minmax(0, 1fr));
+  gap: 20px; align-items: start;
+}
+.am-ruler { display: none; }
+html[data-theme="blueprint"] .am-frame { border: 1px solid var(--line); padding: 30px; }
+html[data-theme="blueprint"] .am-frame::before {
+  content: ""; position: absolute; inset: 18px; border: 1px solid var(--line); pointer-events: none;
+}
+html[data-theme="blueprint"] .am-ruler {
+  display: flex; position: absolute; font: 10px/1 var(--font-mono); color: var(--ink-3);
+}
+.am-ruler span { flex: 1; display: flex; align-items: center; justify-content: center; }
+.am-ruler--top, .am-ruler--bottom { left: 18px; right: 18px; height: 18px; }
+.am-ruler--top { top: 0; }
+.am-ruler--bottom { bottom: 0; }
+.am-ruler--left, .am-ruler--right { top: 18px; bottom: 18px; width: 18px; flex-direction: column; }
+.am-ruler--left { left: 0; }
+.am-ruler--right { right: 0; }
+.am-ruler--top span + span, .am-ruler--bottom span + span { border-left: 1px solid var(--line); }
+.am-ruler--left span + span, .am-ruler--right span + span { border-top: 1px solid var(--line); }
+
+/* ── 面板 ───────────────────────────────── */
+.am-panel {
+  background: var(--paper); border: var(--bw) solid var(--line); border-radius: var(--radius);
+  box-shadow: var(--shadow); min-width: 0; overflow: hidden;
+}
+.am-panel-head {
+  display: flex; align-items: stretch; gap: 0; border-bottom: var(--bw) solid var(--line); min-height: 34px;
+}
+.am-panel-id {
+  display: flex; align-items: center; justify-content: center; min-width: 34px; padding: 0 8px;
+  background: var(--head-bg); color: var(--head-fg); font-weight: 600; font-size: 14px;
+}
+html[data-theme="shadcn"] .am-panel-id { border-radius: 6px; min-width: 24px; height: 24px; margin: 9px 0 9px 14px; font-size: 12px; }
+html[data-theme="shadcn"] .am-panel-head { border-bottom-width: 1px; }
+.am-panel-head h2 { margin: 0; padding: 7px 12px; font-size: 15px; font-weight: 600; flex: 1; display: flex; align-items: center; }
+.am-panel-meta { align-self: center; padding: 0 12px; font: 11px/1.3 var(--font-mono); color: var(--ink-2); text-align: right; }
+.am-panel-body { padding: 14px 16px 16px; }
+.am-panel-body > * + * { margin-top: 12px; }
+
+/* ── Markdown 正文 ───────────────────────── */
+.am-md > :first-child { margin-top: 0; }
+.am-md > :last-child { margin-bottom: 0; }
+.am-md p { margin: 0 0 8px; }
+.am-md ul, .am-md ol { margin: 0 0 8px; padding-left: 20px; }
+.am-md li + li { margin-top: 3px; }
+.am-md h3, .am-md h4 { margin: 14px 0 6px; font-size: 13px; }
+.am-md a { color: var(--accent); }
+.am-md blockquote { margin: 0 0 8px; padding: 2px 12px; border-left: 3px solid var(--line-2); color: var(--ink-2); }
+.am-md :not(pre) > code { font-size: 0.9em; background: var(--fill); padding: 1px 5px; border-radius: 4px; }
+.am-md hr { border: 0; border-top: 1px solid var(--line-2); margin: 12px 0; }
+.am-md table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.am-md th {
+  text-align: left; font: 11px/1.3 var(--font-mono); color: var(--ink-2); font-weight: 400;
+  padding: 6px 10px; border-bottom: 1px solid var(--line-2);
+}
+.am-md td { padding: 7px 10px; border-bottom: 1px solid var(--line-2); vertical-align: top; }
+.am-md tbody tr:nth-child(even) td { background: var(--fill); }
+.am-table-wrap { overflow-x: auto; }
+.am-code {
+  margin: 0; padding: 12px 14px; background: var(--fill); border: 1px solid var(--line-2);
+  border-radius: var(--radius); overflow-x: auto; font-size: 12.5px; line-height: 1.5;
+}
+
+/* ── 状态徽章 ok / no / warn ──────────────── */
+.am-status { white-space: nowrap; font-weight: 500; }
+.am-status--ok { color: var(--ok); }
+.am-status--no { color: var(--err); }
+.am-status--warn { color: var(--warn); }
+.am-status-icon { display: inline-block; width: 1.1em; font-weight: 700; }
+
+/* ── callout ─────────────────────────────── */
+.am-callout {
+  border: 1px solid var(--line-2); border-left: 3px solid var(--accent); background: var(--accent-bg);
+  padding: 10px 14px; border-radius: var(--radius);
+}
+.am-callout--ok { border-left-color: var(--ok); background: var(--ok-bg); }
+.am-callout--warn { border-left-color: var(--warn); background: var(--warn-bg); }
+.am-callout--err { border-left-color: var(--err); background: var(--err-bg); }
+.am-callout-title { font-weight: 600; margin-bottom: 4px; }
+
+/* ── kv 标题栏格 ─────────────────────────── */
+.am-kv {
+  display: grid; grid-template-columns: repeat(var(--kv-cols, 2), minmax(0, 1fr)); margin: 0;
+  border-top: var(--bw) solid var(--line); border-left: var(--bw) solid var(--line);
+}
+.am-kv-cell { border-right: var(--bw) solid var(--line); border-bottom: var(--bw) solid var(--line); padding: 6px 10px 8px; min-width: 0; }
+.am-kv-cell--wide { grid-column: 1 / -1; }
+.am-kv dt { font: 11px/1.4 var(--font-mono); color: var(--ink-2); }
+.am-kv dd { margin: 2px 0 0; font-size: 14px; font-weight: 500; overflow-wrap: anywhere; }
+.am-kv-cell--wide dd { font-size: 17px; font-weight: 600; }
+html[data-theme="shadcn"] .am-kv { border-color: var(--line); border-radius: var(--radius); overflow: hidden; }
+
+/* ── timeline ────────────────────────────── */
+.am-timeline { list-style: none; margin: 0; padding: 0; }
+.am-timeline--h { display: grid; grid-template-columns: repeat(var(--n, 1), minmax(0, 1fr)); padding-top: 4px; }
+.am-timeline--h li { position: relative; text-align: center; padding: 0 6px; }
+.am-timeline--h li::before {
+  content: ""; position: absolute; top: 31px; left: 0; right: 0; border-top: var(--bw) solid var(--line);
+}
+.am-timeline--h li:first-child::before { left: 50%; }
+.am-timeline--h li:last-child::before { right: 50%; }
+.am-tl-when { display: block; font-size: 15px; font-weight: 500; height: 24px; }
+.am-tl-dot {
+  position: relative; display: block; width: 11px; height: 11px; margin: 2px auto 8px;
+  border: var(--bw) solid var(--line); border-radius: 50%; background: var(--paper);
+}
+.am-tl-item--hi .am-tl-dot { background: var(--accent); border-color: var(--accent); }
+.am-tl-title { display: block; font-size: 12.5px; font-weight: 500; }
+.am-tl-text { display: block; font-size: 12px; color: var(--ink-2); line-height: 1.45; }
+.am-timeline--v li { position: relative; padding: 0 0 14px 22px; }
+.am-timeline--v li::before { content: ""; position: absolute; left: 5px; top: 6px; bottom: -6px; border-left: var(--bw) solid var(--line-2); }
+.am-timeline--v li:last-child::before { display: none; }
+.am-timeline--v .am-tl-dot { position: absolute; left: 0; top: 4px; margin: 0; }
+.am-timeline--v .am-tl-when { display: inline; height: auto; font: 12px var(--font-mono); color: var(--ink-2); margin-right: 8px; }
+.am-timeline--v .am-tl-title { display: inline; font-size: 14px; }
+.am-timeline--v .am-tl-text { margin-top: 2px; }
+
+/* ── annot 句子标注 ──────────────────────── */
+.am-annot + .am-annot { border-top: 1px solid var(--line-2); padding-top: 12px; }
+.am-annot-head { display: flex; justify-content: space-between; gap: 12px; font-size: 13px; font-weight: 600; margin-bottom: 8px; }
+.am-annot-meta { font: 11px var(--font-mono); font-weight: 400; color: var(--ink-2); }
+.am-annot-scroll { overflow-x: auto; }
+.am-annot-line {
+  position: relative; display: inline-block; white-space: pre; font: 14px/1.6 var(--font-mono);
+  padding-bottom: calc(var(--rows, 0) * 17px + 14px);
+}
+.am-annot-line--wrap { display: block; white-space: normal; padding-bottom: 10px; }
+.am-annot-line--wrap .am-seg { white-space: nowrap; }
+.am-seg { position: relative; }
+.am-seg::after {
+  content: ""; position: absolute; left: 1px; right: 1px; top: calc(100% + 1px); height: 5px;
+  border: 1px solid var(--accent); border-top: 0;
+}
+.am-seg-n {
+  position: absolute; left: 0; top: calc(100% + 8px + var(--row, 0) * 17px);
+  font: 11px/16px var(--font-sans); color: var(--accent); white-space: nowrap;
+}
+.am-seg--err { color: var(--err); }
+.am-seg--err::after { border-color: var(--err); }
+.am-seg--err .am-seg-n { color: var(--err); }
+.am-annot-caption { font-size: 12px; color: var(--ink-2); }
+
+/* ── limits 限值条 ───────────────────────── */
+.am-lim + .am-lim { margin-top: 14px; }
+.am-lim-head { display: flex; justify-content: space-between; gap: 12px; font-size: 13px; margin-bottom: 4px; }
+.am-lim-val { font: 12px var(--font-mono); color: var(--accent); white-space: nowrap; }
+.am-lim-track { position: relative; height: 12px; border: 1px solid var(--line-2); background: var(--fill); border-radius: calc(var(--radius) / 2); }
+.am-lim-fill { position: absolute; left: 0; top: 0; bottom: 0; background: var(--accent-bg); border-right: 1px solid var(--accent); }
+.am-lim-mark { position: absolute; top: -4px; bottom: -4px; border-left: 2px solid var(--accent); }
+.am-lim.is-over .am-lim-fill { background: var(--err-bg); border-right-color: var(--err); }
+.am-lim.is-over .am-lim-val { color: var(--err); }
+.am-lim-ticks { position: relative; height: 16px; font: 10px/16px var(--font-mono); color: var(--ink-3); }
+.am-lim-ticks span { position: absolute; transform: translateX(-50%); }
+.am-lim-ticks span:first-child { transform: none; }
+.am-lim-note { font-size: 11px; color: var(--ink-2); margin-left: 6px; }
+
+/* ── tree 结构树 ─────────────────────────── */
+.am-tree { font-size: 13px; }
+.am-tree-root { display: flex; justify-content: center; position: relative; padding-bottom: 18px; }
+.am-tree-root::after { content: ""; position: absolute; bottom: 0; left: 50%; height: 18px; border-left: var(--bw) solid var(--line); }
+.am-tree-root--solo { padding-bottom: 12px; }
+.am-tree-root--solo::after { display: none; }
+.am-tree-box {
+  border: var(--bw) solid var(--line); background: var(--paper); padding: 6px 14px; text-align: center;
+  border-radius: var(--radius); font-weight: 600;
+}
+.am-tree-box small { display: block; font-weight: 400; color: var(--ink-2); font-size: 12px; }
+.am-tree-box--root { background: var(--accent-bg); font-size: 15px; padding: 8px 28px; }
+.am-tree-cols { display: grid; grid-template-columns: repeat(var(--n, 1), minmax(0, 1fr)); }
+.am-tree-col { position: relative; padding: 18px 8px 0; min-width: 0; }
+.am-tree-col::before { content: ""; position: absolute; top: 0; left: 0; right: 0; border-top: var(--bw) solid var(--line); }
+.am-tree-col:first-child::before { left: 50%; }
+.am-tree-col:last-child::before { right: 50%; }
+.am-tree-col::after { content: ""; position: absolute; top: 0; left: 50%; height: 18px; border-left: var(--bw) solid var(--line); }
+.am-tree-list, .am-tree-list ul { list-style: none; margin: 0; padding: 0; }
+.am-tree-col > .am-tree-list { margin: 8px 0 0 14px; }
+.am-tree-list ul { margin-left: 16px; }
+.am-tree-list li { position: relative; padding: 3px 0 3px 18px; }
+.am-tree-list li::before { content: ""; position: absolute; left: 0; top: 0.95em; width: 12px; border-top: 1px solid var(--ink-3); }
+.am-tree-list li::after { content: ""; position: absolute; left: 0; top: 0; bottom: 0; border-left: 1px solid var(--ink-3); }
+.am-tree-list li:last-child::after { bottom: auto; height: 0.95em; }
+.am-tree-tag { font: 11px var(--font-mono); color: var(--ink-3); margin-right: 4px; }
+.am-tree code { font: 12px var(--font-mono); }
+.am-tree-sub { display: block; font-size: 11.5px; color: var(--ink-2); }
+.am-tree-hi > .am-tree-label { color: var(--accent); font-weight: 600; }
+
+/* ── 图（flow / sequence）───────────────── */
+.am-diagram { margin: 0; overflow-x: auto; text-align: center; }
+.am-diagram svg { max-width: 100%; height: auto; font-family: var(--font-sans); }
+.am-diagram text { fill: var(--ink); font-size: 13px; }
+.am-node-shape { fill: var(--paper); stroke: var(--line); stroke-width: var(--bw); }
+.am-node--hi .am-node-shape { fill: var(--accent-bg); stroke: var(--accent); }
+.am-node--hi text { fill: var(--accent); font-weight: 600; }
+.am-edge { fill: none; stroke: var(--ink-2); stroke-width: 1.3; }
+.am-edge--dashed { stroke-dasharray: 5 4; }
+.am-arrow { fill: var(--ink-2); }
+.am-edge-label rect { fill: var(--paper); }
+.am-diagram .am-edge-label text { fill: var(--accent); font-size: 11.5px; }
+.am-cluster { fill: var(--fill); stroke: var(--line-2); stroke-width: 1; stroke-dasharray: 4 3; }
+.am-diagram .am-cluster-label { fill: var(--ink-2); font: 11px var(--font-mono); }
+.am-lifeline { stroke: var(--ink-3); stroke-width: 1; stroke-dasharray: 4 4; }
+.am-actor { fill: var(--paper); stroke: var(--line); stroke-width: var(--bw); }
+.am-note { fill: var(--warn-bg); stroke: var(--warn); stroke-width: 1; }
+.am-diagram .am-step { fill: var(--ink-3); font: 10px var(--font-mono); }
+
+/* ── doc 线性讲解 ────────────────────────── */
+.am-doc { max-width: 1120px; margin: 0 auto; padding: 40px 28px 64px; }
+.am-doc-layout { display: grid; grid-template-columns: 200px minmax(0, 1fr); gap: 32px; align-items: start; }
+.am-doc-layout--notoc { grid-template-columns: minmax(0, 1fr); max-width: 860px; }
+.am-toc { position: sticky; top: 24px; font-size: 13px; }
+.am-toc a { display: block; color: var(--ink-2); text-decoration: none; padding: 4px 0 4px 10px; border-left: 2px solid var(--line-2); }
+.am-toc a:hover { color: var(--ink); border-left-color: var(--accent); }
+.am-doc-body > .am-panel + .am-panel { margin-top: 20px; }
+
+/* ── 响应式与打印 ─────────────────────────── */
+@media (max-width: 1100px) {
+  .am-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .am-grid > .am-panel { grid-column: auto !important; }
+  .am-grid > .am-panel.am-span-wide { grid-column: 1 / -1 !important; }
+}
+@media (max-width: 760px) {
+  .am-sheet, .am-doc { padding: 56px 12px 24px; }
+  .am-head { padding-right: 0; }
+  .am-grid { grid-template-columns: minmax(0, 1fr); }
+  .am-grid > .am-panel.am-span-wide { grid-column: auto !important; }
+  html[data-theme="blueprint"] .am-frame { padding: 0; border: 0; }
+  html[data-theme="blueprint"] .am-frame::before, html[data-theme="blueprint"] .am-ruler { display: none; }
+  .am-doc-layout { grid-template-columns: minmax(0, 1fr); }
+  .am-toc { position: static; }
+  .am-timeline--h { grid-template-columns: minmax(0, 1fr); }
+  .am-tree-cols { grid-template-columns: minmax(0, 1fr); }
+}
+.am-colophon { text-align: center; padding: 0 0 28px; font: 11px var(--font-mono); color: var(--ink-3); }
+
+@media print {
+  .am-toolbar { display: none; }
+  body { background: var(--paper); }
+  .am-panel { break-inside: avoid; box-shadow: none; }
+}
+.am-panel--bare { border: 0; background: transparent; box-shadow: none; }
+.am-panel--bare > .am-panel-body { padding: 0; }
+.am-panel--bare .am-kv { background: var(--paper); }
+
+</style>
+</head>
+<body>
+<div class="am-toolbar">
+<button class="am-btn" type="button" data-am="theme" data-labels="{&quot;blueprint&quot;:&quot;主题：图纸&quot;,&quot;shadcn&quot;:&quot;主题：卡片&quot;}">主题：卡片</button>
+<button class="am-btn" type="button" data-am="mode" data-labels="{&quot;auto&quot;:&quot;明暗：跟随系统&quot;,&quot;light&quot;:&quot;明暗：亮&quot;,&quot;dark&quot;:&quot;明暗：暗&quot;}">明暗：亮</button>
+<button class="am-btn" type="button" data-am="copy" data-done="已复制 ✓">复制源稿</button>
+</div>
+<main class="am-doc">
+<header class="am-head"><h1>이미지는 언제, 텍스트는 언제?</h1><p class="am-sub">StyleMate · feature map과 memory layer를 연결하는 입력 흐름 3가지</p><div class="am-head-meta"><span><b>status</b>UX 제안 · 미승인 · 제품 미구현</span><span><b>checked</b>2026-10-13</span></div><div class="am-intro am-md"><div class="am-md"><p>사용자는 모든 feature를 설명할 필요가 없다. 시스템은 유효한 기억을 먼저 쓰고, 이번 추천을 바꿀 정보만 가장 답하기 쉬운 방식으로 묻는다.</p>
+</div></div></header>
+<div class="am-doc-layout">
+<nav class="am-toc" aria-label="目录"><a href="#panel-A">A · 먼저 구분할 것: 옷의 속성과 사용자의 의도</a><a href="#panel-B">B · 아이디어 1 · 기억을 먼저 쓰고, 빈틈만 묻기</a><a href="#panel-C">C · 아이디어 2 · 사진에서 원하는 요소를 집기</a><a href="#panel-D">D · 아이디어 3 · 먼저 추천하고, 바꾸고 싶은 부분만 말하기</a><a href="#panel-E">E · 실제로 언제 무엇을 물을까?</a><a href="#panel-F">F · memory layer는 다음 입력을 어떻게 줄일까?</a><a href="#panel-G">G · 세 아이디어를 연결한 한 번의 사용 예시</a><a href="#panel-H">H · 팀에 권하는 선택과 검증 방법</a></nav><div class="am-doc-body">
+<section class="am-panel" id="panel-A">
+<header class="am-panel-head"><span class="am-panel-id">A</span><h2>먼저 구분할 것: 옷의 속성과 사용자의 의도</h2></header>
+<div class="am-panel-body"><div class="am-md"><p><strong>아이템 feature map은 옷을 설명한다. 사용자 맥락은 그 옷을 왜, 언제, 어떻게 원하는지 설명한다.</strong> 같은 <code>fit</code>이라도 “사진의 바지는 여유 핏”과 “나는 여유 핏을 원한다”는 서로 다른 정보다.</p>
+<div class="am-table-wrap"><table>
+<thead>
+<tr>
+<th>필요한 정보</th>
+<th>주된 입력과 근거</th>
+<th>추천에 쓰는 방식</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>아이템 종류·보이는 색·실루엣·기장</td>
+<td>아이템 이미지와 상품 설명 텍스트</td>
+<td>아이템의 관찰·추출 후보로 정리</td>
+</tr>
+<tr>
+<td>실제 소재·착용감·보유 여부</td>
+<td>상품 정보 또는 사용자 텍스트</td>
+<td>사진만으로 확정하지 않고 확인한 정보로 보완</td>
+</tr>
+<tr>
+<td>일정·활동·피하고 싶은 조건</td>
+<td>사용자 텍스트 또는 짧은 선택 버튼</td>
+<td>이번 요청의 상황·제약으로 적용</td>
+</tr>
+<tr>
+<td>원하는 핏·색·격식의 정도</td>
+<td>명확한 텍스트, 또는 이미지 비교와 선택 이유</td>
+<td>사용자가 지정한 요소만 이번 조건으로 적용</td>
+</tr>
+<tr>
+<td>다음에도 쓸 취향·반복 상황</td>
+<td>내용 확인과 이후 활용 동의</td>
+<td>memory layer의 장기 기억으로 저장</td>
+</tr>
+</tbody></table></div>
+<p>예를 들어 검정 재킷 사진에서 검정색이 관찰될 수 있다. 사용자가 “이 핏이 좋아요”라고 하면 핏만 취향으로 확인한다. 색상 선호와 재킷 보유 여부는 별도로 남긴다.</p>
+</div>
+<div class="am-callout am-callout--info" role="note"><div class="am-callout-title">공통 원칙</div><div class="am-callout-body am-md"><p>feature map의 모든 칸을 사용자에게 채우게 하지 않는다. 아이템 정보는 공급 측 데이터와 이미지에서 얻고, 사용자는 목적·제약·선택 이유를 알려준다. 모르는 값은 모름으로 둔다.</p>
+</div></div>
+<div class="am-md"><p>아래 key 예시는 승인된 memory claim 사전의 <code>fit</code>, <code>color</code>, <code>material</code>, <code>formality</code>, <code>occasion</code>, <code>activity</code>를 참고했다. 완성된 아이템 feature map 스키마를 새로 확정하는 제안은 아니다. 현 메모리 계약은 선택 이미지·선택 이유·확인된 claim을 표현한다. 아이템 자동 추출 결과의 저장 계약은 후속 설계 대상이다.</p>
+</div></div>
+</section>
+<section class="am-panel" id="panel-B">
+<header class="am-panel-head"><span class="am-panel-id">B</span><h2>아이디어 1 · 기억을 먼저 쓰고, 빈틈만 묻기</h2></header>
+<div class="am-panel-body"><div class="am-md"><p><strong>기본 진입 흐름으로 가장 권한다.</strong> 이전에 동의한 취향이 있는 재방문 사용자에게 특히 적합하다. 사용자는 이번 목적만 말하고, 기억이 없으면 빈 프로필로 시작할 수 있다.</p>
+</div>
+<figure class="am-diagram am-flow"><svg viewBox="0 0 512 63" width="512" height="63" role="img" aria-label="流程图：이번 목적、기억 조회、중요 공백 확인、추천" xmlns="http://www.w3.org/2000/svg"><defs><marker id="am1-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="am-arrow" d="M0,0 L10,5 L0,10 z"/></marker></defs><g></g><g><g data-step="0"><path class="am-edge" d="M97.9,31.5 L109.4,31.5 Q120.9,31.5 132.4,31.5 L143.9,31.5" marker-end="url(#am1-arrow)"/></g><g data-step="0"><path class="am-edge" d="M227.8,31.5 L239.3,31.5 Q250.8,31.5 262.3,31.5 L273.8,31.5" marker-end="url(#am1-arrow)"/></g><g data-step="0"><path class="am-edge" d="M387.6,31.5 L399.1,31.5 Q410.6,31.5 422.1,31.5 L433.6,31.5" marker-end="url(#am1-arrow)"/></g></g><g><g class="am-node am-node--rect" data-key="이번 목적" data-step="0"><rect class="am-node-shape" x="14" y="14" width="83.9" height="35" rx="3"/><text x="56" y="31.5" text-anchor="middle" dominant-baseline="central">이번 목적</text></g><g class="am-node am-node--rect" data-key="기억 조회" data-step="0"><rect class="am-node-shape" x="143.9" y="14" width="83.9" height="35" rx="3"/><text x="185.9" y="31.5" text-anchor="middle" dominant-baseline="central">기억 조회</text></g><g class="am-node am-node--rect" data-key="중요 공백 확인" data-step="0"><rect class="am-node-shape" x="273.8" y="14" width="113.8" height="35" rx="3"/><text x="330.7" y="31.5" text-anchor="middle" dominant-baseline="central">중요 공백 확인</text></g><g class="am-node am-node--rect" data-key="추천" data-step="0"><rect class="am-node-shape" x="433.6" y="14" width="64" height="35" rx="3"/><text x="465.6" y="31.5" text-anchor="middle" dominant-baseline="central">추천</text></g></g></svg></figure>
+<div class="am-md"><ol>
+<li>사용자가 “내일 고객 미팅인데 정장처럼 보이기는 싫어”라고 입력한다.</li>
+<li>memory layer에서 유효한 “여유 핏 선호·차분한 색 선호”를 가져온다.</li>
+<li>화면에 “여유 핏과 차분한 색을 참고할게요”를 보여준다. 각 조건에 이번 추천에서 빼기와 수정 기능을 둔다.</li>
+<li>추천을 바꿀 공백만 묻는다. “많이 걸으세요?”는 텍스트 버튼으로 답한다.</li>
+<li>“단정함”의 경계가 여전히 모호하면 이미지 비교를 제공한다. 이미 명확하면 바로 추천한다.</li>
+</ol>
+<p><strong>텍스트 시점:</strong> 목적·일정·활동·필수 조건이 없거나 서로 충돌할 때다. 이미 직접 말한 조건에는 반복 확인을 요구하지 않는다.</p>
+<p><strong>이미지 시점:</strong> “너무 정장 같지 않게”처럼 시각적 정도가 모호하고, 그 차이가 후보를 바꿀 때다. “이 정도 단정함인가요?”라는 질문과 비교 이미지를 보여준다. 사진 업로드는 요구하지 않는다.</p>
+<p><strong>기억 활용:</strong> 오늘의 예외는 이번 조건으로만 적용한다. 기존 취향은 관련 있고 유효할 때 재사용한다. 과거 요청의 미팅·날씨를 새 요청에 자동으로 가져오지 않는다.</p>
+</div>
+<div class="am-callout am-callout--ok" role="note"><div class="am-callout-title">편의성과 주의점</div><div class="am-callout-body am-md"><p>이미 아는 취향을 다시 설명할 필요가 줄어든다. 대신 잘못된 기억을 쉽게 뺄 수 있어야 한다. “이번에 제외”와 “기본 취향 수정”은 서로 다른 조작으로 제공한다.</p>
+</div></div></div>
+</section>
+<section class="am-panel" id="panel-C">
+<header class="am-panel-head"><span class="am-panel-id">C</span><h2>아이디어 2 · 사진에서 원하는 요소를 집기</h2></header>
+<div class="am-panel-body"><div class="am-md"><p><strong>옷이나 원하는 룩을 이미 가지고 온 사용자의 선택 경로다.</strong> 설명을 길게 쓰는 대신 사진을 보여주고, 원하는 부분을 집는다. 사진 없이 시스템의 비교 이미지를 골라도 된다.</p>
+</div>
+<figure class="am-diagram am-flow"><svg viewBox="0 0 612 63" width="612" height="63" role="img" aria-label="流程图：사진 선택、사용 목적、요소 지정、짧은 맥락、추천" xmlns="http://www.w3.org/2000/svg"><defs><marker id="am2-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="am-arrow" d="M0,0 L10,5 L0,10 z"/></marker></defs><g></g><g><g data-step="0"><path class="am-edge" d="M97.9,31.5 L109.4,31.5 Q120.9,31.5 132.4,31.5 L143.9,31.5" marker-end="url(#am2-arrow)"/></g><g data-step="0"><path class="am-edge" d="M227.8,31.5 L239.3,31.5 Q250.8,31.5 262.3,31.5 L273.8,31.5" marker-end="url(#am2-arrow)"/></g><g data-step="0"><path class="am-edge" d="M357.7,31.5 L369.2,31.5 Q380.7,31.5 392.2,31.5 L403.7,31.5" marker-end="url(#am2-arrow)"/></g><g data-step="0"><path class="am-edge" d="M487.6,31.5 L499.1,31.5 Q510.6,31.5 522.1,31.5 L533.6,31.5" marker-end="url(#am2-arrow)"/></g></g><g><g class="am-node am-node--rect" data-key="사진 선택" data-step="0"><rect class="am-node-shape" x="14" y="14" width="83.9" height="35" rx="3"/><text x="56" y="31.5" text-anchor="middle" dominant-baseline="central">사진 선택</text></g><g class="am-node am-node--rect" data-key="사용 목적" data-step="0"><rect class="am-node-shape" x="143.9" y="14" width="83.9" height="35" rx="3"/><text x="185.9" y="31.5" text-anchor="middle" dominant-baseline="central">사용 목적</text></g><g class="am-node am-node--rect" data-key="요소 지정" data-step="0"><rect class="am-node-shape" x="273.8" y="14" width="83.9" height="35" rx="3"/><text x="315.8" y="31.5" text-anchor="middle" dominant-baseline="central">요소 지정</text></g><g class="am-node am-node--rect" data-key="짧은 맥락" data-step="0"><rect class="am-node-shape" x="403.7" y="14" width="83.9" height="35" rx="3"/><text x="445.7" y="31.5" text-anchor="middle" dominant-baseline="central">짧은 맥락</text></g><g class="am-node am-node--rect" data-key="추천" data-step="0"><rect class="am-node-shape" x="533.6" y="14" width="64" height="35" rx="3"/><text x="565.6" y="31.5" text-anchor="middle" dominant-baseline="central">추천</text></g></g></svg></figure>
+<div class="am-md"><ol>
+<li>입력창에 선택적인 “사진으로 시작”을 둔다. 기존 기억이나 선택된 레퍼런스를 재사용하면 다시 업로드하지 않는다.</li>
+<li>“이 옷으로 코디할래요 / 이런 분위기를 원해요” 중 사용 목적을 고른다.</li>
+<li>시스템은 사진 속 아이템과 눈에 보이는 속성을 후보로 보여준다. 여러 아이템이 있으면 사용자가 대상을 고른다.</li>
+<li>레퍼런스라면 “핏 / 색감 / 디테일 / 전체 분위기 / 직접 설명” 중 원하는 요소를 고른다.</li>
+<li>“어디에 입으세요?”처럼 사진으로 알 수 없는 맥락만 텍스트로 보완한다.</li>
+</ol>
+<p><strong>사용 화면 예시:</strong> 사용자가 사진 속 바지의 핏을 고른다. 이어서 “고객 미팅용으로 코디해 주세요”라고 말한다. 시스템은 선택 대상을 바지로 좁히고, 여유 핏을 이번 조건으로 확인한다. 사진 속 신발·색·소재까지 취향으로 확대하지 않는다.</p>
+<p><strong>텍스트 시점:</strong> 사진의 용도, 착용 상황, 제외할 요소를 확인할 때다. 사진이 흐리거나 실제 소재가 중요할 때도 텍스트로 보완한다. 사용 목적을 이미 말했으면 다시 묻지 않는다.</p>
+<p><strong>이미지 시점:</strong> 특정 아이템으로 코디하거나, 말로 설명하기 어려운 룩을 참고하고 싶을 때다. 사용자가 먼저 사진을 주거나 자발적으로 이 경로를 고른다.</p>
+<p><strong>기억 활용:</strong> 기억한 색·핏은 사진에서 지정하지 않은 부분의 후보를 좁히는 데 쓴다. 사진에 대한 새 의도가 기존 취향과 다르면 이번 요청의 명시 조건을 우선한다. 저장된 취향만으로 원본 사진을 계속 보관하거나 재사용할 수 있다고 가정하지 않는다.</p>
+</div>
+<div class="am-callout am-callout--warn" role="note"><div class="am-callout-title">편의성과 주의점</div><div class="am-callout-body am-md"><p>사진 한 장으로 시각적 설명 부담을 줄일 수 있다. 그러나 사진 준비·업로드 자체가 부담일 수 있다. 업로드 없이 진행하는 경로를 유지한다. 사진만으로 몸의 치수·촉감·신축성·취향을 확정하지 않는다.</p>
+</div></div></div>
+</section>
+<section class="am-panel" id="panel-D">
+<header class="am-panel-head"><span class="am-panel-id">D</span><h2>아이디어 3 · 먼저 추천하고, 바꾸고 싶은 부분만 말하기</h2></header>
+<div class="am-panel-body"><div class="am-md"><p><strong>취향을 미리 설명하기 어렵거나 빨리 결과를 보고 싶은 사용자에게 적합하다.</strong> 사용자는 결과를 본 뒤 “무엇을 바꿀지” 말한다. 첫 추천은 대화를 시작하는 시각적 기준점이 된다.</p>
+</div>
+<figure class="am-diagram am-flow"><svg viewBox="0 0 485 63" width="485" height="63" role="img" aria-label="流程图：최소 맥락、첫 추천、요소별 수정、재추천" xmlns="http://www.w3.org/2000/svg"><defs><marker id="am3-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="am-arrow" d="M0,0 L10,5 L0,10 z"/></marker></defs><g></g><g><g data-step="0"><path class="am-edge" d="M97.9,31.5 L109.4,31.5 Q120.9,31.5 132.4,31.5 L143.9,31.5" marker-end="url(#am3-arrow)"/></g><g data-step="0"><path class="am-edge" d="M214.8,31.5 L226.3,31.5 Q237.8,31.5 249.3,31.5 L260.8,31.5" marker-end="url(#am3-arrow)"/></g><g data-step="0"><path class="am-edge" d="M357.7,31.5 L369.2,31.5 Q380.7,31.5 392.2,31.5 L403.7,31.5" marker-end="url(#am3-arrow)"/></g></g><g><g class="am-node am-node--rect" data-key="최소 맥락" data-step="0"><rect class="am-node-shape" x="14" y="14" width="83.9" height="35" rx="3"/><text x="56" y="31.5" text-anchor="middle" dominant-baseline="central">최소 맥락</text></g><g class="am-node am-node--rect" data-key="첫 추천" data-step="0"><rect class="am-node-shape" x="143.9" y="14" width="70.9" height="35" rx="3"/><text x="179.4" y="31.5" text-anchor="middle" dominant-baseline="central">첫 추천</text></g><g class="am-node am-node--rect" data-key="요소별 수정" data-step="0"><rect class="am-node-shape" x="260.8" y="14" width="96.9" height="35" rx="3"/><text x="309.3" y="31.5" text-anchor="middle" dominant-baseline="central">요소별 수정</text></g><g class="am-node am-node--rect" data-key="재추천" data-step="0"><rect class="am-node-shape" x="403.7" y="14" width="67" height="35" rx="3"/><text x="437.2" y="31.5" text-anchor="middle" dominant-baseline="central">재추천</text></g></g></svg></figure>
+<div class="am-md"><ol>
+<li>이번 목적과 명시한 필수 조건을 파악한다. 장기 기억이 있으면 함께 쓴다.</li>
+<li>부드러운 스타일 선호가 일부 비어 있어도 첫 추천을 보여준다. 기억이 없으면 개인화가 제한된 첫 제안이라고 알린다.</li>
+<li>카드에서 “더 편하게 / 덜 격식 있게 / 핏만 변경 / 직접 말하기”처럼 수정 방향을 고른다.</li>
+<li>“핏만 더 여유롭게, 색은 좋아요”라는 피드백을 해당 아이템·요소에 연결한다.</li>
+<li>수정한 결과를 보여주고, 새로 확인한 취향 중 이후에도 쓸 항목만 선택적으로 저장한다.</li>
+</ol>
+<p><strong>텍스트 시점:</strong> 이미지에서 알 수 없는 불편·목적·예외를 말할 때다. “많이 걸어서 이 신발은 싫어요”를 반영하되, 모든 구두를 싫어한다고 일반화하지 않는다.</p>
+<p><strong>이미지 시점:</strong> 첫 결과를 평가하거나 구체적인 수정 정도를 비교할 때다. 추가 선택은 핏·격식처럼 아직 모호한 요소에만 제공한다. 사용자가 직접 사진을 올릴 필요는 없다.</p>
+<p><strong>기억 활용:</strong> 다음 요청에는 동의한 수정 사항만 장기로 재사용한다. 클릭·선택·착용을 평소 취향으로 자동 저장하지 않는다. “이 코디는 좋아요”만으로 모든 속성을 선호한다고 확정하지 않는다. “별로예요”처럼 이유가 불명확하면 바꾸고 싶은 아이템·요소를 묻는다.</p>
+</div>
+<div class="am-callout am-callout--warn" role="note"><div class="am-callout-title">편의성과 주의점</div><div class="am-callout-body am-md"><p>추천을 보면서 말하면 원하는 차이를 표현하기 쉬울 수 있다. 첫 결과가 크게 빗나가면 수정 부담이 커진다. 중요한 필수 조건의 의미가 불명확하거나 충돌하면 먼저 확인한다. 첫 결과의 부드러운 선호는 비교를 통해 탐색할 수 있다.</p>
+</div></div></div>
+</section>
+<section class="am-panel" id="panel-E">
+<header class="am-panel-head"><span class="am-panel-id">E</span><h2>실제로 언제 무엇을 물을까?</h2></header>
+<div class="am-panel-body"><div class="am-md"><p>다음 질문은 <strong>추천에 미치는 영향, 현재 정보의 불확실성, 사용자의 응답 부담</strong>을 함께 보고 고른다. 모델 점수가 높아도 사용자 확인이나 저장 동의를 대신하지 못한다.</p>
+<div class="am-table-wrap"><table>
+<thead>
+<tr>
+<th>지금 상태</th>
+<th>다음 상호작용</th>
+<th>예시</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>필수 조건이 모호하거나 충돌함</td>
+<td>짧은 텍스트·버튼 질문을 우선</td>
+<td>“정장은 필수인가요, 피하고 싶으신가요?”</td>
+</tr>
+<tr>
+<td>목적·활동 정보가 후보를 바꿈</td>
+<td>텍스트·버튼 질문</td>
+<td>“걷는 시간이 많아요 / 적어요”</td>
+</tr>
+<tr>
+<td>핏·격식의 시각적 경계가 모호함</td>
+<td>시스템이 이미지 비교를 제공</td>
+<td>“이 중 어느 정도 여유 핏을 원하세요?”</td>
+</tr>
+<tr>
+<td>사용자가 특정 옷·룩을 참고하고 싶음</td>
+<td>선택적인 사진과 사용 목적 확인</td>
+<td>“이 옷으로 코디 / 이 분위기 참고”</td>
+</tr>
+<tr>
+<td>글로 구체적인 조건을 이미 줌</td>
+<td>추가 이미지 없이 반영</td>
+<td>“검정색, 여유 핏, 재킷 제외”</td>
+</tr>
+<tr>
+<td>기억과 현재 입력만으로 추천 가능</td>
+<td>질문을 끝내고 추천</td>
+<td>사용한 조건과 반영 이유 표시</td>
+</tr>
+<tr>
+<td>이미지 준비가 어렵거나 비교를 원하지 않음</td>
+<td>텍스트로 전환</td>
+<td>“약간 여유 / 넉넉 / 직접 설명”</td>
+</tr>
+</tbody></table></div>
+<p><strong>비교 이미지의 품질도 입력 품질이다.</strong> 핏을 물으면 다른 색·무드를 가능한 한 비슷하게 맞춘다. 여러 속성이 함께 달라지면 선택 이유를 추가로 확인한다. 적절한 비교 이미지가 없으면 텍스트로 전환한다.</p>
+<p><strong>질문 종료:</strong> 필요한 필수 조건의 충돌을 정리했고 추천할 후보가 있으면 진행한다. 영향이 작은 공백은 남겨둘 수 있다. “바로 추천받기”를 항상 제공하고, 미확인 조건이 있으면 그 범위를 알린다. 충족 여부를 모르는 필수 조건은 충족했다고 표시하지 않는다.</p>
+</div></div>
+</section>
+<section class="am-panel" id="panel-F">
+<header class="am-panel-head"><span class="am-panel-id">F</span><h2>memory layer는 다음 입력을 어떻게 줄일까?</h2></header>
+<div class="am-panel-body"><div class="am-md"><p>사용자에게는 “기본 취향 / 이번 조건 / 확인 중”으로 보여준다. 시스템 내부에서는 유효한 장기 기억과 현재 요청의 확인된 조건을 추천에 연결한다.</p>
+<div class="am-table-wrap"><table>
+<thead>
+<tr>
+<th>단계</th>
+<th>memory layer의 역할</th>
+<th>사용자의 부담을 줄이는 방식</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>요청 시작</td>
+<td>관련 있고 유효한 장기 기억 조회</td>
+<td>취향을 처음부터 다시 쓰지 않음</td>
+</tr>
+<tr>
+<td>대화 진행</td>
+<td>이번 조건·근거·미확인·충돌 구분</td>
+<td>이미 답한 내용은 다시 묻지 않음</td>
+</tr>
+<tr>
+<td>질문 선택</td>
+<td>기억의 공백과 충돌을 전달</td>
+<td>대화 정책이 필요한 형식만 제공</td>
+</tr>
+<tr>
+<td>추천 표시</td>
+<td>반영한 기억과 이번 조건 연결</td>
+<td>결과에서 바로 조건 수정</td>
+</tr>
+<tr>
+<td>선택적 저장</td>
+<td>항목별 내용 확인과 이후 활용 동의</td>
+<td>새로 확인한 내용만 검토</td>
+</tr>
+<tr>
+<td>다음 요청</td>
+<td>동의한 장기만 재사용</td>
+<td>지난 요청의 임시 조건을 반복 정리하지 않음</td>
+</tr>
+</tbody></table></div>
+<p>기억한 <code>fit=여유</code>와 이미지 비교에서 선택한 <code>fit=레귤러</code>가 다르면 이번 요청에서만 레귤러를 쓴다. 이 조정만으로 기본 취향을 덮어쓰지 않는다.</p>
+</div>
+<div class="am-callout am-callout--info" role="note"><div class="am-callout-title">가장 중요한 분업</div><div class="am-callout-body am-md"><p>memory layer는 무엇을 알고 있고 무엇이 미확인인지 알려준다. 대화 정책은 어떤 질문을 어떤 형식으로 보여줄지 결정한다. feature map은 아이템의 속성을 표현한다. 추천은 사용자 조건과 아이템 속성을 연결한다.</p>
+</div></div>
+<div class="am-md"><p>추천 이후 “다음에도 참고할 요소”를 보여주되 체크 기본값은 해제한다. 명확한 저장 요청이 있으면 대화 중에도 같은 확인·동의 계약을 적용할 수 있다. 반복 선택만으로 자동 장기화하지 않는다.</p>
+</div></div>
+</section>
+<section class="am-panel" id="panel-G">
+<header class="am-panel-head"><span class="am-panel-id">G</span><h2>세 아이디어를 연결한 한 번의 사용 예시</h2></header>
+<div class="am-panel-body"><div class="am-md"><p>다음 내용은 가상 시나리오다. 저장된 기본 취향은 “여유 핏·차분한 색”이다.</p>
+</div>
+<figure class="am-diagram am-seq"><svg viewBox="0 0 382 382" width="382" height="382" role="img" aria-label="时序图：사용자、StyleMate" xmlns="http://www.w3.org/2000/svg"><defs><marker id="am4-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="am-arrow" d="M0,0 L10,5 L0,10 z"/></marker></defs><line class="am-lifeline" x1="54" y1="42" x2="54" y2="378"/><g data-key="사용자"><rect class="am-actor" x="12" y="8" width="84" height="34" rx="2"/><text x="54" y="25" text-anchor="middle" dominant-baseline="central" font-weight="600">사용자</text></g><line class="am-lifeline" x1="324.6" y1="42" x2="324.6" y2="378"/><g data-key="StyleMate"><rect class="am-actor" x="279.8" y="8" width="89.6" height="34" rx="2"/><text x="324.6" y="25" text-anchor="middle" dominant-baseline="central" font-weight="600">StyleMate</text></g><g data-step="0"><text x="189.3" y="70" text-anchor="middle">고객 미팅용으로, 너무 정장 같지 않게</text><path class="am-edge" d="M54,80 L322.6,80" marker-end="url(#am4-arrow)"/><text class="am-step" x="60" y="74" text-anchor="start">1</text></g><g data-step="1"><text x="189.3" y="110" text-anchor="middle">여유 핏과 차분한 색을 참고할게요</text><path class="am-edge am-edge--dashed" d="M324.6,120 L56,120" marker-end="url(#am4-arrow)"/><text class="am-step" x="318.6" y="114" text-anchor="end">2</text></g><g data-step="2"><text x="189.3" y="150" text-anchor="middle">미팅에 원하는 격식을 이미지에서 골라주</text><text x="189.3" y="166" text-anchor="middle">세요</text><path class="am-edge am-edge--dashed" d="M324.6,176 L56,176" marker-end="url(#am4-arrow)"/><text class="am-step" x="318.6" y="170" text-anchor="end">3</text></g><g data-step="3"><text x="189.3" y="206" text-anchor="middle">이 정도 격식으로, 상의는 레귤러 핏으로</text><text x="189.3" y="222" text-anchor="middle">요</text><path class="am-edge" d="M54,232 L322.6,232" marker-end="url(#am4-arrow)"/><text class="am-step" x="60" y="226" text-anchor="start">4</text></g><g data-step="4"><text x="189.3" y="262" text-anchor="middle">이번 격식과 레귤러 핏을 반영했어요</text><path class="am-edge am-edge--dashed" d="M324.6,272 L56,272" marker-end="url(#am4-arrow)"/><text class="am-step" x="318.6" y="266" text-anchor="end">5</text></g><g data-step="5"><text x="189.3" y="302" text-anchor="middle">핏은 좋아요. 신발은 많이 걷기 편하게</text><path class="am-edge" d="M54,312 L322.6,312" marker-end="url(#am4-arrow)"/><text class="am-step" x="60" y="306" text-anchor="start">6</text></g><g data-step="6"><text x="189.3" y="342" text-anchor="middle">신발 조건을 반영한 새 후보예요</text><path class="am-edge am-edge--dashed" d="M324.6,352 L56,352" marker-end="url(#am4-arrow)"/><text class="am-step" x="318.6" y="346" text-anchor="end">7</text></g></svg></figure>
+<div class="am-md"><ul>
+<li><strong>1번이 시작을 맡는다.</strong> 기억을 먼저 쓰고, 모호한 단정함만 이미지로 묻는다.</li>
+<li><strong>2번은 선택 경로다.</strong> 사용자가 레퍼런스를 가져왔다면 시스템 비교 대신 그 사진의 특정 요소를 집는다.</li>
+<li><strong>3번이 수정을 맡는다.</strong> 첫 추천을 본 뒤 신발처럼 필요한 부분만 바꾼다.</li>
+</ul>
+<p>저장 화면에서 사용자가 아무 항목도 선택하지 않았다고 하자. 다음 새 요청에서 “주말 데일리룩 추천해줘”라고 하면 기존 여유 핏·차분한 색을 참고한다. 이전 미팅과 레귤러 핏·걷기 조건은 자동 이월하지 않는다.</p>
+<p>반대로 사용자가 “이 격식을 고객 미팅 때마다 참고해 줘”라고 말할 수 있다. 적용 조건과 내용을 확인한 뒤 조건부 장기 기억으로 저장한다. 주말에도 같은 격식을 적용하는 취향으로 넓히지 않는다.</p>
+</div></div>
+</section>
+<section class="am-panel" id="panel-H">
+<header class="am-panel-head"><span class="am-panel-id">H</span><h2>팀에 권하는 선택과 검증 방법</h2></header>
+<div class="am-panel-body"><div class="am-md"><p><strong>1번을 기본으로, 2번을 선택 입력으로, 3번을 추천 후 수정으로 연결하는 구성을 권한다.</strong> 세 가지는 정보 수집의 시점이 다르며 한 제품 안에서 함께 사용할 수 있다. 사진 업로드를 필수 단계로 두지 않고, 기억이 없는 사용자도 바로 요청을 시작하게 한다.</p>
+<div class="am-table-wrap"><table>
+<thead>
+<tr>
+<th>아이디어</th>
+<th>주된 편의성</th>
+<th>설계상 비용·위험</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>1 · 기억부터</td>
+<td>재설명과 불필요한 질문 감소를 기대</td>
+<td>관련 기억·공백·질문 종료를 판단해야 함</td>
+</tr>
+<tr>
+<td>2 · 사진의 요소부터</td>
+<td>원하는 옷이나 룩을 빠르게 지목</td>
+<td>사진 준비, 복수 아이템·선택 이유 해석 부담</td>
+</tr>
+<tr>
+<td>3 · 첫 추천부터</td>
+<td>결과를 보며 수정할 수 있음</td>
+<td>첫 추천이 빗나가면 수정 부담 증가</td>
+</tr>
+</tbody></table></div>
+<p><strong>먼저 확인할 과제:</strong> 기억 없는 첫 요청과 기억이 충분한 재요청을 비교한다. 오늘만 다른 핏을 요구하는 경우도 검토한다. 여러 속성이 다른 이미지와 사진 없이 진행하는 경우를 확인한다. 사용자가 시스템의 해석을 이해하고 쉽게 바로잡는지 본다.</p>
+<p>평가는 기존 RQ를 유지한다. RQ1에서는 추천 조건을 제어한다고 느끼는지 본다. RQ2에서는 의도 표현 부담과 이해받는 느낌을 본다. 질문 수·소요 시간은 보조 지표다. 이 세 아이디어를 기존 실험의 새 비교 조건으로 자동 확정하지 않는다.</p>
+<p><strong>근거와 제안의 경계:</strong> 기존 <a href="../docs/master.md">연구 기준</a>, <a href="../docs/workflow.md">제품 흐름</a>, <a href="../docs/memory-design.md">승인된 메모리 설계</a>를 읽고 만든 UX 제안이다. 실행 앱·이미지 해석 품질·추천 효과는 검증하지 않았다.</p>
+<p>불확실한 의도에는 확인하거나 다른 방식으로 진행하라는 원칙은 <a href="https://www.microsoft.com/en-us/haxtoolkit/guideline/scope-services-when-in-doubt/">Microsoft HAX 지침</a>을 참고했다. 유용한 수준의 피드백과 사용자의 제어·피드백 생략을 제공하라는 원칙은 <a href="https://pair.withgoogle.com/guidebook-v2/chapter/feedback-controls/">Google PAIR 가이드</a>를 참고했다. 위 세 흐름은 이 원칙을 StyleMate에 적용한 제안이며, 편의성 향상은 연구에서 확인할 가설이다.</p>
+</div></div>
+</section>
+</div>
+</div>
+</main>
+<footer class="am-colophon">Generated by Answer me with HTML 0.4.6 · 2026-10-13 21:06</footer>
+<textarea id="am-source" hidden readonly aria-hidden="true">---
+template: doc
+theme: shadcn
+mode: light
+style: 80
+title: 이미지는 언제, 텍스트는 언제?
+subtitle: StyleMate · feature map과 memory layer를 연결하는 입력 흐름 3가지
+status: UX 제안 · 미승인 · 제품 미구현
+checked: 2026-10-13
+---
+사용자는 모든 feature를 설명할 필요가 없다. 시스템은 유효한 기억을 먼저 쓰고, 이번 추천을 바꿀 정보만 가장 답하기 쉬운 방식으로 묻는다.
+
+## A 먼저 구분할 것: 옷의 속성과 사용자의 의도
+
+**아이템 feature map은 옷을 설명한다. 사용자 맥락은 그 옷을 왜, 언제, 어떻게 원하는지 설명한다.** 같은 `fit`이라도 “사진의 바지는 여유 핏”과 “나는 여유 핏을 원한다”는 서로 다른 정보다.
+
+| 필요한 정보 | 주된 입력과 근거 | 추천에 쓰는 방식 |
+|---|---|---|
+| 아이템 종류·보이는 색·실루엣·기장 | 아이템 이미지와 상품 설명 텍스트 | 아이템의 관찰·추출 후보로 정리 |
+| 실제 소재·착용감·보유 여부 | 상품 정보 또는 사용자 텍스트 | 사진만으로 확정하지 않고 확인한 정보로 보완 |
+| 일정·활동·피하고 싶은 조건 | 사용자 텍스트 또는 짧은 선택 버튼 | 이번 요청의 상황·제약으로 적용 |
+| 원하는 핏·색·격식의 정도 | 명확한 텍스트, 또는 이미지 비교와 선택 이유 | 사용자가 지정한 요소만 이번 조건으로 적용 |
+| 다음에도 쓸 취향·반복 상황 | 내용 확인과 이후 활용 동의 | memory layer의 장기 기억으로 저장 |
+
+예를 들어 검정 재킷 사진에서 검정색이 관찰될 수 있다. 사용자가 “이 핏이 좋아요”라고 하면 핏만 취향으로 확인한다. 색상 선호와 재킷 보유 여부는 별도로 남긴다.
+
+```callout info 공통 원칙
+feature map의 모든 칸을 사용자에게 채우게 하지 않는다. 아이템 정보는 공급 측 데이터와 이미지에서 얻고, 사용자는 목적·제약·선택 이유를 알려준다. 모르는 값은 모름으로 둔다.
+```
+
+아래 key 예시는 승인된 memory claim 사전의 `fit`, `color`, `material`, `formality`, `occasion`, `activity`를 참고했다. 완성된 아이템 feature map 스키마를 새로 확정하는 제안은 아니다. 현 메모리 계약은 선택 이미지·선택 이유·확인된 claim을 표현한다. 아이템 자동 추출 결과의 저장 계약은 후속 설계 대상이다.
+
+## B 아이디어 1 · 기억을 먼저 쓰고, 빈틈만 묻기
+
+**기본 진입 흐름으로 가장 권한다.** 이전에 동의한 취향이 있는 재방문 사용자에게 특히 적합하다. 사용자는 이번 목적만 말하고, 기억이 없으면 빈 프로필로 시작할 수 있다.
+
+```flow LR
+이번 목적 -&gt; 기억 조회 -&gt; 중요 공백 확인 -&gt; 추천
+```
+
+1. 사용자가 “내일 고객 미팅인데 정장처럼 보이기는 싫어”라고 입력한다.
+2. memory layer에서 유효한 “여유 핏 선호·차분한 색 선호”를 가져온다.
+3. 화면에 “여유 핏과 차분한 색을 참고할게요”를 보여준다. 각 조건에 이번 추천에서 빼기와 수정 기능을 둔다.
+4. 추천을 바꿀 공백만 묻는다. “많이 걸으세요?”는 텍스트 버튼으로 답한다.
+5. “단정함”의 경계가 여전히 모호하면 이미지 비교를 제공한다. 이미 명확하면 바로 추천한다.
+
+**텍스트 시점:** 목적·일정·활동·필수 조건이 없거나 서로 충돌할 때다. 이미 직접 말한 조건에는 반복 확인을 요구하지 않는다.
+
+**이미지 시점:** “너무 정장 같지 않게”처럼 시각적 정도가 모호하고, 그 차이가 후보를 바꿀 때다. “이 정도 단정함인가요?”라는 질문과 비교 이미지를 보여준다. 사진 업로드는 요구하지 않는다.
+
+**기억 활용:** 오늘의 예외는 이번 조건으로만 적용한다. 기존 취향은 관련 있고 유효할 때 재사용한다. 과거 요청의 미팅·날씨를 새 요청에 자동으로 가져오지 않는다.
+
+```callout ok 편의성과 주의점
+이미 아는 취향을 다시 설명할 필요가 줄어든다. 대신 잘못된 기억을 쉽게 뺄 수 있어야 한다. “이번에 제외”와 “기본 취향 수정”은 서로 다른 조작으로 제공한다.
+```
+
+## C 아이디어 2 · 사진에서 원하는 요소를 집기
+
+**옷이나 원하는 룩을 이미 가지고 온 사용자의 선택 경로다.** 설명을 길게 쓰는 대신 사진을 보여주고, 원하는 부분을 집는다. 사진 없이 시스템의 비교 이미지를 골라도 된다.
+
+```flow LR
+사진 선택 -&gt; 사용 목적 -&gt; 요소 지정 -&gt; 짧은 맥락 -&gt; 추천
+```
+
+1. 입력창에 선택적인 “사진으로 시작”을 둔다. 기존 기억이나 선택된 레퍼런스를 재사용하면 다시 업로드하지 않는다.
+2. “이 옷으로 코디할래요 / 이런 분위기를 원해요” 중 사용 목적을 고른다.
+3. 시스템은 사진 속 아이템과 눈에 보이는 속성을 후보로 보여준다. 여러 아이템이 있으면 사용자가 대상을 고른다.
+4. 레퍼런스라면 “핏 / 색감 / 디테일 / 전체 분위기 / 직접 설명” 중 원하는 요소를 고른다.
+5. “어디에 입으세요?”처럼 사진으로 알 수 없는 맥락만 텍스트로 보완한다.
+
+**사용 화면 예시:** 사용자가 사진 속 바지의 핏을 고른다. 이어서 “고객 미팅용으로 코디해 주세요”라고 말한다. 시스템은 선택 대상을 바지로 좁히고, 여유 핏을 이번 조건으로 확인한다. 사진 속 신발·색·소재까지 취향으로 확대하지 않는다.
+
+**텍스트 시점:** 사진의 용도, 착용 상황, 제외할 요소를 확인할 때다. 사진이 흐리거나 실제 소재가 중요할 때도 텍스트로 보완한다. 사용 목적을 이미 말했으면 다시 묻지 않는다.
+
+**이미지 시점:** 특정 아이템으로 코디하거나, 말로 설명하기 어려운 룩을 참고하고 싶을 때다. 사용자가 먼저 사진을 주거나 자발적으로 이 경로를 고른다.
+
+**기억 활용:** 기억한 색·핏은 사진에서 지정하지 않은 부분의 후보를 좁히는 데 쓴다. 사진에 대한 새 의도가 기존 취향과 다르면 이번 요청의 명시 조건을 우선한다. 저장된 취향만으로 원본 사진을 계속 보관하거나 재사용할 수 있다고 가정하지 않는다.
+
+```callout warn 편의성과 주의점
+사진 한 장으로 시각적 설명 부담을 줄일 수 있다. 그러나 사진 준비·업로드 자체가 부담일 수 있다. 업로드 없이 진행하는 경로를 유지한다. 사진만으로 몸의 치수·촉감·신축성·취향을 확정하지 않는다.
+```
+
+## D 아이디어 3 · 먼저 추천하고, 바꾸고 싶은 부분만 말하기
+
+**취향을 미리 설명하기 어렵거나 빨리 결과를 보고 싶은 사용자에게 적합하다.** 사용자는 결과를 본 뒤 “무엇을 바꿀지” 말한다. 첫 추천은 대화를 시작하는 시각적 기준점이 된다.
+
+```flow LR
+최소 맥락 -&gt; 첫 추천 -&gt; 요소별 수정 -&gt; 재추천
+```
+
+1. 이번 목적과 명시한 필수 조건을 파악한다. 장기 기억이 있으면 함께 쓴다.
+2. 부드러운 스타일 선호가 일부 비어 있어도 첫 추천을 보여준다. 기억이 없으면 개인화가 제한된 첫 제안이라고 알린다.
+3. 카드에서 “더 편하게 / 덜 격식 있게 / 핏만 변경 / 직접 말하기”처럼 수정 방향을 고른다.
+4. “핏만 더 여유롭게, 색은 좋아요”라는 피드백을 해당 아이템·요소에 연결한다.
+5. 수정한 결과를 보여주고, 새로 확인한 취향 중 이후에도 쓸 항목만 선택적으로 저장한다.
+
+**텍스트 시점:** 이미지에서 알 수 없는 불편·목적·예외를 말할 때다. “많이 걸어서 이 신발은 싫어요”를 반영하되, 모든 구두를 싫어한다고 일반화하지 않는다.
+
+**이미지 시점:** 첫 결과를 평가하거나 구체적인 수정 정도를 비교할 때다. 추가 선택은 핏·격식처럼 아직 모호한 요소에만 제공한다. 사용자가 직접 사진을 올릴 필요는 없다.
+
+**기억 활용:** 다음 요청에는 동의한 수정 사항만 장기로 재사용한다. 클릭·선택·착용을 평소 취향으로 자동 저장하지 않는다. “이 코디는 좋아요”만으로 모든 속성을 선호한다고 확정하지 않는다. “별로예요”처럼 이유가 불명확하면 바꾸고 싶은 아이템·요소를 묻는다.
+
+```callout warn 편의성과 주의점
+추천을 보면서 말하면 원하는 차이를 표현하기 쉬울 수 있다. 첫 결과가 크게 빗나가면 수정 부담이 커진다. 중요한 필수 조건의 의미가 불명확하거나 충돌하면 먼저 확인한다. 첫 결과의 부드러운 선호는 비교를 통해 탐색할 수 있다.
+```
+
+## E 실제로 언제 무엇을 물을까?
+
+다음 질문은 **추천에 미치는 영향, 현재 정보의 불확실성, 사용자의 응답 부담**을 함께 보고 고른다. 모델 점수가 높아도 사용자 확인이나 저장 동의를 대신하지 못한다.
+
+| 지금 상태 | 다음 상호작용 | 예시 |
+|---|---|---|
+| 필수 조건이 모호하거나 충돌함 | 짧은 텍스트·버튼 질문을 우선 | “정장은 필수인가요, 피하고 싶으신가요?” |
+| 목적·활동 정보가 후보를 바꿈 | 텍스트·버튼 질문 | “걷는 시간이 많아요 / 적어요” |
+| 핏·격식의 시각적 경계가 모호함 | 시스템이 이미지 비교를 제공 | “이 중 어느 정도 여유 핏을 원하세요?” |
+| 사용자가 특정 옷·룩을 참고하고 싶음 | 선택적인 사진과 사용 목적 확인 | “이 옷으로 코디 / 이 분위기 참고” |
+| 글로 구체적인 조건을 이미 줌 | 추가 이미지 없이 반영 | “검정색, 여유 핏, 재킷 제외” |
+| 기억과 현재 입력만으로 추천 가능 | 질문을 끝내고 추천 | 사용한 조건과 반영 이유 표시 |
+| 이미지 준비가 어렵거나 비교를 원하지 않음 | 텍스트로 전환 | “약간 여유 / 넉넉 / 직접 설명” |
+
+**비교 이미지의 품질도 입력 품질이다.** 핏을 물으면 다른 색·무드를 가능한 한 비슷하게 맞춘다. 여러 속성이 함께 달라지면 선택 이유를 추가로 확인한다. 적절한 비교 이미지가 없으면 텍스트로 전환한다.
+
+**질문 종료:** 필요한 필수 조건의 충돌을 정리했고 추천할 후보가 있으면 진행한다. 영향이 작은 공백은 남겨둘 수 있다. “바로 추천받기”를 항상 제공하고, 미확인 조건이 있으면 그 범위를 알린다. 충족 여부를 모르는 필수 조건은 충족했다고 표시하지 않는다.
+
+## F memory layer는 다음 입력을 어떻게 줄일까?
+
+사용자에게는 “기본 취향 / 이번 조건 / 확인 중”으로 보여준다. 시스템 내부에서는 유효한 장기 기억과 현재 요청의 확인된 조건을 추천에 연결한다.
+
+| 단계 | memory layer의 역할 | 사용자의 부담을 줄이는 방식 |
+|---|---|---|
+| 요청 시작 | 관련 있고 유효한 장기 기억 조회 | 취향을 처음부터 다시 쓰지 않음 |
+| 대화 진행 | 이번 조건·근거·미확인·충돌 구분 | 이미 답한 내용은 다시 묻지 않음 |
+| 질문 선택 | 기억의 공백과 충돌을 전달 | 대화 정책이 필요한 형식만 제공 |
+| 추천 표시 | 반영한 기억과 이번 조건 연결 | 결과에서 바로 조건 수정 |
+| 선택적 저장 | 항목별 내용 확인과 이후 활용 동의 | 새로 확인한 내용만 검토 |
+| 다음 요청 | 동의한 장기만 재사용 | 지난 요청의 임시 조건을 반복 정리하지 않음 |
+
+기억한 `fit=여유`와 이미지 비교에서 선택한 `fit=레귤러`가 다르면 이번 요청에서만 레귤러를 쓴다. 이 조정만으로 기본 취향을 덮어쓰지 않는다.
+
+```callout info 가장 중요한 분업
+memory layer는 무엇을 알고 있고 무엇이 미확인인지 알려준다. 대화 정책은 어떤 질문을 어떤 형식으로 보여줄지 결정한다. feature map은 아이템의 속성을 표현한다. 추천은 사용자 조건과 아이템 속성을 연결한다.
+```
+
+추천 이후 “다음에도 참고할 요소”를 보여주되 체크 기본값은 해제한다. 명확한 저장 요청이 있으면 대화 중에도 같은 확인·동의 계약을 적용할 수 있다. 반복 선택만으로 자동 장기화하지 않는다.
+
+## G 세 아이디어를 연결한 한 번의 사용 예시
+
+다음 내용은 가상 시나리오다. 저장된 기본 취향은 “여유 핏·차분한 색”이다.
+
+```sequence num
+사용자 -&gt; StyleMate: 고객 미팅용으로, 너무 정장 같지 않게
+StyleMate --&gt; 사용자: 여유 핏과 차분한 색을 참고할게요
+StyleMate --&gt; 사용자: 미팅에 원하는 격식을 이미지에서 골라주세요
+사용자 -&gt; StyleMate: 이 정도 격식으로, 상의는 레귤러 핏으로요
+StyleMate --&gt; 사용자: 이번 격식과 레귤러 핏을 반영했어요
+사용자 -&gt; StyleMate: 핏은 좋아요. 신발은 많이 걷기 편하게
+StyleMate --&gt; 사용자: 신발 조건을 반영한 새 후보예요
+```
+
+- **1번이 시작을 맡는다.** 기억을 먼저 쓰고, 모호한 단정함만 이미지로 묻는다.
+- **2번은 선택 경로다.** 사용자가 레퍼런스를 가져왔다면 시스템 비교 대신 그 사진의 특정 요소를 집는다.
+- **3번이 수정을 맡는다.** 첫 추천을 본 뒤 신발처럼 필요한 부분만 바꾼다.
+
+저장 화면에서 사용자가 아무 항목도 선택하지 않았다고 하자. 다음 새 요청에서 “주말 데일리룩 추천해줘”라고 하면 기존 여유 핏·차분한 색을 참고한다. 이전 미팅과 레귤러 핏·걷기 조건은 자동 이월하지 않는다.
+
+반대로 사용자가 “이 격식을 고객 미팅 때마다 참고해 줘”라고 말할 수 있다. 적용 조건과 내용을 확인한 뒤 조건부 장기 기억으로 저장한다. 주말에도 같은 격식을 적용하는 취향으로 넓히지 않는다.
+
+## H 팀에 권하는 선택과 검증 방법
+
+**1번을 기본으로, 2번을 선택 입력으로, 3번을 추천 후 수정으로 연결하는 구성을 권한다.** 세 가지는 정보 수집의 시점이 다르며 한 제품 안에서 함께 사용할 수 있다. 사진 업로드를 필수 단계로 두지 않고, 기억이 없는 사용자도 바로 요청을 시작하게 한다.
+
+| 아이디어 | 주된 편의성 | 설계상 비용·위험 |
+|---|---|---|
+| 1 · 기억부터 | 재설명과 불필요한 질문 감소를 기대 | 관련 기억·공백·질문 종료를 판단해야 함 |
+| 2 · 사진의 요소부터 | 원하는 옷이나 룩을 빠르게 지목 | 사진 준비, 복수 아이템·선택 이유 해석 부담 |
+| 3 · 첫 추천부터 | 결과를 보며 수정할 수 있음 | 첫 추천이 빗나가면 수정 부담 증가 |
+
+**먼저 확인할 과제:** 기억 없는 첫 요청과 기억이 충분한 재요청을 비교한다. 오늘만 다른 핏을 요구하는 경우도 검토한다. 여러 속성이 다른 이미지와 사진 없이 진행하는 경우를 확인한다. 사용자가 시스템의 해석을 이해하고 쉽게 바로잡는지 본다.
+
+평가는 기존 RQ를 유지한다. RQ1에서는 추천 조건을 제어한다고 느끼는지 본다. RQ2에서는 의도 표현 부담과 이해받는 느낌을 본다. 질문 수·소요 시간은 보조 지표다. 이 세 아이디어를 기존 실험의 새 비교 조건으로 자동 확정하지 않는다.
+
+**근거와 제안의 경계:** 기존 [연구 기준](../docs/master.md), [제품 흐름](../docs/workflow.md), [승인된 메모리 설계](../docs/memory-design.md)를 읽고 만든 UX 제안이다. 실행 앱·이미지 해석 품질·추천 효과는 검증하지 않았다.
+
+불확실한 의도에는 확인하거나 다른 방식으로 진행하라는 원칙은 [Microsoft HAX 지침](https://www.microsoft.com/en-us/haxtoolkit/guideline/scope-services-when-in-doubt/)을 참고했다. 유용한 수준의 피드백과 사용자의 제어·피드백 생략을 제공하라는 원칙은 [Google PAIR 가이드](https://pair.withgoogle.com/guidebook-v2/chapter/feedback-controls/)를 참고했다. 위 세 흐름은 이 원칙을 StyleMate에 적용한 제안이며, 편의성 향상은 연구에서 확인할 가설이다.
+</textarea>
+<script>
+(() => {
+  const root = document.documentElement;
+  const cycle = (list, cur) => list[(list.indexOf(cur) + 1) % list.length];
+  const label = (btn, value) => {
+    const map = JSON.parse(btn.dataset.labels || '{}');
+    btn.textContent = map[value] || value;
+  };
+  const bind = (name, attr, values) => {
+    const btn = document.querySelector(`[data-am="${name}"]`);
+    if (!btn) return;
+    label(btn, root.getAttribute(attr));
+    btn.addEventListener('click', () => {
+      const next = cycle(values, root.getAttribute(attr));
+      root.setAttribute(attr, next);
+      label(btn, next);
+    });
+  };
+  bind('theme', 'data-theme', ['blueprint', 'shadcn']);
+  bind('mode', 'data-mode', ['auto', 'light', 'dark']);
+
+  const copyBtn = document.querySelector('[data-am="copy"]');
+  copyBtn?.addEventListener('click', async () => {
+    const nodes = document.querySelectorAll('#am-source');
+    const text = nodes[nodes.length - 1]?.value ?? '';
+    try {
+      await navigator.clipboard.writeText(text);
+    } catch {
+      const ta = Object.assign(document.createElement('textarea'), { value: text });
+      document.body.append(ta);
+      ta.select();
+      document.execCommand('copy');
+      ta.remove();
+    }
+    const original = copyBtn.textContent;
+    copyBtn.textContent = copyBtn.dataset.done;
+    setTimeout(() => { copyBtn.textContent = original; }, 1400);
+  });
+})();
+</script>
+</body>
+</html>

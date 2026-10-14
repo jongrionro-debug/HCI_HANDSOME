@@ -1,0 +1,251 @@
+{
+  "number": 3,
+  "title": "쇼핑용 메모리 context와 목표 feature 추론·LLM adapter 구현",
+  "body": "## Summary\n\n일반 쇼핑 사용자의 기본 취향과 이번 요청을 SQLite에 저장하고, 아이템별 유효 메모리 context로 목표 feature를 생성·검증하는 로컬 프로토타입을 구현했습니다. 기본 Relaxed 선호에 이번 Slim 예외를 적용해도 다음 요청에서는 기본 선호가 유지됩니다.\n\n원본 item65/outfit9 계획은 소비자용17개 속성으로 축소했습니다. OpenAI Responses API 연결은 실제 저장·context에서 주입한 가상 HTTP 응답까지 통합 검증했습니다. 사용자의 확인에 따라 실제 API 키 접근·모델 호출은 하지 않았습니다.\n\n## Related Issue\n\nCloses #2\nRefs #1\n\n## Acceptance Criteria Traceability\n\n| AC | 구현 위치 | 검증 및 결과 |\n|---|---|---|\n| AC1 | registry.py, ADR 0003 | 17개 허용값/타입/category/원본 source·length/None-vsN/A·부정 입력 테스트 PASS |\n| AC2 | store.py | 실제 SQLite 요청·확인/동의·승격/교체·철회/삭제·기간·보관 테스트 PASS |\n| AC3 | store.py | 전체 rollback·CAS·재시도/다른 본문 충돌·삭제 fingerprint/24h replay·재접속 테스트 PASS |\n| AC4 | context.py, store.py | 사용자/요청/기간/후보·철회 격리·대상별 fit/color·scoped facts·조건/근거 테스트 PASS |\n| AC5 | context.py, app.py | 오늘 예외/다음 요청/empty/conflict/예산/버전·기간 중 변경·늦은 응답 테스트 PASS |\n| AC6 | inference.py, app.py | 직접값/복수값·any/all/range 보존, model 위조/다른 대상 참조/자동 기억화 방지 테스트 PASS |\n| AC7 | llm.py | strict structured output/store=false/timeout·거부/불완전/invalid JSON/HTTP 오류·안전한 메시지, fake transport 테스트 PASS. 실제 호출 제외 |\n| AC8 | tests/, CLI, memory-tests.yml | Python3.11/3.14 각각79개·가상 데모·editable 설치·저장소/diff/index checkout 검사 PASS |\n| AC9 | ADR 0003, 현재 실행 문서, 이 PR | 사용자 위임/축소·한계 기록, 독립 리뷰·회귀 수정·재검토 완료 |\n\n## Changes\n\n- Python stdlib/SQLite의 요청·memory CRUD, 확인/별도 동의, 원자적 batch·멱등성·버전·소유권·보관/삭제.\n- 소비자용17개 feature와 한국어 label. 대상별 조건/범위·현재 예외·미정·충돌·source ID/version.\n- read-only 모델 proposal 및 최종 목표 profile. 직접 조건 누락 복원과 사용자 의미/연산 보존.\n- OpenAI Responses adapter·명시적 향후 provider/model/key 설정, 기본 offline rule/CLI.\n- Python3.11/3.14 오프라인 CI와 installable package.\n- 미게시된 승인 설계/가상 계약 자료는 README/설계의 필요한 의존성으로 검토해 포함. 이들은 새 실행 DTO와 다른 역사적 v0.2 자료이며 runtime은 이 거대한 JSON을 요구하지 않음.\n- 기존 AGENTS 사용자 변경, workflow Markdown/HTML 미커밋 수정, 설명 영상/HTML 산출물은 포함하지 않음.\n\n## Testing\n\n```text\nPYTHONPATH=src python3.11 -m unittest discover -s tests -q -> 79 PASS (Python3.11.15)\nPYTHONPATH=src python3 -m unittest discover -s tests -q -> 79 PASS (Python3.14.5)\nstore test suite 10회 반복 -> PASS (UUID 순서 의존 fixture 수정)\ndemo --synthetic -> Slim today / Relaxed next; memory unchanged; live_llm_called=false\n임시Python3.11 환경, --no-index --no-deps --no-build-isolation editable 설치 -> PASS, CLI features17개\npython3 scripts/check_repository.py -> 로컬185링크·HTML5쌍 PASS\nPR index만 export한 임시 checkout -> Python3.11/3.14 각각79 PASS, 168링크·HTML2쌍 PASS\ngit diff --cached --check / 새파일 AST·TOML·JSON·공백 검사 -> PASS\n기존 v0.2 validator -> 계약39·가상시나리오70·거부변조31 PASS (runtime/모델 검증과 별개)\n```\n\n원격 CI도 커밋 `6ca871a878782a6ece8932ad0d1451d818972445`에서 모두 **SUCCESS**로 확인했습니다: [repository-checks](https://github.com/jongrionro-debug/HCI_HANDSOME/actions/runs/38441562329), [memory-tests Python3.11/3.14](https://github.com/jongrionro-debug/HCI_HANDSOME/actions/runs/38441562443). 실제 모델 호출/의미 품질, 제품 UI/인증·실데이터·사용자 연구·SSD/OS 백업 소거는 미실행/범위 밖입니다.\n\n## Documentation\n\n- docs/shopping-memory-prototype.md: 현재 실행 계약·지원17개·CLI·LLM 경계·검증/한계.\n- README, 기존 memory/target 계획: 현재 구현과 역사적 계획을 구분해 연결.\n- 새 Markdown 문서에 대응 HTML은 만들지 않음. 기존 사용자 HTML 수정은 PR에서 제외했고 committed checkout의 기존 원문 쌍 검사는 통과.\n\n## Architecture Decision\n\n- docs/decisions/0003-consumer-shopping-prototype.md (Accepted): 사용자의 구현·축소 위임과 실제 호출을 나중으로 정한 회신을 근거로 기록. 기존 ADR 0001/0002의 본문 보존.\n\n## Risks / Trade-offs\n\n- 신뢰된 로컬 caller가 user ID/확인·동의 근거를 제공하는 프로토타입. 실제 로그인/의도·동의 진위 검증 UI는 없음.\n- 17개 vocabulary로 축소해 세부 디자인·섬유 혼용률·상품ID·전체 outfit 조합은 제외.\n- fake/rule 테스트는 실제 LLM의 언어 해석·목표 품질을 증명하지 않음. 호출 모델은 사용자가 명시 설정.\n- 삭제 재시도/tombstone은 내용 없는24h 경계. 24h 이후 ID 재사용 허용; 영구 멱등성·외부 사본/매체 소거 보장 아님.\n- 혼합 multi match의 평탄한 match는null. feature.constraints/개별 suggestions가 연산의 정본.\n- 독립 리뷰에서 찾은 요청 간 mutation·미확인 장기화·삭제 receipt·TTL·조건/fact selector·match/복수값·response 오류 공백을 회귀 테스트로 수정. 최신 검토의 차단 발견 없음.\n\n## Review Checklist\n\n- [x] 관련 Issue의 Requirements와 Acceptance Criteria를 확인했다.\n- [x] 변경 범위가 Issue 목적에 맞고 무관한 사용자 변경/산출물은 제외했다.\n- [x] Git Diff와 미추적 포함 파일 및 정확한 index 목록을 검토했다.\n- [x] 테스트 명령·실제 결과와 미실행 이유/한계를 기록했다.\n- [x] 코드·현재 동작 문서·README와 역사적 계획의 역할이 일치한다.\n- [x] 알려진 위험과 남은 제품 범위를 기록했다.\n- [x] 문서 링크와 ADR을 확인했다.\n\n",
+  "state": "MERGED",
+  "isDraft": false,
+  "mergedAt": "2026-10-14T02:41:02Z",
+  "mergeCommit": {
+    "oid": "02b6b90bd43991ca101cacf6701ebe0d56f0cef2"
+  },
+  "url": "https://github.com/jongrionro-debug/HCI_HANDSOME/pull/3",
+  "baseRefName": "main",
+  "headRefName": "codex/1-memory-design",
+  "headRefOid": "6ca871a878782a6ece8932ad0d1451d818972445",
+  "comments": [],
+  "reviews": [],
+  "commits": [
+    {
+      "oid": "6ca871a878782a6ece8932ad0d1451d818972445",
+      "messageHeadline": "feat: implement shopping memory and target-feature inference (#2)",
+      "authoredDate": "2026-10-13T17:44:36Z",
+      "committedDate": "2026-10-13T17:44:36Z"
+    }
+  ],
+  "files": [
+    {
+      "path": ".env.example",
+      "additions": 4,
+      "deletions": 0,
+      "changeType": "ADDED"
+    },
+    {
+      "path": ".github/workflows/memory-tests.yml",
+      "additions": 38,
+      "deletions": 0,
+      "changeType": "ADDED"
+    },
+    {
+      "path": ".gitignore",
+      "additions": 6,
+      "deletions": 0,
+      "changeType": "MODIFIED"
+    },
+    {
+      "path": "README.md",
+      "additions": 35,
+      "deletions": 3,
+      "changeType": "MODIFIED"
+    },
+    {
+      "path": "docs/decisions/0001-memory-boundaries.md",
+      "additions": 48,
+      "deletions": 0,
+      "changeType": "ADDED"
+    },
+    {
+      "path": "docs/decisions/0002-memory-prototype-storage.md",
+      "additions": 48,
+      "deletions": 0,
+      "changeType": "ADDED"
+    },
+    {
+      "path": "docs/decisions/0003-consumer-shopping-prototype.md",
+      "additions": 44,
+      "deletions": 0,
+      "changeType": "ADDED"
+    },
+    {
+      "path": "docs/memory-design.md",
+      "additions": 247,
+      "deletions": 0,
+      "changeType": "ADDED"
+    },
+    {
+      "path": "docs/memory-implementation-plan.md",
+      "additions": 142,
+      "deletions": 0,
+      "changeType": "ADDED"
+    },
+    {
+      "path": "docs/shopping-memory-prototype.md",
+      "additions": 162,
+      "deletions": 0,
+      "changeType": "ADDED"
+    },
+    {
+      "path": "docs/target-feature-inference-plan.md",
+      "additions": 343,
+      "deletions": 0,
+      "changeType": "ADDED"
+    },
+    {
+      "path": "pyproject.toml",
+      "additions": 16,
+      "deletions": 0,
+      "changeType": "ADDED"
+    },
+    {
+      "path": "schemas/examples/memory-cases.json",
+      "additions": 6508,
+      "deletions": 0,
+      "changeType": "ADDED"
+    },
+    {
+      "path": "schemas/memory-contract.schema.json",
+      "additions": 1937,
+      "deletions": 0,
+      "changeType": "ADDED"
+    },
+    {
+      "path": "scripts/requirements-memory-design.txt",
+      "additions": 3,
+      "deletions": 0,
+      "changeType": "ADDED"
+    },
+    {
+      "path": "scripts/validate_memory_design.py",
+      "additions": 802,
+      "deletions": 0,
+      "changeType": "ADDED"
+    },
+    {
+      "path": "src/stylemate_memory/__init__.py",
+      "additions": 3,
+      "deletions": 0,
+      "changeType": "ADDED"
+    },
+    {
+      "path": "src/stylemate_memory/app.py",
+      "additions": 64,
+      "deletions": 0,
+      "changeType": "ADDED"
+    },
+    {
+      "path": "src/stylemate_memory/cli.py",
+      "additions": 161,
+      "deletions": 0,
+      "changeType": "ADDED"
+    },
+    {
+      "path": "src/stylemate_memory/context.py",
+      "additions": 1033,
+      "deletions": 0,
+      "changeType": "ADDED"
+    },
+    {
+      "path": "src/stylemate_memory/errors.py",
+      "additions": 11,
+      "deletions": 0,
+      "changeType": "ADDED"
+    },
+    {
+      "path": "src/stylemate_memory/inference.py",
+      "additions": 455,
+      "deletions": 0,
+      "changeType": "ADDED"
+    },
+    {
+      "path": "src/stylemate_memory/llm.py",
+      "additions": 774,
+      "deletions": 0,
+      "changeType": "ADDED"
+    },
+    {
+      "path": "src/stylemate_memory/registry.py",
+      "additions": 623,
+      "deletions": 0,
+      "changeType": "ADDED"
+    },
+    {
+      "path": "src/stylemate_memory/store.py",
+      "additions": 1389,
+      "deletions": 0,
+      "changeType": "ADDED"
+    },
+    {
+      "path": "tests/__init__.py",
+      "additions": 1,
+      "deletions": 0,
+      "changeType": "ADDED"
+    },
+    {
+      "path": "tests/test_app.py",
+      "additions": 155,
+      "deletions": 0,
+      "changeType": "ADDED"
+    },
+    {
+      "path": "tests/test_context.py",
+      "additions": 248,
+      "deletions": 0,
+      "changeType": "ADDED"
+    },
+    {
+      "path": "tests/test_inference.py",
+      "additions": 182,
+      "deletions": 0,
+      "changeType": "ADDED"
+    },
+    {
+      "path": "tests/test_llm.py",
+      "additions": 380,
+      "deletions": 0,
+      "changeType": "ADDED"
+    },
+    {
+      "path": "tests/test_registry.py",
+      "additions": 41,
+      "deletions": 0,
+      "changeType": "ADDED"
+    },
+    {
+      "path": "tests/test_store.py",
+      "additions": 714,
+      "deletions": 0,
+      "changeType": "ADDED"
+    }
+  ],
+  "statusCheckRollup": [
+    {
+      "__typename": "CheckRun",
+      "completedAt": "2026-10-13T17:48:06Z",
+      "conclusion": "SUCCESS",
+      "detailsUrl": "https://github.com/jongrionro-debug/HCI_HANDSOME/actions/runs/38441562443/job/115449163977",
+      "name": "memory-tests (Python 3.11)",
+      "startedAt": "2026-10-13T17:48:00Z",
+      "status": "COMPLETED",
+      "workflowName": "memory-tests"
+    },
+    {
+      "__typename": "CheckRun",
+      "completedAt": "2026-10-13T17:48:07Z",
+      "conclusion": "SUCCESS",
+      "detailsUrl": "https://github.com/jongrionro-debug/HCI_HANDSOME/actions/runs/38441562329/job/115449162697",
+      "name": "repository-checks",
+      "startedAt": "2026-10-13T17:48:01Z",
+      "status": "COMPLETED",
+      "workflowName": "repository-checks"
+    },
+    {
+      "__typename": "CheckRun",
+      "completedAt": "2026-10-13T17:48:10Z",
+      "conclusion": "SUCCESS",
+      "detailsUrl": "https://github.com/jongrionro-debug/HCI_HANDSOME/actions/runs/38441562443/job/115449163424",
+      "name": "memory-tests (Python 3.14)",
+      "startedAt": "2026-10-13T17:48:01Z",
+      "status": "COMPLETED",
+      "workflowName": "memory-tests"
+    }
+  ]
+}

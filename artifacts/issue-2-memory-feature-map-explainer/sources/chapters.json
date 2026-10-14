@@ -1,0 +1,44 @@
+[
+  {
+    "id": "A",
+    "title": "1. 오늘의 예외와 평소 취향",
+    "start": 13.051,
+    "end": 68.765,
+    "start_label": "00:13"
+  },
+  {
+    "id": "B",
+    "title": "2. Feature Map은 무엇을 표현하나",
+    "start": 68.765,
+    "end": 135.384,
+    "start_label": "01:08"
+  },
+  {
+    "id": "C",
+    "title": "3. 기억 하나를 저장하는 과정",
+    "start": 135.384,
+    "end": 204.262,
+    "start_label": "02:15"
+  },
+  {
+    "id": "D",
+    "title": "4. 저장된 기억을 context로 좁히기",
+    "start": 204.262,
+    "end": 276.751,
+    "start_label": "03:24"
+  },
+  {
+    "id": "E",
+    "title": "5. context에서 목표값을 만드는 과정",
+    "start": 276.751,
+    "end": 348.23,
+    "start_label": "04:36"
+  },
+  {
+    "id": "F",
+    "title": "6. 활용과 삭제, 검증의 경계",
+    "start": 348.23,
+    "end": 420.276,
+    "start_label": "05:48"
+  }
+]

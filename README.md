@@ -1,13 +1,15 @@
 # StyleMate · HCI_HANDSOME
 
-StyleMate는 평소 취향을 유지하면서 고객 미팅·발표 등 현재 상황에 맞게 코디를 조정하도록 돕는 대화형 추천 연구 프로젝트다. 사용자가 기본 취향과 이번 요청의 조건을 구분해 확인·수정하고, 필요한 정보에 따라 텍스트 질문과 이미지 선택을 제공하는 상호작용을 연구한다.
+StyleMate는 텍스트·이미지 상호작용과 우리가 설계한 장·단기 메모리 시스템으로 원하는 패션 아이템을 찾아주는 에이전트 연구 프로젝트다. 아이템·조건별 취향을 축적하고 지속적 선호와 현재 요구를 구분해 추천에 활용한다. 핵심은 이 시스템을 사용하는 에이전트의 아이템 선호 판단이 사용자의 판단을 얼마나 충실하게 재현하는지 평가하는 것이다.
 
 ## 현재 상태와 기술 스택
 
-- 연구 문제와 RQ1·RQ2는 [연구 기준](docs/master.md)에 정의되어 있다.
+- 중간보고서용 Project overview·Project objective와 RQ 분리 방향은 [연구 기준](docs/master.md)의 2026-10-14 사용자 동의·설명을 반영한다. RQ1은 설계한 메모리 시스템을 통한 취향 판단의 재현, RQ2는 텍스트·이미지로 취향 정보를 얻는 방식이다. 구체적인 RQ 문안·평가 방법은 Proposed이며 기존 비교·평가는 보존했다. 실제 선호 판단 재현·추천 품질은 아직 사용자 평가 전이다.
 - [시스템 동작 설계](docs/workflow.md)는 Figma 화면에서 확인한 구성, 구현 제안, 미정 사항을 구분한다. 실행 중인 앱의 명세로 해석하지 않는다.
 - [Issue #2의 로컬 프로토타입](docs/shopping-memory-prototype.md)은 Python 3.11+·SQLite 저장, 장·단기 메모리 context, 일반 쇼핑용17개 목표 feature, CLI와 오프라인 테스트를 제공한다. 실행 의존성은 표준 라이브러리이며 제품 화면·인증·상품 검색/추천 서비스는 구현하지 않았다.
-- OpenAI Responses API adapter는 주입된 가상 HTTP 응답으로 연결·검증한다. 사용자의 **실제 호출은 나중에**라는 선택에 따라 이번 작업에서 API 키를 읽거나 실제 LLM을 호출하지 않았다. 기본 demo/rule 실행은 네트워크를 사용하지 않는다.
+- OpenAI Responses API adapter는 주입된 가상 HTTP 응답으로 연결·검증한다. Issue #2 구현 당시 사용자의 **실제 호출은 나중에**라는 선택에 따라 API 키를 읽거나 실제 LLM을 호출하지 않았다. 기본 demo/rule 실행은 네트워크를 사용하지 않는다.
+- [Codex Luna 사전 테스트](artifacts/luna-memory-preflight/README.md)는 2026-10-14 사용자가 선택한 `gpt-6-luna` 에이전트로 합성 자연어 입력8/목표 context10개를 처리한 별도 실험이다. 후보 분해·현재 코드의 조건 보존과 추가 추론/질문 수준을 구분하며 제품 Responses 실호출·입력 UI 구현·일반 사용자 정확도 평가를 뜻하지 않는다.
+- [개발자용 Chat/Memory/Feature Map 관찰 도구](docs/developer-memory-inspector.md)는 세 패널로 LLM 추출 후보·확인/장기 동의·실제 SQLite/context·목표값/근거 변화를 관찰한다. `gpt-6-luna` Codex CLI를 실제 호출하는 로컬 도구이며 소비자 UI·참조 이미지·상품 추천 기능과 구분한다.
 - [Issue #1의 메모리 설계](docs/memory-design.md)와 [구현 계획](docs/memory-implementation-plan.md)은 2026-10-13 Accepted v0.2의 설계·가상 검증 기록이다. 현재 실행 DTO와 같은 JSON 형식이 아니며 핵심 확인/동의·범위·보관 원칙을 이어받았다.
 - [목표 feature 계획](docs/target-feature-inference-plan.md)의 방향은 2026-10-14 사용자가 승인했다. 일반 쇼핑에 맞춘 축소·구현 위임의 범위와 65+9에서17개로 줄인 이유는 [ADR 0003](docs/decisions/0003-consumer-shopping-prototype.md)에 기록했다. 현재 실행 계약은 프로토타입 문서와 코드가 정본이다.
 - 기존 산출물은 Markdown과 HTML 문서다. HTML에는 CSS·JavaScript와 Markdown 원문이 포함되어 있으며, 생성기 표기는 `Answer me with HTML 0.4.6`이다. 재생성 도구와 명령은 저장소에 포함되어 있지 않다.
@@ -19,12 +21,13 @@ StyleMate는 평소 취향을 유지하면서 고객 미팅·발표 등 현재 �
 |---|---|
 | [AGENTS.md](AGENTS.md) | Codex의 작업·승인·검증 규칙 |
 | [docs/engineering-workflow.md](docs/engineering-workflow.md) | 담당 작업별 브랜치 → 기획·구현 → 테스트 → PR → 리뷰·병합 절차 |
-| [docs/master.md](docs/master.md) | 확정된 연구 문제와 RQ |
+| [docs/master.md](docs/master.md) | 현재 연구 목적·문제 정의, 기존 RQ 비교·평가와 Proposed 정렬안 |
 | [docs/workflow.md](docs/workflow.md) · [HTML](docs/workflow.html) | 제품의 화면·상태 흐름과 구현 제안 |
 | [docs/memory-design.md](docs/memory-design.md) · [구현 계획](docs/memory-implementation-plan.md) | Issue #1의 메모리 결정표·계약·보관/삭제·연구 경계와 승인 후 구현·검증 순서 |
 | [docs/target-feature-inference-plan.md](docs/target-feature-inference-plan.md) | 승인된 방향·전체 feature 설계/확장 참조와 원래 계획 기록 |
 | [docs/shopping-memory-prototype.md](docs/shopping-memory-prototype.md) · [ADR 0003](docs/decisions/0003-consumer-shopping-prototype.md) | Issue #2의 소비자용 실행 계약·축소 이유·로컬 명령·LLM 연결 경계 |
 | [src/stylemate_memory/](src/stylemate_memory/) · [tests/](tests/) · [pyproject.toml](pyproject.toml) | 실제 SQLite·context·목표 추론·Responses adapter·CLI와 오프라인 단위/통합 테스트 |
+| [docs/developer-memory-inspector.md](docs/developer-memory-inspector.md) · [로컬 서버](src/stylemate_memory/inspector.py) · [Codex 연결](src/stylemate_memory/codex_llm.py) | 개발자용 세 패널·실제 Codex 추출/목표 호출과 확인/동의·근거·로그 관찰 |
 | [docs/decisions/0001-memory-boundaries.md](docs/decisions/0001-memory-boundaries.md) · [0002](docs/decisions/0002-memory-prototype-storage.md) | 범위/동의/삭제와 최소 저장/조회/배치 처리의 Accepted ADR |
 | [schemas/memory-contract.schema.json](schemas/memory-contract.schema.json) · [가상 사례](schemas/examples/memory-cases.json) | Accepted v0.2 계약·fixture. 제품/모델/DB 검증과 구분 |
 | [scripts/validate_memory_design.py](scripts/validate_memory_design.py) | JSON Schema·가상 정책의 정합성 검사 |
@@ -61,6 +64,14 @@ PYTHONPATH=src python3 -m unittest discover -s tests -v
 
 지속 DB·항목별 쓰기·목표값·향후 명시적 OpenAI 호출 설정은 [현재 실행 문서](docs/shopping-memory-prototype.md)를 따른다. 실제 호출·의미 품질 평가와 구조/가상 연결 테스트를 구분한다.
 
+## 개발자용 관찰 도구
+
+개발자용 관찰 도구는 다음 명령으로 연다. 기존 Codex 로그인과 모델 사용 권한이 필요하며 실제 모델을 호출한다. 기본 URL은 `http://127.0.0.1:8765`, DB는 OS 임시 폴더에 생성된다. [실행·확인/저장 흐름·한계](docs/developer-memory-inspector.md)를 따른다.
+
+```sh
+PYTHONPATH=src python3 -m stylemate_memory.inspector
+```
+
 ## 저장소와 역사적 설계 검사
 
 저장소 루트에서 실행한다. 추가 Python 패키지는 필요하지 않다.
@@ -80,7 +91,7 @@ python3 -m venv /tmp/stylemate-memory-check
 /tmp/stylemate-memory-check/bin/python scripts/validate_memory_design.py
 ```
 
-실제 실행 결과와 AC별 완료 근거는 [메모리 구현 계획의 검증 기록](docs/memory-implementation-plan.md#7-이번-실행-결과와-한계)에 있다.
+설계 당시 실행 결과는 [초기 검증 기록](docs/memory-implementation-plan.md#7-이번-실행-결과와-한계), AC별 근거와 최신 문서 검증은 [Issue #1 문서 마무리 기록](docs/memory-implementation-plan.md#8-2026-10-14-issue-1-문서-마무리)에 있다.
 
 ## GitHub 적용 상태
 

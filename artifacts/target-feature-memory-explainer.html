@@ -1,0 +1,856 @@
+<!doctype html>
+<html lang="zh-CN" data-theme="shadcn" data-mode="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="generator" content="Answer me with HTML 0.4.6">
+<title>기억에서 원하는 옷의 조건까지</title>
+<style>
+html[data-theme="blueprint"], html[data-theme="blueprint"][data-mode="light"] {
+  --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, "JetBrains Mono", Menlo, Consolas, "Liberation Mono", monospace;
+  --radius: 0px;
+  --shadow: none;
+  --bw: 1.5px;
+  --head-font: var(--font-sans);
+  --bg: #f6f6f3;
+  --paper: #ffffff;
+  --ink: #16181d;
+  --ink-2: #4b5260;
+  --ink-3: #8b929e;
+  --line: #1d2026;
+  --line-2: #d6dae1;
+  --fill: #f3f5f8;
+  --accent: #1d5fbf;
+  --accent-bg: #e4ecf8;
+  --ok: #1d5fbf;
+  --ok-bg: #e4ecf8;
+  --err: #c62828;
+  --err-bg: #fbeaea;
+  --warn: #a8620a;
+  --warn-bg: #fdf3e2;
+  --head-bg: #16181d;
+  --head-fg: #ffffff;
+}
+html[data-theme="blueprint"][data-mode="dark"] {
+  --bg: #081322;
+  --paper: #0d1c31;
+  --ink: #e6edf7;
+  --ink-2: #a9b8cc;
+  --ink-3: #6b7f99;
+  --line: #c9d6e8;
+  --line-2: #23385a;
+  --fill: #12253f;
+  --accent: #6ea8ff;
+  --accent-bg: #16305a;
+  --ok: #6ea8ff;
+  --ok-bg: #16305a;
+  --err: #ff7070;
+  --err-bg: #3b1620;
+  --warn: #f0b14a;
+  --warn-bg: #3a2a10;
+  --head-bg: #e6edf7;
+  --head-fg: #081322;
+}
+@media (prefers-color-scheme: dark) {
+html[data-theme="blueprint"][data-mode="auto"] {
+  --bg: #081322;
+  --paper: #0d1c31;
+  --ink: #e6edf7;
+  --ink-2: #a9b8cc;
+  --ink-3: #6b7f99;
+  --line: #c9d6e8;
+  --line-2: #23385a;
+  --fill: #12253f;
+  --accent: #6ea8ff;
+  --accent-bg: #16305a;
+  --ok: #6ea8ff;
+  --ok-bg: #16305a;
+  --err: #ff7070;
+  --err-bg: #3b1620;
+  --warn: #f0b14a;
+  --warn-bg: #3a2a10;
+  --head-bg: #e6edf7;
+  --head-fg: #081322;
+}
+}
+
+html[data-theme="shadcn"], html[data-theme="shadcn"][data-mode="light"] {
+  --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, "JetBrains Mono", Menlo, Consolas, "Liberation Mono", monospace;
+  --radius: 8px;
+  --shadow: 0 1px 2px 0 rgba(0,0,0,0.05);
+  --bw: 1px;
+  --head-font: var(--font-sans);
+  --bg: #fafafa;
+  --paper: #ffffff;
+  --ink: #09090b;
+  --ink-2: #71717a;
+  --ink-3: #a1a1aa;
+  --line: #e4e4e7;
+  --line-2: #f0f0f2;
+  --fill: #f4f4f5;
+  --accent: #2563eb;
+  --accent-bg: #eff6ff;
+  --ok: #16a34a;
+  --ok-bg: #f0fdf4;
+  --err: #dc2626;
+  --err-bg: #fef2f2;
+  --warn: #d97706;
+  --warn-bg: #fffbeb;
+  --head-bg: #18181b;
+  --head-fg: #fafafa;
+}
+html[data-theme="shadcn"][data-mode="dark"] {
+  --bg: #09090b;
+  --paper: #121215;
+  --ink: #fafafa;
+  --ink-2: #a1a1aa;
+  --ink-3: #71717a;
+  --line: #27272a;
+  --line-2: #1c1c1f;
+  --fill: #18181b;
+  --accent: #60a5fa;
+  --accent-bg: #172554;
+  --ok: #4ade80;
+  --ok-bg: #052e16;
+  --err: #f87171;
+  --err-bg: #450a0a;
+  --warn: #fbbf24;
+  --warn-bg: #451a03;
+  --head-bg: #fafafa;
+  --head-fg: #18181b;
+}
+@media (prefers-color-scheme: dark) {
+html[data-theme="shadcn"][data-mode="auto"] {
+  --bg: #09090b;
+  --paper: #121215;
+  --ink: #fafafa;
+  --ink-2: #a1a1aa;
+  --ink-3: #71717a;
+  --line: #27272a;
+  --line-2: #1c1c1f;
+  --fill: #18181b;
+  --accent: #60a5fa;
+  --accent-bg: #172554;
+  --ok: #4ade80;
+  --ok-bg: #052e16;
+  --err: #f87171;
+  --err-bg: #450a0a;
+  --warn: #fbbf24;
+  --warn-bg: #451a03;
+  --head-bg: #fafafa;
+  --head-fg: #18181b;
+}
+}
+
+html[lang="ja"][data-theme][data-mode] {
+  --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic UI", "Yu Gothic", Meiryo, "Noto Sans CJK JP", "Noto Sans JP", "PingFang SC", "Microsoft YaHei", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+html[lang="ja"][data-theme="3b1b"][data-mode] {
+  --v-title-font: "CMU Serif", "Latin Modern Roman", "Iowan Old Style", "Palatino", "Hiragino Mincho ProN", "Yu Mincho", "Noto Serif CJK JP", "Noto Serif JP", "Songti SC", serif;
+}
+
+/* Answer me with HTML base — 只引用主题变量，禁止写死颜色（主题 token 见 themes/index.js） */
+*, *::before, *::after { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+body {
+  background: var(--bg); color: var(--ink);
+  font-family: var(--font-sans); font-size: 14px; line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+}
+code, pre, kbd { font-family: var(--font-mono); }
+
+/* ── 工具栏 ─────────────────────────────── */
+.am-toolbar {
+  position: fixed; top: 12px; right: 12px; z-index: 10; display: flex; gap: 6px;
+}
+.am-btn {
+  font: 12px/1 var(--font-sans); color: var(--ink); background: var(--paper);
+  border: 1px solid var(--line-2); border-radius: var(--radius); padding: 7px 10px; cursor: pointer;
+}
+.am-btn:hover { border-color: var(--ink-3); }
+.am-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+/* ── 页头 ───────────────────────────────── */
+.am-head { margin: 0 0 20px; padding-right: 260px; }
+.am-head h1 { margin: 0; font-size: 24px; line-height: 1.25; letter-spacing: -0.01em; }
+.am-sub { margin: 4px 0 0; color: var(--ink-2); }
+.am-head-meta { display: flex; flex-wrap: wrap; gap: 6px 18px; margin-top: 10px; font-size: 12px; color: var(--ink-2); }
+.am-head-meta b { font-family: var(--font-mono); font-weight: 400; color: var(--ink-3); margin-right: 6px; }
+.am-intro { margin-top: 12px; max-width: 80ch; }
+
+/* ── sheet 图纸板 ────────────────────────── */
+.am-sheet { max-width: 1680px; margin: 0 auto; padding: 32px 28px 40px; }
+.am-frame { position: relative; }
+.am-grid {
+  display: grid; grid-template-columns: repeat(var(--cols, 3), minmax(0, 1fr));
+  gap: 20px; align-items: start;
+}
+.am-ruler { display: none; }
+html[data-theme="blueprint"] .am-frame { border: 1px solid var(--line); padding: 30px; }
+html[data-theme="blueprint"] .am-frame::before {
+  content: ""; position: absolute; inset: 18px; border: 1px solid var(--line); pointer-events: none;
+}
+html[data-theme="blueprint"] .am-ruler {
+  display: flex; position: absolute; font: 10px/1 var(--font-mono); color: var(--ink-3);
+}
+.am-ruler span { flex: 1; display: flex; align-items: center; justify-content: center; }
+.am-ruler--top, .am-ruler--bottom { left: 18px; right: 18px; height: 18px; }
+.am-ruler--top { top: 0; }
+.am-ruler--bottom { bottom: 0; }
+.am-ruler--left, .am-ruler--right { top: 18px; bottom: 18px; width: 18px; flex-direction: column; }
+.am-ruler--left { left: 0; }
+.am-ruler--right { right: 0; }
+.am-ruler--top span + span, .am-ruler--bottom span + span { border-left: 1px solid var(--line); }
+.am-ruler--left span + span, .am-ruler--right span + span { border-top: 1px solid var(--line); }
+
+/* ── 面板 ───────────────────────────────── */
+.am-panel {
+  background: var(--paper); border: var(--bw) solid var(--line); border-radius: var(--radius);
+  box-shadow: var(--shadow); min-width: 0; overflow: hidden;
+}
+.am-panel-head {
+  display: flex; align-items: stretch; gap: 0; border-bottom: var(--bw) solid var(--line); min-height: 34px;
+}
+.am-panel-id {
+  display: flex; align-items: center; justify-content: center; min-width: 34px; padding: 0 8px;
+  background: var(--head-bg); color: var(--head-fg); font-weight: 600; font-size: 14px;
+}
+html[data-theme="shadcn"] .am-panel-id { border-radius: 6px; min-width: 24px; height: 24px; margin: 9px 0 9px 14px; font-size: 12px; }
+html[data-theme="shadcn"] .am-panel-head { border-bottom-width: 1px; }
+.am-panel-head h2 { margin: 0; padding: 7px 12px; font-size: 15px; font-weight: 600; flex: 1; display: flex; align-items: center; }
+.am-panel-meta { align-self: center; padding: 0 12px; font: 11px/1.3 var(--font-mono); color: var(--ink-2); text-align: right; }
+.am-panel-body { padding: 14px 16px 16px; }
+.am-panel-body > * + * { margin-top: 12px; }
+
+/* ── Markdown 正文 ───────────────────────── */
+.am-md > :first-child { margin-top: 0; }
+.am-md > :last-child { margin-bottom: 0; }
+.am-md p { margin: 0 0 8px; }
+.am-md ul, .am-md ol { margin: 0 0 8px; padding-left: 20px; }
+.am-md li + li { margin-top: 3px; }
+.am-md h3, .am-md h4 { margin: 14px 0 6px; font-size: 13px; }
+.am-md a { color: var(--accent); }
+.am-md blockquote { margin: 0 0 8px; padding: 2px 12px; border-left: 3px solid var(--line-2); color: var(--ink-2); }
+.am-md :not(pre) > code { font-size: 0.9em; background: var(--fill); padding: 1px 5px; border-radius: 4px; }
+.am-md hr { border: 0; border-top: 1px solid var(--line-2); margin: 12px 0; }
+.am-md table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.am-md th {
+  text-align: left; font: 11px/1.3 var(--font-mono); color: var(--ink-2); font-weight: 400;
+  padding: 6px 10px; border-bottom: 1px solid var(--line-2);
+}
+.am-md td { padding: 7px 10px; border-bottom: 1px solid var(--line-2); vertical-align: top; }
+.am-md tbody tr:nth-child(even) td { background: var(--fill); }
+.am-table-wrap { overflow-x: auto; }
+.am-code {
+  margin: 0; padding: 12px 14px; background: var(--fill); border: 1px solid var(--line-2);
+  border-radius: var(--radius); overflow-x: auto; font-size: 12.5px; line-height: 1.5;
+}
+
+/* ── 状态徽章 ok / no / warn ──────────────── */
+.am-status { white-space: nowrap; font-weight: 500; }
+.am-status--ok { color: var(--ok); }
+.am-status--no { color: var(--err); }
+.am-status--warn { color: var(--warn); }
+.am-status-icon { display: inline-block; width: 1.1em; font-weight: 700; }
+
+/* ── callout ─────────────────────────────── */
+.am-callout {
+  border: 1px solid var(--line-2); border-left: 3px solid var(--accent); background: var(--accent-bg);
+  padding: 10px 14px; border-radius: var(--radius);
+}
+.am-callout--ok { border-left-color: var(--ok); background: var(--ok-bg); }
+.am-callout--warn { border-left-color: var(--warn); background: var(--warn-bg); }
+.am-callout--err { border-left-color: var(--err); background: var(--err-bg); }
+.am-callout-title { font-weight: 600; margin-bottom: 4px; }
+
+/* ── kv 标题栏格 ─────────────────────────── */
+.am-kv {
+  display: grid; grid-template-columns: repeat(var(--kv-cols, 2), minmax(0, 1fr)); margin: 0;
+  border-top: var(--bw) solid var(--line); border-left: var(--bw) solid var(--line);
+}
+.am-kv-cell { border-right: var(--bw) solid var(--line); border-bottom: var(--bw) solid var(--line); padding: 6px 10px 8px; min-width: 0; }
+.am-kv-cell--wide { grid-column: 1 / -1; }
+.am-kv dt { font: 11px/1.4 var(--font-mono); color: var(--ink-2); }
+.am-kv dd { margin: 2px 0 0; font-size: 14px; font-weight: 500; overflow-wrap: anywhere; }
+.am-kv-cell--wide dd { font-size: 17px; font-weight: 600; }
+html[data-theme="shadcn"] .am-kv { border-color: var(--line); border-radius: var(--radius); overflow: hidden; }
+
+/* ── timeline ────────────────────────────── */
+.am-timeline { list-style: none; margin: 0; padding: 0; }
+.am-timeline--h { display: grid; grid-template-columns: repeat(var(--n, 1), minmax(0, 1fr)); padding-top: 4px; }
+.am-timeline--h li { position: relative; text-align: center; padding: 0 6px; }
+.am-timeline--h li::before {
+  content: ""; position: absolute; top: 31px; left: 0; right: 0; border-top: var(--bw) solid var(--line);
+}
+.am-timeline--h li:first-child::before { left: 50%; }
+.am-timeline--h li:last-child::before { right: 50%; }
+.am-tl-when { display: block; font-size: 15px; font-weight: 500; height: 24px; }
+.am-tl-dot {
+  position: relative; display: block; width: 11px; height: 11px; margin: 2px auto 8px;
+  border: var(--bw) solid var(--line); border-radius: 50%; background: var(--paper);
+}
+.am-tl-item--hi .am-tl-dot { background: var(--accent); border-color: var(--accent); }
+.am-tl-title { display: block; font-size: 12.5px; font-weight: 500; }
+.am-tl-text { display: block; font-size: 12px; color: var(--ink-2); line-height: 1.45; }
+.am-timeline--v li { position: relative; padding: 0 0 14px 22px; }
+.am-timeline--v li::before { content: ""; position: absolute; left: 5px; top: 6px; bottom: -6px; border-left: var(--bw) solid var(--line-2); }
+.am-timeline--v li:last-child::before { display: none; }
+.am-timeline--v .am-tl-dot { position: absolute; left: 0; top: 4px; margin: 0; }
+.am-timeline--v .am-tl-when { display: inline; height: auto; font: 12px var(--font-mono); color: var(--ink-2); margin-right: 8px; }
+.am-timeline--v .am-tl-title { display: inline; font-size: 14px; }
+.am-timeline--v .am-tl-text { margin-top: 2px; }
+
+/* ── annot 句子标注 ──────────────────────── */
+.am-annot + .am-annot { border-top: 1px solid var(--line-2); padding-top: 12px; }
+.am-annot-head { display: flex; justify-content: space-between; gap: 12px; font-size: 13px; font-weight: 600; margin-bottom: 8px; }
+.am-annot-meta { font: 11px var(--font-mono); font-weight: 400; color: var(--ink-2); }
+.am-annot-scroll { overflow-x: auto; }
+.am-annot-line {
+  position: relative; display: inline-block; white-space: pre; font: 14px/1.6 var(--font-mono);
+  padding-bottom: calc(var(--rows, 0) * 17px + 14px);
+}
+.am-annot-line--wrap { display: block; white-space: normal; padding-bottom: 10px; }
+.am-annot-line--wrap .am-seg { white-space: nowrap; }
+.am-seg { position: relative; }
+.am-seg::after {
+  content: ""; position: absolute; left: 1px; right: 1px; top: calc(100% + 1px); height: 5px;
+  border: 1px solid var(--accent); border-top: 0;
+}
+.am-seg-n {
+  position: absolute; left: 0; top: calc(100% + 8px + var(--row, 0) * 17px);
+  font: 11px/16px var(--font-sans); color: var(--accent); white-space: nowrap;
+}
+.am-seg--err { color: var(--err); }
+.am-seg--err::after { border-color: var(--err); }
+.am-seg--err .am-seg-n { color: var(--err); }
+.am-annot-caption { font-size: 12px; color: var(--ink-2); }
+
+/* ── limits 限值条 ───────────────────────── */
+.am-lim + .am-lim { margin-top: 14px; }
+.am-lim-head { display: flex; justify-content: space-between; gap: 12px; font-size: 13px; margin-bottom: 4px; }
+.am-lim-val { font: 12px var(--font-mono); color: var(--accent); white-space: nowrap; }
+.am-lim-track { position: relative; height: 12px; border: 1px solid var(--line-2); background: var(--fill); border-radius: calc(var(--radius) / 2); }
+.am-lim-fill { position: absolute; left: 0; top: 0; bottom: 0; background: var(--accent-bg); border-right: 1px solid var(--accent); }
+.am-lim-mark { position: absolute; top: -4px; bottom: -4px; border-left: 2px solid var(--accent); }
+.am-lim.is-over .am-lim-fill { background: var(--err-bg); border-right-color: var(--err); }
+.am-lim.is-over .am-lim-val { color: var(--err); }
+.am-lim-ticks { position: relative; height: 16px; font: 10px/16px var(--font-mono); color: var(--ink-3); }
+.am-lim-ticks span { position: absolute; transform: translateX(-50%); }
+.am-lim-ticks span:first-child { transform: none; }
+.am-lim-note { font-size: 11px; color: var(--ink-2); margin-left: 6px; }
+
+/* ── tree 结构树 ─────────────────────────── */
+.am-tree { font-size: 13px; }
+.am-tree-root { display: flex; justify-content: center; position: relative; padding-bottom: 18px; }
+.am-tree-root::after { content: ""; position: absolute; bottom: 0; left: 50%; height: 18px; border-left: var(--bw) solid var(--line); }
+.am-tree-root--solo { padding-bottom: 12px; }
+.am-tree-root--solo::after { display: none; }
+.am-tree-box {
+  border: var(--bw) solid var(--line); background: var(--paper); padding: 6px 14px; text-align: center;
+  border-radius: var(--radius); font-weight: 600;
+}
+.am-tree-box small { display: block; font-weight: 400; color: var(--ink-2); font-size: 12px; }
+.am-tree-box--root { background: var(--accent-bg); font-size: 15px; padding: 8px 28px; }
+.am-tree-cols { display: grid; grid-template-columns: repeat(var(--n, 1), minmax(0, 1fr)); }
+.am-tree-col { position: relative; padding: 18px 8px 0; min-width: 0; }
+.am-tree-col::before { content: ""; position: absolute; top: 0; left: 0; right: 0; border-top: var(--bw) solid var(--line); }
+.am-tree-col:first-child::before { left: 50%; }
+.am-tree-col:last-child::before { right: 50%; }
+.am-tree-col::after { content: ""; position: absolute; top: 0; left: 50%; height: 18px; border-left: var(--bw) solid var(--line); }
+.am-tree-list, .am-tree-list ul { list-style: none; margin: 0; padding: 0; }
+.am-tree-col > .am-tree-list { margin: 8px 0 0 14px; }
+.am-tree-list ul { margin-left: 16px; }
+.am-tree-list li { position: relative; padding: 3px 0 3px 18px; }
+.am-tree-list li::before { content: ""; position: absolute; left: 0; top: 0.95em; width: 12px; border-top: 1px solid var(--ink-3); }
+.am-tree-list li::after { content: ""; position: absolute; left: 0; top: 0; bottom: 0; border-left: 1px solid var(--ink-3); }
+.am-tree-list li:last-child::after { bottom: auto; height: 0.95em; }
+.am-tree-tag { font: 11px var(--font-mono); color: var(--ink-3); margin-right: 4px; }
+.am-tree code { font: 12px var(--font-mono); }
+.am-tree-sub { display: block; font-size: 11.5px; color: var(--ink-2); }
+.am-tree-hi > .am-tree-label { color: var(--accent); font-weight: 600; }
+
+/* ── 图（flow / sequence）───────────────── */
+.am-diagram { margin: 0; overflow-x: auto; text-align: center; }
+.am-diagram svg { max-width: 100%; height: auto; font-family: var(--font-sans); }
+.am-diagram text { fill: var(--ink); font-size: 13px; }
+.am-node-shape { fill: var(--paper); stroke: var(--line); stroke-width: var(--bw); }
+.am-node--hi .am-node-shape { fill: var(--accent-bg); stroke: var(--accent); }
+.am-node--hi text { fill: var(--accent); font-weight: 600; }
+.am-edge { fill: none; stroke: var(--ink-2); stroke-width: 1.3; }
+.am-edge--dashed { stroke-dasharray: 5 4; }
+.am-arrow { fill: var(--ink-2); }
+.am-edge-label rect { fill: var(--paper); }
+.am-diagram .am-edge-label text { fill: var(--accent); font-size: 11.5px; }
+.am-cluster { fill: var(--fill); stroke: var(--line-2); stroke-width: 1; stroke-dasharray: 4 3; }
+.am-diagram .am-cluster-label { fill: var(--ink-2); font: 11px var(--font-mono); }
+.am-lifeline { stroke: var(--ink-3); stroke-width: 1; stroke-dasharray: 4 4; }
+.am-actor { fill: var(--paper); stroke: var(--line); stroke-width: var(--bw); }
+.am-note { fill: var(--warn-bg); stroke: var(--warn); stroke-width: 1; }
+.am-diagram .am-step { fill: var(--ink-3); font: 10px var(--font-mono); }
+
+/* ── doc 线性讲解 ────────────────────────── */
+.am-doc { max-width: 1120px; margin: 0 auto; padding: 40px 28px 64px; }
+.am-doc-layout { display: grid; grid-template-columns: 200px minmax(0, 1fr); gap: 32px; align-items: start; }
+.am-doc-layout--notoc { grid-template-columns: minmax(0, 1fr); max-width: 860px; }
+.am-toc { position: sticky; top: 24px; font-size: 13px; }
+.am-toc a { display: block; color: var(--ink-2); text-decoration: none; padding: 4px 0 4px 10px; border-left: 2px solid var(--line-2); }
+.am-toc a:hover { color: var(--ink); border-left-color: var(--accent); }
+.am-doc-body > .am-panel + .am-panel { margin-top: 20px; }
+
+/* ── 响应式与打印 ─────────────────────────── */
+@media (max-width: 1100px) {
+  .am-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .am-grid > .am-panel { grid-column: auto !important; }
+  .am-grid > .am-panel.am-span-wide { grid-column: 1 / -1 !important; }
+}
+@media (max-width: 760px) {
+  .am-sheet, .am-doc { padding: 56px 12px 24px; }
+  .am-head { padding-right: 0; }
+  .am-grid { grid-template-columns: minmax(0, 1fr); }
+  .am-grid > .am-panel.am-span-wide { grid-column: auto !important; }
+  html[data-theme="blueprint"] .am-frame { padding: 0; border: 0; }
+  html[data-theme="blueprint"] .am-frame::before, html[data-theme="blueprint"] .am-ruler { display: none; }
+  .am-doc-layout { grid-template-columns: minmax(0, 1fr); }
+  .am-toc { position: static; }
+  .am-timeline--h { grid-template-columns: minmax(0, 1fr); }
+  .am-tree-cols { grid-template-columns: minmax(0, 1fr); }
+}
+.am-colophon { text-align: center; padding: 0 0 28px; font: 11px var(--font-mono); color: var(--ink-3); }
+
+@media print {
+  .am-toolbar { display: none; }
+  body { background: var(--paper); }
+  .am-panel { break-inside: avoid; box-shadow: none; }
+}
+.am-panel--bare { border: 0; background: transparent; box-shadow: none; }
+.am-panel--bare > .am-panel-body { padding: 0; }
+.am-panel--bare .am-kv { background: var(--paper); }
+
+</style>
+</head>
+<body>
+<div class="am-toolbar">
+<button class="am-btn" type="button" data-am="theme" data-labels="{&quot;blueprint&quot;:&quot;主题：图纸&quot;,&quot;shadcn&quot;:&quot;主题：卡片&quot;}">主题：卡片</button>
+<button class="am-btn" type="button" data-am="mode" data-labels="{&quot;auto&quot;:&quot;明暗：跟随系统&quot;,&quot;light&quot;:&quot;明暗：亮&quot;,&quot;dark&quot;:&quot;明暗：暗&quot;}">明暗：亮</button>
+<button class="am-btn" type="button" data-am="copy" data-done="已复制 ✓">复制源稿</button>
+</div>
+<main class="am-doc">
+<header class="am-head"><h1>기억에서 원하는 옷의 조건까지</h1><p class="am-sub">장·단기 메모리와 Feature Map을 연결하는 계획</p><div class="am-head-meta"><span><b>status</b>추가 연결 설계는 Proposed</span><span><b>basis</b>2026-10-14</span></div><div class="am-intro am-md"><div class="am-md"><p>사용자의 취향과 이번 상황을 기억합니다. 그 기억으로 LLM이 원하는 옷의 목표 조건을 제안합니다.</p>
+</div></div></header>
+<div class="am-doc-layout">
+<nav class="am-toc" aria-label="目录"><a href="#panel-A">A · 우리가 만드는 것은 무엇인가요?</a><a href="#panel-B">B · 장기와 단기는 무엇이 다른가요?</a><a href="#panel-C">C · 기억 하나에는 무엇을 담나요?</a><a href="#panel-D">D · LLM에는 어떤 기억을 주나요?</a><a href="#panel-E">E · Feature 값은 어떻게 정하나요?</a><a href="#panel-F">F · 추론한 값은 언제 기억이 되나요?</a><a href="#panel-G">G · 무엇부터 구현하나요?</a></nav><div class="am-doc-body">
+<section class="am-panel" id="panel-A">
+<header class="am-panel-head"><span class="am-panel-id">A</span><h2>우리가 만드는 것은 무엇인가요?</h2></header>
+<div class="am-panel-body"><div class="am-md"><p><strong>우리의 작업은 LLM에 전달할 기억과 맥락을 만드는 것입니다.</strong></p>
+</div>
+<figure class="am-diagram am-flow"><svg viewBox="0 0 172 261" width="172" height="261" role="img" aria-label="流程图：장단기 기억、LLM、목표 조건" xmlns="http://www.w3.org/2000/svg"><defs><marker id="am1-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="am-arrow" d="M0,0 L10,5 L0,10 z"/></marker></defs><g></g><g><g data-step="0"><path class="am-edge" d="M85.8,49 L85.8,65 Q85.8,81 85.8,97 L85.8,113" marker-end="url(#am1-arrow)"/><g class="am-edge-label"><rect x="15" y="72" width="141.6" height="18" rx="3"/><text x="85.8" y="81" text-anchor="middle" dominant-baseline="central">맥락과 Feature Map 전달</text></g></g><g data-step="1"><path class="am-edge" d="M85.8,148 L85.8,164 Q85.8,180 85.8,196 L85.8,212" marker-end="url(#am1-arrow)"/><g class="am-edge-label"><rect x="37.1" y="171" width="97.4" height="18" rx="3"/><text x="85.8" y="180" text-anchor="middle" dominant-baseline="central">값과 근거를 제안</text></g></g></g><g><g class="am-node am-node--rect" data-key="장단기 기억" data-step="0"><rect class="am-node-shape" x="37.3" y="14" width="96.9" height="35" rx="3"/><text x="85.8" y="31.5" text-anchor="middle" dominant-baseline="central">장단기 기억</text></g><g class="am-node am-node--rect" data-key="LLM" data-step="0"><rect class="am-node-shape" x="53.8" y="113" width="64" height="35" rx="3"/><text x="85.8" y="130.5" text-anchor="middle" dominant-baseline="central">LLM</text></g><g class="am-node am-node--rect" data-key="목표 조건" data-step="1"><rect class="am-node-shape" x="43.8" y="212" width="83.9" height="35" rx="3"/><text x="85.8" y="229.5" text-anchor="middle" dominant-baseline="central">목표 조건</text></g></g></svg></figure>
+<div class="am-md"><p>Feature Map은 어떤 속성과 값을 사용할지 알려주는 사전입니다.
+맥락은 그 값 중 사용자가 무엇을 원하는지 판단할 근거입니다.
+이 페이지는 계획 설명입니다. 아래 예시는 실제 실행 결과가 아닙니다.</p>
+</div></div>
+</section>
+<section class="am-panel" id="panel-B">
+<header class="am-panel-head"><span class="am-panel-id">B</span><h2>장기와 단기는 무엇이 다른가요?</h2></header>
+<div class="am-panel-body"><div class="am-md"><p>가상의 사용자가 기본 취향을 확인하고 저장했다고 가정합니다.
+이번에는 고객 미팅에서 입을 바지를 요청합니다.</p>
+<div class="am-table-wrap"><table>
+<thead>
+<tr>
+<th>기억</th>
+<th>사용자의 말</th>
+<th>적용 범위</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>장기 취향</td>
+<td>평소 바지는 여유핏인 Relaxed를 선호해요</td>
+<td>이후 요청에도 참고</td>
+</tr>
+<tr>
+<td>장기 취향</td>
+<td>바지는 네이비를 좋아해요</td>
+<td>이후 요청에도 참고</td>
+</tr>
+<tr>
+<td>단기 조건</td>
+<td>이번 바지는 Slim으로 입고 싶어요</td>
+<td>이번 요청에 적용</td>
+</tr>
+<tr>
+<td>단기 상황</td>
+<td>고객 미팅에서 입을 옷이에요</td>
+<td>이번 요청에 적용</td>
+</tr>
+</tbody></table></div>
+<p><strong>이번 목표는 Slim입니다. 기본 Relaxed 취향은 유지합니다.</strong>
+새 요청에는 이전의 Slim 조건을 자동으로 가져오지 않습니다.
+장기 저장에는 내용 확인과 이후 활용 동의가 필요합니다.</p>
+</div></div>
+</section>
+<section class="am-panel" id="panel-C">
+<header class="am-panel-head"><span class="am-panel-id">C</span><h2>기억 하나에는 무엇을 담나요?</h2></header>
+<div class="am-panel-body"><div class="am-md"><p>한 기억에는 독립적으로 수정할 수 있는 한 가지 뜻을 담습니다.</p>
+<div class="am-table-wrap"><table>
+<thead>
+<tr>
+<th>항목</th>
+<th>예시</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>내용</td>
+<td>이번 바지는 Slim을 원함</td>
+</tr>
+<tr>
+<td>대상</td>
+<td>바지</td>
+</tr>
+<tr>
+<td>선호와 강도</td>
+<td>Slim 선호. 꼭 지켜야 하는지는 별도로 기록</td>
+</tr>
+<tr>
+<td>상황과 기간</td>
+<td>이번 고객 미팅 요청</td>
+</tr>
+<tr>
+<td>적용 범위</td>
+<td>단기</td>
+</tr>
+<tr>
+<td>근거</td>
+<td>사용자의 현재 발화와 확인한 내용</td>
+</tr>
+</tbody></table></div>
+<p><strong>대상을 함께 기억해야 합니다.</strong>
+흰 셔츠와 네이비 재킷은 서로 다른 옷의 색 조건입니다.
+두 조건을 한 옷의 색상 충돌로 처리하지 않습니다.</p>
+</div></div>
+</section>
+<section class="am-panel" id="panel-D">
+<header class="am-panel-head"><span class="am-panel-id">D</span><h2>LLM에는 어떤 기억을 주나요?</h2></header>
+<div class="am-panel-body"><div class="am-md"><p>context는 LLM에 전달하는 <strong>이번 요청의 맥락 묶음</strong>입니다.
+대화 전체를 그대로 보내는 대신 쓸 수 있는 정보를 고릅니다.</p>
+</div>
+<figure class="am-diagram am-flow"><svg viewBox="0 0 166 360" width="166" height="360" role="img" aria-label="流程图：현재 요청과 대상、유효한 기억、이번에 쓸 조건、맥락 묶음" xmlns="http://www.w3.org/2000/svg"><defs><marker id="am2-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="am-arrow" d="M0,0 L10,5 L0,10 z"/></marker></defs><g></g><g><g data-step="0"><path class="am-edge" d="M82.7,49 L82.7,65 Q82.7,81 82.7,97 L82.7,113" marker-end="url(#am2-arrow)"/><g class="am-edge-label"><rect x="28.2" y="72" width="108.9" height="18" rx="3"/><text x="82.7" y="81" text-anchor="middle" dominant-baseline="central">소유권과 기간 확인</text></g></g><g data-step="1"><path class="am-edge" d="M82.7,148 L82.7,164 Q82.7,180 82.7,196 L82.7,212" marker-end="url(#am2-arrow)"/><g class="am-edge-label"><rect x="15" y="171" width="135.4" height="18" rx="3"/><text x="82.7" y="180" text-anchor="middle" dominant-baseline="central">대상별 예외와 충돌 처리</text></g></g><g data-step="2"><path class="am-edge" d="M82.7,247 L82.7,263 Q82.7,279 82.7,295 L82.7,311" marker-end="url(#am2-arrow)"/><g class="am-edge-label"><rect x="34" y="270" width="97.4" height="18" rx="3"/><text x="82.7" y="279" text-anchor="middle" dominant-baseline="central">의미와 근거 보존</text></g></g></g><g><g class="am-node am-node--rect" data-key="현재 요청과 대상" data-step="0"><rect class="am-node-shape" x="19.3" y="14" width="126.8" height="35" rx="3"/><text x="82.7" y="31.5" text-anchor="middle" dominant-baseline="central">현재 요청과 대상</text></g><g class="am-node am-node--rect" data-key="유효한 기억" data-step="0"><rect class="am-node-shape" x="34.2" y="113" width="96.9" height="35" rx="3"/><text x="82.7" y="130.5" text-anchor="middle" dominant-baseline="central">유효한 기억</text></g><g class="am-node am-node--rect" data-key="이번에 쓸 조건" data-step="1"><rect class="am-node-shape" x="25.8" y="212" width="113.8" height="35" rx="3"/><text x="82.7" y="229.5" text-anchor="middle" dominant-baseline="central">이번에 쓸 조건</text></g><g class="am-node am-node--rect am-node--hi" data-key="맥락 묶음" data-step="2"><rect class="am-node-shape" x="40.7" y="311" width="83.9" height="35" rx="3"/><text x="82.7" y="328.5" text-anchor="middle" dominant-baseline="central">맥락 묶음</text></g></g></svg></figure>
+<div class="am-md"><div class="am-table-wrap"><table>
+<thead>
+<tr>
+<th>맥락 묶음의 내용</th>
+<th>이번 바지 예시</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>목표와 대상</td>
+<td>고객 미팅용 바지</td>
+</tr>
+<tr>
+<td>사용할 기본 취향</td>
+<td>Navy 선호</td>
+</tr>
+<tr>
+<td>이번 조건</td>
+<td>Slim 선호</td>
+</tr>
+<tr>
+<td>직접 대응한 값</td>
+<td>Visual Fit은 Slim</td>
+</tr>
+<tr>
+<td>미정 사항</td>
+<td>소재와 혼용률은 아직 모름</td>
+</tr>
+<tr>
+<td>근거</td>
+<td>사용한 기억의 식별자와 버전</td>
+</tr>
+</tbody></table></div>
+<p>이번에 대체된 기본 핏은 실행 조건에서 뺍니다.
+미확인 후보와 철회·삭제·만료된 기억도 제외합니다.
+같은 대상의 조건이 해결되지 않으면 질문으로 남깁니다.</p>
+</div></div>
+</section>
+<section class="am-panel" id="panel-E">
+<header class="am-panel-head"><span class="am-panel-id">E</span><h2>Feature 값은 어떻게 정하나요?</h2></header>
+<div class="am-panel-body"><div class="am-md"><p><strong>명확한 값은 보존하고, 해석이 필요한 값은 제안합니다.</strong></p>
+<div class="am-table-wrap"><table>
+<thead>
+<tr>
+<th>입력 근거</th>
+<th>목표 Feature와 값</th>
+<th>처리</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>이번 바지는 Slim</td>
+<td>Visual Fit = Slim</td>
+<td>명시값 보존</td>
+</tr>
+<tr>
+<td>저장된 네이비 선호</td>
+<td>Primary Color = Navy</td>
+<td>기억 활용</td>
+</tr>
+<tr>
+<td>고객 미팅에서 입을 옷</td>
+<td>Formality Level = 3~4</td>
+<td>추론 제안 예시</td>
+</tr>
+<tr>
+<td>혼용률 정보 없음</td>
+<td>Fiber Composition</td>
+<td>미정 유지</td>
+</tr>
+</tbody></table></div>
+<p>격식 3~4는 설명용 예시입니다. 고객 미팅의 고정 정답이 아닙니다.
+LLM의 추론에는 근거와 짧은 이유를 붙입니다.
+추론한 값은 사용자가 확정한 값과 구분합니다.</p>
+</div>
+<div class="am-callout am-callout--info" role="note"><div class="am-callout-title">값이 하나일 필요는 없습니다</div><div class="am-callout-body am-md"><p>검정 회피는 Black 제외 조건입니다.
+슬림 또는 레귤러 허용은 두 값의 집합입니다.
+격식 3~4 허용은 범위 조건입니다.</p>
+</div></div>
+<div class="am-md"><p>핏 선택만으로 바짓단 모양·색·소재 선호까지 확정하지 않습니다.
+아이템의 격식과 코디 전체의 격식도 각각 다룹니다.</p>
+</div></div>
+</section>
+<section class="am-panel" id="panel-F">
+<header class="am-panel-head"><span class="am-panel-id">F</span><h2>추론한 값은 언제 기억이 되나요?</h2></header>
+<div class="am-panel-body"><div class="am-md"><p>LLM의 제안은 검증을 거쳐 사용자에게 보여줍니다.
+허용값, 적용 대상, 필수 조건, 근거를 확인합니다.
+시스템은 사용자가 명시한 조건을 결과에 보존합니다.</p>
+</div>
+<figure class="am-diagram am-flow"><svg viewBox="0 0 142 572" width="142" height="572" role="img" aria-label="流程图：LLM 제안、검증、사용자 확인、이번 요청 반영、장기 활용 선택、장기 기억" xmlns="http://www.w3.org/2000/svg"><defs><marker id="am3-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="am-arrow" d="M0,0 L10,5 L0,10 z"/></marker></defs><g></g><g><g data-step="0"><path class="am-edge" d="M70.9,49 L70.9,65 Q70.9,81 70.9,97 L70.9,113" marker-end="url(#am3-arrow)"/><g class="am-edge-label"><rect x="28" y="72" width="85.9" height="18" rx="3"/><text x="70.9" y="81" text-anchor="middle" dominant-baseline="central">값과 근거 확인</text></g></g><g data-step="1"><path class="am-edge" d="M70.9,148 L70.9,164 Q70.9,180 70.9,196 L70.9,212" marker-end="url(#am3-arrow)"/><g class="am-edge-label"><rect x="16.5" y="171" width="108.9" height="18" rx="3"/><text x="70.9" y="180" text-anchor="middle" dominant-baseline="central">목표 조건 보여주기</text></g></g><g data-step="2"><path class="am-edge" d="M70.9,247 L70.9,263 Q70.9,279 70.9,295 L70.9,311" marker-end="url(#am3-arrow)"/><g class="am-edge-label"><rect x="33.7" y="270" width="74.4" height="18" rx="3"/><text x="70.9" y="279" text-anchor="middle" dominant-baseline="central">새 확인 근거</text></g></g><g data-step="3"><path class="am-edge" d="M70.9,346 L70.9,362 Q70.9,378 70.9,394 L70.9,410" marker-end="url(#am3-arrow)"/><g class="am-edge-label"><rect x="35.4" y="369" width="71" height="18" rx="3"/><text x="70.9" y="378" text-anchor="middle" dominant-baseline="central">항목별 동의</text></g></g><g data-step="4"><path class="am-edge" d="M70.9,445 L70.9,461 Q70.9,477 70.9,493 L70.9,509" marker-end="url(#am3-arrow)"/><g class="am-edge-label"><rect x="16.5" y="468" width="108.9" height="18" rx="3"/><text x="70.9" y="477" text-anchor="middle" dominant-baseline="central">선택한 항목만 저장</text></g></g></g><g><g class="am-node am-node--rect" data-key="LLM 제안" data-step="0"><rect class="am-node-shape" x="27.5" y="14" width="86.8" height="35" rx="3"/><text x="70.9" y="31.5" text-anchor="middle" dominant-baseline="central">LLM 제안</text></g><g class="am-node am-node--rect" data-key="검증" data-step="0"><rect class="am-node-shape" x="38.9" y="113" width="64" height="35" rx="3"/><text x="70.9" y="130.5" text-anchor="middle" dominant-baseline="central">검증</text></g><g class="am-node am-node--rect" data-key="사용자 확인" data-step="1"><rect class="am-node-shape" x="22.5" y="212" width="96.9" height="35" rx="3"/><text x="70.9" y="229.5" text-anchor="middle" dominant-baseline="central">사용자 확인</text></g><g class="am-node am-node--rect" data-key="이번 요청 반영" data-step="2"><rect class="am-node-shape" x="14" y="311" width="113.8" height="35" rx="3"/><text x="70.9" y="328.5" text-anchor="middle" dominant-baseline="central">이번 요청 반영</text></g><g class="am-node am-node--rect" data-key="장기 활용 선택" data-step="3"><rect class="am-node-shape" x="14" y="410" width="113.8" height="35" rx="3"/><text x="70.9" y="427.5" text-anchor="middle" dominant-baseline="central">장기 활용 선택</text></g><g class="am-node am-node--db" data-key="장기 기억" data-step="4"><path class="am-node-shape" d="M29,516 A42,7 0 0 1 112.9,516 V551 A42,7 0 0 1 29,551 Z"/><path class="am-node-shape" d="M29,516 A42,7 0 0 0 112.9,516"/><text x="70.9" y="537.5" text-anchor="middle" dominant-baseline="central">장기 기억</text></g></g></svg></figure>
+<div class="am-md"><p><strong>모델 제안만으로 장기 기억을 바꾸지 않습니다.</strong>
+같은 대상의 필수 조건이 충돌하면 사용자에게 확인합니다.
+틀린 값과 근거 없는 확정값은 결과에 적용하지 않습니다.</p>
+</div></div>
+</section>
+<section class="am-panel" id="panel-G">
+<header class="am-panel-head"><span class="am-panel-id">G</span><h2>무엇부터 구현하나요?</h2></header>
+<div class="am-panel-body"><ol class="am-timeline am-timeline--v"><li class="am-tl-item"><span class="am-tl-when">1</span><span class="am-tl-dot"></span><span class="am-tl-title">Feature 사전</span><span class="am-tl-text">속성·허용값·적용 대상을 정리합니다.</span></li><li class="am-tl-item"><span class="am-tl-when">2</span><span class="am-tl-dot"></span><span class="am-tl-title">기억 연결</span><span class="am-tl-text">기억의 뜻을 정확한 속성과 대상에 연결합니다.</span></li><li class="am-tl-item"><span class="am-tl-when">3</span><span class="am-tl-dot"></span><span class="am-tl-title">맥락 조립</span><span class="am-tl-text">기본 취향·이번 조건·미정 사항·근거를 묶습니다.</span></li><li class="am-tl-item"><span class="am-tl-when">4</span><span class="am-tl-dot"></span><span class="am-tl-title">가상 검증</span><span class="am-tl-text">예외·충돌·새 요청·삭제 사례를 확인합니다.</span></li><li class="am-tl-item"><span class="am-tl-when">5</span><span class="am-tl-dot"></span><span class="am-tl-title">LLM 연결</span><span class="am-tl-text">모델을 선택한 뒤 실제 해석 품질을 평가합니다.</span></li></ol>
+<div class="am-md"><p>사전은 아이템 속성 65개와 코디 속성 9개를 담는 계획입니다.
+첫 동작 검증은 명시된 단일 아이템으로 시작합니다.
+핏·색·패턴·스타일·분위기·격식을 먼저 확인합니다.</p>
+<div class="am-table-wrap"><table>
+<thead>
+<tr>
+<th>현재 구분</th>
+<th>상태</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>기존 메모리의 동의·범위·저장 규칙</td>
+<td><span class="am-status am-status--ok"><span class="am-status-icon" aria-hidden="true">✓</span>승인된 설계</span></td>
+</tr>
+<tr>
+<td>Feature 연결과 맥락·출력 계약</td>
+<td><span class="am-status am-status--warn"><span class="am-status-icon" aria-hidden="true">!</span>검토용 Proposed 계획</span></td>
+</tr>
+<tr>
+<td>실행 코드와 실제 LLM 품질</td>
+<td>아직 구현·검증 전</td>
+</tr>
+</tbody></table></div>
+<p>전체 계획에는 속성별 연결표와 입력·출력 예시가 있습니다.
+<a href="../docs/target-feature-inference-plan.md">상세 계획 읽기</a></p>
+<p>근거: 사용자 제공 최종 Feature Map PDF 9쪽과 승인된 메모리 설계.
+이 설명 페이지는 새로운 계약의 승인이나 제품 구현 완료를 뜻하지 않습니다.</p>
+</div></div>
+</section>
+</div>
+</div>
+</main>
+<footer class="am-colophon">Generated by Answer me with HTML 0.4.6 · 2026-10-14 01:20</footer>
+<textarea id="am-source" hidden readonly aria-hidden="true">---
+template: doc
+theme: shadcn
+mode: light
+style: 80
+title: 기억에서 원하는 옷의 조건까지
+subtitle: 장·단기 메모리와 Feature Map을 연결하는 계획
+status: 추가 연결 설계는 Proposed
+basis: 2026-10-14
+---
+사용자의 취향과 이번 상황을 기억합니다. 그 기억으로 LLM이 원하는 옷의 목표 조건을 제안합니다.
+
+## A 우리가 만드는 것은 무엇인가요?
+
+**우리의 작업은 LLM에 전달할 기억과 맥락을 만드는 것입니다.**
+
+```flow
+장단기 기억 -&gt; LLM: 맥락과 Feature Map 전달
+LLM -&gt; 목표 조건: 값과 근거를 제안
+```
+
+Feature Map은 어떤 속성과 값을 사용할지 알려주는 사전입니다.
+맥락은 그 값 중 사용자가 무엇을 원하는지 판단할 근거입니다.
+이 페이지는 계획 설명입니다. 아래 예시는 실제 실행 결과가 아닙니다.
+## B 장기와 단기는 무엇이 다른가요?
+
+가상의 사용자가 기본 취향을 확인하고 저장했다고 가정합니다.
+이번에는 고객 미팅에서 입을 바지를 요청합니다.
+
+| 기억 | 사용자의 말 | 적용 범위 |
+|---|---|---|
+| 장기 취향 | 평소 바지는 여유핏인 Relaxed를 선호해요 | 이후 요청에도 참고 |
+| 장기 취향 | 바지는 네이비를 좋아해요 | 이후 요청에도 참고 |
+| 단기 조건 | 이번 바지는 Slim으로 입고 싶어요 | 이번 요청에 적용 |
+| 단기 상황 | 고객 미팅에서 입을 옷이에요 | 이번 요청에 적용 |
+
+**이번 목표는 Slim입니다. 기본 Relaxed 취향은 유지합니다.**
+새 요청에는 이전의 Slim 조건을 자동으로 가져오지 않습니다.
+장기 저장에는 내용 확인과 이후 활용 동의가 필요합니다.
+
+## C 기억 하나에는 무엇을 담나요?
+
+한 기억에는 독립적으로 수정할 수 있는 한 가지 뜻을 담습니다.
+
+| 항목 | 예시 |
+|---|---|
+| 내용 | 이번 바지는 Slim을 원함 |
+| 대상 | 바지 |
+| 선호와 강도 | Slim 선호. 꼭 지켜야 하는지는 별도로 기록 |
+| 상황과 기간 | 이번 고객 미팅 요청 |
+| 적용 범위 | 단기 |
+| 근거 | 사용자의 현재 발화와 확인한 내용 |
+
+**대상을 함께 기억해야 합니다.**
+흰 셔츠와 네이비 재킷은 서로 다른 옷의 색 조건입니다.
+두 조건을 한 옷의 색상 충돌로 처리하지 않습니다.
+
+## D LLM에는 어떤 기억을 주나요?
+
+context는 LLM에 전달하는 **이번 요청의 맥락 묶음**입니다.
+대화 전체를 그대로 보내는 대신 쓸 수 있는 정보를 고릅니다.
+
+```flow
+현재 요청과 대상 -&gt; 유효한 기억: 소유권과 기간 확인
+유효한 기억 -&gt; 이번에 쓸 조건: 대상별 예외와 충돌 처리
+이번에 쓸 조건 -&gt; *맥락 묶음: 의미와 근거 보존
+```
+
+| 맥락 묶음의 내용 | 이번 바지 예시 |
+|---|---|
+| 목표와 대상 | 고객 미팅용 바지 |
+| 사용할 기본 취향 | Navy 선호 |
+| 이번 조건 | Slim 선호 |
+| 직접 대응한 값 | Visual Fit은 Slim |
+| 미정 사항 | 소재와 혼용률은 아직 모름 |
+| 근거 | 사용한 기억의 식별자와 버전 |
+
+이번에 대체된 기본 핏은 실행 조건에서 뺍니다.
+미확인 후보와 철회·삭제·만료된 기억도 제외합니다.
+같은 대상의 조건이 해결되지 않으면 질문으로 남깁니다.
+
+## E Feature 값은 어떻게 정하나요?
+
+**명확한 값은 보존하고, 해석이 필요한 값은 제안합니다.**
+
+| 입력 근거 | 목표 Feature와 값 | 처리 |
+|---|---|---|
+| 이번 바지는 Slim | Visual Fit = Slim | 명시값 보존 |
+| 저장된 네이비 선호 | Primary Color = Navy | 기억 활용 |
+| 고객 미팅에서 입을 옷 | Formality Level = 3~4 | 추론 제안 예시 |
+| 혼용률 정보 없음 | Fiber Composition | 미정 유지 |
+
+격식 3~4는 설명용 예시입니다. 고객 미팅의 고정 정답이 아닙니다.
+LLM의 추론에는 근거와 짧은 이유를 붙입니다.
+추론한 값은 사용자가 확정한 값과 구분합니다.
+
+```callout info 값이 하나일 필요는 없습니다
+검정 회피는 Black 제외 조건입니다.
+슬림 또는 레귤러 허용은 두 값의 집합입니다.
+격식 3~4 허용은 범위 조건입니다.
+```
+
+핏 선택만으로 바짓단 모양·색·소재 선호까지 확정하지 않습니다.
+아이템의 격식과 코디 전체의 격식도 각각 다룹니다.
+## F 추론한 값은 언제 기억이 되나요?
+
+LLM의 제안은 검증을 거쳐 사용자에게 보여줍니다.
+허용값, 적용 대상, 필수 조건, 근거를 확인합니다.
+시스템은 사용자가 명시한 조건을 결과에 보존합니다.
+
+```flow
+LLM 제안 -&gt; 검증: 값과 근거 확인
+검증 -&gt; 사용자 확인: 목표 조건 보여주기
+사용자 확인 -&gt; 이번 요청 반영: 새 확인 근거
+이번 요청 반영 -&gt; 장기 활용 선택: 항목별 동의
+장기 활용 선택 -&gt; [(장기 기억)]: 선택한 항목만 저장
+```
+
+**모델 제안만으로 장기 기억을 바꾸지 않습니다.**
+같은 대상의 필수 조건이 충돌하면 사용자에게 확인합니다.
+틀린 값과 근거 없는 확정값은 결과에 적용하지 않습니다.
+
+## G 무엇부터 구현하나요?
+
+```timeline v
+1 | Feature 사전 | 속성·허용값·적용 대상을 정리합니다.
+2 | 기억 연결 | 기억의 뜻을 정확한 속성과 대상에 연결합니다.
+3 | 맥락 조립 | 기본 취향·이번 조건·미정 사항·근거를 묶습니다.
+4 | 가상 검증 | 예외·충돌·새 요청·삭제 사례를 확인합니다.
+5 | LLM 연결 | 모델을 선택한 뒤 실제 해석 품질을 평가합니다.
+```
+
+사전은 아이템 속성 65개와 코디 속성 9개를 담는 계획입니다.
+첫 동작 검증은 명시된 단일 아이템으로 시작합니다.
+핏·색·패턴·스타일·분위기·격식을 먼저 확인합니다.
+
+| 현재 구분 | 상태 |
+|---|---|
+| 기존 메모리의 동의·범위·저장 규칙 | ok 승인된 설계 |
+| Feature 연결과 맥락·출력 계약 | warn 검토용 Proposed 계획 |
+| 실행 코드와 실제 LLM 품질 | 아직 구현·검증 전 |
+
+전체 계획에는 속성별 연결표와 입력·출력 예시가 있습니다.
+[상세 계획 읽기](../docs/target-feature-inference-plan.md)
+
+근거: 사용자 제공 최종 Feature Map PDF 9쪽과 승인된 메모리 설계.
+이 설명 페이지는 새로운 계약의 승인이나 제품 구현 완료를 뜻하지 않습니다.
+</textarea>
+<script>
+(() => {
+  const root = document.documentElement;
+  const cycle = (list, cur) => list[(list.indexOf(cur) + 1) % list.length];
+  const label = (btn, value) => {
+    const map = JSON.parse(btn.dataset.labels || '{}');
+    btn.textContent = map[value] || value;
+  };
+  const bind = (name, attr, values) => {
+    const btn = document.querySelector(`[data-am="${name}"]`);
+    if (!btn) return;
+    label(btn, root.getAttribute(attr));
+    btn.addEventListener('click', () => {
+      const next = cycle(values, root.getAttribute(attr));
+      root.setAttribute(attr, next);
+      label(btn, next);
+    });
+  };
+  bind('theme', 'data-theme', ['blueprint', 'shadcn']);
+  bind('mode', 'data-mode', ['auto', 'light', 'dark']);
+
+  const copyBtn = document.querySelector('[data-am="copy"]');
+  copyBtn?.addEventListener('click', async () => {
+    const nodes = document.querySelectorAll('#am-source');
+    const text = nodes[nodes.length - 1]?.value ?? '';
+    try {
+      await navigator.clipboard.writeText(text);
+    } catch {
+      const ta = Object.assign(document.createElement('textarea'), { value: text });
+      document.body.append(ta);
+      ta.select();
+      document.execCommand('copy');
+      ta.remove();
+    }
+    const original = copyBtn.textContent;
+    copyBtn.textContent = copyBtn.dataset.done;
+    setTimeout(() => { copyBtn.textContent = original; }, 1400);
+  });
+})();
+</script>
+</body>
+</html>

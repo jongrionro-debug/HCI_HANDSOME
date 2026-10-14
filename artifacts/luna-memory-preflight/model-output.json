@@ -1,0 +1,323 @@
+{
+  "extraction": [
+    {
+      "id": "A1",
+      "candidates": [
+        {
+          "feature": "fit",
+          "values": ["Relaxed"],
+          "polarity": "prefer",
+          "strength": "soft",
+          "match": "any",
+          "selector": {"garment_type": "Pants"},
+          "scope_hint": "baseline",
+          "future_use": "not_stated",
+          "confirmed": false,
+          "consent_ref": null,
+          "evidence_quote": "평소 바지는 여유 있는 핏이 좋아"
+        },
+        {
+          "feature": "fit",
+          "values": ["Slim"],
+          "polarity": "require",
+          "strength": "hard",
+          "match": "any",
+          "selector": {"garment_type": "Pants"},
+          "scope_hint": "current",
+          "future_use": "denied",
+          "confirmed": false,
+          "consent_ref": null,
+          "evidence_quote": "오늘 발표에 입을 바지만 슬림 핏으로 꼭 해줘. 오늘 조건을 앞으로 기억하지는 마"
+        }
+      ],
+      "facts": [
+        {"key": "occasion", "value": "발표", "evidence_quote": "오늘 발표에 입을 바지"}
+      ],
+      "unmapped": [],
+      "questions": []
+    },
+    {
+      "id": "A2",
+      "candidates": [
+        {
+          "feature": "color",
+          "values": ["White"],
+          "polarity": "prefer",
+          "strength": "soft",
+          "match": "any",
+          "selector": {"garment_type": "Shirt"},
+          "scope_hint": "unknown",
+          "future_use": "not_stated",
+          "confirmed": false,
+          "consent_ref": null,
+          "evidence_quote": "셔츠는 흰색"
+        },
+        {
+          "feature": "color",
+          "values": ["Black"],
+          "polarity": "avoid",
+          "strength": "soft",
+          "match": "any",
+          "selector": {"garment_type": "Pants"},
+          "scope_hint": "unknown",
+          "future_use": "not_stated",
+          "confirmed": false,
+          "consent_ref": null,
+          "evidence_quote": "바지는 검정 말고 네이비가 좋아"
+        },
+        {
+          "feature": "color",
+          "values": ["Navy"],
+          "polarity": "prefer",
+          "strength": "soft",
+          "match": "any",
+          "selector": {"garment_type": "Pants"},
+          "scope_hint": "unknown",
+          "future_use": "not_stated",
+          "confirmed": false,
+          "consent_ref": null,
+          "evidence_quote": "바지는 검정 말고 네이비가 좋아"
+        }
+      ],
+      "facts": [],
+      "unmapped": [],
+      "questions": []
+    },
+    {
+      "id": "A3",
+      "candidates": [
+        {
+          "feature": "style",
+          "values": ["Minimal", "Classic"],
+          "polarity": "prefer",
+          "strength": "soft",
+          "match": "any",
+          "selector": {"garment_type": "Shirt"},
+          "scope_hint": "unknown",
+          "future_use": "not_stated",
+          "confirmed": false,
+          "consent_ref": null,
+          "evidence_quote": "셔츠 스타일은 미니멀 또는 클래식 중 하나면 돼"
+        },
+        {
+          "feature": "style",
+          "values": ["Minimal", "Classic"],
+          "polarity": "prefer",
+          "strength": "soft",
+          "match": "all",
+          "selector": {"garment_type": "Pants"},
+          "scope_hint": "unknown",
+          "future_use": "not_stated",
+          "confirmed": false,
+          "consent_ref": null,
+          "evidence_quote": "바지는 미니멀과 클래식이 모두 느껴졌으면 좋겠어"
+        }
+      ],
+      "facts": [],
+      "unmapped": [],
+      "questions": []
+    },
+    {
+      "id": "A4",
+      "candidates": [
+        {
+          "feature": "functions",
+          "values": ["Waterproof"],
+          "polarity": "require",
+          "strength": "hard",
+          "match": "any",
+          "selector": {"garment_type": "Jacket"},
+          "scope_hint": "current",
+          "future_use": "not_stated",
+          "confirmed": false,
+          "consent_ref": null,
+          "evidence_quote": "이번 비 오는 여행의 재킷은 방수 기능이 꼭 필요해"
+        }
+      ],
+      "facts": [
+        {"key": "occasion", "value": "비 오는 여행", "evidence_quote": "이번 비 오는 여행의 재킷"}
+      ],
+      "unmapped": ["면 100%"],
+      "questions": []
+    },
+    {
+      "id": "A5",
+      "candidates": [],
+      "facts": [
+        {"key": "occasion", "value": "고객 미팅", "evidence_quote": "고객 미팅용 바지"},
+        {"key": "goal", "value": "단정하지만 정장 같지는 않게", "evidence_quote": "단정하지만 정장 같지는 않았으면 해"}
+      ],
+      "unmapped": [],
+      "questions": []
+    },
+    {
+      "id": "A6",
+      "candidates": [],
+      "facts": [],
+      "unmapped": [],
+      "questions": ["사진을 볼 수 없어 원하는 핏과 피하고 싶은 색을 식별할 수 없습니다. 핏과 색을 말로 설명해 주시겠어요?"]
+    },
+    {
+      "id": "A7",
+      "candidates": [
+        {
+          "feature": "color",
+          "values": ["Navy"],
+          "polarity": "prefer",
+          "strength": "soft",
+          "match": "any",
+          "selector": {"garment_type": "Pants"},
+          "scope_hint": "baseline",
+          "future_use": "requested",
+          "confirmed": false,
+          "consent_ref": null,
+          "evidence_quote": "앞으로 바지는 네이비 색을 기본 취향으로 기억해줘"
+        },
+        {
+          "feature": "color",
+          "values": ["White"],
+          "polarity": "prefer",
+          "strength": "soft",
+          "match": "any",
+          "selector": {"garment_type": "Shirt"},
+          "scope_hint": "current",
+          "future_use": "not_stated",
+          "confirmed": false,
+          "consent_ref": null,
+          "evidence_quote": "오늘 셔츠 색은 흰색으로 하자"
+        }
+      ],
+      "facts": [],
+      "unmapped": [],
+      "questions": []
+    },
+    {
+      "id": "A8",
+      "candidates": [
+        {
+          "feature": "logo",
+          "values": ["Large"],
+          "polarity": "avoid",
+          "strength": "soft",
+          "match": "any",
+          "selector": {"garment_type": "T-shirt"},
+          "scope_hint": "baseline",
+          "future_use": "not_stated",
+          "confirmed": false,
+          "consent_ref": null,
+          "evidence_quote": "평소 티셔츠의 큰 로고는 피하고 싶어"
+        },
+        {
+          "feature": "logo",
+          "values": ["None"],
+          "polarity": "require",
+          "strength": "hard",
+          "match": "any",
+          "selector": {"garment_type": "T-shirt"},
+          "scope_hint": "current",
+          "future_use": "not_stated",
+          "confirmed": false,
+          "consent_ref": null,
+          "evidence_quote": "이번 티셔츠에는 로고가 아예 없어야 해"
+        }
+      ],
+      "facts": [],
+      "unmapped": [],
+      "questions": []
+    }
+  ],
+  "feature_inference": [
+    {
+      "id": "B1",
+      "proposal": {
+        "suggestions": [
+          {"target_id": "pants", "feature": "color", "values": ["Navy"], "match": "any", "source_ids": ["base-color"], "reason": "확인된 바지 색 선호 바인딩을 유지합니다."},
+          {"target_id": "pants", "feature": "fit", "values": ["Slim"], "match": "any", "source_ids": ["today-fit"], "reason": "확인된 hard 핏 조건을 유지합니다."}
+        ],
+        "questions": []
+      }
+    },
+    {
+      "id": "B2",
+      "proposal": {
+        "suggestions": [
+          {"target_id": "pants", "feature": "color", "values": ["Navy"], "match": "any", "source_ids": ["base-color"], "reason": "확인된 바지 색 선호 바인딩을 유지합니다."},
+          {"target_id": "pants", "feature": "fit", "values": ["Relaxed"], "match": "any", "source_ids": ["base-fit"], "reason": "확인된 바지 핏 선호 바인딩을 유지합니다."}
+        ],
+        "questions": []
+      }
+    },
+    {
+      "id": "B3",
+      "proposal": {
+        "suggestions": [
+          {"target_id": "pants", "feature": "color", "values": ["Navy"], "match": "any", "source_ids": ["pants-navy"], "reason": "바지 대상에 연결된 색 선호를 유지합니다."},
+          {"target_id": "pants", "feature": "fit", "values": ["Relaxed"], "match": "any", "source_ids": ["pants-fit"], "reason": "바지 대상에 연결된 핏 선호를 유지합니다."},
+          {"target_id": "shirt", "feature": "color", "values": ["White"], "match": "any", "source_ids": ["shirt-white"], "reason": "셔츠 대상에 연결된 색 선호를 유지합니다."},
+          {"target_id": "shirt", "feature": "mood", "values": ["Refined"], "match": "any", "source_ids": ["fact:shirt-goal"], "reason": "셔츠에 대한 단정하지만 정장 같지 않은 목표에서 단정한 분위기를 약하게 제안합니다."}
+        ],
+        "questions": []
+      }
+    },
+    {
+      "id": "B4",
+      "proposal": {"suggestions": [], "questions": []}
+    },
+    {
+      "id": "B5",
+      "proposal": {
+        "suggestions": [
+          {"target_id": "pants", "feature": "color", "values": ["Navy"], "match": "any", "source_ids": ["base-color"], "reason": "바지 색 선호 바인딩을 유지합니다."},
+          {"target_id": "pants", "feature": "fit", "values": ["Relaxed"], "match": "any", "source_ids": ["base-fit"], "reason": "바지 핏 선호 바인딩을 유지합니다."},
+          {"target_id": "pants", "feature": "mood", "values": ["Refined"], "match": "any", "source_ids": ["fact:goal"], "reason": "단정하되 정장 같지 않은 목표를 바지의 분위기 선호로 약하게 반영합니다."}
+        ],
+        "questions": []
+      }
+    },
+    {
+      "id": "B6",
+      "proposal": {
+        "suggestions": [
+          {"target_id": "jacket", "feature": "functions", "values": ["Waterproof"], "match": "any", "source_ids": ["jacket-waterproof"], "reason": "확인된 hard 방수 조건을 그대로 유지합니다."}
+        ],
+        "questions": []
+      }
+    },
+    {
+      "id": "B7",
+      "proposal": {
+        "suggestions": [],
+        "questions": ["바지 핏에 대한 hard 조건이 서로 충돌합니다. Oversized와 Slim 중 어느 쪽을 적용할까요?"]
+      }
+    },
+    {
+      "id": "B8",
+      "proposal": {
+        "suggestions": [
+          {"target_id": "pants", "feature": "color", "values": ["Navy"], "match": "any", "source_ids": ["active-navy"], "reason": "현재 적용되는 바지 색 선호 바인딩을 유지합니다."}
+        ],
+        "questions": []
+      }
+    },
+    {
+      "id": "B9",
+      "proposal": {
+        "suggestions": [
+          {"target_id": "pants", "feature": "color", "values": ["Navy"], "match": "any", "source_ids": ["navy"], "reason": "바지 색 선호 바인딩을 유지합니다."},
+          {"target_id": "pants", "feature": "fit", "values": ["Relaxed"], "match": "any", "source_ids": ["relaxed"], "reason": "기억 내용의 문구와 분리해 확인된 바지 핏 바인딩을 유지합니다."}
+        ],
+        "questions": []
+      }
+    },
+    {
+      "id": "B10",
+      "proposal": {
+        "suggestions": [
+          {"target_id": "pants", "feature": "formality", "values": [3, 4], "match": "range", "source_ids": ["formal-range"], "reason": "확인된 hard 격식 범위를 유지합니다."},
+          {"target_id": "pants", "feature": "style", "values": ["Minimal", "Classic"], "match": "all", "source_ids": ["styles"], "reason": "확인된 두 스타일 선호를 모두 유지합니다."}
+        ],
+        "questions": []
+      }
+    }
+  ]
+}

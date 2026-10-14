@@ -2,13 +2,15 @@
 
 - 상태: **Accepted — 2026-10-13 설계·기술·P0–P6 계획의 역사적 기록**. 2026-10-14 사용자가 목표 feature 방향의 구현·소비자용 축소를 위임했다. 실제 범위·축소 DTO·검증은 [현재 실행 문서](shopping-memory-prototype.md)와 [ADR 0003](decisions/0003-consumer-shopping-prototype.md)을 따른다. 아래 예정 모듈/전체 운영이 모두 구현됐다는 뜻이 아니다.
 - 승인 근거: 2026-10-13 · 현재 채팅의 승인 질문(D01–D12·ADR 0001/0002·보관 기간·Python+SQLite 최소안)에 사용자가 **“권고안 전체 승인”**으로 응답했다.
-- 기준: 2026-10-13 · `codex/1-memory-design` · HEAD `77f38f28a1e0c43bde96f9f46b961cbc4b737a7b` + 이번 미커밋 설계 자료, 기존 `AGENTS.md` 변경
+- 초기 설계 기준: 2026-10-13 · `codex/1-memory-design` · HEAD `77f38f28a1e0c43bde96f9f46b961cbc4b737a7b` + 당시 미커밋 설계 자료, 기존 `AGENTS.md` 변경. 최신 문서 검증 기준은 8절에 기록한다.
 - Related Issue: [#1](https://github.com/jongrionro-debug/HCI_HANDSOME/issues/1)
 - 동작 정본: [memory-design.md](memory-design.md) · 이유: [ADR 0001](decisions/0001-memory-boundaries.md), [ADR 0002](decisions/0002-memory-prototype-storage.md)
 
 ## 1. 이번 산출물과 후속 경계
 
-이번 브랜치는 D01–D12 최종 선택·대안·트레이드오프, Accepted ADR, 계약·가상 사례·검증기, 제품 흐름/HTML·README 연결과 사용자 승인된 구현 계획을 제공한다. 2026-10-13 전체 승인 회신으로 Issue #1의 설계·계획 완료 조건을 충족했다. 원격 Issue 상태는 변경하지 않았다. 제품 코드·SQLite DB·공개 API·실제 LLM·배포·참여자 수집은 추가하지 않는다.
+2026-10-13 설계 작업에서는 D01–D12 최종 선택·대안·트레이드오프, Accepted ADR, 계약·가상 사례·검증기, 제품 흐름/HTML·README 연결과 사용자 승인된 구현 계획을 준비했다. 전체 승인 회신은 Issue #1의 설계 최종 검토 근거이며, 당시 원격 Issue 상태는 변경하지 않았다. 이 설계 작업에 제품 코드·SQLite DB·공개 API·실제 LLM·배포·참여자 수집을 포함하지 않았다.
+
+후속 Issue #2의 로컬 프로토타입은 별도 실행 계약으로 구현됐다. 아래 P0–P6와 예정 경로는 승인 당시 계획으로 보존하며 전체 구현 완료표로 사용하지 않는다. 2026-10-14의 Issue #1 문서 마무리와 실제 검증 결과는 8절을 따른다.
 
 | 이번 파일 | 책임 |
 |---|---|
@@ -40,7 +42,7 @@
 
 ## 2. 승인 후 최소 구현의 책임·입출력
 
-아래 경로는 **예정 파일**이며 현재 존재하는 제품 코드가 아니다. 이번 승인된 계획에 따라 후속 구현 Issue에서 구현한다. 최소 Python 모듈만 정하며 전체 웹앱 스택까지 확정하지 않는다.
+아래는 **2026-10-13 승인 당시의 예정 파일·책임**이다. 후속 구현에서 일부 책임과 경로를 통합·축소했으므로 현재 파일 존재 여부나 구현 범위는 현재 실행 문서와 코드를 따른다. 최소 Python 모듈의 계획이며 전체 웹앱 스택을 확정하지 않는다.
 
 | 모듈·예정 경로 | 입력 → 출력·책임 | 실패·검증 |
 |---|---|---|
@@ -81,7 +83,7 @@ P1–P5의 모듈 경계는 한 프로세스 안에서 구현 가능하다. 기�
 
 ## 5. 실행·CI 계획
 
-현재 설계 검증 명령:
+v0.2 설계 검증 명령(현재도 사용 가능):
 
 ```sh
 python3 -m venv /tmp/stylemate-memory-check
@@ -93,19 +95,20 @@ git diff --check
 
 별도 Python 가상환경을 사용하며 전역 제품 의존성을 설치하지 않는다. schema 검증은 Draft202012Validator와 FormatChecker를 활성화한다. 의존성이 없으면 완전한 schema 검증을 통과했다고 보고하지 않는다. 설치 실패·미실행과 정책 fixture 결과를 구분한다.
 
-현재 CI에는 문서 검사가 있다. 승인된 후속 계획에 따라 검증 dependencies 설치+memory validator 실행 단계를 추가할 예정이며, 이번에 GitHub Actions를 실행/활성화했다고 주장하지 않는다. 제품 구현 시 Python 3.11 기준 환경에서 단위/SQLite 통합 테스트를 추가한다.
+2026-10-13 당시 CI에는 문서 검사가 있었고, 설계 validator와 단위/SQLite 테스트 연결을 후속으로 계획했다. 이후 Issue #2는 Python 3.11/3.14 오프라인 실행 테스트 CI를 추가했다. 현재 명령과 검증 범위는 현재 실행 문서를 따른다. 아래 과거 기록을 이번 원격 CI 실행 결과로 보고하지 않는다.
 
-예정 제품 명령(현재 실행 불가):
+승인 당시 예정 명령(이후 Issue #2의 로컬 CLI·테스트로 제공):
 
 ```sh
-# 후속 P1–P5 구현 뒤 제공할 명령
-python -m unittest discover -s tests
-python -m stylemate_memory.cli demo --synthetic
+PYTHONPATH=src python3 -m unittest discover -s tests
+PYTHONPATH=src python3 -m stylemate_memory.cli demo --synthetic
 ```
 
-CLI는 temp DB와 가상 evidence만 사용한다. 실제 원문·연구 데이터 경로를 기본 인자로 삼지 않는다. 제품 UI·빌드/브라우저 테스트는 해당 스택 선택 후 추가한다.
+위 가상 demo는 temp DB와 synthetic evidence를 사용한다. 현재 CLI의 지속 DB·항목별 조작은 현재 실행 문서를 따른다. 실제 원문·연구 데이터 경로를 기본 인자로 삼지 않는다. 제품 UI·빌드/브라우저 테스트는 해당 스택 선택 후 추가한다.
 
 ## 6. AC별 완료 근거
+
+아래는 Issue #1의 **설계·계획 AC**에 대한 근거다. 실제 DB·UI 등의 후속 표현은 승인 당시 구현 경계이며 현재 실행 범위는 별도 문서를 따른다. AC10의 최신 문서 정합성 검증은 8절에 덧붙인다.
 
 | AC | 검토 자료·검증 근거 | 현재 상태 |
 |---|---|---|
@@ -140,3 +143,22 @@ CLI는 temp DB와 가상 evidence만 사용한다. 실제 원문·연구 데이�
 검증 모델은 서비스가 관리할 전체 운영을 구현하지 않는다. 요청·계정 전체 삭제, 실제 DB/journal/파일/백업 소거, 보관 만료·영수증 TTL 스케줄러, 다중 프로세스 동시성, 실제 UI·인증·외부 모델·이미지 해석은 미실행이다. 이들은 P1–P5의 제품 구현 검증에 남는다. 삭제 증거는 가상 항목·snapshot·의존 그래프와 메타데이터 경계에 한정한다. 승인된 계약과 실제 운영 완료를 구분한다.
 
 schema·fixture 검증은 제품 DB·API·인증·추천 모델·이미지 이해·물리 삭제·사용자 연구 효과를 검증하지 않는다. CI·Figma 최신 화면·외부 모델 호출·실데이터 수집은 실행하지 않는다. 이번 승인 반영에서도 원격 Issue 종료·Commit·Push·PR 생성·게시·배포는 수행하지 않았다.
+
+## 8. 2026-10-14 Issue #1 문서 마무리
+
+확인 기준은 기존 `codex/1-memory-design` HEAD `6ca871a878782a6ece8932ad0d1451d818972445`와 이번 문서 미커밋 변경이다. 로컬 `origin/main`의 병합 commit `02b6b90bd43991ca101cacf6701ebe0d56f0cef2`와 HEAD의 tree는 같다. 새 브랜치·워크트리는 만들지 않았다. 기존 `AGENTS.md`와 설명용 `artifacts/` 변경은 이 문서 반영 범위에 포함하지 않는다.
+
+workflow의 승인된 정책과 UI 미정 사항을 구분하고, README·설계·계획에서 v0.2와 후속 실행 계약의 관계를 맞췄다. 저장 뒤 기존 추천에는 갱신 필요를 표시하도록 D08/D09와 맞췄다. 승인된 결정·schema·fixture·ADR 본문·연구 기준·제품 코드는 변경하지 않았다. HTML은 기존 표시 본문을 수동 수정하고 내장 Markdown 전체를 정본과 동기화했다. CSS는 앵커 이동 시 제목이 고정 도구모음에 가리지 않도록 패널의 scroll margin만 보완했다.
+
+| 이번 실행·검토 | 실제 결과·범위 |
+|---|---|
+| `/private/tmp/hci-memory-design-venv/bin/python scripts/validate_memory_design.py` | **PASS** — Python 3.14.5, Draft202012+FormatChecker, 계약 객체 39개·가상 시나리오 70개·변조 거부 31개. 기존 가상환경·의존성을 재사용 |
+| `python3 scripts/check_repository.py` | **FAIL** — 전체 작업 폴더의 링크 190개·HTML 원문 쌍 6개 검사 중 별도 미추적 `artifacts/issue-2-memory-feature-map-explainer/index.html`의 짝 Markdown 누락. 해당 파일은 이번 범위 밖이므로 수정하지 않음 |
+| `python3 scripts/check_repository.py --root /private/tmp/hci-issue1-doc-check-gjtp3hwg` | **PASS** — HEAD의 추적 파일에 이번 문서 5개만 덮어쓴 사본: 링크 176개·HTML 원문 쌍 2개·Issue Form 2개·PR 양식 1개. 기존 사용자 AGENTS/설명 artifacts 미포함 |
+| `git diff --check` | **PASS** — 현재 추적 파일 diff의 공백 검사 |
+| HTML 브라우저 검토 | 1440px·390px에서 A–H 본문·목차 8개 대상 확인, A/G 화면 확인·가로 넘침 없음. 테마·밝기 전환, 복사 handler의 전달값과 내장 원문 일치 확인. 최신 D/E 승인 표시·G 갱신 안내와 원문/Markdown 일치, 설계/계획/실행 문서/ADR 0003 링크의 로컬 HTTP 200 확인. 모바일 목차 이동 후 제목과 도구모음 겹침 해소 확인 |
+| AC1–AC10 재검토 | 6절의 AC별 설계 근거, D01–D12·C01–C13, Accepted ADR 0001/0002·v0.2 계약과 현재 실행 문서의 경계 대조. AC10의 최신 문서 검증은 위 결과로 보완 |
+
+설계의 사용자 최종 검토 근거는 2026-10-13의 “권고안 전체 승인” 회신이다. 이번 문서 diff는 로컬 검토용이며 아직 commit·push·PR·원격 반영하지 않았다. 이번 조회에서 원격 Issue #1은 OPEN·AC 체크 미변경이며 댓글은 없었다. 문서 마무리 요청을 원격 종료 승인으로 확대하지 않았다.
+
+이번에는 문서·가상 계약을 검증했다. 제품 코드가 바뀌지 않아 프로토타입 단위 테스트·실제 SQLite/모델·인증·이미지·물리 삭제·사용자 연구·최신 Figma·원격 CI를 재실행하지 않았다. 이전 실행 기록과 이번 검증을 구분한다. 다음은 사용자의 문서 diff 검토와 원격 반영·Issue #1 종료 여부 결정이다.

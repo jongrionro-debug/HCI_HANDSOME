@@ -1,0 +1,572 @@
+{
+  "synthetic": true,
+  "provider": "offline-rule-fixture",
+  "feature_count": 17,
+  "today": {
+    "context_id": "ctx_cc08ea89b2ca1a96",
+    "context_hash": "cc08ea89b2ca1a963e57cc03634bd5c8f90ec7d36f050e4310a97a496967c405",
+    "registry_version": "consumer-17-v1",
+    "targets": [
+      {
+        "target_id": "pants-1",
+        "garment_type": "Pants",
+        "features": {
+          "garment_type": {
+            "status": "specified",
+            "values": [
+              "Pants"
+            ],
+            "match": "any",
+            "source_ids": [],
+            "origin": "target"
+          },
+          "color": {
+            "status": "specified",
+            "values": [
+              "Navy"
+            ],
+            "match": "any",
+            "source_ids": [
+              "2ee56a54-5150-439d-b65e-9de478926fd3"
+            ],
+            "reason": "사용자가 확인한 직접 조건",
+            "suggestions": [
+              {
+                "target_id": "pants-1",
+                "feature": "color",
+                "values": [
+                  "Navy"
+                ],
+                "match": "any",
+                "source_ids": [
+                  "2ee56a54-5150-439d-b65e-9de478926fd3"
+                ],
+                "reason": "사용자가 확인한 직접 조건"
+              }
+            ],
+            "constraints": [
+              {
+                "target_id": "pants-1",
+                "feature": "color",
+                "values": [
+                  "Navy"
+                ],
+                "match": "any",
+                "polarity": "prefer",
+                "strength": "soft",
+                "scope": "long_term",
+                "source_ids": [
+                  "2ee56a54-5150-439d-b65e-9de478926fd3"
+                ]
+              }
+            ],
+            "origin": "explicit"
+          },
+          "fit": {
+            "status": "specified",
+            "values": [
+              "Slim"
+            ],
+            "match": "any",
+            "source_ids": [
+              "35da6f7c-bed6-4755-93f1-567a324497c5"
+            ],
+            "reason": "사용자가 확인한 직접 조건",
+            "suggestions": [
+              {
+                "target_id": "pants-1",
+                "feature": "fit",
+                "values": [
+                  "Slim"
+                ],
+                "match": "any",
+                "source_ids": [
+                  "35da6f7c-bed6-4755-93f1-567a324497c5"
+                ],
+                "reason": "사용자가 확인한 직접 조건"
+              }
+            ],
+            "constraints": [
+              {
+                "target_id": "pants-1",
+                "feature": "fit",
+                "values": [
+                  "Slim"
+                ],
+                "match": "any",
+                "polarity": "prefer",
+                "strength": "soft",
+                "scope": "short_term",
+                "source_ids": [
+                  "35da6f7c-bed6-4755-93f1-567a324497c5"
+                ]
+              }
+            ],
+            "origin": "explicit"
+          },
+          "length": {
+            "status": "unspecified",
+            "values": [],
+            "match": "any",
+            "source_ids": []
+          },
+          "sleeve_length": {
+            "status": "not_applicable",
+            "values": [],
+            "match": "any",
+            "source_ids": []
+          },
+          "neckline": {
+            "status": "not_applicable",
+            "values": [],
+            "match": "any",
+            "source_ids": []
+          },
+          "pattern": {
+            "status": "unspecified",
+            "values": [],
+            "match": "any",
+            "source_ids": []
+          },
+          "logo": {
+            "status": "unspecified",
+            "values": [],
+            "match": "any",
+            "source_ids": []
+          },
+          "fabric": {
+            "status": "unspecified",
+            "values": [],
+            "match": "any",
+            "source_ids": []
+          },
+          "texture": {
+            "status": "unspecified",
+            "values": [],
+            "match": "any",
+            "source_ids": []
+          },
+          "style": {
+            "status": "unspecified",
+            "values": [],
+            "match": "any",
+            "source_ids": []
+          },
+          "mood": {
+            "status": "unspecified",
+            "values": [],
+            "match": "any",
+            "source_ids": []
+          },
+          "formality": {
+            "status": "inferred",
+            "values": [
+              3
+            ],
+            "match": "any",
+            "source_ids": [
+              "43164c7a-4649-41c1-b401-14bb64745053"
+            ],
+            "reason": "확인된 목표의 smart casual 표현에서 제안",
+            "suggestions": [
+              {
+                "target_id": "pants-1",
+                "feature": "formality",
+                "values": [
+                  3
+                ],
+                "match": "any",
+                "source_ids": [
+                  "43164c7a-4649-41c1-b401-14bb64745053"
+                ],
+                "reason": "확인된 목표의 smart casual 표현에서 제안"
+              }
+            ],
+            "constraints": [],
+            "origin": "inferred"
+          },
+          "season": {
+            "status": "unspecified",
+            "values": [],
+            "match": "any",
+            "source_ids": []
+          },
+          "thickness": {
+            "status": "unspecified",
+            "values": [],
+            "match": "any",
+            "source_ids": []
+          },
+          "warmth": {
+            "status": "unspecified",
+            "values": [],
+            "match": "any",
+            "source_ids": []
+          },
+          "functions": {
+            "status": "unspecified",
+            "values": [],
+            "match": "any",
+            "source_ids": []
+          }
+        }
+      }
+    ],
+    "suggestions": [
+      {
+        "target_id": "pants-1",
+        "feature": "color",
+        "values": [
+          "Navy"
+        ],
+        "match": "any",
+        "source_ids": [
+          "2ee56a54-5150-439d-b65e-9de478926fd3"
+        ],
+        "reason": "사용자가 확인한 직접 조건"
+      },
+      {
+        "target_id": "pants-1",
+        "feature": "fit",
+        "values": [
+          "Slim"
+        ],
+        "match": "any",
+        "source_ids": [
+          "35da6f7c-bed6-4755-93f1-567a324497c5"
+        ],
+        "reason": "사용자가 확인한 직접 조건"
+      },
+      {
+        "target_id": "pants-1",
+        "feature": "formality",
+        "values": [
+          3
+        ],
+        "match": "any",
+        "source_ids": [
+          "43164c7a-4649-41c1-b401-14bb64745053"
+        ],
+        "reason": "확인된 목표의 smart casual 표현에서 제안"
+      }
+    ],
+    "constraints": [
+      {
+        "target_id": "pants-1",
+        "feature": "color",
+        "values": [
+          "Navy"
+        ],
+        "match": "any",
+        "polarity": "prefer",
+        "strength": "soft",
+        "scope": "long_term",
+        "source_ids": [
+          "2ee56a54-5150-439d-b65e-9de478926fd3"
+        ]
+      },
+      {
+        "target_id": "pants-1",
+        "feature": "fit",
+        "values": [
+          "Slim"
+        ],
+        "match": "any",
+        "polarity": "prefer",
+        "strength": "soft",
+        "scope": "short_term",
+        "source_ids": [
+          "35da6f7c-bed6-4755-93f1-567a324497c5"
+        ]
+      }
+    ],
+    "questions": [],
+    "blocked": false,
+    "inference": {
+      "adapter": "RuleAdapter",
+      "adapter_version": "rule-v1",
+      "source_ids": [
+        "2ee56a54-5150-439d-b65e-9de478926fd3",
+        "35da6f7c-bed6-4755-93f1-567a324497c5",
+        "43164c7a-4649-41c1-b401-14bb64745053"
+      ]
+    },
+    "request_id": "68d1bce8-696c-41e0-9f0c-a1a45fcb6020",
+    "versions": {
+      "request": 2,
+      "profile": 1,
+      "memories": {
+        "2ee56a54-5150-439d-b65e-9de478926fd3": 1,
+        "35da6f7c-bed6-4755-93f1-567a324497c5": 1,
+        "43164c7a-4649-41c1-b401-14bb64745053": 1
+      }
+    }
+  },
+  "next_request": {
+    "context_id": "ctx_9599db758a6f0be8",
+    "context_hash": "9599db758a6f0be80841d5a2f9242cb8da2a013df8389b90490b47d273864c9c",
+    "registry_version": "consumer-17-v1",
+    "targets": [
+      {
+        "target_id": "pants-1",
+        "garment_type": "Pants",
+        "features": {
+          "garment_type": {
+            "status": "specified",
+            "values": [
+              "Pants"
+            ],
+            "match": "any",
+            "source_ids": [],
+            "origin": "target"
+          },
+          "color": {
+            "status": "specified",
+            "values": [
+              "Navy"
+            ],
+            "match": "any",
+            "source_ids": [
+              "2ee56a54-5150-439d-b65e-9de478926fd3"
+            ],
+            "reason": "사용자가 확인한 직접 조건",
+            "suggestions": [
+              {
+                "target_id": "pants-1",
+                "feature": "color",
+                "values": [
+                  "Navy"
+                ],
+                "match": "any",
+                "source_ids": [
+                  "2ee56a54-5150-439d-b65e-9de478926fd3"
+                ],
+                "reason": "사용자가 확인한 직접 조건"
+              }
+            ],
+            "constraints": [
+              {
+                "target_id": "pants-1",
+                "feature": "color",
+                "values": [
+                  "Navy"
+                ],
+                "match": "any",
+                "polarity": "prefer",
+                "strength": "soft",
+                "scope": "long_term",
+                "source_ids": [
+                  "2ee56a54-5150-439d-b65e-9de478926fd3"
+                ]
+              }
+            ],
+            "origin": "explicit"
+          },
+          "fit": {
+            "status": "specified",
+            "values": [
+              "Relaxed"
+            ],
+            "match": "any",
+            "source_ids": [
+              "e6a31d23-10c2-4241-9092-f84e1989ca74"
+            ],
+            "reason": "사용자가 확인한 직접 조건",
+            "suggestions": [
+              {
+                "target_id": "pants-1",
+                "feature": "fit",
+                "values": [
+                  "Relaxed"
+                ],
+                "match": "any",
+                "source_ids": [
+                  "e6a31d23-10c2-4241-9092-f84e1989ca74"
+                ],
+                "reason": "사용자가 확인한 직접 조건"
+              }
+            ],
+            "constraints": [
+              {
+                "target_id": "pants-1",
+                "feature": "fit",
+                "values": [
+                  "Relaxed"
+                ],
+                "match": "any",
+                "polarity": "prefer",
+                "strength": "soft",
+                "scope": "long_term",
+                "source_ids": [
+                  "e6a31d23-10c2-4241-9092-f84e1989ca74"
+                ]
+              }
+            ],
+            "origin": "explicit"
+          },
+          "length": {
+            "status": "unspecified",
+            "values": [],
+            "match": "any",
+            "source_ids": []
+          },
+          "sleeve_length": {
+            "status": "not_applicable",
+            "values": [],
+            "match": "any",
+            "source_ids": []
+          },
+          "neckline": {
+            "status": "not_applicable",
+            "values": [],
+            "match": "any",
+            "source_ids": []
+          },
+          "pattern": {
+            "status": "unspecified",
+            "values": [],
+            "match": "any",
+            "source_ids": []
+          },
+          "logo": {
+            "status": "unspecified",
+            "values": [],
+            "match": "any",
+            "source_ids": []
+          },
+          "fabric": {
+            "status": "unspecified",
+            "values": [],
+            "match": "any",
+            "source_ids": []
+          },
+          "texture": {
+            "status": "unspecified",
+            "values": [],
+            "match": "any",
+            "source_ids": []
+          },
+          "style": {
+            "status": "unspecified",
+            "values": [],
+            "match": "any",
+            "source_ids": []
+          },
+          "mood": {
+            "status": "unspecified",
+            "values": [],
+            "match": "any",
+            "source_ids": []
+          },
+          "formality": {
+            "status": "unspecified",
+            "values": [],
+            "match": "any",
+            "source_ids": []
+          },
+          "season": {
+            "status": "unspecified",
+            "values": [],
+            "match": "any",
+            "source_ids": []
+          },
+          "thickness": {
+            "status": "unspecified",
+            "values": [],
+            "match": "any",
+            "source_ids": []
+          },
+          "warmth": {
+            "status": "unspecified",
+            "values": [],
+            "match": "any",
+            "source_ids": []
+          },
+          "functions": {
+            "status": "unspecified",
+            "values": [],
+            "match": "any",
+            "source_ids": []
+          }
+        }
+      }
+    ],
+    "suggestions": [
+      {
+        "target_id": "pants-1",
+        "feature": "color",
+        "values": [
+          "Navy"
+        ],
+        "match": "any",
+        "source_ids": [
+          "2ee56a54-5150-439d-b65e-9de478926fd3"
+        ],
+        "reason": "사용자가 확인한 직접 조건"
+      },
+      {
+        "target_id": "pants-1",
+        "feature": "fit",
+        "values": [
+          "Relaxed"
+        ],
+        "match": "any",
+        "source_ids": [
+          "e6a31d23-10c2-4241-9092-f84e1989ca74"
+        ],
+        "reason": "사용자가 확인한 직접 조건"
+      }
+    ],
+    "constraints": [
+      {
+        "target_id": "pants-1",
+        "feature": "color",
+        "values": [
+          "Navy"
+        ],
+        "match": "any",
+        "polarity": "prefer",
+        "strength": "soft",
+        "scope": "long_term",
+        "source_ids": [
+          "2ee56a54-5150-439d-b65e-9de478926fd3"
+        ]
+      },
+      {
+        "target_id": "pants-1",
+        "feature": "fit",
+        "values": [
+          "Relaxed"
+        ],
+        "match": "any",
+        "polarity": "prefer",
+        "strength": "soft",
+        "scope": "long_term",
+        "source_ids": [
+          "e6a31d23-10c2-4241-9092-f84e1989ca74"
+        ]
+      }
+    ],
+    "questions": [],
+    "blocked": false,
+    "inference": {
+      "adapter": "RuleAdapter",
+      "adapter_version": "rule-v1",
+      "source_ids": [
+        "2ee56a54-5150-439d-b65e-9de478926fd3",
+        "e6a31d23-10c2-4241-9092-f84e1989ca74"
+      ]
+    },
+    "request_id": "58c1a614-2e4c-4685-9344-89a6f64b0882",
+    "versions": {
+      "request": 1,
+      "profile": 1,
+      "memories": {
+        "2ee56a54-5150-439d-b65e-9de478926fd3": 1,
+        "e6a31d23-10c2-4241-9092-f84e1989ca74": 1
+      }
+    }
+  },
+  "memory_unchanged_by_inference": true,
+  "live_llm_called": false
+}

@@ -1,0 +1,9 @@
+{
+  "date": "2026-10-14",
+  "requested_model": "gpt-6-luna",
+  "experiment": "synthetic Codex subagent; batched single response; no API credentials",
+  "prompt_sha256": "36cd09e20270d0abb71273de4e00cb932722e6ac5f9a9b84c3b3d5d87a49443f",
+  "gold_sha256": "774fe4798f42189fa73a7cb1ca363bdc0e039a962b416f0e28b8e30d9368091e",
+  "registry": "consumer-17-v1",
+  "seed_head": "6ca871a878782a6ece8932ad0d1451d818972445"
+}
