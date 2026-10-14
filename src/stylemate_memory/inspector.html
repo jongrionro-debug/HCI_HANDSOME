@@ -1,0 +1,488 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>StyleMate Memory Inspector</title>
+  <style>
+    :root {
+      color-scheme: light;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      color: #17202a;
+      background: #f4f5f6;
+      --line: #c6cbd1;
+      --muted: #59636e;
+      --panel: #fff;
+      --soft: #eef1f3;
+      --accent: #145da0;
+      --danger: #9f2b2b;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; min-width: 320px; }
+    button, select, textarea { font: inherit; }
+    button, select { min-height: 2rem; border: 1px solid var(--line); background: var(--panel); color: inherit; padding: .35rem .55rem; }
+    button { cursor: pointer; }
+    button:disabled, select:disabled, textarea:disabled { cursor: not-allowed; opacity: .55; }
+    .topbar { display: flex; flex-wrap: wrap; gap: .75rem 1.25rem; align-items: center; padding: .75rem 1rem; border-bottom: 1px solid var(--line); background: var(--panel); }
+    h1, h2, h3, p { margin: 0; }
+    h1 { font-size: 1rem; }
+    h2 { font-size: .95rem; }
+    h3 { font-size: .82rem; }
+    .brand { margin-right: auto; }
+    .brand p, .hint, .meta, .empty { color: var(--muted); font-size: .76rem; }
+    .topmeta, .controls, .samples, .actions { display: flex; flex-wrap: wrap; gap: .4rem; align-items: center; }
+    .badge { border: 1px solid var(--line); padding: .22rem .4rem; font-size: .72rem; background: var(--soft); }
+    .badge[data-busy="true"] { border-color: #b66d00; }
+    .error { margin: .7rem 1rem 0; border: 1px solid #d28b8b; color: var(--danger); background: #fff5f5; padding: .55rem .7rem; font-size: .8rem; }
+    .error[hidden] { display: none; }
+    .columns { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .75rem; padding: .75rem 1rem; align-items: start; }
+    .panel { min-width: 0; height: calc(100vh - 14rem); min-height: 28rem; max-height: 52rem; display: flex; flex-direction: column; border: 1px solid var(--line); background: var(--panel); }
+    .panel-head { flex-shrink: 0; display: flex; justify-content: space-between; gap: .5rem; align-items: baseline; padding: .65rem .75rem; border-bottom: 1px solid var(--line); }
+    .panel-body { flex: 1; min-height: 0; overflow: auto; padding: .7rem .75rem; }
+    .messages { flex: 1; min-height: 0; overflow: auto; padding: .7rem; margin: 0; list-style: none; }
+    .message { margin: 0 0 .65rem; border-left: 3px solid var(--line); padding-left: .55rem; }
+    .message.user { border-color: var(--accent); }
+    .message-role { display: block; color: var(--muted); font-size: .68rem; margin-bottom: .15rem; }
+    .message-text { white-space: pre-wrap; overflow-wrap: anywhere; font-size: .8rem; }
+    .chat-form { flex-shrink: 0; border-top: 1px solid var(--line); padding: .7rem; }
+    textarea { display: block; width: 100%; min-height: 5rem; resize: vertical; border: 1px solid var(--line); padding: .5rem; background: var(--panel); color: inherit; }
+    .samples { margin-bottom: .5rem; }
+    .samples button { font-size: .7rem; }
+    .send { margin-top: .5rem; width: 100%; }
+    .memory-groups, .feature-map { display: grid; gap: .65rem; }
+    .memory-group { border-top: 1px solid var(--line); padding-top: .55rem; }
+    .memory-group:first-child { border-top: 0; padding-top: 0; }
+    .memory-group > h3 { margin-bottom: .4rem; }
+    .memory-card, .feature-card { border: 1px solid var(--line); padding: .55rem; margin-bottom: .45rem; overflow-wrap: anywhere; }
+    .memory-card:last-child, .feature-card:last-child { margin-bottom: 0; }
+    .card-title { display: flex; justify-content: space-between; gap: .45rem; align-items: baseline; margin-bottom: .3rem; }
+    .card-title strong { font-size: .8rem; }
+    .pill { font-size: .66rem; padding: .13rem .3rem; border: 1px solid var(--line); background: var(--soft); white-space: nowrap; }
+    .field { margin: .26rem 0; font-size: .74rem; }
+    .field b { color: var(--muted); font-weight: 600; }
+    .draft { margin-top: .45rem; border-left: 3px solid #b66d00; background: #fff9e8; padding: .4rem .5rem; font-size: .72rem; }
+    .actions { margin-top: .5rem; }
+    .actions button { font-size: .7rem; }
+    .feature-card { display: grid; grid-template-columns: minmax(7rem, .8fr) minmax(0, 1.5fr); column-gap: .55rem; row-gap: .24rem; }
+    .feature-name { grid-row: span 7; font-weight: 600; font-size: .75rem; }
+    .feature-value { font-size: .74rem; overflow-wrap: anywhere; }
+    .profile-note { margin-bottom: .65rem; border: 1px dashed var(--line); padding: .45rem; font-size: .72rem; }
+    .bottom { margin: 0 1rem .9rem; border: 1px solid var(--line); background: var(--panel); }
+    details summary { cursor: pointer; padding: .65rem .75rem; font-size: .82rem; }
+    .trace-content { display: grid; grid-template-columns: 1fr 1fr; gap: .65rem; border-top: 1px solid var(--line); padding: .7rem; }
+    pre { margin: 0; max-height: 18rem; overflow: auto; white-space: pre-wrap; overflow-wrap: anywhere; background: #f7f8f9; border: 1px solid var(--line); padding: .55rem; font-size: .7rem; }
+    @media (max-width: 900px) {
+      .columns { grid-template-columns: 1fr; }
+      .panel { height: 38rem; min-height: 28rem; }
+    }
+    @media (max-width: 600px) {
+      .topbar { align-items: flex-start; }
+      .brand { flex-basis: 100%; }
+      .trace-content { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <h1>StyleMate Memory Inspector</h1>
+      <p>developer-only state view · consumer UI와 분리된 내부 확인 화면</p>
+    </div>
+    <div class="topmeta" aria-live="polite">
+      <span class="badge" id="modelBadge">model: —</span>
+      <span class="badge" id="callBadge">actual call: unknown</span>
+      <span class="badge" id="requestBadge">request: —</span>
+      <span class="badge" id="phaseBadge">idle</span>
+    </div>
+    <div class="controls">
+      <label for="targetSelect" class="hint">target</label>
+      <select id="targetSelect" data-write="true" aria-label="Current target garment type"></select>
+      <button id="newRequest" type="button" data-write="true">New request</button>
+      <button id="reload" type="button">Reload</button>
+      <button id="infer" type="button" data-write="true">Infer</button>
+    </div>
+  </header>
+
+  <div class="error" id="errorBox" role="alert" hidden></div>
+
+  <main class="columns">
+    <section class="panel" aria-labelledby="chatTitle">
+      <div class="panel-head"><h2 id="chatTitle">Chat</h2><span class="hint">request messages</span></div>
+      <ol class="messages" id="messageList" aria-live="polite"></ol>
+      <form class="chat-form" id="chatForm">
+        <div class="samples" aria-label="Sample text">
+          <button type="button" data-sample="면접에 입을 검은 바지를 찾고 있어요.">sample: interview pants</button>
+          <button type="button" data-sample="편한 핏과 긴 기장이 좋아요.">sample: fit + length</button>
+        </div>
+        <label for="chatInput" class="hint">message</label>
+        <textarea id="chatInput" placeholder="메시지를 입력하세요."></textarea>
+        <button class="send" type="submit" data-write="true">Send</button>
+      </form>
+    </section>
+
+    <section class="panel" aria-labelledby="memoryTitle">
+      <div class="panel-head"><h2 id="memoryTitle">Memory</h2><span class="hint" id="memorySummary">—</span></div>
+      <div class="panel-body"><div class="memory-groups" id="memoryGroups"></div></div>
+    </section>
+
+    <section class="panel" aria-labelledby="featureTitle">
+      <div class="panel-head"><h2 id="featureTitle">17-feature map</h2><span class="hint" id="featureCount">—</span></div>
+      <div class="panel-body">
+        <div class="profile-note" id="profileNote">profile: —</div>
+        <div class="feature-map" id="featureMap"></div>
+      </div>
+    </section>
+  </main>
+
+  <section class="bottom" aria-label="Processing trace and raw JSON">
+    <details id="traceDetails">
+      <summary>Processing trace / raw JSON</summary>
+      <div class="trace-content">
+        <div><h2>Trace</h2><pre id="traceOutput">—</pre></div>
+        <div><h2>Raw state</h2><pre id="rawOutput">—</pre></div>
+      </div>
+    </details>
+  </section>
+
+  <script>
+    "use strict";
+    const app = {
+      state: null,
+      loading: false,
+      writing: false,
+      pollTimer: null,
+      messageIds: null
+    };
+    const $ = (id) => document.getElementById(id);
+    const messageList = $("messageList");
+    const chatInput = $("chatInput");
+
+    function make(tag, className, value) {
+      const element = document.createElement(tag);
+      if (className) element.className = className;
+      if (value !== undefined && value !== null) element.textContent = String(value);
+      return element;
+    }
+
+    function clear(element) {
+      while (element.firstChild) element.removeChild(element.firstChild);
+    }
+
+    function list(value) {
+      if (Array.isArray(value)) return value;
+      if (value === undefined || value === null || value === "") return [];
+      return [value];
+    }
+
+    function display(value) {
+      const values = list(value).map((item) => typeof item === "object" ? JSON.stringify(item) : String(item));
+      return values.length ? values.join(", ") : "—";
+    }
+
+    function setError(error) {
+      const box = $("errorBox");
+      if (!error) {
+        box.hidden = true;
+        box.textContent = "";
+        return;
+      }
+      const code = error.code ? `${error.code}: ` : "";
+      box.textContent = `${code}${error.message || "Unknown error"}`;
+      box.hidden = false;
+    }
+
+    function targetType(state) {
+      return (state && state.target && state.target.garment_type) || "";
+    }
+
+    function setBusyControls() {
+      const disabled = app.loading || app.writing || Boolean(app.state && app.state.busy);
+      document.querySelectorAll("[data-write='true']").forEach((element) => { element.disabled = disabled; });
+      $("reload").disabled = app.loading;
+    }
+
+    function renderHeader(state) {
+      $("modelBadge").textContent = `model: ${state.model || "—"}`;
+      const lastCall = state.last_call || {};
+      const attempted = state.actual_call !== undefined ? state.actual_call : lastCall.attempted;
+      const completed = state.completed_call !== undefined ? state.completed_call : lastCall.completed;
+      const yesNo = (value) => value === true ? "yes" : value === false ? "no" : "unknown";
+      const stage = lastCall.stage ? ` · stage ${lastCall.stage}` : "";
+      const provider = state.provider ? ` · ${state.provider}` : "";
+      $("callBadge").textContent = `Codex 실행 시도 ${yesNo(attempted)} · 완료 응답 ${yesNo(completed)}${stage}${provider}`;
+      $("requestBadge").textContent = `request: ${state.request_id || "—"}`;
+      $("phaseBadge").textContent = state.busy ? `busy · ${state.phase || "processing"}` : (state.phase || "idle");
+      $("phaseBadge").dataset.busy = state.busy ? "true" : "false";
+      const select = $("targetSelect");
+      const current = targetType(state);
+      const types = list(state.garment_types);
+      if (!types.length && state.registry && state.registry.features && state.registry.features.garment_type) {
+        types.push(...list(state.registry.features.garment_type.values));
+      }
+      const previous = select.value;
+      clear(select);
+      types.forEach((type) => {
+        const option = make("option", "", type);
+        option.value = type;
+        select.appendChild(option);
+      });
+      if (current) select.value = current;
+      else if (previous) select.value = previous;
+    }
+
+    function renderMessages(state) {
+      const messages = list(state.messages);
+      const nextIds = messages.map((message, index) => message.id || `${message.role || "message"}:${index}`);
+      const previousIds = app.messageIds;
+      const hasNewMessage = previousIds === null || nextIds.length > previousIds.length || nextIds.some((id, index) => id !== previousIds[index]);
+      const distanceFromBottom = messageList.scrollHeight - messageList.scrollTop - messageList.clientHeight;
+      const nearBottom = distanceFromBottom <= 48;
+      const scrollTop = messageList.scrollTop;
+      clear(messageList);
+      if (!messages.length) messageList.appendChild(make("li", "empty", "No messages in this request."));
+      messages.forEach((message) => {
+        const item = make("li", `message ${message.role || "unknown"}`);
+        const role = message.role === "user" ? "user" : message.role === "assistant" ? "assistant" : (message.role || "message");
+        item.appendChild(make("span", "message-role", `${role}${message.at ? ` · ${message.at}` : ""}`));
+        item.appendChild(make("div", "message-text", message.text || ""));
+        messageList.appendChild(item);
+      });
+      app.messageIds = nextIds;
+      requestAnimationFrame(() => {
+        if (nearBottom || hasNewMessage) messageList.scrollTop = messageList.scrollHeight;
+        else messageList.scrollTop = scrollTop;
+      });
+    }
+
+    function memoryGroup(memory) {
+      const status = String(memory.status || "").toLowerCase();
+      const scope = String(memory.scope || "").toLowerCase();
+      if (status === "candidate") return "candidate";
+      if (scope.includes("long")) return "long";
+      if (scope.includes("short") || scope.includes("request")) return "short";
+      return "short";
+    }
+
+    function memoryField(parent, label, value) {
+      const field = make("div", "field");
+      field.appendChild(make("b", "", `${label}: `));
+      field.appendChild(document.createTextNode(display(value)));
+      parent.appendChild(field);
+    }
+
+    function addMemoryAction(card, label, op, memory) {
+      const button = make("button", "", label);
+      button.type = "button";
+      button.dataset.write = "true";
+      button.addEventListener("click", () => mutate("/api/memory", {
+        op,
+        memory_id: memory.id,
+        expected_version: memory.version === undefined ? null : memory.version
+      }));
+      card.querySelector(".actions").appendChild(button);
+    }
+
+    function renderMemoryCard(memory) {
+      const card = make("article", "memory-card");
+      const title = make("div", "card-title");
+      const status = String(memory.status || "").toLowerCase();
+      const inactive = status === "withdrawn" || status === "superseded" || status === "inactive";
+      const statusLabel = inactive ? `inactive · ${memory.status}` : (memory.status || "status —");
+      title.appendChild(make("strong", "", memory.feature || memory.id || "memory"));
+      title.appendChild(make("span", "pill", `${memory.scope || "scope —"} · ${statusLabel}`));
+      card.appendChild(title);
+      memoryField(card, "id", memory.id);
+      memoryField(card, "content", memory.content);
+      memoryField(card, "values", memory.values);
+      memoryField(card, "evidence_ref", memory.evidence_ref);
+      memoryField(card, "selector", memory.selector);
+      memoryField(card, "polarity / strength / match", [memory.polarity, memory.strength, memory.match].filter((item) => item !== undefined && item !== null));
+      memoryField(card, "version", memory.version);
+      if (memory.conditions) memoryField(card, "conditions", memory.conditions);
+      if (status === "candidate" || memory.draft) {
+        const draft = make("div", "draft");
+        draft.appendChild(make("strong", "", status === "candidate" ? "candidate not yet applied" : "extraction evidence"));
+        if (memory.draft) {
+          memoryField(draft, "scope hint", memory.draft.scope_hint);
+          memoryField(draft, "quote", memory.draft.quote);
+          memoryField(draft, "why", memory.draft.explanation);
+          if (memory.draft.replaces && memory.draft.replaces.length) memoryField(draft, "may replace", memory.draft.replaces);
+          if (memory.draft.condition_quotes && memory.draft.condition_quotes.length) {
+            memoryField(draft, "condition evidence", memory.draft.condition_quotes.map((item) => {
+              if (!item || typeof item !== "object") return item;
+              return [item.key, item.value, item.quote].filter((part) => part !== undefined && part !== null && part !== "").join(" · ");
+            }));
+          }
+        }
+        card.appendChild(draft);
+      }
+      const actions = make("div", "actions");
+      card.appendChild(actions);
+      const group = memoryGroup(memory);
+      if (status === "candidate") {
+        addMemoryAction(card, "확인하고 이번 요청에 적용", "confirm", memory);
+        addMemoryAction(card, "확인하고 앞으로도 사용 허용", "remember", memory);
+      } else if (status === "active") {
+        if (group === "short") addMemoryAction(card, "앞으로도 사용 허용", "remember", memory);
+        if (group === "short" || group === "long") addMemoryAction(card, "withdraw", "withdraw", memory);
+      }
+      if (!actions.childNodes.length) actions.remove();
+      return card;
+    }
+
+    function renderMemories(state) {
+      const memories = list(state.memories);
+      const groups = {
+        candidate: { title: "Candidate · pending", items: [] },
+        short: { title: "Short-term · current request", items: [] },
+        long: { title: "Long-term · confirmed for future use", items: [] }
+      };
+      memories.forEach((memory) => groups[memoryGroup(memory)].items.push(memory));
+      clear($("memoryGroups"));
+      Object.keys(groups).forEach((key) => {
+        const group = groups[key];
+        const section = make("section", "memory-group");
+        section.appendChild(make("h3", "", `${group.title} (${group.items.length})`));
+        if (!group.items.length) section.appendChild(make("p", "empty", "None"));
+        group.items.forEach((memory) => section.appendChild(renderMemoryCard(memory)));
+        $("memoryGroups").appendChild(section);
+      });
+      $("memorySummary").textContent = `${memories.length} memory item${memories.length === 1 ? "" : "s"}`;
+    }
+
+    function profileTarget(state) {
+      if (!state.profile || !Array.isArray(state.profile.targets)) return null;
+      const id = state.target && state.target.id;
+      return state.profile.targets.find((item) => item.target_id === id) || state.profile.targets[0] || null;
+    }
+
+    function featureValue(feature) {
+      if (!feature) return null;
+      return feature.values || feature.value || feature.direct_values;
+    }
+
+    function renderFeatures(state) {
+      const registry = state.registry && state.registry.features ? state.registry.features : {};
+      const profileTargetState = profileTarget(state);
+      const features = profileTargetState && profileTargetState.features ? profileTargetState.features : {};
+      const keys = Object.keys(registry);
+      Object.keys(features).forEach((key) => { if (!keys.includes(key)) keys.push(key); });
+      clear($("featureMap"));
+      keys.forEach((key) => {
+        const info = features[key] || null;
+        const meta = registry[key] || {};
+        const card = make("article", "feature-card");
+        card.appendChild(make("div", "feature-name", meta.label_ko ? `${meta.label_ko} (${key})` : key));
+        card.appendChild(make("div", "feature-value", `values: ${display(featureValue(info))}`));
+        card.appendChild(make("div", "feature-value", `status: ${info && info.status ? info.status : profileTargetState ? "—" : "profile unavailable"}`));
+        card.appendChild(make("div", "feature-value", `sources: ${display(info && (info.source_ids || info.sources))}`));
+        card.appendChild(make("div", "feature-value", `constraints: ${display(info && info.constraints)}`));
+        card.appendChild(make("div", "feature-value", `match: ${display(info && info.match)}`));
+        card.appendChild(make("div", "feature-value", `origin: ${display(info && info.origin)}`));
+        card.appendChild(make("div", "feature-value", `reason: ${display(info && info.reason)}`));
+        $("featureMap").appendChild(card);
+      });
+      $("featureCount").textContent = `${keys.length || 17} features`;
+      if (state.profile) {
+        $("profileNote").textContent = `profile: available${state.profile.context_id ? ` · context ${state.profile.context_id}` : ""}`;
+      } else {
+        $("profileNote").textContent = `profile: unavailable${state.last_error && state.last_error.message ? ` · ${state.last_error.message}` : ""}`;
+      }
+    }
+
+    function renderTrace(state) {
+      const trace = list(state.trace);
+      $("traceOutput").textContent = trace.length ? JSON.stringify(trace, null, 2) : "No trace entries.";
+      $("rawOutput").textContent = JSON.stringify(state, null, 2);
+    }
+
+    function render(state) {
+      renderHeader(state);
+      renderMessages(state);
+      renderMemories(state);
+      renderFeatures(state);
+      renderTrace(state);
+      if (state.last_error) setError(state.last_error);
+      else setError(null);
+      setBusyControls();
+    }
+
+    async function responseJson(response) {
+      let body = null;
+      try { body = await response.json(); } catch (_) { body = {}; }
+      if (!response.ok || (body && body.error)) throw (body && body.error) || { code: `http_${response.status}`, message: `Request failed (${response.status})` };
+      return body;
+    }
+
+    async function loadState(preserveDraft = true) {
+      const draft = preserveDraft ? chatInput.value : "";
+      app.loading = true;
+      setBusyControls();
+      try {
+        const response = await fetch("/api/state", { headers: { Accept: "application/json" } });
+        app.state = await responseJson(response);
+        render(app.state);
+        if (preserveDraft) chatInput.value = draft;
+        return app.state;
+      } catch (error) {
+        setError(error);
+        throw error;
+      } finally {
+        app.loading = false;
+        setBusyControls();
+      }
+    }
+
+    function pollUntilIdle() {
+      if (app.pollTimer) window.clearTimeout(app.pollTimer);
+      const poll = async () => {
+        try {
+          const state = await loadState(true);
+          if (state.busy) app.pollTimer = window.setTimeout(poll, 1000);
+        } catch (_) {
+          app.pollTimer = window.setTimeout(poll, 1000);
+        }
+      };
+      app.pollTimer = window.setTimeout(poll, 1000);
+    }
+
+    async function mutate(path, payload, clearInput = false) {
+      if (app.writing || app.loading || (app.state && app.state.busy)) return;
+      app.writing = true;
+      setBusyControls();
+      try {
+        const response = await fetch(path, {
+          method: "POST",
+          headers: { "Content-Type": "application/json", Accept: "application/json" },
+          body: JSON.stringify(payload)
+        });
+        await responseJson(response);
+        if (clearInput) chatInput.value = "";
+        const state = await loadState(true);
+        if (state.busy) pollUntilIdle();
+      } catch (error) {
+        setError(error);
+      } finally {
+        app.writing = false;
+        setBusyControls();
+      }
+    }
+
+    $("chatForm").addEventListener("submit", (event) => {
+      event.preventDefault();
+      const text = chatInput.value.trim();
+      if (text) mutate("/api/chat", { text }, true);
+    });
+    document.querySelectorAll("[data-sample]").forEach((button) => {
+      button.addEventListener("click", () => { chatInput.value = button.dataset.sample || ""; chatInput.focus(); });
+    });
+    $("targetSelect").addEventListener("change", () => {
+      if ($("targetSelect").value) mutate("/api/target", { garment_type: $("targetSelect").value });
+    });
+    $("newRequest").addEventListener("click", () => mutate("/api/request", { garment_type: $("targetSelect").value }, true));
+    $("infer").addEventListener("click", () => mutate("/api/infer", {}));
+    $("reload").addEventListener("click", () => loadState(true).catch(() => {}));
+    loadState(false).then((state) => { if (state.busy) pollUntilIdle(); }).catch(() => {});
+  </script>
+</body>
+</html>

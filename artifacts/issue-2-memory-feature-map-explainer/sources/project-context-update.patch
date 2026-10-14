@@ -1,0 +1,28 @@
+--- /Users/nojonghyeon/Desktop/세모프/프로젝트-맥락/HCI_HANDSOME/01-복귀.md
++++ /Users/nojonghyeon/Desktop/세모프/프로젝트-맥락/HCI_HANDSOME/01-복귀.md
+@@ -30,6 +30,8 @@
+ 
+ ## 실행과 실제 검증
+ 
++**2026-10-14 통합 영상 작업의 추가 확인:** GitHub에서 Issue #1 OPEN·Issue #2 CLOSED·PR #3 MERGED와 PR head CI 3개 SUCCESS를 실제 조회했다. 로컬 HEAD `6ca871a`의 오프라인 79개 테스트·가상 데모 PASS, 모델 호출 false·추론 후 기억 불변 확인. 전체 문서 검사246링크·HTML쌍8·`git diff --check` PASS. 기존 설명 `index.html`의 짝 Markdown은 내장 원문으로 복구해 앞선 전체 검사 실패를 해결했고 HTML은 보존했다. 제품 코드·정책·브랜치·원격 상태는 변경하지 않았다.
++
+ ```sh
+ PYTHONPATH=src python3 -m stylemate_memory.cli demo --synthetic
+ PYTHONPATH=src python3 -m unittest discover -s tests -q
+@@ -49,13 +51,15 @@
+ 
+ ## 다음 행동
+ 
+-1. **사용자 지정 Issue #1 문서 검토:** 문서 5개의 로컬 정리·검증을 마쳤다. 사용자 diff 검토 후 원격 반영·#1 종료 여부를 결정한다. 기존 AGENTS/설명 artifacts는 별도다. 전체 검사에서 확인된 별도 설명 HTML의 짝 Markdown 누락도 해당 자료 작업에서 정리해야 한다. PR 본문 초안은 `/private/tmp/hci-issue1-pr-body.md`에 준비했다. 이번에 commit·push·PR 게시·#1 종료는 수행하지 않았다.
++1. **사용자 지정 Issue #1 문서 검토:** 문서 5개의 로컬 정리·검증을 마쳤다. 사용자 diff 검토 후 원격 반영·#1 종료 여부를 결정한다. 기존 AGENTS/설명 artifacts는 별도다. 별도 설명 HTML의 짝 Markdown은 통합 영상 작업에서 복구해 전체 검사를 통과했다. PR 본문 초안은 `/private/tmp/hci-issue1-pr-body.md`에 준비했다. 이번에 commit·push·PR 게시·#1 종료는 수행하지 않았다.
+ 2. **사용자 지정 나중 작업:** 로컬 model/key 설정 뒤 실제 LLM 호출과 목표 의미 품질을 확인한다. 키 값을 채팅/저장소에 넣지 않는다.
+ 3. **AI 후속 제안:** 입력/확인·동의 UI와 인증/상품 연결은 별도 요구사항으로 진행한다.
+ 
+ 목표일: **미정**. 사용자 지정 없음.
+ 
+ ## 보존한 설명 자료
++
++통합 메모리·Feature Map 영상 (Issue #2): 2026-10-14 사용자 요청으로 `answer-me-with-html`의 3b1b 테마·**6장면·31개 대사·약 7분 2초·1080p 한국어 영상**을 완성했다. 기본/이번 선호, 17개 속성, SQLite 확인·동의·저장, 대상별 context, 직접값/추론/미정, 철회·삭제·기간과 미구현 범위를 설명한다. [MP4](/Users/nojonghyeon/Documents/GitHub/HCI_HANDSOME/artifacts/issue-2-memory-feature-map-explainer/stylemate-memory-feature-map.mp4) · [플레이어](/Users/nojonghyeon/Documents/GitHub/HCI_HANDSOME/artifacts/issue-2-memory-feature-map-explainer/stylemate-memory-feature-map.html) · [시간표·대사](/Users/nojonghyeon/Documents/GitHub/HCI_HANDSOME/artifacts/issue-2-memory-feature-map-explainer/narration-ko.md) · [SRT](/Users/nojonghyeon/Documents/GitHub/HCI_HANDSOME/artifacts/issue-2-memory-feature-map-explainer/narration-ko.srt) · [상세 근거](/Users/nojonghyeon/Documents/GitHub/HCI_HANDSOME/artifacts/issue-2-memory-feature-map-explainer/evidence.md). 6장면과 인코딩된 프레임을 시각 확인했고 챕터·재생·속도·자막31개·런타임 예외0, 비무음 음성/타임라인 일치와 전체 MP4 디코딩을 확인했다. 실제 LLM·이미지/상품 추출·제품 UI·연구 효과의 실행 검증은 아니며, 설계·제품 정본을 바꾸지 않았다. 기존 사용자 문서/산출물을 보존했다.
+ 
+ 아래 자료는 이전 설명 산출물이며 현재 구현 정본을 대신하지 않는다. 미커밋 artifacts를 이번 PR에 포함하지 않았다.
+ 

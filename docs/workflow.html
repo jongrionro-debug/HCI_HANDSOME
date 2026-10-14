@@ -208,7 +208,7 @@ html[data-theme="blueprint"] .am-ruler {
 /* ── 面板 ───────────────────────────────── */
 .am-panel {
   background: var(--paper); border: var(--bw) solid var(--line); border-radius: var(--radius);
-  box-shadow: var(--shadow); min-width: 0; overflow: hidden;
+  box-shadow: var(--shadow); min-width: 0; overflow: hidden; scroll-margin-top: 52px;
 }
 .am-panel-head {
   display: flex; align-items: stretch; gap: 0; border-bottom: var(--bw) solid var(--line); min-height: 34px;
@@ -437,7 +437,9 @@ html[data-theme="shadcn"] .am-kv { border-color: var(--line); border-radius: var
 <button class="am-btn" type="button" data-am="copy" data-done="已复制 ✓">复制源稿</button>
 </div>
 <main class="am-doc">
-<header class="am-head"><h1>StyleMate 시스템 동작 방식</h1><p class="am-sub">기본 취향과 이번 요청을 분리하는 대화형 코디 추천</p><div class="am-head-meta"><span><b>date</b>2026-10-04</span><span><b>design</b>Figma · Web Flow V2</span><span><b>research</b>docs/master.md · RQ1·RQ2</span></div><div class="am-intro am-md"><div class="am-md"><p>StyleMate는 사용자의 기본 취향을 참고해 현재 상황에 맞는 코디를 추천한다. 사용자는 대화와 이미지 선택으로 조건을 구체화하고, 이후에도 기억할 취향을 직접 선택한다.</p>
+<header class="am-head"><h1>StyleMate 시스템 동작 방식</h1><p class="am-sub">기본 취향과 이번 요청을 분리하는 대화형 코디 추천</p><div class="am-head-meta"><span><b>date</b>2026-10-04</span><span><b>design</b>Figma · Web Flow V2</span><span><b>research</b>docs/master.md · RQ1·RQ2</span></div><div class="am-intro am-md"><div class="am-md"><p>StyleMate는 텍스트·이미지 상호작용과 우리가 설계한 장·단기 메모리 시스템으로 아이템·조건별 취향을 축적하고, 기존 취향과 현재 요구에 맞는 패션 아이템을 찾는 에이전트를 목표로 한다. 이 시스템을 활용한 아이템 선호 판단이 사용자의 판단을 얼마나 충실하게 재현하는지 연구한다.</p>
+<p><strong>목적 범위 · 2026-10-14:</strong> 아래 Figma 화면과 코디 흐름은 기존 설계 사례다. 고객 미팅·발표 등 특정 상황의 코디 조정으로 프로젝트 전체를 한정하지 않는다. 사용자 동의를 반영한 목적·RQ 분리 방향과 구체 문안·평가 검토안은 <a href="master.md">연구 기준</a>을 따른다. 취향 판단 재현은 연구 목표이며 새 상품 추천 UI나 효과의 구현·검증을 뜻하지 않는다.</p>
+<p><strong>현재 초기 UI 방향 · 2026-10-14 사용자 지정:</strong> Feature Map과 메모리의 채워진 상태·전체 조건표·채움률·확정/추론 표시는 사용자 화면에 기본 노출하지 않는다. 사용자는 짧은 질문, 선택 버튼, 비교 이미지, 추천과 수정 동작으로 취향을 표현한다. 기존 오른쪽 조건 패널은 Figma 참조 기록이며 현재 초기 UI의 필수 구성이 아니다. 상세 표시 원칙은 D절을 따른다. 정보량을 줄이려는 설계 의도이며 실제 피로도 감소를 검증한 결과는 아니다.</p>
 </div></div></header>
 <div class="am-doc-layout">
 <nav class="am-toc" aria-label="目录"><a href="#panel-A">A · 전체 흐름과 문서의 근거</a><a href="#panel-B">B · 로그인과 세 가지 초기 취향 설정 경로</a><a href="#panel-C">C · 현재 요청과 공통 작업 공간</a><a href="#panel-D">D · 적응형 대화와 추천 조건의 분리</a><a href="#panel-E">E · 이미지 선택 뒤에 세부 취향을 확인하는 방식</a><a href="#panel-F">F · 최종 추천에서 비교하고 선택하기</a><a href="#panel-G">G · 선택적 기억과 이번 요청만의 조건</a><a href="#panel-H">H · 구현할 상태와 처리 순서</a></nav><div class="am-doc-body">
@@ -500,7 +502,9 @@ html[data-theme="shadcn"] .am-kv { border-color: var(--line); border-radius: var
 </tr>
 </tbody></table></div>
 <p><strong>근거의 범위:</strong> <a href="../Assignment/Figma.url">저장소의 Figma 링크</a>가 가리키는 <code>Web Flow V2 · StyleMate Reference</code>의 9개 화면을 확인했다. 연구 목적과 선호 분리 원칙은 <a href="./master.md">master.md</a>를 따른다. <a href="../Assignment/Readme.md">Assignment/Readme.md</a>에 따라 과제 PDF 두 개는 기준 자료에서 제외했다.</p>
-<p><strong>표기 원칙:</strong> 화면에서 확인한 구성은 그대로 설명한다. 화면만으로 알 수 없는 내부 처리와 예외 처리는 <strong>구현 제안</strong>으로 표시한다. 현재 저장소에는 실행 가능한 앱 코드가 없어 API·모델·데이터베이스 구현을 확인하지 않았다.</p>
+<p><strong>표기 원칙:</strong> 기존 Figma 화면의 구성, <strong>승인된 메모리 설계</strong>, 후속 UI의 <strong>구현 제안·미정</strong>을 구분한다. 이 문서는 제품 화면의 설계이며 현재 실행 앱의 명세가 아니다. 최신 Figma를 이번 문서 정리에서 다시 검증하지 않았다.</p>
+<p><strong>메모리 상세 설계 상태 · 2026-10-14 확인:</strong> <a href="https://github.com/jongrionro-debug/HCI_HANDSOME/issues/1">Issue #1</a>의 <a href="memory-design.md">장·단기 메모리 설계</a>와 <a href="memory-implementation-plan.md">구현 계획</a>은 범위·확인·동의·조회·충돌·보관·삭제·처리 계약을 정의한다. ADR 0001/0002와 v0.2 계약은 <strong>Accepted — 2026-10-13 사용자 전체 승인</strong>이다. 아래 승인된 조작은 UI가 구현됐다는 뜻이 아니다.</p>
+<p><strong>현재 실행 범위:</strong> 후속 Issue #2에서 Python·SQLite·CLI 기반 메모리/context·쇼핑용 17개 목표 feature와 LLM 연결 코드를 구현했다. <a href="shopping-memory-prototype.md">현재 실행 문서</a>와 <a href="decisions/0003-consumer-shopping-prototype.md">ADR 0003</a>이 축소된 실행 계약의 기준이다. v0.2와 실행 DTO는 동일한 JSON 형식이 아니다. 로그인·이미지 해석·상품 추천·전체 UI는 구현 범위 밖이며 실제 LLM 호출은 나중으로 정했다.</p>
 </div></div>
 </section>
 <section class="am-panel" id="panel-B">
@@ -524,7 +528,7 @@ html[data-theme="shadcn"] .am-kv { border-color: var(--line); border-radius: var
 <tr>
 <td>B · 이미지 선택</td>
 <td>미니멀·캐주얼·스트릿·포멀 등 이미지 중 2–4개를 선택한다.</td>
-<td>선택 이미지들의 공통 스타일 요소</td>
+<td>선택한 이미지와 확인할 스타일 요소 후보</td>
 <td><code>다음으로</code>를 거쳐 현재 요청으로 합류</td>
 </tr>
 <tr>
@@ -535,25 +539,32 @@ html[data-theme="shadcn"] .am-kv { border-color: var(--line); border-radius: var
 </tr>
 </tbody></table></div>
 <p>직접 입력 예시는 스트릿·오버핏·무채색·신발의 작은 포인트를 언급한다. 이미지 경로는 선택된 카드에 파란 테두리와 체크 표시를 보여준다. C 경로는 대화와 이미지 선택으로 취향을 알아간다고 안내한다.</p>
-<p><strong>구현 제안:</strong> 세 경로의 결과를 같은 기본 취향 구조로 정리한다. 입력 원문 또는 선택 이미지 ID를 함께 보관해 해석의 근거를 남긴다. C 경로에서는 취향을 빈 상태로 시작할 수 있어야 한다.</p>
-<p><strong>미정:</strong> 초기 설정 화면에는 1–4 진행 표시가 있다. 나머지 단계와 초기 프로필 확정 시점은 보이지 않는다. 기존 사용자의 초기 설정 생략 조건도 정해야 한다.</p>
+<p><strong>승인된 메모리 설계:</strong> 세 경로를 같은 기억 구조로 정리하되 직접 입력·이미지 이유를 항목별로 확인한다. 이후 활용할 요소는 기본 미체크 상태에서 선택·저장하며, C 경로는 빈 기본 취향으로 시작한다. 요청 원문과 장기 동의 snapshot의 보관은 분리한다. 초기 설정 UI의 구현은 후속 범위다.</p>
+<p><strong>UI 미정:</strong> 초기 설정 화면에는 1–4 진행 표시가 있고 나머지 화면 연결은 확인되지 않았다. 항목 검토·저장 시점과 빈 프로필 경로는 승인된 메모리 설계를 따른다.</p>
 </div></div>
 </section>
 <section class="am-panel" id="panel-C">
 <header class="am-panel-head"><span class="am-panel-id">C</span><h2>현재 요청과 공통 작업 공간</h2></header>
 <div class="am-panel-body"><div class="am-md"><p>사용자는 <code>오늘 어떤 스타일을 찾고 계신가요?</code> 화면에서 이번 목표를 입력한다. 텍스트 입력, 이미지 첨부, 음성 입력, 예시 요청 버튼이 표시되어 있다. <code>요청 시작하기</code>와 입력창의 전송 버튼이 요청 진입점이다.</p>
 <p>화면 예시는 가을 아우터, 편한 데일리룩, 면접 복장, 검정 바지에 어울리는 상의다. 이 요청은 평소 취향과 별도로 이번 추천의 목표가 된다.</p>
+<p>아래 작업 공간은 기존 Figma의 구성 기록이다. 오른쪽 조건 패널과 기본 취향 현황의 기본 노출은 현재 초기 UI 방향에 적용하지 않는다.</p>
 </div>
 <div class="am-tree"><div class="am-tree-root am-tree-root--solo"><div class="am-tree-box am-tree-box--root" data-key="작업 공간" data-step="0">작업 공간</div></div><ul class="am-tree-list"><li data-key="상단 탐색" data-step="1"><span class="am-tree-label">상단 탐색</span><span class="am-tree-sub">Home · Chat · My Style, 초기 화면에는 Explore도 표시</span></li><li data-key="왼쪽 요청 목록" data-step="2"><span class="am-tree-label">왼쪽 요청 목록</span><span class="am-tree-sub">새로운 스타일 요청 · 이전 요청</span></li><li data-key="왼쪽 내 스타일" data-step="3"><span class="am-tree-label">왼쪽 내 스타일</span><span class="am-tree-sub">내 기본 스타일 · 저장한 아이템 · 최근 본 아이템 · 설정</span></li><li data-key="중앙 영역" data-step="4"><span class="am-tree-label">중앙 영역</span><span class="am-tree-sub">요청 입력 또는 대화와 이미지 후보</span></li><li data-key="오른쪽 조건 패널" data-step="5"><span class="am-tree-label">오른쪽 조건 패널</span><span class="am-tree-sub">적응형 대화에서 지금까지 파악한 내용</span></li></ul></div>
-<div class="am-md"><p><strong>구현 제안:</strong> 새 요청을 시작할 때 요청 ID를 만든다. 기본 취향을 불러오고, 이번 요청의 조건은 별도 상태로 시작한다. 이전 요청의 임시 조건을 새 요청에 자동으로 이어 붙이지 않는다.</p>
+<div class="am-md"><p><strong>승인된 메모리 설계:</strong> 사용자의 비어 있지 않은 전송을 수락할 때 새 요청 ID를 만들고 이번 조건을 별도 상태로 시작한다. 이전 임시 조건은 자동 이월하지 않는다. 같은 요청 재개·새 요청·선택 복제를 구분하고, 재개 시 만료된 날짜·상황을 재확인한다. 상세 수명 계약은 메모리 설계 D02에 있다.</p>
 <p>요청 화면은 사진과 대화를 추천에 필요한 범위에서 사용한다고 안내한다. 이 문구만으로 서버 보관 기간이나 대화 삭제 방식을 확정할 수는 없다.</p>
-<p><strong>미정:</strong> 이미지·음성의 실제 처리, 전송 버튼과 시작 버튼의 차이, 빈 입력 처리, 요청 목록 복원 방식이 필요하다. 저장 아이템과 최근 본 아이템의 상세 화면도 이 설계 범위에는 없다.</p>
+<p><strong>UI 미정:</strong> 이미지·음성의 실제 처리, 전송 버튼과 시작 버튼의 연결은 후속 UI 범위다. 빈 입력 거부와 보관 중 동일 요청 재개는 승인된 메모리 계약에 정의했다. 저장 아이템·최근 본 아이템의 상세 화면은 이 범위 밖이다.</p>
 </div></div>
 </section>
 <section class="am-panel" id="panel-D">
 <header class="am-panel-head"><span class="am-panel-id">D</span><h2>적응형 대화와 추천 조건의 분리</h2></header>
-<div class="am-panel-body"><div class="am-md"><p>중앙 채팅은 사용자의 말을 받고 이미지 후보를 제시한다. 오른쪽 <code>지금까지 파악한 내용</code>에는 **내 기본 스타일(읽기)**와 **이번 요청(쓰기)**가 표시된다. 계절·아이템·무드와 아직 파악 중인 핏·컬러·기장감·추가 디테일을 보여준다.</p>
+<div class="am-panel-body"><div class="am-md"><p>기존 Figma에서 중앙 채팅은 사용자의 말을 받고 이미지 후보를 제시한다. 오른쪽 <code>지금까지 파악한 내용</code>에는 <strong>내 기본 스타일(읽기)</strong>와 <strong>이번 요청(쓰기)</strong>가 표시된다. 계절·아이템·무드와 아직 파악 중인 핏·컬러·기장감·추가 디테일을 보여준다. 이 패널은 현재 초기 UI에서 기본 표시할 대상으로 정하지 않는다.</p>
 <p>화면 예시에서는 가을 아우터 요청 뒤에 후보 이미지를 보여준다. 사용자는 이미지를 선택하고, 마음에 드는 요소로 색감·핏·분위기·소재·디테일 중 하나를 고른다. 자유 입력으로 조건을 추가할 수도 있다.</p>
+<h3 id="initial-ui-display-policy">현재 초기 UI의 표시 원칙 — 2026-10-14</h3>
+<p>사용자는 질문에 답하고, 이미지·아이템을 고르고, 마음에 들지 않는 부분을 수정한다. Feature Map과 메모리는 이를 처리하는 내부 상태다. 전체 속성 목록, 채움률, 장·단기 메모리 목록, 조건 요약 패널과 확정/추론 배지는 초기 사용자 화면에 기본 표시하지 않는다. 속성 설명은 해당 질문에 필요한 짧은 문장으로 제공하고 긴 텍스트 입력을 강제하지 않는다.</p>
+<p>이미지 비교는 이미 파악한 조건에 맞는 라벨링된 아이템에서 이번에 확인할 속성의 값이 다른 후보를 고르는 방향이다. 질문에서 비교할 요소를 알리고, 선택은 해당 요소에만 반영한다. 다른 속성·촬영 차이는 가능한 한 줄인다. 실제 라벨 데이터·이미지 검색/선정·후보 부족 시 대체 규칙은 아직 구현·검증하지 않았다.</p>
+<p>내부에서는 사용자 직접 입력/선택과 모델 추정의 출처, 필수 조건, 적용 범위와 사용 근거를 유지한다. 추정값은 추천에 활용할 수 있지만 자동으로 필수 조건이나 장기 취향으로 확정하지 않는다. 사용자가 반대하지 않았다는 사실만으로 내용 확인·이후 활용 동의를 완료하지 않는다. 해석이 모호하거나 조건이 충돌할 때는 관련 요소만 짧게 확인하며 전체 내부 상태를 설명하게 하지 않는다.</p>
+<p>장기 활용 동의·수정·철회·삭제의 기존 계약은 유지한다. 예를 들어 이후 활용을 확인할 때 해당 요소만 “이런 핏을 다음에도 참고해도 될까요?”처럼 묻고, 전체 메모리 목록을 보여줄 필요는 없다. 동의의 정확한 대상·의미 확인과 관리 동작의 UI/이벤트 연결은 후속 구현 대상이다. 현재 방향은 기본 노출을 줄이는 결정이며 사용자 관리 권한의 제거를 뜻하지 않는다.</p>
+<p>이 표시 방향은 사용자가 지정했다. 정보량 감소가 표현 부담을 낮추는지, 추천을 수정하기 쉬운지는 사용자 평가로 확인해야 한다. 기존 RQ 비교·주 평가와 Proposed 정렬안은 이 결정만으로 바꾸지 않는다.</p>
 <p><strong>구현 제안 — 다음 상호작용을 고르는 규칙:</strong></p>
 <div class="am-table-wrap"><table>
 <thead>
@@ -591,9 +602,10 @@ html[data-theme="shadcn"] .am-kv { border-color: var(--line); border-radius: var
 </tbody></table></div>
 </div>
 <figure class="am-diagram am-flow"><svg viewBox="0 0 433 360" width="433" height="360" role="img" aria-label="流程图：사용자 응답、조건 갱신、질문 선택、텍스트 질문、이미지 비교、추천 생성" xmlns="http://www.w3.org/2000/svg"><defs><marker id="am2-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="am-arrow" d="M0,0 L10,5 L0,10 z"/></marker></defs><g></g><g><g data-step="0"><path class="am-edge" d="M155.9,49 L155.9,65 Q155.9,81 155.9,97 L155.9,113" marker-end="url(#am2-arrow)"/><g class="am-edge-label"><rect x="107.2" y="72" width="97.4" height="18" rx="3"/><text x="155.9" y="81" text-anchor="middle" dominant-baseline="central">이번 요청에 반영</text></g></g><g data-step="1"><path class="am-edge" d="M184.4,148 L210.5,164 Q236.6,180 236.6,196 L236.6,212" marker-end="url(#am2-arrow)"/><g class="am-edge-label"><rect x="157.4" y="171" width="158.4" height="18" rx="3"/><text x="236.6" y="180" text-anchor="middle" dominant-baseline="central">부족하거나 모호한 정보 확인</text></g></g><g data-step="2"><path class="am-edge" d="M278.5,243.3 L333,261.1 Q387.5,279 379.3,295 L371.1,311" marker-end="url(#am2-arrow)"/><g class="am-edge-label"><rect x="357.7" y="270" width="59.5" height="18" rx="3"/><text x="387.5" y="279" text-anchor="middle" dominant-baseline="central">상황 사실</text></g></g><g data-step="3"><path class="am-edge" d="M236.6,247 L236.6,263 Q236.6,279 197.4,295 L158.2,311" marker-end="url(#am2-arrow)"/><g class="am-edge-label"><rect x="201.1" y="270" width="71" height="18" rx="3"/><text x="236.6" y="279" text-anchor="middle" dominant-baseline="central">시각적 경계</text></g></g><g data-step="4"><path class="am-edge" d="M353.1,311 L344.9,295 Q336.8,279 336.8,254.3 Q336.8,229.5 336.8,204.8 Q336.8,180 336.8,155.3 Q336.8,130.5 336.8,105.8 Q336.8,81 270.5,62.9 L204.3,44.8" marker-end="url(#am2-arrow)"/></g><g data-step="5"><path class="am-edge" d="M72.4,311 L33.2,295 Q-6,279 -6,254.3 Q-6,229.5 -6,204.8 Q-6,180 -6,155.3 Q-6,130.5 -6,105.8 Q-6,81 50.7,63.7 L107.4,46.3" marker-end="url(#am2-arrow)"/></g><g data-step="6"><path class="am-edge" d="M127.4,148 L101.3,164 Q75.2,180 75.2,196 L75.2,212" marker-end="url(#am2-arrow)"/><g class="am-edge-label"><rect x="15" y="171" width="120.4" height="18" rx="3"/><text x="75.2" y="180" text-anchor="middle" dominant-baseline="central">이 내용으로 추천받기</text></g></g></g><g><g class="am-node am-node--rect" data-key="사용자 응답" data-step="0"><rect class="am-node-shape" x="107.4" y="14" width="96.9" height="35" rx="3"/><text x="155.9" y="31.5" text-anchor="middle" dominant-baseline="central">사용자 응답</text></g><g class="am-node am-node--rect" data-key="조건 갱신" data-step="0"><rect class="am-node-shape" x="113.9" y="113" width="83.9" height="35" rx="3"/><text x="155.9" y="130.5" text-anchor="middle" dominant-baseline="central">조건 갱신</text></g><g class="am-node am-node--rect" data-key="질문 선택" data-step="1"><rect class="am-node-shape" x="194.6" y="212" width="83.9" height="35" rx="3"/><text x="236.6" y="229.5" text-anchor="middle" dominant-baseline="central">질문 선택</text></g><g class="am-node am-node--rect" data-key="텍스트 질문" data-step="2"><rect class="am-node-shape" x="313.7" y="311" width="96.9" height="35" rx="3"/><text x="362.1" y="328.5" text-anchor="middle" dominant-baseline="central">텍스트 질문</text></g><g class="am-node am-node--rect" data-key="이미지 비교" data-step="3"><rect class="am-node-shape" x="66.8" y="311" width="96.9" height="35" rx="3"/><text x="115.3" y="328.5" text-anchor="middle" dominant-baseline="central">이미지 비교</text></g><g class="am-node am-node--rect" data-key="추천 생성" data-step="6"><rect class="am-node-shape" x="33.2" y="212" width="83.9" height="35" rx="3"/><text x="75.2" y="229.5" text-anchor="middle" dominant-baseline="central">추천 생성</text></g></g></svg></figure>
-<div class="am-md"><p><strong>구현 제안:</strong> 사용자가 새 조건을 보내면 대화와 조건 패널을 함께 갱신한다. 이번 요청의 응답은 기본 취향을 자동으로 덮어쓰지 않는다. 조건을 수정하면 해당 조건으로 후보를 다시 계산한다.</p>
+<div class="am-md"><p><strong>승인된 메모리 설계:</strong> 이번 요청의 응답은 기본 취향을 자동으로 덮어쓰지 않는다. 조건 변경 뒤 이전 추천은 갱신 필요로 표시한다.</p>
+<p><strong>기존 Figma 기반 UI 제안:</strong> 사용자가 새 조건을 보내면 대화와 조건 패널을 함께 갱신하고 현재 조건으로 후보를 다시 계산하는 방식이었다. 현재 초기 UI에서는 내부 조건과 후보를 갱신하되 전체 조건 패널을 기본 노출하지 않는다.</p>
 <p><strong>연구 기준:</strong> <a href="./master.md">RQ2</a>는 추가 정보가 필요할 때 텍스트와 이미지를 선택적으로 제공하는 방식이다. Figma의 가을 아우터 예시 순서를 모든 요청에 고정 적용하면 이 기준과 달라진다.</p>
-<p><strong>미정:</strong> 필요한 정보의 기준, 질문 종료 조건, 후보 이미지 생성·검색 방식이 필요하다. RQ1은 조건 확인·수정을 요구하지만, 현재 패널의 항목별 수정 조작은 구체적으로 정의되지 않았다.</p>
+<p><strong>미정:</strong> RQ2의 질문 종료 조건·형식 선택과 후보 이미지 공급은 별도 정책이 필요하다. 메모리 설계는 확인 중·기본·이번 조건, 이번 요청 제외·장기 수정·철회·삭제의 승인된 조작 계약을 정의한다. 현재 Figma에서 이 조작들을 구현 확인한 것은 아니다.</p>
 </div></div>
 </section>
 <section class="am-panel" id="panel-E">
@@ -608,8 +620,9 @@ html[data-theme="shadcn"] .am-kv { border-color: var(--line); border-radius: var
 <li>사용자가 조건을 더 보내거나 <code>추천 결과 보기</code>를 누른다.</li>
 </ol>
 <p>화면 예시는 핏 선택과 함께 색감·편안함에 대한 텍스트 피드백을 보여준다. 다음 후보에는 <code>Recommended</code> 표시가 있다. <code>이전으로</code> 버튼도 표시된다.</p>
-<p><strong>구현 제안:</strong> 이미지 선택 자체와 선택 이유를 분리해 기록한다. 사용자가 핏을 선택했다고 이미지의 색상·소재·격식까지 모두 좋아한다고 확정하지 않는다. 글로 추가한 조건도 함께 반영한다.</p>
-<p><strong>미정:</strong> 복수 요소 선택 가능 여부, 이미지 변경 시 기존 피드백 유지 여부, 이전 화면 복귀 시 조건 보존 방식이 필요하다. 이 단계가 별도 화면인지 채팅 내부의 확장 상태인지도 결정해야 한다.</p>
+<p><strong>승인된 메모리 설계:</strong> 이미지 선택 자체와 선택 이유를 분리해 기록한다. 사용자가 핏을 선택했다고 이미지의 색상·소재·격식까지 모두 좋아한다고 확정하지 않는다. 글로 추가한 조건도 확인된 범위에서 반영한다.</p>
+<p><strong>승인된 메모리 설계:</strong> 복수 요소 선택을 허용한다. 이미지를 바꿔도 확정된 요소는 근거 이미지와 함께 유지하고 새 이미지 속성으로 자동 변경하지 않는다. 이전 화면으로 돌아가도 확정 조건은 유지한다.</p>
+<p><strong>UI 미정:</strong> 세부 취향 확인을 별도 화면으로 제공할지, 채팅 내부에서 확장할지는 후속 UI 선택이다.</p>
 </div></div>
 </section>
 <section class="am-panel" id="panel-F">
@@ -641,7 +654,7 @@ html[data-theme="shadcn"] .am-kv { border-color: var(--line); border-radius: var
 </tbody></table></div>
 <p>필터는 <code>전체(3)</code>, <code>평소 스타일 기반(2)</code>, <code>새로운 스타일 제안(1)</code>이다. 이 숫자는 현재 화면의 예시 구성이다. 모든 요청에서 같은 추천 개수를 제공해야 한다는 규칙은 아니다.</p>
 <p><strong>구현 제안:</strong> 각 결과에 사용한 기본 취향과 이번 요청의 조건을 연결한다. 설명에서는 유지한 취향과 상황 때문에 조정한 요소를 구분한다. 사용자가 코디를 선택한 뒤에는 새로 파악한 취향의 저장 선택으로 이어진다.</p>
-<p>연구 대상에 맞춘 <strong>설명 예시</strong>는 다음과 같다. “기본 취향인 여유 있는 핏을 유지했습니다. 고객 미팅에 맞춰 상의를 더 단정하게 조정했습니다.” 이 문장은 Figma의 실제 추천 문구가 아니다.</p>
+<p>현재 요구 중 하나인 상황을 반영한 <strong>설명 예시</strong>는 다음과 같다. “기본 취향인 여유 있는 핏을 유지했습니다. 고객 미팅에 맞춰 상의를 더 단정하게 조정했습니다.” 이 문장은 Figma의 실제 추천 문구가 아니다.</p>
 <p><strong>미정:</strong> 자세히 보기의 내용, 다른 카드의 코디 선택 방법, 재추천 조작이 필요하다. 상품 상세·구매·결제 흐름은 현재 화면에서 확인되지 않았다.</p>
 </div></div>
 </section>
@@ -665,7 +678,7 @@ html[data-theme="shadcn"] .am-kv { border-color: var(--line); border-radius: var
 <tr>
 <td>선택한 요소 저장하기</td>
 <td>선택한 요소를 기본 취향에 반영</td>
-<td>현재 추천 유지</td>
+<td>기존 결과를 유지하되 갱신 필요 표시</td>
 </tr>
 <tr>
 <td>이번에만 적용하기</td>
@@ -674,20 +687,21 @@ html[data-theme="shadcn"] .am-kv { border-color: var(--line); border-radius: var
 </tr>
 <tr>
 <td>모달 닫기</td>
-<td>구현 제안: 기본 취향 변경 없음</td>
-<td>닫은 뒤 복귀 화면은 미정</td>
+<td>기본 취향 변경 없음</td>
+<td>승인된 설계: 현재 조건을 유지하고 대화로 복귀</td>
 </tr>
 </tbody></table></div>
 </div>
 <figure class="am-diagram am-flow"><svg viewBox="0 0 1046 134" width="1046" height="134" role="img" aria-label="流程图：대화 피드백、이번 요청 조건、저장 후보、기본 취향、요청 유지、다음 추천" xmlns="http://www.w3.org/2000/svg"><defs><marker id="am3-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="am-arrow" d="M0,0 L10,5 L0,10 z"/></marker></defs><g></g><g><g data-step="0"><path class="am-edge" d="M110.9,67 L137.8,67 Q164.6,67 191.5,67 L218.4,67" marker-end="url(#am3-arrow)"/><g class="am-edge-label"><rect x="134.9" y="58" width="59.5" height="18" rx="3"/><text x="164.6" y="67" text-anchor="middle" dominant-baseline="central">우선 반영</text></g></g><g data-step="1"><path class="am-edge" d="M332.2,67 L362.8,67 Q393.4,67 424,67 L454.6,67" marker-end="url(#am3-arrow)"/><g class="am-edge-label"><rect x="356.2" y="58" width="74.4" height="18" rx="3"/><text x="393.4" y="67" text-anchor="middle" dominant-baseline="central">새 취향 정리</text></g></g><g data-step="2"><path class="am-edge" d="M538.5,78.8 L580.6,90.7 Q622.7,102.5 664.8,102.5 L706.9,102.5" marker-end="url(#am3-arrow)"/><g class="am-edge-label"><rect x="562.5" y="93.5" width="120.4" height="18" rx="3"/><text x="622.7" y="102.5" text-anchor="middle" dominant-baseline="central">선택한 요소 저장하기</text></g></g><g data-step="3"><path class="am-edge" d="M538.5,55.2 L580.6,43.3 Q622.7,31.5 664.8,31.5 L706.9,31.5" marker-end="url(#am3-arrow)"/><g class="am-edge-label"><rect x="569.9" y="22.5" width="105.5" height="18" rx="3"/><text x="622.7" y="31.5" text-anchor="middle" dominant-baseline="central">이번에만 적용하기</text></g></g><g data-step="4"><path class="am-edge" d="M790.8,102.5 L830,102.5 Q869.2,102.5 908.4,102.5 L947.7,102.5" marker-end="url(#am3-arrow)"/><g class="am-edge-label"><rect x="814.8" y="93.5" width="108.9" height="18" rx="3"/><text x="869.2" y="102.5" text-anchor="middle" dominant-baseline="central">다음 요청에서 참고</text></g></g></g><g><g class="am-node am-node--rect" data-key="대화 피드백" data-step="0"><rect class="am-node-shape" x="14" y="49.5" width="96.9" height="35" rx="3"/><text x="62.5" y="67" text-anchor="middle" dominant-baseline="central">대화 피드백</text></g><g class="am-node am-node--rect" data-key="이번 요청 조건" data-step="0"><rect class="am-node-shape" x="218.4" y="49.5" width="113.8" height="35" rx="3"/><text x="275.3" y="67" text-anchor="middle" dominant-baseline="central">이번 요청 조건</text></g><g class="am-node am-node--rect" data-key="저장 후보" data-step="1"><rect class="am-node-shape" x="454.6" y="49.5" width="83.9" height="35" rx="3"/><text x="496.5" y="67" text-anchor="middle" dominant-baseline="central">저장 후보</text></g><g class="am-node am-node--rect" data-key="기본 취향" data-step="2"><rect class="am-node-shape" x="706.9" y="85" width="83.9" height="35" rx="3"/><text x="748.8" y="102.5" text-anchor="middle" dominant-baseline="central">기본 취향</text></g><g class="am-node am-node--rect" data-key="요청 유지" data-step="3"><rect class="am-node-shape" x="706.9" y="14" width="83.9" height="35" rx="3"/><text x="748.8" y="31.5" text-anchor="middle" dominant-baseline="central">요청 유지</text></g><g class="am-node am-node--rect" data-key="다음 추천" data-step="4"><rect class="am-node-shape" x="947.7" y="85" width="83.9" height="35" rx="3"/><text x="989.6" y="102.5" text-anchor="middle" dominant-baseline="central">다음 추천</text></g></g></svg></figure>
-<div class="am-md"><p><strong>구현 제안:</strong> 기본 취향 변경은 저장 버튼을 확정한 시점에 수행한다. 기존 취향과 충돌하는 요소는 변경 내용을 보여주고 확인할 수 있어야 한다. 저장 성공 후 화면에 반영 결과를 보여준다.</p>
+<div class="am-md"><p><strong>승인된 메모리 설계:</strong> 기본 취향 변경은 선택한 항목의 내용 확인·이후 활용 동의와 시스템 검증이 성공할 때 수행한다. 체크 기본값은 해제, 전부 해제하면 저장 버튼은 비활성이다. 충돌은 전후와 범위를 확인하며, 복수 항목은 한 배치로 전체 성공 또는 전체 실패한다. 실패하면 선택을 유지하고 실제 결과를 표시한다. 저장 UI의 구현은 후속 범위다.</p>
 <p><strong>주의할 의미:</strong> <code>저장하지 않음</code>은 여기서 기본 취향으로 저장하지 않는다는 뜻이다. 대화 기록이나 요청 이력까지 서버에 전혀 보관하지 않는다는 뜻으로 해석하지 않는다.</p>
-<p><strong>미정:</strong> 체크 항목의 기본 선택값, 중복 취향 병합, 충돌 처리, 저장 취소·실패 시 복귀 동작이 필요하다. RQ1의 범위 선택은 사용자가 이해하고 직접 결정할 수 있어야 한다.</p>
+<p><strong>계약 참조:</strong> 저장·중복·충돌·닫기·실패는 메모리 설계 D04–D09를 따른다. 기본 저장을 선택하지 않기, 추천 활용 철회, 실제 기록 삭제는 서로 다른 조작이며 보관·삭제 안내는 D10을 따른다. 화면에 체크된 예시가 있다는 사실을 기본 체크 정책으로 해석하지 않는다.</p>
 </div></div>
 </section>
 <section class="am-panel" id="panel-H">
 <header class="am-panel-head"><span class="am-panel-id">H</span><h2>구현할 상태와 처리 순서</h2></header>
-<div class="am-panel-body"><div class="am-md"><p>이 패널은 앞선 화면을 실제 시스템으로 연결하기 위한 <strong>구현 제안</strong>이다. 기술 스택이나 특정 API를 확정한 내용은 아니다.</p>
+<div class="am-panel-body"><div class="am-md"><p>이 패널은 앞선 화면을 실제 시스템으로 연결하기 위한 <strong>UI 구현 제안</strong>이다. 메모리 계층의 Python·SQLite 선택과 내부 처리 계약은 승인됐고 후속 로컬 프로토타입에 일부 구현됐다. 전체 앱 스택·공개 API·아래 화면 연결은 아직 구현하지 않았다.</p>
+<p>아래 시퀀스의 조건 패널은 기존 Figma 기반 흐름을 보존한 것이다. 현재 초기 UI는 D절의 표시 원칙에 따라 질문·선택·추천·수정을 제공하고 Feature Map/메모리의 전체 상태는 기본 노출하지 않는다.</p>
 <div class="am-table-wrap"><table>
 <thead>
 <tr>
@@ -727,24 +741,24 @@ html[data-theme="shadcn"] .am-kv { border-color: var(--line); border-radius: var
 <div class="am-md"><p>동작 조정기는 현재 단계, 다음 질문, 추천 실행 시점을 관리한다. 조건 해석은 사용자 응답을 구조화한다. 추천 처리는 기본 취향과 이번 요청을 함께 사용한다. 취향 저장은 사용자가 확정한 요소를 기본 취향에 반영한다. 이 역할들은 하나의 서비스 안에서 구현할 수 있다.</p>
 <p><strong>구현 제안 — 상태 전이와 예외 처리:</strong></p>
 <ul>
-<li>요청을 다시 열면 그 요청의 대화와 조건을 함께 복원한다.</li>
+<li>보관 중 요청의 재개를 확정하면 유효한 대화·조건을 복원하고 지난 날짜 조건은 재확인한다.</li>
 <li>조건 변경 뒤 이전 추천을 보여줄 때는 갱신이 필요한 결과임을 표시한다.</li>
 <li>처리 중에는 진행 상태를 보여주고 중복 요청을 막는다.</li>
 <li>추천에 실패하면 조건과 선택 내용을 유지한 채 재시도할 수 있게 한다.</li>
 <li>저장에 실패하면 성공으로 표시하지 않는다. 선택한 항목을 유지한다.</li>
-<li>응답 결과를 요청 ID와 연결해 다른 대화의 조건을 덮어쓰지 않는다.</li>
+<li>응답 결과를 요청 ID·request/profile revision과 연결하고 늦은 결과·오래된 저장 화면은 폐기 또는 재확인한다.</li>
 </ul>
 <p><strong>구현 검증 기준:</strong></p>
 <ol>
 <li>초기 설정의 A·B·C가 같은 현재 요청 화면으로 이어지는지 확인한다.</li>
 <li>이번 요청의 피드백만으로 기본 취향이 바뀌지 않는지 확인한다.</li>
 <li>텍스트 질문과 이미지 선택이 필요한 정보에 따라 달라지는지 확인한다.</li>
-<li>사용자 수정과 오른쪽 조건 패널, 추천 결과가 일치하는지 확인한다.</li>
+<li>사용자 수정이 내부 조건과 추천 결과에 반영되고, 초기 사용자 화면에 전체 조건표·메모리 현황·채움률이 기본 노출되지 않는지 확인한다.</li>
 <li>이미지를 선택한 이유를 전체 이미지의 취향과 혼동하지 않는지 확인한다.</li>
 <li>저장 버튼은 선택한 요소만 반영하는지 확인한다.</li>
 <li><code>이번에만 적용하기</code> 뒤 새 요청에 임시 조건이 이어지지 않는지 확인한다.</li>
 </ol>
-<p>연구 비교 조건은 별도로 구성해야 한다. <a href="./master.md">RQ1</a>은 선호 분리와 확인·수정의 효과를 비교한다. <a href="./master.md">RQ2</a>는 텍스트만 제공, 텍스트·이미지 고정 순서, 필요에 따른 선택 제공을 비교한다. 질문 수와 소요 시간은 보조 지표이며, 현재 화면의 단계 수를 실험 지표로 대신하지 않는다.</p>
+<p>아래는 2026-10-04 기존 RQ의 비교·평가이며, 우리가 설계한 메모리 시스템을 통한 취향 판단 재현의 RQ·평가 검토안과 구분한다. 연구 비교 조건은 별도로 구성해야 한다. <a href="./master.md">RQ1</a>은 선호 분리와 확인·수정의 효과를 비교한다. <a href="./master.md">RQ2</a>는 텍스트만 제공, 텍스트·이미지 고정 순서, 필요에 따른 선택 제공을 비교한다. 질문 수와 소요 시간은 보조 지표이며, 현재 화면의 단계 수를 실험 지표로 대신하지 않는다.</p>
 </div></div>
 </section>
 </div>
@@ -761,7 +775,11 @@ design: Figma · Web Flow V2
 research: docs/master.md · RQ1·RQ2
 ---
 
-StyleMate는 사용자의 기본 취향을 참고해 현재 상황에 맞는 코디를 추천한다. 사용자는 대화와 이미지 선택으로 조건을 구체화하고, 이후에도 기억할 취향을 직접 선택한다.
+StyleMate는 텍스트·이미지 상호작용과 우리가 설계한 장·단기 메모리 시스템으로 아이템·조건별 취향을 축적하고, 기존 취향과 현재 요구에 맞는 패션 아이템을 찾는 에이전트를 목표로 한다. 이 시스템을 활용한 아이템 선호 판단이 사용자의 판단을 얼마나 충실하게 재현하는지 연구한다.
+
+**목적 범위 · 2026-10-14:** 아래 Figma 화면과 코디 흐름은 기존 설계 사례다. 고객 미팅·발표 등 특정 상황의 코디 조정으로 프로젝트 전체를 한정하지 않는다. 사용자 동의를 반영한 목적·RQ 분리 방향과 구체 문안·평가 검토안은 [연구 기준](master.md)을 따른다. 취향 판단 재현은 연구 목표이며 새 상품 추천 UI나 효과의 구현·검증을 뜻하지 않는다.
+
+**현재 초기 UI 방향 · 2026-10-14 사용자 지정:** Feature Map과 메모리의 채워진 상태·전체 조건표·채움률·확정/추론 표시는 사용자 화면에 기본 노출하지 않는다. 사용자는 짧은 질문, 선택 버튼, 비교 이미지, 추천과 수정 동작으로 취향을 표현한다. 기존 오른쪽 조건 패널은 Figma 참조 기록이며 현재 초기 UI의 필수 구성이 아니다. 상세 표시 원칙은 D절을 따른다. 정보량을 줄이려는 설계 의도이며 실제 피로도 감소를 검증한 결과는 아니다.
 
 ## A 전체 흐름과 문서의 근거
 
@@ -792,7 +810,11 @@ StyleMate는 사용자의 기본 취향을 참고해 현재 상황에 맞는 코
 
 **근거의 범위:** [저장소의 Figma 링크](../Assignment/Figma.url)가 가리키는 `Web Flow V2 · StyleMate Reference`의 9개 화면을 확인했다. 연구 목적과 선호 분리 원칙은 [master.md](./master.md)를 따른다. [Assignment/Readme.md](../Assignment/Readme.md)에 따라 과제 PDF 두 개는 기준 자료에서 제외했다.
 
-**표기 원칙:** 화면에서 확인한 구성은 그대로 설명한다. 화면만으로 알 수 없는 내부 처리와 예외 처리는 **구현 제안**으로 표시한다. 현재 저장소에는 실행 가능한 앱 코드가 없어 API·모델·데이터베이스 구현을 확인하지 않았다.
+**표기 원칙:** 기존 Figma 화면의 구성, **승인된 메모리 설계**, 후속 UI의 **구현 제안·미정**을 구분한다. 이 문서는 제품 화면의 설계이며 현재 실행 앱의 명세가 아니다. 최신 Figma를 이번 문서 정리에서 다시 검증하지 않았다.
+
+**메모리 상세 설계 상태 · 2026-10-14 확인:** [Issue #1](https://github.com/jongrionro-debug/HCI_HANDSOME/issues/1)의 [장·단기 메모리 설계](memory-design.md)와 [구현 계획](memory-implementation-plan.md)은 범위·확인·동의·조회·충돌·보관·삭제·처리 계약을 정의한다. ADR 0001/0002와 v0.2 계약은 **Accepted — 2026-10-13 사용자 전체 승인**이다. 아래 승인된 조작은 UI가 구현됐다는 뜻이 아니다.
+
+**현재 실행 범위:** 후속 Issue #2에서 Python·SQLite·CLI 기반 메모리/context·쇼핑용 17개 목표 feature와 LLM 연결 코드를 구현했다. [현재 실행 문서](shopping-memory-prototype.md)와 [ADR 0003](decisions/0003-consumer-shopping-prototype.md)이 축소된 실행 계약의 기준이다. v0.2와 실행 DTO는 동일한 JSON 형식이 아니다. 로그인·이미지 해석·상품 추천·전체 UI는 구현 범위 밖이며 실제 LLM 호출은 나중으로 정했다.
 
 ## B 로그인과 세 가지 초기 취향 설정 경로
 
@@ -801,20 +823,22 @@ StyleMate는 사용자의 기본 취향을 참고해 현재 상황에 맞는 코
 | 경로 | 사용자 행동 | 시스템이 얻는 정보 | 다음 단계 |
 |---|---|---|---|
 | A · 직접 입력 | 평소 좋아하는 스타일을 자유롭게 적는다. 추천 키워드도 참고한다. | 스타일·핏·색상 등에 대한 명시적 설명 | `다음으로`를 거쳐 현재 요청으로 합류 |
-| B · 이미지 선택 | 미니멀·캐주얼·스트릿·포멀 등 이미지 중 2–4개를 선택한다. | 선택 이미지들의 공통 스타일 요소 | `다음으로`를 거쳐 현재 요청으로 합류 |
+| B · 이미지 선택 | 미니멀·캐주얼·스트릿·포멀 등 이미지 중 2–4개를 선택한다. | 선택한 이미지와 확인할 스타일 요소 후보 | `다음으로`를 거쳐 현재 요청으로 합류 |
 | C · 사용하면서 알아가기 | `아직 잘 모르겠어요` 경로에서 `바로 시작하기`를 누른다. | 아직 정해지지 않은 취향 | 현재 요청과 이후 상호작용에서 취향을 구체화 |
 
 직접 입력 예시는 스트릿·오버핏·무채색·신발의 작은 포인트를 언급한다. 이미지 경로는 선택된 카드에 파란 테두리와 체크 표시를 보여준다. C 경로는 대화와 이미지 선택으로 취향을 알아간다고 안내한다.
 
-**구현 제안:** 세 경로의 결과를 같은 기본 취향 구조로 정리한다. 입력 원문 또는 선택 이미지 ID를 함께 보관해 해석의 근거를 남긴다. C 경로에서는 취향을 빈 상태로 시작할 수 있어야 한다.
+**승인된 메모리 설계:** 세 경로를 같은 기억 구조로 정리하되 직접 입력·이미지 이유를 항목별로 확인한다. 이후 활용할 요소는 기본 미체크 상태에서 선택·저장하며, C 경로는 빈 기본 취향으로 시작한다. 요청 원문과 장기 동의 snapshot의 보관은 분리한다. 초기 설정 UI의 구현은 후속 범위다.
 
-**미정:** 초기 설정 화면에는 1–4 진행 표시가 있다. 나머지 단계와 초기 프로필 확정 시점은 보이지 않는다. 기존 사용자의 초기 설정 생략 조건도 정해야 한다.
+**UI 미정:** 초기 설정 화면에는 1–4 진행 표시가 있고 나머지 화면 연결은 확인되지 않았다. 항목 검토·저장 시점과 빈 프로필 경로는 승인된 메모리 설계를 따른다.
 
 ## C 현재 요청과 공통 작업 공간
 
 사용자는 `오늘 어떤 스타일을 찾고 계신가요?` 화면에서 이번 목표를 입력한다. 텍스트 입력, 이미지 첨부, 음성 입력, 예시 요청 버튼이 표시되어 있다. `요청 시작하기`와 입력창의 전송 버튼이 요청 진입점이다.
 
 화면 예시는 가을 아우터, 편한 데일리룩, 면접 복장, 검정 바지에 어울리는 상의다. 이 요청은 평소 취향과 별도로 이번 추천의 목표가 된다.
+
+아래 작업 공간은 기존 Figma의 구성 기록이다. 오른쪽 조건 패널과 기본 취향 현황의 기본 노출은 현재 초기 UI 방향에 적용하지 않는다.
 
 ```tree
 작업 공간
@@ -825,17 +849,29 @@ StyleMate는 사용자의 기본 취향을 참고해 현재 상황에 맞는 코
   오른쪽 조건 패널 | 적응형 대화에서 지금까지 파악한 내용
 ```
 
-**구현 제안:** 새 요청을 시작할 때 요청 ID를 만든다. 기본 취향을 불러오고, 이번 요청의 조건은 별도 상태로 시작한다. 이전 요청의 임시 조건을 새 요청에 자동으로 이어 붙이지 않는다.
+**승인된 메모리 설계:** 사용자의 비어 있지 않은 전송을 수락할 때 새 요청 ID를 만들고 이번 조건을 별도 상태로 시작한다. 이전 임시 조건은 자동 이월하지 않는다. 같은 요청 재개·새 요청·선택 복제를 구분하고, 재개 시 만료된 날짜·상황을 재확인한다. 상세 수명 계약은 메모리 설계 D02에 있다.
 
 요청 화면은 사진과 대화를 추천에 필요한 범위에서 사용한다고 안내한다. 이 문구만으로 서버 보관 기간이나 대화 삭제 방식을 확정할 수는 없다.
 
-**미정:** 이미지·음성의 실제 처리, 전송 버튼과 시작 버튼의 차이, 빈 입력 처리, 요청 목록 복원 방식이 필요하다. 저장 아이템과 최근 본 아이템의 상세 화면도 이 설계 범위에는 없다.
+**UI 미정:** 이미지·음성의 실제 처리, 전송 버튼과 시작 버튼의 연결은 후속 UI 범위다. 빈 입력 거부와 보관 중 동일 요청 재개는 승인된 메모리 계약에 정의했다. 저장 아이템·최근 본 아이템의 상세 화면은 이 범위 밖이다.
 
 ## D 적응형 대화와 추천 조건의 분리
 
-중앙 채팅은 사용자의 말을 받고 이미지 후보를 제시한다. 오른쪽 `지금까지 파악한 내용`에는 **내 기본 스타일(읽기)**와 **이번 요청(쓰기)**가 표시된다. 계절·아이템·무드와 아직 파악 중인 핏·컬러·기장감·추가 디테일을 보여준다.
+기존 Figma에서 중앙 채팅은 사용자의 말을 받고 이미지 후보를 제시한다. 오른쪽 `지금까지 파악한 내용`에는 **내 기본 스타일(읽기)**와 **이번 요청(쓰기)**가 표시된다. 계절·아이템·무드와 아직 파악 중인 핏·컬러·기장감·추가 디테일을 보여준다. 이 패널은 현재 초기 UI에서 기본 표시할 대상으로 정하지 않는다.
 
 화면 예시에서는 가을 아우터 요청 뒤에 후보 이미지를 보여준다. 사용자는 이미지를 선택하고, 마음에 드는 요소로 색감·핏·분위기·소재·디테일 중 하나를 고른다. 자유 입력으로 조건을 추가할 수도 있다.
+
+### 현재 초기 UI의 표시 원칙 — 2026-10-14
+
+사용자는 질문에 답하고, 이미지·아이템을 고르고, 마음에 들지 않는 부분을 수정한다. Feature Map과 메모리는 이를 처리하는 내부 상태다. 전체 속성 목록, 채움률, 장·단기 메모리 목록, 조건 요약 패널과 확정/추론 배지는 초기 사용자 화면에 기본 표시하지 않는다. 속성 설명은 해당 질문에 필요한 짧은 문장으로 제공하고 긴 텍스트 입력을 강제하지 않는다.
+
+이미지 비교는 이미 파악한 조건에 맞는 라벨링된 아이템에서 이번에 확인할 속성의 값이 다른 후보를 고르는 방향이다. 질문에서 비교할 요소를 알리고, 선택은 해당 요소에만 반영한다. 다른 속성·촬영 차이는 가능한 한 줄인다. 실제 라벨 데이터·이미지 검색/선정·후보 부족 시 대체 규칙은 아직 구현·검증하지 않았다.
+
+내부에서는 사용자 직접 입력/선택과 모델 추정의 출처, 필수 조건, 적용 범위와 사용 근거를 유지한다. 추정값은 추천에 활용할 수 있지만 자동으로 필수 조건이나 장기 취향으로 확정하지 않는다. 사용자가 반대하지 않았다는 사실만으로 내용 확인·이후 활용 동의를 완료하지 않는다. 해석이 모호하거나 조건이 충돌할 때는 관련 요소만 짧게 확인하며 전체 내부 상태를 설명하게 하지 않는다.
+
+장기 활용 동의·수정·철회·삭제의 기존 계약은 유지한다. 예를 들어 이후 활용을 확인할 때 해당 요소만 “이런 핏을 다음에도 참고해도 될까요?”처럼 묻고, 전체 메모리 목록을 보여줄 필요는 없다. 동의의 정확한 대상·의미 확인과 관리 동작의 UI/이벤트 연결은 후속 구현 대상이다. 현재 방향은 기본 노출을 줄이는 결정이며 사용자 관리 권한의 제거를 뜻하지 않는다.
+
+이 표시 방향은 사용자가 지정했다. 정보량 감소가 표현 부담을 낮추는지, 추천을 수정하기 쉬운지는 사용자 평가로 확인해야 한다. 기존 RQ 비교·주 평가와 Proposed 정렬안은 이 결정만으로 바꾸지 않는다.
 
 **구현 제안 — 다음 상호작용을 고르는 규칙:**
 
@@ -857,11 +893,13 @@ StyleMate는 사용자의 기본 취향을 참고해 현재 상황에 맞는 코
 조건 갱신 -&gt; 추천 생성: 이 내용으로 추천받기
 ```
 
-**구현 제안:** 사용자가 새 조건을 보내면 대화와 조건 패널을 함께 갱신한다. 이번 요청의 응답은 기본 취향을 자동으로 덮어쓰지 않는다. 조건을 수정하면 해당 조건으로 후보를 다시 계산한다.
+**승인된 메모리 설계:** 이번 요청의 응답은 기본 취향을 자동으로 덮어쓰지 않는다. 조건 변경 뒤 이전 추천은 갱신 필요로 표시한다.
+
+**기존 Figma 기반 UI 제안:** 사용자가 새 조건을 보내면 대화와 조건 패널을 함께 갱신하고 현재 조건으로 후보를 다시 계산하는 방식이었다. 현재 초기 UI에서는 내부 조건과 후보를 갱신하되 전체 조건 패널을 기본 노출하지 않는다.
 
 **연구 기준:** [RQ2](./master.md)는 추가 정보가 필요할 때 텍스트와 이미지를 선택적으로 제공하는 방식이다. Figma의 가을 아우터 예시 순서를 모든 요청에 고정 적용하면 이 기준과 달라진다.
 
-**미정:** 필요한 정보의 기준, 질문 종료 조건, 후보 이미지 생성·검색 방식이 필요하다. RQ1은 조건 확인·수정을 요구하지만, 현재 패널의 항목별 수정 조작은 구체적으로 정의되지 않았다.
+**미정:** RQ2의 질문 종료 조건·형식 선택과 후보 이미지 공급은 별도 정책이 필요하다. 메모리 설계는 확인 중·기본·이번 조건, 이번 요청 제외·장기 수정·철회·삭제의 승인된 조작 계약을 정의한다. 현재 Figma에서 이 조작들을 구현 확인한 것은 아니다.
 
 ## E 이미지 선택 뒤에 세부 취향을 확인하는 방식
 
@@ -876,9 +914,11 @@ StyleMate는 사용자의 기본 취향을 참고해 현재 상황에 맞는 코
 
 화면 예시는 핏 선택과 함께 색감·편안함에 대한 텍스트 피드백을 보여준다. 다음 후보에는 `Recommended` 표시가 있다. `이전으로` 버튼도 표시된다.
 
-**구현 제안:** 이미지 선택 자체와 선택 이유를 분리해 기록한다. 사용자가 핏을 선택했다고 이미지의 색상·소재·격식까지 모두 좋아한다고 확정하지 않는다. 글로 추가한 조건도 함께 반영한다.
+**승인된 메모리 설계:** 이미지 선택 자체와 선택 이유를 분리해 기록한다. 사용자가 핏을 선택했다고 이미지의 색상·소재·격식까지 모두 좋아한다고 확정하지 않는다. 글로 추가한 조건도 확인된 범위에서 반영한다.
 
-**미정:** 복수 요소 선택 가능 여부, 이미지 변경 시 기존 피드백 유지 여부, 이전 화면 복귀 시 조건 보존 방식이 필요하다. 이 단계가 별도 화면인지 채팅 내부의 확장 상태인지도 결정해야 한다.
+**승인된 메모리 설계:** 복수 요소 선택을 허용한다. 이미지를 바꿔도 확정된 요소는 근거 이미지와 함께 유지하고 새 이미지 속성으로 자동 변경하지 않는다. 이전 화면으로 돌아가도 확정 조건은 유지한다.
+
+**UI 미정:** 세부 취향 확인을 별도 화면으로 제공할지, 채팅 내부에서 확장할지는 후속 UI 선택이다.
 
 ## F 최종 추천에서 비교하고 선택하기
 
@@ -894,7 +934,7 @@ StyleMate는 사용자의 기본 취향을 참고해 현재 상황에 맞는 코
 
 **구현 제안:** 각 결과에 사용한 기본 취향과 이번 요청의 조건을 연결한다. 설명에서는 유지한 취향과 상황 때문에 조정한 요소를 구분한다. 사용자가 코디를 선택한 뒤에는 새로 파악한 취향의 저장 선택으로 이어진다.
 
-연구 대상에 맞춘 **설명 예시**는 다음과 같다. “기본 취향인 여유 있는 핏을 유지했습니다. 고객 미팅에 맞춰 상의를 더 단정하게 조정했습니다.” 이 문장은 Figma의 실제 추천 문구가 아니다.
+현재 요구 중 하나인 상황을 반영한 **설명 예시**는 다음과 같다. “기본 취향인 여유 있는 핏을 유지했습니다. 고객 미팅에 맞춰 상의를 더 단정하게 조정했습니다.” 이 문장은 Figma의 실제 추천 문구가 아니다.
 
 **미정:** 자세히 보기의 내용, 다른 카드의 코디 선택 방법, 재추천 조작이 필요하다. 상품 상세·구매·결제 흐름은 현재 화면에서 확인되지 않았다.
 
@@ -907,9 +947,9 @@ StyleMate는 사용자의 기본 취향을 참고해 현재 상황에 맞는 코
 | 사용자 행동 | 기본 취향에 미치는 영향 | 이번 요청 |
 |---|---|---|
 | 저장할 취향 요소를 선택·해제 | 아직 변경하지 않음 | 현재 조건 유지 |
-| 선택한 요소 저장하기 | 선택한 요소를 기본 취향에 반영 | 현재 추천 유지 |
+| 선택한 요소 저장하기 | 선택한 요소를 기본 취향에 반영 | 기존 결과를 유지하되 갱신 필요 표시 |
 | 이번에만 적용하기 | 기본 취향 변경 없음 | 이번 요청에만 적용 |
-| 모달 닫기 | 구현 제안: 기본 취향 변경 없음 | 닫은 뒤 복귀 화면은 미정 |
+| 모달 닫기 | 기본 취향 변경 없음 | 승인된 설계: 현재 조건을 유지하고 대화로 복귀 |
 
 ```flow LR
 대화 피드백 -&gt; 이번 요청 조건: 우선 반영
@@ -919,15 +959,17 @@ StyleMate는 사용자의 기본 취향을 참고해 현재 상황에 맞는 코
 기본 취향 -&gt; 다음 추천: 다음 요청에서 참고
 ```
 
-**구현 제안:** 기본 취향 변경은 저장 버튼을 확정한 시점에 수행한다. 기존 취향과 충돌하는 요소는 변경 내용을 보여주고 확인할 수 있어야 한다. 저장 성공 후 화면에 반영 결과를 보여준다.
+**승인된 메모리 설계:** 기본 취향 변경은 선택한 항목의 내용 확인·이후 활용 동의와 시스템 검증이 성공할 때 수행한다. 체크 기본값은 해제, 전부 해제하면 저장 버튼은 비활성이다. 충돌은 전후와 범위를 확인하며, 복수 항목은 한 배치로 전체 성공 또는 전체 실패한다. 실패하면 선택을 유지하고 실제 결과를 표시한다. 저장 UI의 구현은 후속 범위다.
 
 **주의할 의미:** `저장하지 않음`은 여기서 기본 취향으로 저장하지 않는다는 뜻이다. 대화 기록이나 요청 이력까지 서버에 전혀 보관하지 않는다는 뜻으로 해석하지 않는다.
 
-**미정:** 체크 항목의 기본 선택값, 중복 취향 병합, 충돌 처리, 저장 취소·실패 시 복귀 동작이 필요하다. RQ1의 범위 선택은 사용자가 이해하고 직접 결정할 수 있어야 한다.
+**계약 참조:** 저장·중복·충돌·닫기·실패는 메모리 설계 D04–D09를 따른다. 기본 저장을 선택하지 않기, 추천 활용 철회, 실제 기록 삭제는 서로 다른 조작이며 보관·삭제 안내는 D10을 따른다. 화면에 체크된 예시가 있다는 사실을 기본 체크 정책으로 해석하지 않는다.
 
 ## H 구현할 상태와 처리 순서
 
-이 패널은 앞선 화면을 실제 시스템으로 연결하기 위한 **구현 제안**이다. 기술 스택이나 특정 API를 확정한 내용은 아니다.
+이 패널은 앞선 화면을 실제 시스템으로 연결하기 위한 **UI 구현 제안**이다. 메모리 계층의 Python·SQLite 선택과 내부 처리 계약은 승인됐고 후속 로컬 프로토타입에 일부 구현됐다. 전체 앱 스택·공개 API·아래 화면 연결은 아직 구현하지 않았다.
+
+아래 시퀀스의 조건 패널은 기존 Figma 기반 흐름을 보존한 것이다. 현재 초기 UI는 D절의 표시 원칙에 따라 질문·선택·추천·수정을 제공하고 Feature Map/메모리의 전체 상태는 기본 노출하지 않는다.
 
 | 상태 | 담을 정보 | 변경 시점 |
 |---|---|---|
@@ -955,24 +997,24 @@ UI -&gt; 취향 저장: 확정한 요소만 전달
 
 **구현 제안 — 상태 전이와 예외 처리:**
 
-- 요청을 다시 열면 그 요청의 대화와 조건을 함께 복원한다.
+- 보관 중 요청의 재개를 확정하면 유효한 대화·조건을 복원하고 지난 날짜 조건은 재확인한다.
 - 조건 변경 뒤 이전 추천을 보여줄 때는 갱신이 필요한 결과임을 표시한다.
 - 처리 중에는 진행 상태를 보여주고 중복 요청을 막는다.
 - 추천에 실패하면 조건과 선택 내용을 유지한 채 재시도할 수 있게 한다.
 - 저장에 실패하면 성공으로 표시하지 않는다. 선택한 항목을 유지한다.
-- 응답 결과를 요청 ID와 연결해 다른 대화의 조건을 덮어쓰지 않는다.
+- 응답 결과를 요청 ID·request/profile revision과 연결하고 늦은 결과·오래된 저장 화면은 폐기 또는 재확인한다.
 
 **구현 검증 기준:**
 
 1. 초기 설정의 A·B·C가 같은 현재 요청 화면으로 이어지는지 확인한다.
 2. 이번 요청의 피드백만으로 기본 취향이 바뀌지 않는지 확인한다.
 3. 텍스트 질문과 이미지 선택이 필요한 정보에 따라 달라지는지 확인한다.
-4. 사용자 수정과 오른쪽 조건 패널, 추천 결과가 일치하는지 확인한다.
+4. 사용자 수정이 내부 조건과 추천 결과에 반영되고, 초기 사용자 화면에 전체 조건표·메모리 현황·채움률이 기본 노출되지 않는지 확인한다.
 5. 이미지를 선택한 이유를 전체 이미지의 취향과 혼동하지 않는지 확인한다.
 6. 저장 버튼은 선택한 요소만 반영하는지 확인한다.
 7. `이번에만 적용하기` 뒤 새 요청에 임시 조건이 이어지지 않는지 확인한다.
 
-연구 비교 조건은 별도로 구성해야 한다. [RQ1](./master.md)은 선호 분리와 확인·수정의 효과를 비교한다. [RQ2](./master.md)는 텍스트만 제공, 텍스트·이미지 고정 순서, 필요에 따른 선택 제공을 비교한다. 질문 수와 소요 시간은 보조 지표이며, 현재 화면의 단계 수를 실험 지표로 대신하지 않는다.
+아래는 2026-10-04 기존 RQ의 비교·평가이며, 우리가 설계한 메모리 시스템을 통한 취향 판단 재현의 RQ·평가 검토안과 구분한다. 연구 비교 조건은 별도로 구성해야 한다. [RQ1](./master.md)은 선호 분리와 확인·수정의 효과를 비교한다. [RQ2](./master.md)는 텍스트만 제공, 텍스트·이미지 고정 순서, 필요에 따른 선택 제공을 비교한다. 질문 수와 소요 시간은 보조 지표이며, 현재 화면의 단계 수를 실험 지표로 대신하지 않는다.
 </textarea>
 <script>
 (() => {

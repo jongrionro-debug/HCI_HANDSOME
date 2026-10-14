@@ -1,0 +1,72 @@
+{
+  "status": "PASS",
+  "checked_on": "2026-10-14",
+  "video": {
+    "duration_seconds": 421.776009,
+    "resolution": "1920x1080",
+    "fps": 30,
+    "video_codec": "h264",
+    "audio_codec": "aac",
+    "bytes": 14674099,
+    "scenes": 6,
+    "narration_beats": 31,
+    "theme": "3b1b",
+    "voice": "local macOS system TTS",
+    "ste_warnings": 0
+  },
+  "media_decode": {
+    "command": "ffmpeg -nostdin -v error -i artifacts/issue-2-memory-feature-map-explainer/stylemate-memory-feature-map.mp4 -f null -",
+    "exit_code": 0,
+    "scope": "Complete file decoded without reported audio or video errors."
+  },
+  "runtime_tests": {
+    "command": "PYTHONPATH=src python3 -m unittest discover -s tests -q",
+    "exit_code": 0,
+    "count": 79
+  },
+  "repository_checks": {
+    "command": "python3 scripts/check_repository.py",
+    "exit_code": 0,
+    "output": "repository-checks: PASS — 246 Markdown links, 8 HTML source pair(s), 2 Issue Form(s), and 1 PR template checked."
+  },
+  "diff_check": {
+    "command": "git diff --check",
+    "exit_code": 0
+  },
+  "browser": {
+    "result_file": "browser-check.json",
+    "captions_checked": 31,
+    "scenes_visually_inspected": 6,
+    "encoded_mp4_frame_inspected": true,
+    "runtime_exceptions": 0
+  },
+  "audio": {
+    "result_file": "audio-check.json",
+    "non_silent": true,
+    "matched_to_timeline": true
+  },
+  "sources": {
+    "initial_hashes": "source-manifest.json",
+    "final_state": "final-source-state.json",
+    "runtime_sources_unchanged": true
+  },
+  "recovery": {
+    "file": "../index.md",
+    "source": "Exact embedded am-source of pre-existing index.html",
+    "existing_html_unchanged": true
+  },
+  "scope": {
+    "live_llm_called": false,
+    "real_participant_data": false,
+    "remote_write": false,
+    "product_code_modified": false,
+    "branch_changed": false
+  },
+  "project_context": {
+    "status": "updated",
+    "path": "/Users/nojonghyeon/Desktop/세모프/프로젝트-맥락/HCI_HANDSOME/01-복귀.md",
+    "reviewable_patch": "project-context-update.patch",
+    "sha256": "c35fcd5a4092cff5a521bbe6288bb2e89b316ddc9b73c48d10a6205b9935fd7e",
+    "scope": "Only the new video, verification and resolved missing Markdown note; other project state and decisions preserved."
+  }
+}

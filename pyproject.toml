@@ -14,3 +14,6 @@ stylemate-memory = "stylemate_memory.cli:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]
+
+[tool.setuptools.package-data]
+stylemate_memory = ["inspector.html"]

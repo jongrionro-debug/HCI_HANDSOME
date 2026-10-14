@@ -1,0 +1,1354 @@
+{
+  "version": "consumer-17-v1",
+  "features": {
+    "garment_type": {
+      "values": [
+        "T-shirt",
+        "Shirt",
+        "Blouse",
+        "Knit/Sweater",
+        "Sweatshirt",
+        "Hoodie",
+        "Polo",
+        "Sleeveless",
+        "Pants",
+        "Skirt",
+        "Jacket",
+        "Coat",
+        "Cardigan",
+        "Vest",
+        "Dress"
+      ],
+      "label_ko": "아이템 종류",
+      "pdf": {
+        "feature_group": "01. Category",
+        "attribute": "Garment Type",
+        "allowed_values": [
+          "T-shirt",
+          "Shirt",
+          "Blouse",
+          "Knit/Sweater",
+          "Sweatshirt",
+          "Hoodie",
+          "Polo",
+          "Sleeveless",
+          "Pants",
+          "Skirt",
+          "Jacket",
+          "Coat",
+          "Cardigan",
+          "Vest",
+          "Dress"
+        ],
+        "applicable_categories": [
+          "Tops",
+          "Bottoms",
+          "Outerwear",
+          "Dresses"
+        ],
+        "extraction_source": [
+          "Image",
+          "Metadata"
+        ]
+      },
+      "value_type": "enum",
+      "applicable_categories": [
+        "Tops",
+        "Bottoms",
+        "Outerwear",
+        "Dresses"
+      ],
+      "source": [
+        "Image",
+        "Metadata"
+      ],
+      "feature_id": "garment_type",
+      "allowed_values": [
+        "T-shirt",
+        "Shirt",
+        "Blouse",
+        "Knit/Sweater",
+        "Sweatshirt",
+        "Hoodie",
+        "Polo",
+        "Sleeveless",
+        "Pants",
+        "Skirt",
+        "Jacket",
+        "Coat",
+        "Cardigan",
+        "Vest",
+        "Dress"
+      ],
+      "applicable_to": [
+        "Tops",
+        "Bottoms",
+        "Outerwear",
+        "Dresses"
+      ]
+    },
+    "color": {
+      "values": [
+        "Black",
+        "White",
+        "Ivory",
+        "Cream",
+        "Gray",
+        "Charcoal",
+        "Beige",
+        "Brown",
+        "Navy",
+        "Blue",
+        "Green",
+        "Khaki",
+        "Red",
+        "Pink",
+        "Yellow",
+        "Purple",
+        "Multi-color"
+      ],
+      "label_ko": "기본 색상",
+      "pdf": {
+        "feature_group": "02. Color",
+        "attribute": "Primary Color",
+        "allowed_values": [
+          "Black",
+          "White",
+          "Ivory",
+          "Cream",
+          "Gray",
+          "Charcoal",
+          "Beige",
+          "Brown",
+          "Navy",
+          "Blue",
+          "Green",
+          "Khaki",
+          "Red",
+          "Pink",
+          "Yellow",
+          "Purple",
+          "Multi-color"
+        ],
+        "applicable_categories": [
+          "Tops",
+          "Bottoms",
+          "Outerwear",
+          "Dresses"
+        ],
+        "extraction_source": [
+          "Image",
+          "Metadata"
+        ]
+      },
+      "value_type": "enum",
+      "applicable_categories": [
+        "Tops",
+        "Bottoms",
+        "Outerwear",
+        "Dresses"
+      ],
+      "source": [
+        "Image",
+        "Metadata"
+      ],
+      "feature_id": "color",
+      "allowed_values": [
+        "Black",
+        "White",
+        "Ivory",
+        "Cream",
+        "Gray",
+        "Charcoal",
+        "Beige",
+        "Brown",
+        "Navy",
+        "Blue",
+        "Green",
+        "Khaki",
+        "Red",
+        "Pink",
+        "Yellow",
+        "Purple",
+        "Multi-color"
+      ],
+      "applicable_to": [
+        "Tops",
+        "Bottoms",
+        "Outerwear",
+        "Dresses"
+      ]
+    },
+    "fit": {
+      "values": [
+        "Slim",
+        "Regular",
+        "Relaxed",
+        "Oversized"
+      ],
+      "label_ko": "전체 핏",
+      "pdf": {
+        "feature_group": "03. Fit & Silhouette",
+        "attribute": "Visual Fit",
+        "allowed_values": [
+          "Slim",
+          "Regular",
+          "Relaxed",
+          "Oversized"
+        ],
+        "applicable_categories": [
+          "Tops",
+          "Bottoms",
+          "Outerwear",
+          "Dresses"
+        ],
+        "extraction_source": [
+          "Image",
+          "Metadata"
+        ]
+      },
+      "value_type": "enum",
+      "applicable_categories": [
+        "Tops",
+        "Bottoms",
+        "Outerwear",
+        "Dresses"
+      ],
+      "source": [
+        "Image",
+        "Metadata"
+      ],
+      "feature_id": "fit",
+      "allowed_values": [
+        "Slim",
+        "Regular",
+        "Relaxed",
+        "Oversized"
+      ],
+      "applicable_to": [
+        "Tops",
+        "Bottoms",
+        "Outerwear",
+        "Dresses"
+      ]
+    },
+    "length": {
+      "values": [
+        "Cropped",
+        "Waist-length",
+        "Hip-length",
+        "Below-hip",
+        "Short",
+        "Knee-length",
+        "Ankle-length",
+        "Full-length",
+        "Mini",
+        "Above-knee",
+        "Midi",
+        "Maxi",
+        "Thigh-length",
+        "Long"
+      ],
+      "label_ko": "기장",
+      "pdf": {
+        "feature_group": "04. Length",
+        "attribute": "Garment-specific Length",
+        "allowed_values": [
+          "Cropped",
+          "Waist-length",
+          "Hip-length",
+          "Below-hip",
+          "Short",
+          "Knee-length",
+          "Ankle-length",
+          "Full-length",
+          "Mini",
+          "Above-knee",
+          "Midi",
+          "Maxi",
+          "Thigh-length",
+          "Long"
+        ],
+        "applicable_categories": [
+          "Tops",
+          "Bottoms",
+          "Outerwear",
+          "Dresses"
+        ],
+        "extraction_source": [
+          "Image",
+          "Metadata"
+        ]
+      },
+      "value_type": "enum",
+      "applicable_categories": [
+        "Tops",
+        "Bottoms",
+        "Outerwear",
+        "Dresses"
+      ],
+      "source": [
+        "Image",
+        "Metadata"
+      ],
+      "notes": "PDF의 상의·바지·스커트·아우터·드레스별 허용 길이를 그대로 적용한다.",
+      "by_garment_type": {
+        "T-shirt": [
+          "Cropped",
+          "Waist-length",
+          "Hip-length",
+          "Below-hip"
+        ],
+        "Shirt": [
+          "Cropped",
+          "Waist-length",
+          "Hip-length",
+          "Below-hip"
+        ],
+        "Blouse": [
+          "Cropped",
+          "Waist-length",
+          "Hip-length",
+          "Below-hip"
+        ],
+        "Knit/Sweater": [
+          "Cropped",
+          "Waist-length",
+          "Hip-length",
+          "Below-hip"
+        ],
+        "Sweatshirt": [
+          "Cropped",
+          "Waist-length",
+          "Hip-length",
+          "Below-hip"
+        ],
+        "Hoodie": [
+          "Cropped",
+          "Waist-length",
+          "Hip-length",
+          "Below-hip"
+        ],
+        "Polo": [
+          "Cropped",
+          "Waist-length",
+          "Hip-length",
+          "Below-hip"
+        ],
+        "Sleeveless": [
+          "Cropped",
+          "Waist-length",
+          "Hip-length",
+          "Below-hip"
+        ],
+        "Pants": [
+          "Short",
+          "Knee-length",
+          "Cropped",
+          "Ankle-length",
+          "Full-length"
+        ],
+        "Skirt": [
+          "Mini",
+          "Above-knee",
+          "Knee-length",
+          "Midi",
+          "Maxi"
+        ],
+        "Jacket": [
+          "Cropped",
+          "Waist-length",
+          "Hip-length",
+          "Thigh-length",
+          "Knee-length",
+          "Long"
+        ],
+        "Coat": [
+          "Cropped",
+          "Waist-length",
+          "Hip-length",
+          "Thigh-length",
+          "Knee-length",
+          "Long"
+        ],
+        "Cardigan": [
+          "Cropped",
+          "Waist-length",
+          "Hip-length",
+          "Thigh-length",
+          "Knee-length",
+          "Long"
+        ],
+        "Vest": [
+          "Cropped",
+          "Waist-length",
+          "Hip-length",
+          "Thigh-length",
+          "Knee-length",
+          "Long"
+        ],
+        "Dress": [
+          "Mini",
+          "Above-knee",
+          "Knee-length",
+          "Midi",
+          "Ankle-length",
+          "Maxi"
+        ]
+      },
+      "feature_id": "length",
+      "allowed_values": [
+        "Cropped",
+        "Waist-length",
+        "Hip-length",
+        "Below-hip",
+        "Short",
+        "Knee-length",
+        "Ankle-length",
+        "Full-length",
+        "Mini",
+        "Above-knee",
+        "Midi",
+        "Maxi",
+        "Thigh-length",
+        "Long"
+      ],
+      "applicable_to": [
+        "Tops",
+        "Bottoms",
+        "Outerwear",
+        "Dresses"
+      ],
+      "allowed_values_by_garment_type": {
+        "T-shirt": [
+          "Cropped",
+          "Waist-length",
+          "Hip-length",
+          "Below-hip"
+        ],
+        "Shirt": [
+          "Cropped",
+          "Waist-length",
+          "Hip-length",
+          "Below-hip"
+        ],
+        "Blouse": [
+          "Cropped",
+          "Waist-length",
+          "Hip-length",
+          "Below-hip"
+        ],
+        "Knit/Sweater": [
+          "Cropped",
+          "Waist-length",
+          "Hip-length",
+          "Below-hip"
+        ],
+        "Sweatshirt": [
+          "Cropped",
+          "Waist-length",
+          "Hip-length",
+          "Below-hip"
+        ],
+        "Hoodie": [
+          "Cropped",
+          "Waist-length",
+          "Hip-length",
+          "Below-hip"
+        ],
+        "Polo": [
+          "Cropped",
+          "Waist-length",
+          "Hip-length",
+          "Below-hip"
+        ],
+        "Sleeveless": [
+          "Cropped",
+          "Waist-length",
+          "Hip-length",
+          "Below-hip"
+        ],
+        "Pants": [
+          "Short",
+          "Knee-length",
+          "Cropped",
+          "Ankle-length",
+          "Full-length"
+        ],
+        "Skirt": [
+          "Mini",
+          "Above-knee",
+          "Knee-length",
+          "Midi",
+          "Maxi"
+        ],
+        "Jacket": [
+          "Cropped",
+          "Waist-length",
+          "Hip-length",
+          "Thigh-length",
+          "Knee-length",
+          "Long"
+        ],
+        "Coat": [
+          "Cropped",
+          "Waist-length",
+          "Hip-length",
+          "Thigh-length",
+          "Knee-length",
+          "Long"
+        ],
+        "Cardigan": [
+          "Cropped",
+          "Waist-length",
+          "Hip-length",
+          "Thigh-length",
+          "Knee-length",
+          "Long"
+        ],
+        "Vest": [
+          "Cropped",
+          "Waist-length",
+          "Hip-length",
+          "Thigh-length",
+          "Knee-length",
+          "Long"
+        ],
+        "Dress": [
+          "Mini",
+          "Above-knee",
+          "Knee-length",
+          "Midi",
+          "Ankle-length",
+          "Maxi"
+        ]
+      }
+    },
+    "sleeve_length": {
+      "values": [
+        "Sleeveless",
+        "Cap",
+        "Short",
+        "Elbow-length",
+        "Three-quarter",
+        "Long"
+      ],
+      "label_ko": "소매 길이",
+      "pdf": {
+        "feature_group": "05. Sleeve",
+        "attribute": "Sleeve Length",
+        "allowed_values": [
+          "Sleeveless",
+          "Cap",
+          "Short",
+          "Elbow-length",
+          "Three-quarter",
+          "Long"
+        ],
+        "applicable_categories": [
+          "Tops",
+          "Outerwear",
+          "Dresses"
+        ],
+        "extraction_source": [
+          "Image",
+          "Metadata"
+        ]
+      },
+      "value_type": "enum",
+      "applicable_categories": [
+        "Tops",
+        "Outerwear",
+        "Dresses"
+      ],
+      "source": [
+        "Image",
+        "Metadata"
+      ],
+      "feature_id": "sleeve_length",
+      "allowed_values": [
+        "Sleeveless",
+        "Cap",
+        "Short",
+        "Elbow-length",
+        "Three-quarter",
+        "Long"
+      ],
+      "applicable_to": [
+        "Tops",
+        "Outerwear",
+        "Dresses"
+      ]
+    },
+    "neckline": {
+      "values": [
+        "Crew",
+        "V-neck",
+        "U-neck",
+        "Square",
+        "Boat",
+        "Sweetheart",
+        "Halter",
+        "Off-shoulder",
+        "One-shoulder",
+        "Mock Neck",
+        "Turtleneck",
+        "Strapless"
+      ],
+      "label_ko": "넥라인",
+      "pdf": {
+        "feature_group": "06. Neckline & Collar",
+        "attribute": "Neckline Type",
+        "allowed_values": [
+          "Crew",
+          "V-neck",
+          "U-neck",
+          "Square",
+          "Boat",
+          "Sweetheart",
+          "Halter",
+          "Off-shoulder",
+          "One-shoulder",
+          "Mock Neck",
+          "Turtleneck",
+          "Strapless"
+        ],
+        "applicable_categories": [
+          "Tops",
+          "Outerwear",
+          "Dresses"
+        ],
+        "extraction_source": [
+          "Image",
+          "Metadata"
+        ]
+      },
+      "value_type": "enum",
+      "applicable_categories": [
+        "Tops",
+        "Outerwear",
+        "Dresses"
+      ],
+      "source": [
+        "Image",
+        "Metadata"
+      ],
+      "feature_id": "neckline",
+      "allowed_values": [
+        "Crew",
+        "V-neck",
+        "U-neck",
+        "Square",
+        "Boat",
+        "Sweetheart",
+        "Halter",
+        "Off-shoulder",
+        "One-shoulder",
+        "Mock Neck",
+        "Turtleneck",
+        "Strapless"
+      ],
+      "applicable_to": [
+        "Tops",
+        "Outerwear",
+        "Dresses"
+      ]
+    },
+    "pattern": {
+      "values": [
+        "Solid",
+        "Stripe",
+        "Check",
+        "Plaid",
+        "Dot",
+        "Floral",
+        "Animal",
+        "Camouflage",
+        "Geometric",
+        "Abstract",
+        "Other"
+      ],
+      "label_ko": "무늬",
+      "pdf": {
+        "feature_group": "07. Pattern",
+        "attribute": "Pattern Type",
+        "allowed_values": [
+          "Solid",
+          "Stripe",
+          "Check",
+          "Plaid",
+          "Dot",
+          "Floral",
+          "Animal",
+          "Camouflage",
+          "Geometric",
+          "Abstract",
+          "Other"
+        ],
+        "applicable_categories": [
+          "Tops",
+          "Bottoms",
+          "Outerwear",
+          "Dresses"
+        ],
+        "extraction_source": [
+          "Image",
+          "Metadata"
+        ]
+      },
+      "value_type": "enum",
+      "applicable_categories": [
+        "Tops",
+        "Bottoms",
+        "Outerwear",
+        "Dresses"
+      ],
+      "source": [
+        "Image",
+        "Metadata"
+      ],
+      "feature_id": "pattern",
+      "allowed_values": [
+        "Solid",
+        "Stripe",
+        "Check",
+        "Plaid",
+        "Dot",
+        "Floral",
+        "Animal",
+        "Camouflage",
+        "Geometric",
+        "Abstract",
+        "Other"
+      ],
+      "applicable_to": [
+        "Tops",
+        "Bottoms",
+        "Outerwear",
+        "Dresses"
+      ]
+    },
+    "logo": {
+      "values": [
+        "None",
+        "Small",
+        "Medium",
+        "Large"
+      ],
+      "label_ko": "로고 크기",
+      "pdf": {
+        "feature_group": "08. Graphic & Logo",
+        "attribute": "Logo Visibility + Logo Size",
+        "allowed_values": [
+          "None",
+          "Small",
+          "Medium",
+          "Large"
+        ],
+        "applicable_categories": [
+          "Tops",
+          "Bottoms",
+          "Outerwear",
+          "Dresses"
+        ],
+        "extraction_source": [
+          "Image"
+        ]
+      },
+      "value_type": "enum",
+      "applicable_categories": [
+        "Tops",
+        "Bottoms",
+        "Outerwear",
+        "Dresses"
+      ],
+      "source": [
+        "Image"
+      ],
+      "notes": "소비자용 단일 feature로 축약한 값. PDF의 Logo Visibility와 Logo Size를 None/Small/Medium/Large로 표현한다.",
+      "feature_id": "logo",
+      "allowed_values": [
+        "None",
+        "Small",
+        "Medium",
+        "Large"
+      ],
+      "applicable_to": [
+        "Tops",
+        "Bottoms",
+        "Outerwear",
+        "Dresses"
+      ]
+    },
+    "fabric": {
+      "values": [
+        "Denim",
+        "Jersey",
+        "Knit",
+        "Twill",
+        "Fleece",
+        "Corduroy",
+        "Satin",
+        "Chiffon",
+        "Tweed",
+        "Canvas",
+        "Lace",
+        "Mesh",
+        "Leather",
+        "Faux Leather"
+      ],
+      "label_ko": "원단",
+      "pdf": {
+        "feature_group": "09. Material",
+        "attribute": "Fabric Type",
+        "allowed_values": [
+          "Denim",
+          "Jersey",
+          "Knit",
+          "Twill",
+          "Fleece",
+          "Corduroy",
+          "Satin",
+          "Chiffon",
+          "Tweed",
+          "Canvas",
+          "Lace",
+          "Mesh",
+          "Leather",
+          "Faux Leather"
+        ],
+        "applicable_categories": [
+          "Tops",
+          "Bottoms",
+          "Outerwear",
+          "Dresses"
+        ],
+        "extraction_source": [
+          "Image",
+          "Metadata"
+        ]
+      },
+      "value_type": "enum",
+      "applicable_categories": [
+        "Tops",
+        "Bottoms",
+        "Outerwear",
+        "Dresses"
+      ],
+      "source": [
+        "Image",
+        "Metadata"
+      ],
+      "notes": "Fiber Composition과 혼용률은 소비자용 목표 feature에서 제외했다.",
+      "feature_id": "fabric",
+      "allowed_values": [
+        "Denim",
+        "Jersey",
+        "Knit",
+        "Twill",
+        "Fleece",
+        "Corduroy",
+        "Satin",
+        "Chiffon",
+        "Tweed",
+        "Canvas",
+        "Lace",
+        "Mesh",
+        "Leather",
+        "Faux Leather"
+      ],
+      "applicable_to": [
+        "Tops",
+        "Bottoms",
+        "Outerwear",
+        "Dresses"
+      ]
+    },
+    "texture": {
+      "values": [
+        "Smooth",
+        "Ribbed",
+        "Cable-knit",
+        "Waffle",
+        "Fuzzy",
+        "Bouclé",
+        "Quilted",
+        "Corded",
+        "Lace-textured"
+      ],
+      "label_ko": "표면 질감",
+      "pdf": {
+        "feature_group": "10. Texture & Finish",
+        "attribute": "Surface Texture",
+        "allowed_values": [
+          "Smooth",
+          "Ribbed",
+          "Cable-knit",
+          "Waffle",
+          "Fuzzy",
+          "Bouclé",
+          "Quilted",
+          "Corded",
+          "Lace-textured"
+        ],
+        "applicable_categories": [
+          "Tops",
+          "Bottoms",
+          "Outerwear",
+          "Dresses"
+        ],
+        "extraction_source": [
+          "Image"
+        ]
+      },
+      "value_type": "enum",
+      "applicable_categories": [
+        "Tops",
+        "Bottoms",
+        "Outerwear",
+        "Dresses"
+      ],
+      "source": [
+        "Image"
+      ],
+      "feature_id": "texture",
+      "allowed_values": [
+        "Smooth",
+        "Ribbed",
+        "Cable-knit",
+        "Waffle",
+        "Fuzzy",
+        "Bouclé",
+        "Quilted",
+        "Corded",
+        "Lace-textured"
+      ],
+      "applicable_to": [
+        "Tops",
+        "Bottoms",
+        "Outerwear",
+        "Dresses"
+      ]
+    },
+    "style": {
+      "values": [
+        "Casual",
+        "Minimal",
+        "Street",
+        "Classic",
+        "Formal",
+        "Sporty",
+        "Workwear",
+        "Vintage",
+        "Preppy",
+        "Outdoor",
+        "Romantic",
+        "Chic"
+      ],
+      "label_ko": "스타일",
+      "pdf": {
+        "feature_group": "14. Style & Mood",
+        "attribute": "Item Style Affinity",
+        "allowed_values": [
+          "Casual",
+          "Minimal",
+          "Street",
+          "Classic",
+          "Formal",
+          "Sporty",
+          "Workwear",
+          "Vintage",
+          "Preppy",
+          "Outdoor",
+          "Romantic",
+          "Chic"
+        ],
+        "applicable_categories": [
+          "Tops",
+          "Bottoms",
+          "Outerwear",
+          "Dresses"
+        ],
+        "extraction_source": [
+          "Image",
+          "Metadata",
+          "Inference"
+        ]
+      },
+      "value_type": "multi-label",
+      "applicable_categories": [
+        "Tops",
+        "Bottoms",
+        "Outerwear",
+        "Dresses"
+      ],
+      "source": [
+        "Image",
+        "Metadata",
+        "Inference"
+      ],
+      "feature_id": "style",
+      "allowed_values": [
+        "Casual",
+        "Minimal",
+        "Street",
+        "Classic",
+        "Formal",
+        "Sporty",
+        "Workwear",
+        "Vintage",
+        "Preppy",
+        "Outdoor",
+        "Romantic",
+        "Chic"
+      ],
+      "applicable_to": [
+        "Tops",
+        "Bottoms",
+        "Outerwear",
+        "Dresses"
+      ]
+    },
+    "mood": {
+      "values": [
+        "Clean",
+        "Soft",
+        "Rugged",
+        "Edgy",
+        "Relaxed",
+        "Refined",
+        "Bold",
+        "Understated"
+      ],
+      "label_ko": "분위기",
+      "pdf": {
+        "feature_group": "14. Style & Mood",
+        "attribute": "Visual Mood",
+        "allowed_values": [
+          "Clean",
+          "Soft",
+          "Rugged",
+          "Edgy",
+          "Relaxed",
+          "Refined",
+          "Bold",
+          "Understated"
+        ],
+        "applicable_categories": [
+          "Tops",
+          "Bottoms",
+          "Outerwear",
+          "Dresses"
+        ],
+        "extraction_source": [
+          "Image",
+          "Inference"
+        ]
+      },
+      "value_type": "multi-label",
+      "applicable_categories": [
+        "Tops",
+        "Bottoms",
+        "Outerwear",
+        "Dresses"
+      ],
+      "source": [
+        "Image",
+        "Inference"
+      ],
+      "feature_id": "mood",
+      "allowed_values": [
+        "Clean",
+        "Soft",
+        "Rugged",
+        "Edgy",
+        "Relaxed",
+        "Refined",
+        "Bold",
+        "Understated"
+      ],
+      "applicable_to": [
+        "Tops",
+        "Bottoms",
+        "Outerwear",
+        "Dresses"
+      ]
+    },
+    "formality": {
+      "values": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "label_ko": "격식 정도",
+      "pdf": {
+        "feature_group": "15. Formality",
+        "attribute": "Formality Level",
+        "allowed_values": [
+          1,
+          2,
+          3,
+          4,
+          5
+        ],
+        "applicable_categories": [
+          "Tops",
+          "Bottoms",
+          "Outerwear",
+          "Dresses"
+        ],
+        "extraction_source": [
+          "Image",
+          "Metadata",
+          "Inference"
+        ]
+      },
+      "value_type": "ordinal",
+      "applicable_categories": [
+        "Tops",
+        "Bottoms",
+        "Outerwear",
+        "Dresses"
+      ],
+      "source": [
+        "Image",
+        "Metadata",
+        "Inference"
+      ],
+      "notes": "1=Very Casual, 2=Casual, 3=Smart Casual, 4=Business Casual, 5=Formal.",
+      "labels": {
+        "1": "Very Casual",
+        "2": "Casual",
+        "3": "Smart Casual",
+        "4": "Business Casual",
+        "5": "Formal"
+      },
+      "feature_id": "formality",
+      "allowed_values": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "applicable_to": [
+        "Tops",
+        "Bottoms",
+        "Outerwear",
+        "Dresses"
+      ]
+    },
+    "season": {
+      "values": [
+        "Spring",
+        "Summer",
+        "Autumn",
+        "Winter"
+      ],
+      "label_ko": "계절",
+      "pdf": {
+        "feature_group": "16. Seasonality",
+        "attribute": "Suitable Seasons",
+        "allowed_values": [
+          "Spring",
+          "Summer",
+          "Autumn",
+          "Winter"
+        ],
+        "applicable_categories": [
+          "Tops",
+          "Bottoms",
+          "Outerwear",
+          "Dresses"
+        ],
+        "extraction_source": [
+          "Metadata",
+          "Inference"
+        ]
+      },
+      "value_type": "multi-label",
+      "applicable_categories": [
+        "Tops",
+        "Bottoms",
+        "Outerwear",
+        "Dresses"
+      ],
+      "source": [
+        "Metadata",
+        "Inference"
+      ],
+      "feature_id": "season",
+      "allowed_values": [
+        "Spring",
+        "Summer",
+        "Autumn",
+        "Winter"
+      ],
+      "applicable_to": [
+        "Tops",
+        "Bottoms",
+        "Outerwear",
+        "Dresses"
+      ]
+    },
+    "thickness": {
+      "values": [
+        "Thin",
+        "Medium",
+        "Thick"
+      ],
+      "label_ko": "두께",
+      "pdf": {
+        "feature_group": "13. Thickness & Function",
+        "attribute": "Thickness",
+        "allowed_values": [
+          "Thin",
+          "Medium",
+          "Thick"
+        ],
+        "applicable_categories": [
+          "Tops",
+          "Bottoms",
+          "Outerwear",
+          "Dresses"
+        ],
+        "extraction_source": [
+          "Metadata",
+          "Inference"
+        ]
+      },
+      "value_type": "enum",
+      "applicable_categories": [
+        "Tops",
+        "Bottoms",
+        "Outerwear",
+        "Dresses"
+      ],
+      "source": [
+        "Metadata",
+        "Inference"
+      ],
+      "feature_id": "thickness",
+      "allowed_values": [
+        "Thin",
+        "Medium",
+        "Thick"
+      ],
+      "applicable_to": [
+        "Tops",
+        "Bottoms",
+        "Outerwear",
+        "Dresses"
+      ]
+    },
+    "warmth": {
+      "values": [
+        "Low",
+        "Medium",
+        "High"
+      ],
+      "label_ko": "보온성",
+      "pdf": {
+        "feature_group": "13. Thickness & Function",
+        "attribute": "Thermal Insulation",
+        "allowed_values": [
+          "Low",
+          "Medium",
+          "High"
+        ],
+        "applicable_categories": [
+          "Tops",
+          "Bottoms",
+          "Outerwear",
+          "Dresses"
+        ],
+        "extraction_source": [
+          "Metadata",
+          "Inference"
+        ]
+      },
+      "value_type": "enum",
+      "applicable_categories": [
+        "Tops",
+        "Bottoms",
+        "Outerwear",
+        "Dresses"
+      ],
+      "source": [
+        "Metadata",
+        "Inference"
+      ],
+      "feature_id": "warmth",
+      "allowed_values": [
+        "Low",
+        "Medium",
+        "High"
+      ],
+      "applicable_to": [
+        "Tops",
+        "Bottoms",
+        "Outerwear",
+        "Dresses"
+      ]
+    },
+    "functions": {
+      "values": [
+        "Water-resistant",
+        "Waterproof",
+        "Wind-resistant",
+        "Breathable",
+        "Stretch",
+        "Quick-drying"
+      ],
+      "label_ko": "기능",
+      "pdf": {
+        "feature_group": "13. Thickness & Function",
+        "attribute": "Functional Properties",
+        "allowed_values": [
+          "Water-resistant",
+          "Waterproof",
+          "Wind-resistant",
+          "Breathable",
+          "Stretch",
+          "Quick-drying"
+        ],
+        "applicable_categories": [
+          "Tops",
+          "Bottoms",
+          "Outerwear",
+          "Dresses"
+        ],
+        "extraction_source": [
+          "Metadata"
+        ]
+      },
+      "value_type": "multi-label",
+      "applicable_categories": [
+        "Tops",
+        "Bottoms",
+        "Outerwear",
+        "Dresses"
+      ],
+      "source": [
+        "Metadata"
+      ],
+      "feature_id": "functions",
+      "allowed_values": [
+        "Water-resistant",
+        "Waterproof",
+        "Wind-resistant",
+        "Breathable",
+        "Stretch",
+        "Quick-drying"
+      ],
+      "applicable_to": [
+        "Tops",
+        "Bottoms",
+        "Outerwear",
+        "Dresses"
+      ]
+    }
+  }
+}

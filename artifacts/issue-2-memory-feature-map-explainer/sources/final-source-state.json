@@ -1,0 +1,98 @@
+{
+  "checked_on": "2026-10-14",
+  "runtime_unchanged": true,
+  "files": [
+    {
+      "path": "docs/master.md",
+      "initial_sha256": "c33558e16d7cf328b1d95ab29698030603ec43e91e676d135c844afce810ea00",
+      "final_sha256": "c33558e16d7cf328b1d95ab29698030603ec43e91e676d135c844afce810ea00",
+      "changed_during_task": false
+    },
+    {
+      "path": "docs/memory-design.md",
+      "initial_sha256": "f4d81b541fbe8002d06c38291722325438478acceb9fa95f2d958c05d5979751",
+      "final_sha256": "f4d81b541fbe8002d06c38291722325438478acceb9fa95f2d958c05d5979751",
+      "changed_during_task": false
+    },
+    {
+      "path": "docs/memory-implementation-plan.md",
+      "initial_sha256": "1bacd74327da8cb186e58e10de3e0fb6a48fabc0aef6f84d35677d4a579ab127",
+      "final_sha256": "1bacd74327da8cb186e58e10de3e0fb6a48fabc0aef6f84d35677d4a579ab127",
+      "changed_during_task": false
+    },
+    {
+      "path": "docs/target-feature-inference-plan.md",
+      "initial_sha256": "ab4560a749ffa8d96e86dd3bf0b599131e8efb3018189e6deced186da314c42f",
+      "final_sha256": "ab4560a749ffa8d96e86dd3bf0b599131e8efb3018189e6deced186da314c42f",
+      "changed_during_task": false
+    },
+    {
+      "path": "docs/shopping-memory-prototype.md",
+      "initial_sha256": "d19bb2ffa12b540fdd50cd7ea18da9aca2b7a09e089c47df66261511d036b7ab",
+      "final_sha256": "d19bb2ffa12b540fdd50cd7ea18da9aca2b7a09e089c47df66261511d036b7ab",
+      "changed_during_task": false
+    },
+    {
+      "path": "docs/decisions/0001-memory-boundaries.md",
+      "initial_sha256": "9ce58ef275d59fdbdfae6cf0fed52bcd2b9e790dc60b5c0a6b60e4d396ba4a2f",
+      "final_sha256": "9ce58ef275d59fdbdfae6cf0fed52bcd2b9e790dc60b5c0a6b60e4d396ba4a2f",
+      "changed_during_task": false
+    },
+    {
+      "path": "docs/decisions/0002-memory-prototype-storage.md",
+      "initial_sha256": "624da3d47f316f03345f6495fb6d87414d76fda7be2c89f4f487db07b84f8d89",
+      "final_sha256": "624da3d47f316f03345f6495fb6d87414d76fda7be2c89f4f487db07b84f8d89",
+      "changed_during_task": false
+    },
+    {
+      "path": "docs/decisions/0003-consumer-shopping-prototype.md",
+      "initial_sha256": "46033dd62900953a3204bf2687a8e5ef954df2866452f70242593215879bc2ba",
+      "final_sha256": "46033dd62900953a3204bf2687a8e5ef954df2866452f70242593215879bc2ba",
+      "changed_during_task": false
+    },
+    {
+      "path": "src/stylemate_memory/store.py",
+      "initial_sha256": "25cac161bb3e88a924ead4bc1daee0085264778569a80e289ab7e712139cbb10",
+      "final_sha256": "25cac161bb3e88a924ead4bc1daee0085264778569a80e289ab7e712139cbb10",
+      "changed_during_task": false
+    },
+    {
+      "path": "src/stylemate_memory/registry.py",
+      "initial_sha256": "b7fc923743a267e83d384c78f0193391fce07604fc3b69b3ba8fcdc2725eca21",
+      "final_sha256": "b7fc923743a267e83d384c78f0193391fce07604fc3b69b3ba8fcdc2725eca21",
+      "changed_during_task": false
+    },
+    {
+      "path": "src/stylemate_memory/context.py",
+      "initial_sha256": "ae53333e1b3a0457cd72d6e1d6b47a6db0b3c9abe30f402193b7904e6429d0f7",
+      "final_sha256": "ae53333e1b3a0457cd72d6e1d6b47a6db0b3c9abe30f402193b7904e6429d0f7",
+      "changed_during_task": false
+    },
+    {
+      "path": "src/stylemate_memory/inference.py",
+      "initial_sha256": "9ef6c4da0634b907b0350e023e28c04016467662aa42c2956b7c64ad43a86d7c",
+      "final_sha256": "9ef6c4da0634b907b0350e023e28c04016467662aa42c2956b7c64ad43a86d7c",
+      "changed_during_task": false
+    },
+    {
+      "path": "src/stylemate_memory/llm.py",
+      "initial_sha256": "7a077e9a5855ca1f74ae28588d73695c6cd5ccb6cfbb88c29b2d83ae56575688",
+      "final_sha256": "7a077e9a5855ca1f74ae28588d73695c6cd5ccb6cfbb88c29b2d83ae56575688",
+      "changed_during_task": false
+    },
+    {
+      "path": "src/stylemate_memory/app.py",
+      "initial_sha256": "37b7dae08a4a22d50a0a9c59b87382912229034092171f2cb7ce743a5755acf0",
+      "final_sha256": "37b7dae08a4a22d50a0a9c59b87382912229034092171f2cb7ce743a5755acf0",
+      "changed_during_task": false
+    },
+    {
+      "path": "src/stylemate_memory/cli.py",
+      "initial_sha256": "abe0c67402f83a9ecf7b13ace60b4b457d2c4358cfa37feb2e90530aa329624c",
+      "final_sha256": "abe0c67402f83a9ecf7b13ace60b4b457d2c4358cfa37feb2e90530aa329624c",
+      "changed_during_task": false
+    }
+  ],
+  "existing_index_html_unchanged": true,
+  "recovered_source": "index.md"
+}
