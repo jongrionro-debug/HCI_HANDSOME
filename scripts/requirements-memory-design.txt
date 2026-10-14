@@ -1,0 +1,3 @@
+# Required schema validation dependencies for the Accepted v0.2 design checker.
+jsonschema==4.26.0
+rfc3339-validator==0.1.4

@@ -13,6 +13,12 @@ Thumbs.db
 node_modules/
 __pycache__/
 *.py[cod]
+*.egg-info/
+build/
+dist/
+.stylemate/
+*.sqlite3
+*.sqlite3-*
 
 # 참여자 정보·동의서·원시 응답은 저장소 밖에서 관리
 private/

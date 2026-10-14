@@ -1,0 +1,1937 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:stylemate:memory-contract:0.2",
+  "title": "StyleMate memory contract v0.2",
+  "description": "Accepted review-time contract for request lifetime, memory, evidence, retrieval, intent and atomic memory batches. This schema is not a product implementation, database contract, authentication boundary, or LLM output authority.",
+  "oneOf": [
+    {
+      "$ref": "#/$defs/request"
+    },
+    {
+      "$ref": "#/$defs/memoryItem"
+    },
+    {
+      "$ref": "#/$defs/userEvidence"
+    },
+    {
+      "$ref": "#/$defs/batch"
+    },
+    {
+      "$ref": "#/$defs/event"
+    },
+    {
+      "$ref": "#/$defs/batchResult"
+    },
+    {
+      "$ref": "#/$defs/contextResult"
+    },
+    {
+      "$ref": "#/$defs/intentDecision"
+    },
+    {
+      "$ref": "#/$defs/retentionPolicy"
+    },
+    {
+      "$ref": "#/$defs/deletionReceipt"
+    }
+  ],
+  "$defs": {
+    "identifier": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 160,
+      "pattern": "\\S"
+    },
+    "nonblank": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "\\S"
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "version": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "contractVersion": {
+      "const": "0.2"
+    },
+    "contractType": {
+      "type": "string",
+      "enum": [
+        "request",
+        "memory_item",
+        "user_evidence",
+        "batch",
+        "event",
+        "batch_result",
+        "context_result",
+        "intent_decision",
+        "retention_policy"
+      ]
+    },
+    "claim": {
+      "type": "object",
+      "properties": {
+        "key": {
+          "$ref": "#/$defs/nonblank"
+        },
+        "value": {
+          "$ref": "#/$defs/nonblank"
+        },
+        "polarity": {
+          "enum": [
+            "prefer",
+            "avoid",
+            "require"
+          ]
+        },
+        "strength": {
+          "enum": [
+            "soft",
+            "hard"
+          ]
+        }
+      },
+      "required": [
+        "key",
+        "value",
+        "polarity",
+        "strength"
+      ],
+      "additionalProperties": false
+    },
+    "predicate": {
+      "type": "object",
+      "properties": {
+        "field": {
+          "$ref": "#/$defs/nonblank"
+        },
+        "value": {
+          "$ref": "#/$defs/nonblank"
+        }
+      },
+      "required": [
+        "field",
+        "value"
+      ],
+      "additionalProperties": false
+    },
+    "applicability": {
+      "type": "object",
+      "properties": {
+        "condition": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/nonblank"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "predicates": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/predicate"
+          },
+          "uniqueItems": true
+        },
+        "valid_from": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/timestamp"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "valid_until": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/timestamp"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "condition",
+        "predicates",
+        "valid_from",
+        "valid_until"
+      ],
+      "additionalProperties": false
+    },
+    "userRef": {
+      "type": "object",
+      "properties": {
+        "user_id": {
+          "$ref": "#/$defs/identifier"
+        },
+        "input_ref": {
+          "$ref": "#/$defs/identifier"
+        },
+        "occurred_at": {
+          "$ref": "#/$defs/timestamp"
+        }
+      },
+      "required": [
+        "user_id",
+        "input_ref",
+        "occurred_at"
+      ],
+      "additionalProperties": false
+    },
+    "evidenceSnapshot": {
+      "type": "object",
+      "properties": {
+        "content": {
+          "$ref": "#/$defs/nonblank"
+        },
+        "condition": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/nonblank"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "period": {
+          "$ref": "#/$defs/applicability"
+        },
+        "selected_aspects": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/nonblank"
+          },
+          "uniqueItems": true
+        },
+        "authorized_roles": {
+          "type": "array",
+          "items": {
+            "enum": [
+              "content",
+              "content_confirmation",
+              "long_term_approval",
+              "replacement",
+              "withdrawal",
+              "deletion"
+            ]
+          },
+          "minItems": 1,
+          "uniqueItems": true
+        },
+        "target_memory_ids": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/identifier"
+          },
+          "uniqueItems": true
+        },
+        "claim": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/claim"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "content",
+        "condition",
+        "period",
+        "selected_aspects",
+        "authorized_roles",
+        "target_memory_ids",
+        "claim"
+      ],
+      "additionalProperties": false
+    },
+    "userEvidence": {
+      "type": "object",
+      "properties": {
+        "contract_type": {
+          "const": "user_evidence"
+        },
+        "schema_version": {
+          "$ref": "#/$defs/contractVersion"
+        },
+        "input_ref": {
+          "$ref": "#/$defs/identifier"
+        },
+        "snapshot_id": {
+          "$ref": "#/$defs/identifier"
+        },
+        "user_id": {
+          "$ref": "#/$defs/identifier"
+        },
+        "request_id": {
+          "$ref": "#/$defs/identifier"
+        },
+        "kind": {
+          "enum": [
+            "user_message",
+            "image_feedback",
+            "memory_confirmation",
+            "ui_action"
+          ]
+        },
+        "occurred_at": {
+          "$ref": "#/$defs/timestamp"
+        },
+        "image_id": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/identifier"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "snapshot": {
+          "$ref": "#/$defs/evidenceSnapshot"
+        },
+        "raw_retention_until": {
+          "$ref": "#/$defs/timestamp"
+        }
+      },
+      "required": [
+        "contract_type",
+        "schema_version",
+        "input_ref",
+        "snapshot_id",
+        "user_id",
+        "request_id",
+        "kind",
+        "occurred_at",
+        "image_id",
+        "snapshot",
+        "raw_retention_until"
+      ],
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "kind": {
+                "const": "image_feedback"
+              }
+            },
+            "required": [
+              "kind"
+            ]
+          },
+          "then": {
+            "properties": {
+              "image_id": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "kind": {
+                "enum": [
+                  "user_message",
+                  "memory_confirmation",
+                  "ui_action"
+                ]
+              }
+            },
+            "required": [
+              "kind"
+            ]
+          },
+          "then": {
+            "properties": {
+              "image_id": {
+                "type": "null"
+              }
+            }
+          }
+        }
+      ]
+    },
+    "scope": {
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "short_term"
+            },
+            "request_id": {
+              "$ref": "#/$defs/identifier"
+            }
+          },
+          "required": [
+            "type",
+            "request_id"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "long_term"
+            },
+            "approval": {
+              "$ref": "#/$defs/approvalRef"
+            }
+          },
+          "required": [
+            "type",
+            "approval"
+          ],
+          "additionalProperties": false
+        }
+      ]
+    },
+    "approvalRef": {
+      "type": "object",
+      "properties": {
+        "input_ref": {
+          "$ref": "#/$defs/identifier"
+        },
+        "snapshot_ref": {
+          "$ref": "#/$defs/identifier"
+        },
+        "user_id": {
+          "$ref": "#/$defs/identifier"
+        },
+        "approved_at": {
+          "$ref": "#/$defs/timestamp"
+        },
+        "role": {
+          "const": "long_term_approval"
+        }
+      },
+      "required": [
+        "input_ref",
+        "snapshot_ref",
+        "user_id",
+        "approved_at",
+        "role"
+      ],
+      "additionalProperties": false
+    },
+    "confirmationRef": {
+      "type": "object",
+      "properties": {
+        "input_ref": {
+          "$ref": "#/$defs/identifier"
+        },
+        "snapshot_ref": {
+          "$ref": "#/$defs/identifier"
+        },
+        "user_id": {
+          "$ref": "#/$defs/identifier"
+        },
+        "confirmed_at": {
+          "$ref": "#/$defs/timestamp"
+        },
+        "role": {
+          "const": "content_confirmation"
+        }
+      },
+      "required": [
+        "input_ref",
+        "snapshot_ref",
+        "user_id",
+        "confirmed_at",
+        "role"
+      ],
+      "additionalProperties": false
+    },
+    "verification": {
+      "type": "object",
+      "properties": {
+        "basis": {
+          "enum": [
+            "explicit",
+            "inferred"
+          ]
+        },
+        "state": {
+          "enum": [
+            "unconfirmed",
+            "confirmed"
+          ]
+        },
+        "confirmation": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/confirmationRef"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "basis",
+        "state",
+        "confirmation"
+      ],
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "state": {
+                "const": "confirmed"
+              }
+            },
+            "required": [
+              "state"
+            ]
+          },
+          "then": {
+            "properties": {
+              "confirmation": {
+                "$ref": "#/$defs/confirmationRef"
+              }
+            }
+          },
+          "else": {
+            "properties": {
+              "confirmation": {
+                "type": "null"
+              }
+            }
+          }
+        }
+      ]
+    },
+    "lifecycle": {
+      "type": "object",
+      "properties": {
+        "state": {
+          "enum": [
+            "candidate",
+            "active",
+            "superseded",
+            "withdrawn"
+          ]
+        },
+        "changed_at": {
+          "$ref": "#/$defs/timestamp"
+        },
+        "reason": {
+          "$ref": "#/$defs/nonblank"
+        }
+      },
+      "required": [
+        "state",
+        "changed_at",
+        "reason"
+      ],
+      "additionalProperties": false
+    },
+    "lineage": {
+      "type": "object",
+      "properties": {
+        "operation": {
+          "enum": [
+            "create",
+            "promote",
+            "replace"
+          ]
+        },
+        "source_memory_id": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/identifier"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "family_id": {
+          "$ref": "#/$defs/identifier"
+        },
+        "source_redacted": {
+          "type": "boolean"
+        },
+        "source_redaction_id": {
+          "$ref": "#/$defs/identifier"
+        }
+      },
+      "required": [
+        "operation",
+        "source_memory_id",
+        "family_id"
+      ],
+      "additionalProperties": false
+    },
+    "memoryItem": {
+      "type": "object",
+      "properties": {
+        "contract_type": {
+          "const": "memory_item"
+        },
+        "schema_version": {
+          "$ref": "#/$defs/contractVersion"
+        },
+        "id": {
+          "$ref": "#/$defs/identifier"
+        },
+        "user_id": {
+          "$ref": "#/$defs/identifier"
+        },
+        "version": {
+          "$ref": "#/$defs/version"
+        },
+        "content": {
+          "$ref": "#/$defs/nonblank"
+        },
+        "tags": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/nonblank"
+          },
+          "uniqueItems": true
+        },
+        "claim": {
+          "$ref": "#/$defs/claim"
+        },
+        "scope": {
+          "$ref": "#/$defs/scope"
+        },
+        "applicability": {
+          "$ref": "#/$defs/applicability"
+        },
+        "verification": {
+          "$ref": "#/$defs/verification"
+        },
+        "evidence": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/evidenceRef"
+          },
+          "minItems": 1,
+          "uniqueItems": true
+        },
+        "lifecycle": {
+          "$ref": "#/$defs/lifecycle"
+        },
+        "created_at": {
+          "$ref": "#/$defs/timestamp"
+        },
+        "lineage": {
+          "$ref": "#/$defs/lineage"
+        }
+      },
+      "required": [
+        "contract_type",
+        "schema_version",
+        "id",
+        "user_id",
+        "version",
+        "content",
+        "tags",
+        "claim",
+        "scope",
+        "applicability",
+        "verification",
+        "evidence",
+        "lifecycle",
+        "created_at",
+        "lineage"
+      ],
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "lifecycle": {
+                "properties": {
+                  "state": {
+                    "const": "candidate"
+                  }
+                },
+                "required": [
+                  "state"
+                ]
+              }
+            },
+            "required": [
+              "lifecycle"
+            ]
+          },
+          "then": {
+            "properties": {
+              "scope": {
+                "properties": {
+                  "type": {
+                    "const": "short_term"
+                  }
+                }
+              },
+              "verification": {
+                "properties": {
+                  "state": {
+                    "const": "unconfirmed"
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "lifecycle": {
+                "properties": {
+                  "state": {
+                    "const": "active"
+                  }
+                },
+                "required": [
+                  "state"
+                ]
+              }
+            },
+            "required": [
+              "lifecycle"
+            ]
+          },
+          "then": {
+            "properties": {
+              "verification": {
+                "properties": {
+                  "state": {
+                    "const": "confirmed"
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "scope": {
+                "properties": {
+                  "type": {
+                    "const": "long_term"
+                  }
+                },
+                "required": [
+                  "type"
+                ]
+              }
+            },
+            "required": [
+              "scope"
+            ]
+          },
+          "then": {
+            "properties": {
+              "verification": {
+                "properties": {
+                  "state": {
+                    "const": "confirmed"
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "lineage": {
+                "properties": {
+                  "operation": {
+                    "const": "promote"
+                  }
+                },
+                "required": [
+                  "operation"
+                ]
+              }
+            },
+            "required": [
+              "lineage"
+            ]
+          },
+          "then": {
+            "properties": {
+              "scope": {
+                "properties": {
+                  "type": {
+                    "const": "long_term"
+                  }
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "evidenceRef": {
+      "type": "object",
+      "properties": {
+        "input_ref": {
+          "$ref": "#/$defs/identifier"
+        },
+        "snapshot_ref": {
+          "$ref": "#/$defs/identifier"
+        },
+        "roles": {
+          "type": "array",
+          "items": {
+            "enum": [
+              "content",
+              "content_confirmation",
+              "long_term_approval",
+              "replacement",
+              "withdrawal",
+              "deletion"
+            ]
+          },
+          "minItems": 1,
+          "uniqueItems": true
+        }
+      },
+      "required": [
+        "input_ref",
+        "snapshot_ref",
+        "roles"
+      ],
+      "additionalProperties": false
+    },
+    "request": {
+      "type": "object",
+      "properties": {
+        "contract_type": {
+          "const": "request"
+        },
+        "schema_version": {
+          "$ref": "#/$defs/contractVersion"
+        },
+        "id": {
+          "$ref": "#/$defs/identifier"
+        },
+        "user_id": {
+          "$ref": "#/$defs/identifier"
+        },
+        "kind": {
+          "enum": [
+            "onboarding",
+            "styling"
+          ]
+        },
+        "status": {
+          "enum": [
+            "open",
+            "closed",
+            "cancelled"
+          ]
+        },
+        "revision": {
+          "$ref": "#/$defs/version"
+        },
+        "created_at": {
+          "$ref": "#/$defs/timestamp"
+        },
+        "last_activity_at": {
+          "$ref": "#/$defs/timestamp"
+        },
+        "retention_until": {
+          "$ref": "#/$defs/timestamp"
+        },
+        "timezone": {
+          "$ref": "#/$defs/nonblank"
+        }
+      },
+      "required": [
+        "contract_type",
+        "schema_version",
+        "id",
+        "user_id",
+        "kind",
+        "status",
+        "revision",
+        "created_at",
+        "last_activity_at",
+        "retention_until",
+        "timezone"
+      ],
+      "additionalProperties": false
+    },
+    "target": {
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "none"
+            }
+          },
+          "required": [
+            "kind"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "memory"
+            },
+            "memory_id": {
+              "$ref": "#/$defs/identifier"
+            }
+          },
+          "required": [
+            "kind",
+            "memory_id"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "output"
+            },
+            "action_id": {
+              "$ref": "#/$defs/identifier"
+            }
+          },
+          "required": [
+            "kind",
+            "action_id"
+          ],
+          "additionalProperties": false
+        }
+      ]
+    },
+    "action": {
+      "type": "object",
+      "properties": {
+        "action_id": {
+          "$ref": "#/$defs/identifier"
+        },
+        "type": {
+          "enum": [
+            "create",
+            "confirm",
+            "promote",
+            "replace",
+            "withdraw",
+            "add_evidence",
+            "delete"
+          ]
+        },
+        "target": {
+          "$ref": "#/$defs/target"
+        },
+        "depends_on": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/identifier"
+          },
+          "uniqueItems": true
+        },
+        "new_item": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/memoryItem"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "evidence": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/evidenceRef"
+          },
+          "uniqueItems": true
+        },
+        "deletion_scope": {
+          "type": "array",
+          "items": {
+            "enum": [
+              "memory",
+              "promote_family",
+              "request_raw",
+              "derived_snapshots",
+              "source_spans",
+              "summaries",
+              "indexes",
+              "cache"
+            ]
+          },
+          "uniqueItems": true
+        }
+      },
+      "required": [
+        "action_id",
+        "type",
+        "target",
+        "depends_on",
+        "new_item",
+        "evidence",
+        "deletion_scope"
+      ],
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "create"
+              }
+            },
+            "required": [
+              "type"
+            ]
+          },
+          "then": {
+            "properties": {
+              "target": {
+                "properties": {
+                  "kind": {
+                    "const": "none"
+                  }
+                }
+              },
+              "new_item": {
+                "$ref": "#/$defs/memoryItem"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "enum": [
+                  "confirm",
+                  "promote",
+                  "withdraw",
+                  "add_evidence"
+                ]
+              }
+            },
+            "required": [
+              "type"
+            ]
+          },
+          "then": {
+            "properties": {
+              "target": {
+                "properties": {
+                  "kind": {
+                    "enum": [
+                      "memory",
+                      "output"
+                    ]
+                  }
+                }
+              },
+              "new_item": {
+                "type": "null"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "replace"
+              }
+            },
+            "required": [
+              "type"
+            ]
+          },
+          "then": {
+            "properties": {
+              "target": {
+                "properties": {
+                  "kind": {
+                    "const": "memory"
+                  }
+                }
+              },
+              "new_item": {
+                "$ref": "#/$defs/memoryItem"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "delete"
+              }
+            },
+            "required": [
+              "type"
+            ]
+          },
+          "then": {
+            "properties": {
+              "target": {
+                "properties": {
+                  "kind": {
+                    "const": "memory"
+                  }
+                }
+              },
+              "new_item": {
+                "type": "null"
+              },
+              "deletion_scope": {
+                "minItems": 1
+              }
+            }
+          }
+        }
+      ]
+    },
+    "batch": {
+      "type": "object",
+      "properties": {
+        "contract_type": {
+          "const": "batch"
+        },
+        "schema_version": {
+          "$ref": "#/$defs/contractVersion"
+        },
+        "batch_id": {
+          "$ref": "#/$defs/identifier"
+        },
+        "user_id": {
+          "$ref": "#/$defs/identifier"
+        },
+        "request_id": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/identifier"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "expected_request_revision": {
+          "$ref": "#/$defs/version"
+        },
+        "profile_revision": {
+          "$ref": "#/$defs/version"
+        },
+        "context_snapshot_id": {
+          "$ref": "#/$defs/identifier"
+        },
+        "expected_versions": {
+          "type": "object",
+          "propertyNames": {
+            "$ref": "#/$defs/identifier"
+          },
+          "additionalProperties": {
+            "$ref": "#/$defs/version"
+          }
+        },
+        "actions": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/action"
+          },
+          "minItems": 1,
+          "uniqueItems": true
+        },
+        "issued_at": {
+          "$ref": "#/$defs/timestamp"
+        },
+        "cause_input_ref": {
+          "$ref": "#/$defs/identifier"
+        }
+      },
+      "required": [
+        "contract_type",
+        "schema_version",
+        "batch_id",
+        "user_id",
+        "request_id",
+        "expected_request_revision",
+        "profile_revision",
+        "context_snapshot_id",
+        "expected_versions",
+        "actions",
+        "issued_at",
+        "cause_input_ref"
+      ],
+      "additionalProperties": false
+    },
+    "change": {
+      "type": "object",
+      "properties": {
+        "memory_id": {
+          "$ref": "#/$defs/identifier"
+        },
+        "operation": {
+          "enum": [
+            "upsert",
+            "delete"
+          ]
+        },
+        "before_version": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/version"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "after_version": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/version"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "after_state": {
+          "anyOf": [
+            {
+              "enum": [
+                "candidate",
+                "active",
+                "superseded",
+                "withdrawn"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "lineage_operation": {
+          "anyOf": [
+            {
+              "enum": [
+                "create",
+                "promote",
+                "replace"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "evidence_snapshot_refs": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/identifier"
+          },
+          "uniqueItems": true
+        }
+      },
+      "required": [
+        "memory_id",
+        "operation",
+        "before_version",
+        "after_version",
+        "after_state",
+        "lineage_operation",
+        "evidence_snapshot_refs"
+      ],
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "operation": {
+                "const": "delete"
+              }
+            },
+            "required": [
+              "operation"
+            ]
+          },
+          "then": {
+            "properties": {
+              "after_version": {
+                "type": "null"
+              },
+              "after_state": {
+                "type": "null"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "operation": {
+                "const": "upsert"
+              }
+            },
+            "required": [
+              "operation"
+            ]
+          },
+          "then": {
+            "properties": {
+              "after_version": {
+                "$ref": "#/$defs/version"
+              },
+              "after_state": {
+                "enum": [
+                  "candidate",
+                  "active",
+                  "superseded",
+                  "withdrawn"
+                ]
+              }
+            }
+          }
+        }
+      ]
+    },
+    "event": {
+      "type": "object",
+      "properties": {
+        "contract_type": {
+          "const": "event"
+        },
+        "schema_version": {
+          "$ref": "#/$defs/contractVersion"
+        },
+        "event_id": {
+          "$ref": "#/$defs/identifier"
+        },
+        "batch_id": {
+          "$ref": "#/$defs/identifier"
+        },
+        "user_id": {
+          "$ref": "#/$defs/identifier"
+        },
+        "request_id": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/identifier"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "committed_at": {
+          "$ref": "#/$defs/timestamp"
+        },
+        "change_ids": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/identifier"
+          },
+          "minItems": 1,
+          "uniqueItems": true
+        },
+        "changes": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/change"
+          },
+          "minItems": 1,
+          "uniqueItems": true
+        }
+      },
+      "required": [
+        "contract_type",
+        "schema_version",
+        "event_id",
+        "batch_id",
+        "user_id",
+        "request_id",
+        "committed_at",
+        "change_ids",
+        "changes"
+      ],
+      "additionalProperties": false
+    },
+    "batchResult": {
+      "type": "object",
+      "properties": {
+        "contract_type": {
+          "const": "batch_result"
+        },
+        "schema_version": {
+          "$ref": "#/$defs/contractVersion"
+        },
+        "result_id": {
+          "$ref": "#/$defs/identifier"
+        },
+        "batch_id": {
+          "$ref": "#/$defs/identifier"
+        },
+        "user_id": {
+          "$ref": "#/$defs/identifier"
+        },
+        "status": {
+          "enum": [
+            "accepted",
+            "rejected",
+            "retry"
+          ]
+        },
+        "event_id": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/identifier"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "versions": {
+          "type": "object",
+          "propertyNames": {
+            "$ref": "#/$defs/identifier"
+          },
+          "additionalProperties": {
+            "$ref": "#/$defs/version"
+          }
+        },
+        "error_code": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/nonblank"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "receipt_expires_at": {
+          "$ref": "#/$defs/timestamp"
+        }
+      },
+      "required": [
+        "contract_type",
+        "schema_version",
+        "result_id",
+        "batch_id",
+        "user_id",
+        "status",
+        "event_id",
+        "versions",
+        "error_code",
+        "receipt_expires_at"
+      ],
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "status": {
+                "const": "accepted"
+              }
+            },
+            "required": [
+              "status"
+            ]
+          },
+          "then": {
+            "properties": {
+              "event_id": {
+                "type": "string"
+              },
+              "error_code": {
+                "type": "null"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "status": {
+                "enum": [
+                  "rejected",
+                  "retry"
+                ]
+              }
+            },
+            "required": [
+              "status"
+            ]
+          },
+          "then": {
+            "properties": {
+              "event_id": {
+                "type": "null"
+              },
+              "versions": {
+                "maxProperties": 0
+              },
+              "error_code": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      ]
+    },
+    "usedMemory": {
+      "type": "object",
+      "properties": {
+        "memory_id": {
+          "$ref": "#/$defs/identifier"
+        },
+        "version": {
+          "$ref": "#/$defs/version"
+        },
+        "scope_type": {
+          "enum": [
+            "short_term",
+            "long_term"
+          ]
+        },
+        "score": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "rank": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "family_representative": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "memory_id",
+        "version",
+        "scope_type",
+        "score",
+        "rank",
+        "family_representative"
+      ],
+      "additionalProperties": false
+    },
+    "excludedMemory": {
+      "type": "object",
+      "properties": {
+        "memory_id": {
+          "$ref": "#/$defs/identifier"
+        },
+        "version": {
+          "$ref": "#/$defs/version"
+        },
+        "reason": {
+          "enum": [
+            "wrong_owner",
+            "candidate",
+            "not_confirmed",
+            "withdrawn",
+            "superseded",
+            "wrong_request",
+            "request_excluded",
+            "request_closed",
+            "expired",
+            "condition_unknown",
+            "irrelevant",
+            "conflict",
+            "duplicate_family",
+            "truncated",
+            "budget",
+            "deleted"
+          ]
+        }
+      },
+      "required": [
+        "memory_id",
+        "version",
+        "reason"
+      ],
+      "additionalProperties": false
+    },
+    "contextResult": {
+      "type": "object",
+      "properties": {
+        "contract_type": {
+          "const": "context_result"
+        },
+        "schema_version": {
+          "$ref": "#/$defs/contractVersion"
+        },
+        "context_id": {
+          "$ref": "#/$defs/identifier"
+        },
+        "context_snapshot_id": {
+          "$ref": "#/$defs/identifier"
+        },
+        "user_id": {
+          "$ref": "#/$defs/identifier"
+        },
+        "request_id": {
+          "$ref": "#/$defs/identifier"
+        },
+        "request_revision": {
+          "$ref": "#/$defs/version"
+        },
+        "profile_revision": {
+          "$ref": "#/$defs/version"
+        },
+        "used": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/usedMemory"
+          },
+          "uniqueItems": true
+        },
+        "excluded": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/excludedMemory"
+          },
+          "uniqueItems": true
+        },
+        "overridden": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/identifier"
+          },
+          "uniqueItems": true
+        },
+        "truncated": {
+          "type": "boolean"
+        },
+        "short_limit": {
+          "const": 20
+        },
+        "long_limit": {
+          "const": 12
+        },
+        "char_budget": {
+          "const": 6000
+        },
+        "content_chars": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 6000
+        },
+        "now": {
+          "$ref": "#/$defs/timestamp"
+        },
+        "unresolved": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/nonblank"
+          },
+          "uniqueItems": true
+        },
+        "clarifications": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/nonblank"
+          },
+          "uniqueItems": true
+        },
+        "created_at": {
+          "$ref": "#/$defs/timestamp"
+        }
+      },
+      "required": [
+        "contract_type",
+        "schema_version",
+        "context_id",
+        "context_snapshot_id",
+        "user_id",
+        "request_id",
+        "request_revision",
+        "profile_revision",
+        "used",
+        "excluded",
+        "overridden",
+        "truncated",
+        "short_limit",
+        "long_limit",
+        "char_budget",
+        "content_chars",
+        "now",
+        "unresolved",
+        "clarifications",
+        "created_at"
+      ],
+      "additionalProperties": false
+    },
+    "proposal": {
+      "type": "object",
+      "properties": {
+        "proposal_id": {
+          "$ref": "#/$defs/identifier"
+        },
+        "type": {
+          "enum": [
+            "create",
+            "confirm",
+            "promote",
+            "replace",
+            "withdraw",
+            "add_evidence",
+            "delete"
+          ]
+        },
+        "target_memory_id": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/identifier"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "depends_on": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/identifier"
+          },
+          "uniqueItems": true
+        },
+        "claim": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/claim"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "evidence": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/evidenceRef"
+          },
+          "minItems": 1,
+          "uniqueItems": true
+        },
+        "reason": {
+          "$ref": "#/$defs/nonblank"
+        }
+      },
+      "required": [
+        "proposal_id",
+        "type",
+        "target_memory_id",
+        "depends_on",
+        "claim",
+        "evidence",
+        "reason"
+      ],
+      "additionalProperties": false
+    },
+    "clarification": {
+      "type": "object",
+      "properties": {
+        "question": {
+          "$ref": "#/$defs/nonblank"
+        },
+        "reason_code": {
+          "enum": [
+            "target_ambiguous",
+            "content_ambiguous",
+            "scope_ambiguous",
+            "time_ambiguous",
+            "content_confirmation_required",
+            "long_term_approval_required",
+            "withdrawal_scope_required",
+            "conflicting_claims",
+            "request_closed",
+            "context_stale",
+            "image_aspect_unknown"
+          ]
+        },
+        "memory_ids": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/identifier"
+          },
+          "uniqueItems": true
+        }
+      },
+      "required": [
+        "question",
+        "reason_code",
+        "memory_ids"
+      ],
+      "additionalProperties": false
+    },
+    "intentDecision": {
+      "type": "object",
+      "properties": {
+        "contract_type": {
+          "const": "intent_decision"
+        },
+        "schema_version": {
+          "$ref": "#/$defs/contractVersion"
+        },
+        "source_input_ref": {
+          "$ref": "#/$defs/identifier"
+        },
+        "context_snapshot_id": {
+          "$ref": "#/$defs/identifier"
+        },
+        "request_revision": {
+          "$ref": "#/$defs/version"
+        },
+        "profile_revision": {
+          "$ref": "#/$defs/version"
+        },
+        "status": {
+          "enum": [
+            "ready",
+            "needs_clarification",
+            "no_change",
+            "stale_context"
+          ]
+        },
+        "proposals": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/proposal"
+          },
+          "uniqueItems": true
+        },
+        "clarifications": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/clarification"
+          },
+          "uniqueItems": true
+        },
+        "reason": {
+          "$ref": "#/$defs/nonblank"
+        }
+      },
+      "required": [
+        "contract_type",
+        "schema_version",
+        "source_input_ref",
+        "context_snapshot_id",
+        "request_revision",
+        "profile_revision",
+        "status",
+        "proposals",
+        "clarifications",
+        "reason"
+      ],
+      "additionalProperties": false
+    },
+    "retentionPolicy": {
+      "type": "object",
+      "properties": {
+        "contract_type": {
+          "const": "retention_policy"
+        },
+        "schema_version": {
+          "$ref": "#/$defs/contractVersion"
+        },
+        "request_raw_min_days": {
+          "const": 30
+        },
+        "request_created_max_days": {
+          "const": 90
+        },
+        "long_term_max_days": {
+          "const": 365
+        },
+        "superseded_withdrawn_days": {
+          "const": 30
+        },
+        "tombstone_max_days": {
+          "const": 90
+        },
+        "deletion_receipt_hours": {
+          "const": 24
+        }
+      },
+      "required": [
+        "contract_type",
+        "schema_version",
+        "request_raw_min_days",
+        "request_created_max_days",
+        "long_term_max_days",
+        "superseded_withdrawn_days",
+        "tombstone_max_days",
+        "deletion_receipt_hours"
+      ],
+      "additionalProperties": false
+    },
+    "deletionReceipt": {
+      "type": "object",
+      "properties": {
+        "contract_type": {
+          "const": "deletion_receipt"
+        },
+        "schema_version": {
+          "const": "0.2"
+        },
+        "token": {
+          "$ref": "#/$defs/identifier"
+        },
+        "fingerprint": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "completed_at": {
+          "$ref": "#/$defs/timestamp"
+        },
+        "expires_at": {
+          "$ref": "#/$defs/timestamp"
+        }
+      },
+      "required": [
+        "contract_type",
+        "schema_version",
+        "token",
+        "fingerprint",
+        "completed_at",
+        "expires_at"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "design_status": "Accepted",
+  "design_approval": {
+    "date": "2026-10-13",
+    "source": "user_reply_in_current_chat",
+    "statement": "권고안 전체 승인",
+    "scope": "D01–D12; ADR 0001/0002; parameters; Python+SQLite memory minimum; implementation plan"
+  }
+}

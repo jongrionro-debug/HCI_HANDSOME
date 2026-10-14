@@ -1,0 +1,6508 @@
+{
+  "schema_version": "0.2",
+  "description": "가상 사용자와 가상 입력만 사용하는 Accepted v0.2 계약 검증 fixture. 실제 참여자·상품·모델 출력·DB 기록이 아니다.",
+  "profile": {
+    "user_id": "user_demo",
+    "current_revision": 2
+  },
+  "retention_policy": {
+    "contract_type": "retention_policy",
+    "schema_version": "0.2",
+    "request_raw_min_days": 30,
+    "request_created_max_days": 90,
+    "long_term_max_days": 365,
+    "superseded_withdrawn_days": 30,
+    "tombstone_max_days": 90,
+    "deletion_receipt_hours": 24
+  },
+  "queries": {
+    "ctx_demo": {
+      "target_keys": [
+        "fit"
+      ],
+      "tags": [
+        "fit"
+      ],
+      "general_style_keys": [],
+      "mapped_keys": [
+        "fit",
+        "color",
+        "material",
+        "mood",
+        "formality",
+        "occasion",
+        "activity"
+      ],
+      "facts": {}
+    }
+  },
+  "evidence": [
+    {
+      "contract_type": "user_evidence",
+      "schema_version": "0.2",
+      "input_ref": "u_fit_content",
+      "snapshot_id": "s_fit_content",
+      "user_id": "user_demo",
+      "request_id": "req_demo",
+      "kind": "user_message",
+      "occurred_at": "2026-10-01T09:00:00+09:00",
+      "image_id": null,
+      "snapshot": {
+        "content": "여유 있는 핏을 선호한다.",
+        "condition": null,
+        "period": {
+          "condition": null,
+          "predicates": [],
+          "valid_from": null,
+          "valid_until": null
+        },
+        "selected_aspects": [],
+        "authorized_roles": [
+          "content",
+          "content_confirmation"
+        ],
+        "target_memory_ids": [],
+        "claim": {
+          "key": "fit",
+          "value": "relaxed",
+          "polarity": "prefer",
+          "strength": "soft"
+        }
+      },
+      "raw_retention_until": "2026-11-02T09:00:00+09:00"
+    },
+    {
+      "contract_type": "user_evidence",
+      "schema_version": "0.2",
+      "input_ref": "u_fit_approval",
+      "snapshot_id": "s_fit_approval",
+      "user_id": "user_demo",
+      "request_id": "req_demo",
+      "kind": "memory_confirmation",
+      "occurred_at": "2026-10-01T09:01:00+09:00",
+      "image_id": null,
+      "snapshot": {
+        "content": "여유 있는 핏을 선호한다.",
+        "condition": null,
+        "period": {
+          "condition": null,
+          "predicates": [],
+          "valid_from": null,
+          "valid_until": null
+        },
+        "selected_aspects": [],
+        "authorized_roles": [
+          "long_term_approval"
+        ],
+        "target_memory_ids": [],
+        "claim": {
+          "key": "fit",
+          "value": "relaxed",
+          "polarity": "prefer",
+          "strength": "soft"
+        }
+      },
+      "raw_retention_until": "2026-11-02T09:00:00+09:00"
+    },
+    {
+      "contract_type": "user_evidence",
+      "schema_version": "0.2",
+      "input_ref": "u_image_fit",
+      "snapshot_id": "s_image_fit",
+      "user_id": "user_demo",
+      "request_id": "req_demo",
+      "kind": "image_feedback",
+      "occurred_at": "2026-10-02T09:00:00+09:00",
+      "image_id": "image_demo_a",
+      "snapshot": {
+        "content": "선택한 이미지의 핏 요소가 마음에 들 수 있다.",
+        "condition": null,
+        "period": {
+          "condition": null,
+          "predicates": [],
+          "valid_from": null,
+          "valid_until": null
+        },
+        "selected_aspects": [
+          "fit"
+        ],
+        "authorized_roles": [
+          "content"
+        ],
+        "target_memory_ids": [],
+        "claim": {
+          "key": "fit",
+          "value": "unknown",
+          "polarity": "prefer",
+          "strength": "soft"
+        }
+      },
+      "raw_retention_until": "2026-11-02T09:00:00+09:00"
+    },
+    {
+      "contract_type": "user_evidence",
+      "schema_version": "0.2",
+      "input_ref": "u_short_exception",
+      "snapshot_id": "s_short_exception",
+      "user_id": "user_demo",
+      "request_id": "req_demo",
+      "kind": "user_message",
+      "occurred_at": "2026-10-03T09:00:00+09:00",
+      "image_id": null,
+      "snapshot": {
+        "content": "이번 요청에는 슬림한 핏을 원한다.",
+        "condition": "이번 요청",
+        "period": {
+          "condition": "이번 요청",
+          "predicates": [],
+          "valid_from": null,
+          "valid_until": null
+        },
+        "selected_aspects": [],
+        "authorized_roles": [
+          "content",
+          "content_confirmation"
+        ],
+        "target_memory_ids": [],
+        "claim": {
+          "key": "fit",
+          "value": "slim",
+          "polarity": "require",
+          "strength": "hard"
+        }
+      },
+      "raw_retention_until": "2026-11-02T09:00:00+09:00"
+    },
+    {
+      "contract_type": "user_evidence",
+      "schema_version": "0.2",
+      "input_ref": "u_delete",
+      "snapshot_id": "s_delete",
+      "user_id": "user_demo",
+      "request_id": "req_demo",
+      "kind": "ui_action",
+      "occurred_at": "2026-10-04T09:00:00+09:00",
+      "image_id": null,
+      "snapshot": {
+        "content": "여유 있는 핏을 선호한다.",
+        "condition": null,
+        "period": {
+          "condition": null,
+          "predicates": [],
+          "valid_from": null,
+          "valid_until": null
+        },
+        "selected_aspects": [],
+        "authorized_roles": [
+          "deletion"
+        ],
+        "target_memory_ids": [
+          "mem_fit_long"
+        ],
+        "claim": {
+          "key": "fit",
+          "value": "relaxed",
+          "polarity": "prefer",
+          "strength": "soft"
+        }
+      },
+      "raw_retention_until": "2026-11-02T09:00:00+09:00"
+    },
+    {
+      "contract_type": "user_evidence",
+      "schema_version": "0.2",
+      "input_ref": "u_replace",
+      "snapshot_id": "s_replace",
+      "user_id": "user_demo",
+      "request_id": "req_demo",
+      "kind": "memory_confirmation",
+      "occurred_at": "2026-10-03T09:03:00+09:00",
+      "image_id": null,
+      "snapshot": {
+        "content": "레귤러 핏을 선호한다.",
+        "condition": null,
+        "period": {
+          "condition": null,
+          "predicates": [],
+          "valid_from": null,
+          "valid_until": null
+        },
+        "selected_aspects": [],
+        "authorized_roles": [
+          "content",
+          "content_confirmation",
+          "long_term_approval",
+          "replacement"
+        ],
+        "target_memory_ids": [],
+        "claim": {
+          "key": "fit",
+          "value": "regular",
+          "polarity": "prefer",
+          "strength": "soft"
+        }
+      },
+      "raw_retention_until": "2026-11-02T09:00:00+09:00"
+    },
+    {
+      "contract_type": "user_evidence",
+      "schema_version": "0.2",
+      "input_ref": "u_image_approval",
+      "snapshot_id": "s_image_approval",
+      "user_id": "user_demo",
+      "request_id": "req_demo",
+      "kind": "memory_confirmation",
+      "occurred_at": "2026-10-03T09:02:00+09:00",
+      "image_id": null,
+      "snapshot": {
+        "content": "선택한 이미지의 핏 요소가 마음에 들 수 있다.",
+        "condition": null,
+        "period": {
+          "condition": null,
+          "predicates": [],
+          "valid_from": null,
+          "valid_until": null
+        },
+        "selected_aspects": [
+          "fit"
+        ],
+        "authorized_roles": [
+          "content_confirmation",
+          "long_term_approval"
+        ],
+        "target_memory_ids": [],
+        "claim": {
+          "key": "fit",
+          "value": "unknown",
+          "polarity": "prefer",
+          "strength": "soft"
+        }
+      },
+      "raw_retention_until": "2026-11-02T09:00:00+09:00"
+    },
+    {
+      "contract_type": "user_evidence",
+      "schema_version": "0.2",
+      "input_ref": "u_other",
+      "snapshot_id": "s_other",
+      "user_id": "user_other",
+      "request_id": "req_other",
+      "kind": "user_message",
+      "occurred_at": "2026-10-01T09:00:00+09:00",
+      "image_id": null,
+      "snapshot": {
+        "content": "다른 사용자의 핏 조건.",
+        "condition": null,
+        "period": {
+          "condition": null,
+          "predicates": [],
+          "valid_from": null,
+          "valid_until": null
+        },
+        "selected_aspects": [],
+        "authorized_roles": [
+          "content",
+          "content_confirmation",
+          "long_term_approval"
+        ],
+        "target_memory_ids": [],
+        "claim": {
+          "key": "fit",
+          "value": "slim",
+          "polarity": "prefer",
+          "strength": "soft"
+        }
+      },
+      "raw_retention_until": "2026-10-31T09:00:00+09:00"
+    },
+    {
+      "contract_type": "user_evidence",
+      "schema_version": "0.2",
+      "input_ref": "u_multi",
+      "snapshot_id": "s_multi_fit",
+      "user_id": "user_demo",
+      "request_id": "req_demo",
+      "kind": "memory_confirmation",
+      "occurred_at": "2026-10-03T09:05:00+09:00",
+      "image_id": null,
+      "snapshot": {
+        "content": "여유 있는 핏을 선호한다.",
+        "condition": null,
+        "period": {
+          "condition": null,
+          "predicates": [],
+          "valid_from": null,
+          "valid_until": null
+        },
+        "selected_aspects": [],
+        "authorized_roles": [
+          "content",
+          "content_confirmation",
+          "long_term_approval"
+        ],
+        "target_memory_ids": [],
+        "claim": {
+          "key": "fit",
+          "value": "relaxed",
+          "polarity": "prefer",
+          "strength": "soft"
+        }
+      },
+      "raw_retention_until": "2026-11-02T09:00:00+09:00"
+    },
+    {
+      "contract_type": "user_evidence",
+      "schema_version": "0.2",
+      "input_ref": "u_multi",
+      "snapshot_id": "s_multi_color",
+      "user_id": "user_demo",
+      "request_id": "req_demo",
+      "kind": "memory_confirmation",
+      "occurred_at": "2026-10-03T09:05:00+09:00",
+      "image_id": null,
+      "snapshot": {
+        "content": "차분한 색상을 선호한다.",
+        "condition": null,
+        "period": {
+          "condition": null,
+          "predicates": [],
+          "valid_from": null,
+          "valid_until": null
+        },
+        "selected_aspects": [],
+        "authorized_roles": [
+          "content",
+          "content_confirmation",
+          "long_term_approval"
+        ],
+        "target_memory_ids": [],
+        "claim": {
+          "key": "color",
+          "value": "muted",
+          "polarity": "prefer",
+          "strength": "soft"
+        }
+      },
+      "raw_retention_until": "2026-11-02T09:00:00+09:00"
+    },
+    {
+      "contract_type": "user_evidence",
+      "schema_version": "0.2",
+      "input_ref": "u_withdraw",
+      "snapshot_id": "s_withdraw",
+      "user_id": "user_demo",
+      "request_id": "req_demo",
+      "kind": "ui_action",
+      "occurred_at": "2026-10-03T09:04:00+09:00",
+      "image_id": null,
+      "snapshot": {
+        "content": "여유 있는 핏을 선호한다.",
+        "condition": null,
+        "period": {
+          "condition": null,
+          "predicates": [],
+          "valid_from": null,
+          "valid_until": null
+        },
+        "selected_aspects": [],
+        "authorized_roles": [
+          "withdrawal"
+        ],
+        "target_memory_ids": [
+          "mem_fit_long"
+        ],
+        "claim": {
+          "key": "fit",
+          "value": "relaxed",
+          "polarity": "prefer",
+          "strength": "soft"
+        }
+      },
+      "raw_retention_until": "2026-11-02T09:00:00+09:00"
+    },
+    {
+      "contract_type": "user_evidence",
+      "schema_version": "0.2",
+      "input_ref": "u_fresh",
+      "snapshot_id": "s_fresh",
+      "user_id": "user_demo",
+      "request_id": "req_demo",
+      "kind": "memory_confirmation",
+      "occurred_at": "2026-10-05T09:00:00+09:00",
+      "image_id": null,
+      "snapshot": {
+        "content": "여유 있는 핏을 선호한다.",
+        "condition": null,
+        "period": {
+          "condition": null,
+          "predicates": [],
+          "valid_from": null,
+          "valid_until": null
+        },
+        "selected_aspects": [],
+        "authorized_roles": [
+          "content",
+          "content_confirmation",
+          "long_term_approval"
+        ],
+        "target_memory_ids": [],
+        "claim": {
+          "key": "fit",
+          "value": "relaxed",
+          "polarity": "prefer",
+          "strength": "soft"
+        }
+      },
+      "raw_retention_until": "2026-11-02T09:00:00+09:00"
+    }
+  ],
+  "requests": [
+    {
+      "contract_type": "request",
+      "schema_version": "0.2",
+      "id": "req_demo",
+      "user_id": "user_demo",
+      "kind": "styling",
+      "status": "open",
+      "revision": 3,
+      "created_at": "2026-10-01T08:55:00+09:00",
+      "last_activity_at": "2026-10-03T09:00:00+09:00",
+      "retention_until": "2026-11-02T09:00:00+09:00",
+      "timezone": "Asia/Seoul"
+    },
+    {
+      "contract_type": "request",
+      "schema_version": "0.2",
+      "id": "req_closed",
+      "user_id": "user_demo",
+      "kind": "styling",
+      "status": "closed",
+      "revision": 5,
+      "created_at": "2026-09-01T08:55:00+09:00",
+      "last_activity_at": "2026-09-02T09:00:00+09:00",
+      "retention_until": "2026-10-02T09:00:00+09:00",
+      "timezone": "Asia/Seoul"
+    },
+    {
+      "contract_type": "request",
+      "schema_version": "0.2",
+      "id": "req_clone",
+      "user_id": "user_demo",
+      "kind": "styling",
+      "status": "open",
+      "revision": 1,
+      "created_at": "2026-10-03T09:10:00+09:00",
+      "last_activity_at": "2026-10-03T09:10:00+09:00",
+      "retention_until": "2026-11-02T09:10:00+09:00",
+      "timezone": "Asia/Seoul"
+    },
+    {
+      "contract_type": "request",
+      "schema_version": "0.2",
+      "id": "req_onboarding",
+      "user_id": "user_demo",
+      "kind": "onboarding",
+      "status": "closed",
+      "revision": 2,
+      "created_at": "2026-09-01T08:55:00+09:00",
+      "last_activity_at": "2026-09-02T09:00:00+09:00",
+      "retention_until": "2026-10-02T09:00:00+09:00",
+      "timezone": "Asia/Seoul"
+    },
+    {
+      "contract_type": "request",
+      "schema_version": "0.2",
+      "id": "req_other",
+      "user_id": "user_other",
+      "kind": "styling",
+      "status": "open",
+      "revision": 1,
+      "created_at": "2026-10-01T08:55:00+09:00",
+      "last_activity_at": "2026-10-01T09:00:00+09:00",
+      "retention_until": "2026-10-31T09:00:00+09:00",
+      "timezone": "Asia/Seoul"
+    }
+  ],
+  "memories": [
+    {
+      "contract_type": "memory_item",
+      "schema_version": "0.2",
+      "id": "mem_fit_long",
+      "user_id": "user_demo",
+      "version": 2,
+      "content": "여유 있는 핏을 선호한다.",
+      "tags": [
+        "fit"
+      ],
+      "claim": {
+        "key": "fit",
+        "value": "relaxed",
+        "polarity": "prefer",
+        "strength": "soft"
+      },
+      "scope": {
+        "type": "long_term",
+        "approval": {
+          "input_ref": "u_fit_approval",
+          "snapshot_ref": "s_fit_approval",
+          "user_id": "user_demo",
+          "approved_at": "2026-10-01T09:01:00+09:00",
+          "role": "long_term_approval"
+        }
+      },
+      "applicability": {
+        "condition": null,
+        "predicates": [],
+        "valid_from": null,
+        "valid_until": null
+      },
+      "verification": {
+        "basis": "explicit",
+        "state": "confirmed",
+        "confirmation": {
+          "input_ref": "u_fit_content",
+          "snapshot_ref": "s_fit_content",
+          "user_id": "user_demo",
+          "confirmed_at": "2026-10-01T09:00:00+09:00",
+          "role": "content_confirmation"
+        }
+      },
+      "evidence": [
+        {
+          "input_ref": "u_fit_content",
+          "snapshot_ref": "s_fit_content",
+          "roles": [
+            "content",
+            "content_confirmation"
+          ]
+        },
+        {
+          "input_ref": "u_fit_approval",
+          "snapshot_ref": "s_fit_approval",
+          "roles": [
+            "long_term_approval"
+          ]
+        }
+      ],
+      "lifecycle": {
+        "state": "active",
+        "changed_at": "2026-10-01T09:01:01+09:00",
+        "reason": "사용자가 내용과 이후 활용을 확인했다."
+      },
+      "created_at": "2026-10-01T09:01:01+09:00",
+      "lineage": {
+        "operation": "create",
+        "source_memory_id": null,
+        "family_id": "fam_fit"
+      }
+    },
+    {
+      "contract_type": "memory_item",
+      "schema_version": "0.2",
+      "id": "mem_fit_short_exception",
+      "user_id": "user_demo",
+      "version": 1,
+      "content": "이번 요청에는 슬림한 핏을 원한다.",
+      "tags": [
+        "fit"
+      ],
+      "claim": {
+        "key": "fit",
+        "value": "slim",
+        "polarity": "require",
+        "strength": "hard"
+      },
+      "scope": {
+        "type": "short_term",
+        "request_id": "req_demo"
+      },
+      "applicability": {
+        "condition": "이번 요청",
+        "predicates": [],
+        "valid_from": null,
+        "valid_until": null
+      },
+      "verification": {
+        "basis": "explicit",
+        "state": "confirmed",
+        "confirmation": {
+          "input_ref": "u_short_exception",
+          "snapshot_ref": "s_short_exception",
+          "user_id": "user_demo",
+          "confirmed_at": "2026-10-03T09:00:00+09:00",
+          "role": "content_confirmation"
+        }
+      },
+      "evidence": [
+        {
+          "input_ref": "u_short_exception",
+          "snapshot_ref": "s_short_exception",
+          "roles": [
+            "content",
+            "content_confirmation"
+          ]
+        }
+      ],
+      "lifecycle": {
+        "state": "active",
+        "changed_at": "2026-10-03T09:00:01+09:00",
+        "reason": "현재 요청의 명시적 예외다."
+      },
+      "created_at": "2026-10-03T09:00:01+09:00",
+      "lineage": {
+        "operation": "create",
+        "source_memory_id": null,
+        "family_id": "fam_fit_exception"
+      }
+    },
+    {
+      "contract_type": "memory_item",
+      "schema_version": "0.2",
+      "id": "mem_image_candidate",
+      "user_id": "user_demo",
+      "version": 1,
+      "content": "선택한 이미지의 핏 요소가 마음에 들 수 있다.",
+      "tags": [
+        "fit",
+        "image"
+      ],
+      "claim": {
+        "key": "fit",
+        "value": "unknown",
+        "polarity": "prefer",
+        "strength": "soft"
+      },
+      "scope": {
+        "type": "short_term",
+        "request_id": "req_demo"
+      },
+      "applicability": {
+        "condition": null,
+        "predicates": [],
+        "valid_from": null,
+        "valid_until": null
+      },
+      "verification": {
+        "basis": "inferred",
+        "state": "unconfirmed",
+        "confirmation": null
+      },
+      "evidence": [
+        {
+          "input_ref": "u_image_fit",
+          "snapshot_ref": "s_image_fit",
+          "roles": [
+            "content"
+          ]
+        }
+      ],
+      "lifecycle": {
+        "state": "candidate",
+        "changed_at": "2026-10-02T09:00:01+09:00",
+        "reason": "이미지 선택 요소의 확인이 필요하다."
+      },
+      "created_at": "2026-10-02T09:00:01+09:00",
+      "lineage": {
+        "operation": "create",
+        "source_memory_id": null,
+        "family_id": "fam_image"
+      }
+    },
+    {
+      "contract_type": "memory_item",
+      "schema_version": "0.2",
+      "id": "mem_wrong_owner",
+      "user_id": "user_other",
+      "version": 1,
+      "content": "다른 사용자의 핏 조건.",
+      "tags": [
+        "fit"
+      ],
+      "claim": {
+        "key": "fit",
+        "value": "slim",
+        "polarity": "prefer",
+        "strength": "soft"
+      },
+      "scope": {
+        "type": "long_term",
+        "approval": {
+          "input_ref": "u_other",
+          "snapshot_ref": "s_other",
+          "user_id": "user_other",
+          "approved_at": "2026-10-01T09:00:00+09:00",
+          "role": "long_term_approval"
+        }
+      },
+      "applicability": {
+        "condition": null,
+        "predicates": [],
+        "valid_from": null,
+        "valid_until": null
+      },
+      "verification": {
+        "basis": "explicit",
+        "state": "confirmed",
+        "confirmation": {
+          "input_ref": "u_other",
+          "snapshot_ref": "s_other",
+          "user_id": "user_other",
+          "confirmed_at": "2026-10-01T09:00:00+09:00",
+          "role": "content_confirmation"
+        }
+      },
+      "evidence": [
+        {
+          "input_ref": "u_other",
+          "snapshot_ref": "s_other",
+          "roles": [
+            "content",
+            "content_confirmation",
+            "long_term_approval"
+          ]
+        }
+      ],
+      "lifecycle": {
+        "state": "active",
+        "changed_at": "2026-10-01T09:00:01+09:00",
+        "reason": "fixture의 다른 사용자 항목."
+      },
+      "created_at": "2026-10-01T09:00:01+09:00",
+      "lineage": {
+        "operation": "create",
+        "source_memory_id": null,
+        "family_id": "fam_other"
+      }
+    }
+  ],
+  "contexts": [
+    {
+      "contract_type": "context_result",
+      "schema_version": "0.2",
+      "context_id": "ctx_demo",
+      "context_snapshot_id": "ctx_demo_snapshot_3",
+      "user_id": "user_demo",
+      "request_id": "req_demo",
+      "request_revision": 3,
+      "profile_revision": 2,
+      "used": [
+        {
+          "memory_id": "mem_fit_short_exception",
+          "version": 1,
+          "scope_type": "short_term",
+          "score": 3,
+          "rank": 1,
+          "family_representative": true
+        }
+      ],
+      "excluded": [
+        {
+          "memory_id": "mem_image_candidate",
+          "version": 1,
+          "reason": "candidate"
+        },
+        {
+          "memory_id": "mem_wrong_owner",
+          "version": 1,
+          "reason": "wrong_owner"
+        },
+        {
+          "memory_id": "mem_fit_long",
+          "version": 2,
+          "reason": "conflict"
+        }
+      ],
+      "overridden": [
+        "mem_fit_long"
+      ],
+      "truncated": false,
+      "short_limit": 20,
+      "long_limit": 12,
+      "char_budget": 6000,
+      "content_chars": 24,
+      "now": "2026-10-03T09:00:00+09:00",
+      "unresolved": [],
+      "clarifications": [],
+      "created_at": "2026-10-03T09:00:02+09:00"
+    }
+  ],
+  "decisions": [
+    {
+      "contract_type": "intent_decision",
+      "schema_version": "0.2",
+      "source_input_ref": "u_short_exception",
+      "context_snapshot_id": "ctx_demo_snapshot_3",
+      "request_revision": 3,
+      "profile_revision": 2,
+      "status": "ready",
+      "proposals": [
+        {
+          "proposal_id": "p_short_exception",
+          "type": "create",
+          "target_memory_id": null,
+          "depends_on": [],
+          "claim": {
+            "key": "fit",
+            "value": "slim",
+            "polarity": "require",
+            "strength": "hard"
+          },
+          "evidence": [
+            {
+              "input_ref": "u_short_exception",
+              "snapshot_ref": "s_short_exception",
+              "roles": [
+                "content",
+                "content_confirmation"
+              ]
+            }
+          ],
+          "reason": "현재 요청의 예외를 장기 조건과 분리한다."
+        }
+      ],
+      "clarifications": [],
+      "reason": "현재 요청의 명시적 단기 조건을 제안할 수 있다."
+    },
+    {
+      "contract_type": "intent_decision",
+      "schema_version": "0.2",
+      "source_input_ref": "u_image_fit",
+      "context_snapshot_id": "ctx_demo_snapshot_3",
+      "request_revision": 3,
+      "profile_revision": 2,
+      "status": "needs_clarification",
+      "proposals": [],
+      "clarifications": [
+        {
+          "question": "이미지에서 어떤 요소를 선호하셨나요?",
+          "reason_code": "image_aspect_unknown",
+          "memory_ids": [
+            "mem_image_candidate"
+          ]
+        }
+      ],
+      "reason": "이미지 선택만으로 장기 선호를 확정하지 않는다."
+    },
+    {
+      "contract_type": "intent_decision",
+      "schema_version": "0.2",
+      "source_input_ref": "u_delete",
+      "context_snapshot_id": "ctx_demo_snapshot_3",
+      "request_revision": 3,
+      "profile_revision": 2,
+      "status": "no_change",
+      "proposals": [],
+      "clarifications": [],
+      "reason": "삭제는 별도의 관리 batch에서 처리한다."
+    }
+  ],
+  "batches": [
+    {
+      "contract_type": "batch",
+      "schema_version": "0.2",
+      "batch_id": "batch_create",
+      "user_id": "user_demo",
+      "request_id": "req_demo",
+      "expected_request_revision": 3,
+      "profile_revision": 2,
+      "context_snapshot_id": "ctx_demo_snapshot_3",
+      "expected_versions": {},
+      "actions": [
+        {
+          "action_id": "a_create",
+          "type": "create",
+          "target": {
+            "kind": "none"
+          },
+          "depends_on": [],
+          "new_item": {
+            "contract_type": "memory_item",
+            "schema_version": "0.2",
+            "id": "mem_batch_new",
+            "user_id": "user_demo",
+            "version": 1,
+            "content": "차분한 색상을 선호한다.",
+            "tags": [
+              "color"
+            ],
+            "claim": {
+              "key": "color",
+              "value": "muted",
+              "polarity": "prefer",
+              "strength": "soft"
+            },
+            "scope": {
+              "type": "short_term",
+              "request_id": "req_demo"
+            },
+            "applicability": {
+              "condition": null,
+              "predicates": [],
+              "valid_from": null,
+              "valid_until": null
+            },
+            "verification": {
+              "basis": "explicit",
+              "state": "confirmed",
+              "confirmation": {
+                "input_ref": "u_multi",
+                "snapshot_ref": "s_multi_color",
+                "user_id": "user_demo",
+                "confirmed_at": "2026-10-03T09:05:00+09:00",
+                "role": "content_confirmation"
+              }
+            },
+            "evidence": [
+              {
+                "input_ref": "u_multi",
+                "snapshot_ref": "s_multi_color",
+                "roles": [
+                  "content",
+                  "content_confirmation",
+                  "long_term_approval"
+                ]
+              }
+            ],
+            "lifecycle": {
+              "state": "active",
+              "changed_at": "2026-10-03T09:05:01+09:00",
+              "reason": "가상 사용자 확인·선택"
+            },
+            "created_at": "2026-10-03T09:05:01+09:00",
+            "lineage": {
+              "operation": "create",
+              "source_memory_id": null,
+              "family_id": "family_mem_batch_new"
+            }
+          },
+          "evidence": [
+            {
+              "input_ref": "u_multi",
+              "snapshot_ref": "s_multi_color",
+              "roles": [
+                "content",
+                "content_confirmation",
+                "long_term_approval"
+              ]
+            }
+          ],
+          "deletion_scope": []
+        }
+      ],
+      "issued_at": "2026-10-03T09:05:00+09:00",
+      "cause_input_ref": "u_multi"
+    },
+    {
+      "contract_type": "batch",
+      "schema_version": "0.2",
+      "batch_id": "batch_confirm_promote",
+      "user_id": "user_demo",
+      "request_id": "req_demo",
+      "expected_request_revision": 3,
+      "profile_revision": 2,
+      "context_snapshot_id": "ctx_demo_snapshot_3",
+      "expected_versions": {
+        "mem_image_candidate": 1
+      },
+      "actions": [
+        {
+          "action_id": "a_confirm",
+          "type": "confirm",
+          "target": {
+            "kind": "memory",
+            "memory_id": "mem_image_candidate"
+          },
+          "depends_on": [],
+          "new_item": null,
+          "evidence": [
+            {
+              "input_ref": "u_image_approval",
+              "snapshot_ref": "s_image_approval",
+              "roles": [
+                "content_confirmation"
+              ]
+            }
+          ],
+          "deletion_scope": []
+        },
+        {
+          "action_id": "a_promote",
+          "type": "promote",
+          "target": {
+            "kind": "output",
+            "action_id": "a_confirm"
+          },
+          "depends_on": [
+            "a_confirm"
+          ],
+          "new_item": null,
+          "evidence": [
+            {
+              "input_ref": "u_image_approval",
+              "snapshot_ref": "s_image_approval",
+              "roles": [
+                "long_term_approval"
+              ]
+            }
+          ],
+          "deletion_scope": []
+        }
+      ],
+      "issued_at": "2026-10-03T09:02:00+09:00",
+      "cause_input_ref": "u_image_approval"
+    },
+    {
+      "contract_type": "batch",
+      "schema_version": "0.2",
+      "batch_id": "batch_replace",
+      "user_id": "user_demo",
+      "request_id": "req_demo",
+      "expected_request_revision": 3,
+      "profile_revision": 2,
+      "context_snapshot_id": "ctx_demo_snapshot_3",
+      "expected_versions": {
+        "mem_fit_long": 2
+      },
+      "actions": [
+        {
+          "action_id": "a_replace",
+          "type": "replace",
+          "target": {
+            "kind": "memory",
+            "memory_id": "mem_fit_long"
+          },
+          "depends_on": [],
+          "new_item": {
+            "contract_type": "memory_item",
+            "schema_version": "0.2",
+            "id": "mem_fit_regular",
+            "user_id": "user_demo",
+            "version": 1,
+            "content": "레귤러 핏을 선호한다.",
+            "tags": [
+              "fit"
+            ],
+            "claim": {
+              "key": "fit",
+              "value": "regular",
+              "polarity": "prefer",
+              "strength": "soft"
+            },
+            "scope": {
+              "type": "long_term",
+              "approval": {
+                "input_ref": "u_replace",
+                "snapshot_ref": "s_replace",
+                "user_id": "user_demo",
+                "approved_at": "2026-10-03T09:03:00+09:00",
+                "role": "long_term_approval"
+              }
+            },
+            "applicability": {
+              "condition": null,
+              "predicates": [],
+              "valid_from": null,
+              "valid_until": null
+            },
+            "verification": {
+              "basis": "explicit",
+              "state": "confirmed",
+              "confirmation": {
+                "input_ref": "u_replace",
+                "snapshot_ref": "s_replace",
+                "user_id": "user_demo",
+                "confirmed_at": "2026-10-03T09:03:00+09:00",
+                "role": "content_confirmation"
+              }
+            },
+            "evidence": [
+              {
+                "input_ref": "u_replace",
+                "snapshot_ref": "s_replace",
+                "roles": [
+                  "content",
+                  "content_confirmation",
+                  "long_term_approval",
+                  "replacement"
+                ]
+              }
+            ],
+            "lifecycle": {
+              "state": "active",
+              "changed_at": "2026-10-03T09:03:01+09:00",
+              "reason": "사용자가 기존 장기 선호를 새 내용으로 교체했다."
+            },
+            "created_at": "2026-10-03T09:03:01+09:00",
+            "lineage": {
+              "operation": "replace",
+              "source_memory_id": "mem_fit_long",
+              "family_id": "fam_fit_regular"
+            }
+          },
+          "evidence": [
+            {
+              "input_ref": "u_replace",
+              "snapshot_ref": "s_replace",
+              "roles": [
+                "replacement",
+                "content_confirmation",
+                "long_term_approval"
+              ]
+            }
+          ],
+          "deletion_scope": []
+        }
+      ],
+      "issued_at": "2026-10-03T09:03:01+09:00",
+      "cause_input_ref": "u_replace"
+    },
+    {
+      "contract_type": "batch",
+      "schema_version": "0.2",
+      "batch_id": "batch_withdraw",
+      "user_id": "user_demo",
+      "request_id": "req_demo",
+      "expected_request_revision": 3,
+      "profile_revision": 2,
+      "context_snapshot_id": "ctx_demo_snapshot_3",
+      "expected_versions": {
+        "mem_fit_long": 2
+      },
+      "actions": [
+        {
+          "action_id": "a_withdraw",
+          "type": "withdraw",
+          "target": {
+            "kind": "memory",
+            "memory_id": "mem_fit_long"
+          },
+          "depends_on": [],
+          "new_item": null,
+          "evidence": [
+            {
+              "input_ref": "u_withdraw",
+              "snapshot_ref": "s_withdraw",
+              "roles": [
+                "withdrawal"
+              ]
+            }
+          ],
+          "deletion_scope": []
+        }
+      ],
+      "issued_at": "2026-10-03T09:04:00+09:00",
+      "cause_input_ref": "u_withdraw"
+    },
+    {
+      "contract_type": "batch",
+      "schema_version": "0.2",
+      "batch_id": "batch_delete",
+      "user_id": "user_demo",
+      "request_id": null,
+      "expected_request_revision": 3,
+      "profile_revision": 2,
+      "context_snapshot_id": "ctx_demo_snapshot_3",
+      "expected_versions": {
+        "mem_fit_long": 2
+      },
+      "actions": [
+        {
+          "action_id": "a_delete",
+          "type": "delete",
+          "target": {
+            "kind": "memory",
+            "memory_id": "mem_fit_long"
+          },
+          "depends_on": [],
+          "new_item": null,
+          "evidence": [
+            {
+              "input_ref": "u_delete",
+              "snapshot_ref": "s_delete",
+              "roles": [
+                "deletion"
+              ]
+            }
+          ],
+          "deletion_scope": [
+            "memory",
+            "promote_family",
+            "derived_snapshots",
+            "source_spans",
+            "summaries",
+            "indexes",
+            "cache"
+          ]
+        }
+      ],
+      "issued_at": "2026-10-04T09:00:00+09:00",
+      "cause_input_ref": "u_delete"
+    }
+  ],
+  "events": [
+    {
+      "contract_type": "event",
+      "schema_version": "0.2",
+      "event_id": "evt_batch_create",
+      "batch_id": "batch_create",
+      "user_id": "user_demo",
+      "request_id": "req_demo",
+      "committed_at": "2026-10-03T09:05:02+09:00",
+      "change_ids": [
+        "mem_batch_new"
+      ],
+      "changes": [
+        {
+          "memory_id": "mem_batch_new",
+          "operation": "upsert",
+          "before_version": null,
+          "after_version": 1,
+          "after_state": "active",
+          "lineage_operation": "create",
+          "evidence_snapshot_refs": [
+            "s_multi_color"
+          ]
+        }
+      ]
+    },
+    {
+      "contract_type": "event",
+      "schema_version": "0.2",
+      "event_id": "evt_batch_delete",
+      "batch_id": "batch_delete",
+      "user_id": "user_demo",
+      "request_id": null,
+      "committed_at": "2026-10-04T09:00:01+09:00",
+      "change_ids": [
+        "mem_fit_long"
+      ],
+      "changes": [
+        {
+          "memory_id": "mem_fit_long",
+          "operation": "delete",
+          "before_version": 2,
+          "after_version": null,
+          "after_state": null,
+          "lineage_operation": null,
+          "evidence_snapshot_refs": [
+            "s_delete"
+          ]
+        }
+      ]
+    }
+  ],
+  "results": [
+    {
+      "contract_type": "batch_result",
+      "schema_version": "0.2",
+      "result_id": "result_create",
+      "batch_id": "batch_create",
+      "user_id": "user_demo",
+      "status": "accepted",
+      "event_id": "evt_batch_create",
+      "versions": {
+        "mem_batch_new": 1
+      },
+      "error_code": null,
+      "receipt_expires_at": "2026-10-04T09:00:04+09:00"
+    },
+    {
+      "contract_type": "batch_result",
+      "schema_version": "0.2",
+      "result_id": "result_stale",
+      "batch_id": "batch_replace",
+      "user_id": "user_demo",
+      "status": "rejected",
+      "event_id": null,
+      "versions": {},
+      "error_code": "stale_context",
+      "receipt_expires_at": "2026-10-04T09:03:00+09:00"
+    }
+  ],
+  "negative_fixtures": [
+    {
+      "id": "decision_unknown_input",
+      "mutations": [
+        {
+          "path": [
+            "decisions",
+            0,
+            "source_input_ref"
+          ],
+          "value": "bogus"
+        }
+      ],
+      "diagnostic": "unknown evidence input"
+    },
+    {
+      "id": "decision_unknown_context",
+      "mutations": [
+        {
+          "path": [
+            "decisions",
+            0,
+            "context_snapshot_id"
+          ],
+          "value": "bogus"
+        }
+      ],
+      "diagnostic": "decision context"
+    },
+    {
+      "id": "decision_bad_target",
+      "mutations": [
+        {
+          "path": [
+            "decisions",
+            0,
+            "proposals",
+            0,
+            "target_memory_id"
+          ],
+          "value": "missing"
+        }
+      ],
+      "diagnostic": "decision target owner"
+    },
+    {
+      "id": "action_unknown_snapshot",
+      "mutations": [
+        {
+          "path": [
+            "batches",
+            0,
+            "actions",
+            0,
+            "evidence",
+            0,
+            "snapshot_ref"
+          ],
+          "value": "bogus"
+        }
+      ],
+      "diagnostic": "unknown evidence snapshot"
+    },
+    {
+      "id": "delete_role_forged",
+      "mutations": [
+        {
+          "path": [
+            "batches",
+            4,
+            "actions",
+            0,
+            "evidence"
+          ],
+          "value": [
+            {
+              "input_ref": "u_short_exception",
+              "snapshot_ref": "s_short_exception",
+              "roles": [
+                "deletion"
+              ]
+            }
+          ]
+        }
+      ],
+      "diagnostic": "evidence unauthorized role"
+    },
+    {
+      "id": "batch_foreign_request",
+      "mutations": [
+        {
+          "path": [
+            "batches",
+            0,
+            "user_id"
+          ],
+          "value": "user_other"
+        }
+      ],
+      "diagnostic": "batch context owner"
+    },
+    {
+      "id": "event_version_99",
+      "mutations": [
+        {
+          "path": [
+            "events",
+            0,
+            "changes",
+            0,
+            "after_version"
+          ],
+          "value": 99
+        }
+      ],
+      "diagnostic": "event committed changes"
+    },
+    {
+      "id": "result_version_99",
+      "mutations": [
+        {
+          "path": [
+            "results",
+            0,
+            "versions"
+          ],
+          "value": {
+            "mem_batch_new": 99
+          }
+        }
+      ],
+      "diagnostic": "result committed versions"
+    },
+    {
+      "id": "duplicate_batch_id",
+      "mutations": [
+        {
+          "path": [
+            "batches",
+            1,
+            "batch_id"
+          ],
+          "value": "batch_create"
+        }
+      ],
+      "diagnostic": "duplicate batch_id"
+    },
+    {
+      "id": "evidence_bad_request",
+      "mutations": [
+        {
+          "path": [
+            "evidence",
+            0,
+            "request_id"
+          ],
+          "value": "missing"
+        }
+      ],
+      "diagnostic": "evidence request owner"
+    },
+    {
+      "id": "bad_lineage",
+      "mutations": [
+        {
+          "path": [
+            "memories",
+            0,
+            "lineage"
+          ],
+          "value": {
+            "operation": "replace",
+            "source_memory_id": "missing",
+            "family_id": "bad"
+          }
+        }
+      ],
+      "diagnostic": "lineage source missing"
+    },
+    {
+      "id": "confirmation_not_authorized",
+      "mutations": [
+        {
+          "path": [
+            "evidence",
+            0,
+            "snapshot",
+            "authorized_roles"
+          ],
+          "value": [
+            "content"
+          ]
+        }
+      ],
+      "diagnostic": "confirmation role missing"
+    },
+    {
+      "id": "long_approval_wrong_content",
+      "mutations": [
+        {
+          "path": [
+            "evidence",
+            1,
+            "snapshot",
+            "content"
+          ],
+          "value": "다른 내용"
+        }
+      ],
+      "diagnostic": "approval payload mismatch"
+    },
+    {
+      "id": "candidate_active_without_confirmation",
+      "mutations": [
+        {
+          "path": [
+            "memories",
+            2,
+            "lifecycle",
+            "state"
+          ],
+          "value": "active"
+        }
+      ],
+      "diagnostic": "schema invalid"
+    },
+    {
+      "id": "bad_request_retention",
+      "mutations": [
+        {
+          "path": [
+            "requests",
+            0,
+            "retention_until"
+          ],
+          "value": "2026-12-31T09:00:00+09:00"
+        }
+      ],
+      "diagnostic": "retention formula"
+    },
+    {
+      "id": "invalid_timestamp",
+      "mutations": [
+        {
+          "path": [
+            "events",
+            0,
+            "committed_at"
+          ],
+          "value": "not-date"
+        }
+      ],
+      "diagnostic": "schema invalid"
+    },
+    {
+      "id": "context_wrong_scope",
+      "mutations": [
+        {
+          "path": [
+            "contexts",
+            0,
+            "used",
+            0,
+            "scope_type"
+          ],
+          "value": "long_term"
+        }
+      ],
+      "diagnostic": "context scope"
+    },
+    {
+      "id": "context_false_representative",
+      "mutations": [
+        {
+          "path": [
+            "contexts",
+            0,
+            "used",
+            0,
+            "family_representative"
+          ],
+          "value": false
+        }
+      ],
+      "diagnostic": "context scope"
+    },
+    {
+      "id": "create_existing_id",
+      "mutations": [
+        {
+          "path": [
+            "batches",
+            0,
+            "actions",
+            0,
+            "new_item",
+            "id"
+          ],
+          "value": "mem_fit_long"
+        }
+      ],
+      "diagnostic": "new identity/version"
+    },
+    {
+      "id": "CAS_stale",
+      "mutations": [
+        {
+          "path": [
+            "batches",
+            2,
+            "expected_versions",
+            "mem_fit_long"
+          ],
+          "value": 1
+        }
+      ],
+      "diagnostic": "stale version"
+    },
+    {
+      "id": "profile_stale",
+      "mutations": [
+        {
+          "path": [
+            "batches",
+            0,
+            "profile_revision"
+          ],
+          "value": 1
+        }
+      ],
+      "diagnostic": "stale profile"
+    },
+    {
+      "id": "request_revision_stale",
+      "mutations": [
+        {
+          "path": [
+            "batches",
+            0,
+            "expected_request_revision"
+          ],
+          "value": 1
+        }
+      ],
+      "diagnostic": "stale request revision"
+    },
+    {
+      "id": "new_unknown_confirm_ref",
+      "mutations": [
+        {
+          "path": [
+            "batches",
+            0,
+            "actions",
+            0,
+            "new_item",
+            "verification",
+            "confirmation",
+            "snapshot_ref"
+          ],
+          "value": "missing"
+        }
+      ],
+      "diagnostic": "unknown evidence snapshot"
+    },
+    {
+      "id": "period_reversed",
+      "mutations": [
+        {
+          "path": [
+            "memories",
+            0,
+            "applicability",
+            "valid_from"
+          ],
+          "value": "2026-12-01T00:00:00+09:00"
+        },
+        {
+          "path": [
+            "memories",
+            0,
+            "applicability",
+            "valid_until"
+          ],
+          "value": "2026-11-01T00:00:00+09:00"
+        }
+      ],
+      "diagnostic": "invalid period"
+    },
+    {
+      "id": "displayed_family_changed",
+      "mutations": [
+        {
+          "path": [
+            "evidence",
+            4,
+            "snapshot",
+            "target_memory_ids"
+          ],
+          "value": []
+        }
+      ],
+      "diagnostic": "displayed family mismatch"
+    },
+    {
+      "id": "structured_claim_changed",
+      "mutations": [
+        {
+          "path": [
+            "memories",
+            0,
+            "claim",
+            "value"
+          ],
+          "value": "slim"
+        }
+      ],
+      "diagnostic": "claim snapshot mismatch"
+    },
+    {
+      "id": "past_approval_used_as_current",
+      "mutations": [
+        {
+          "path": [
+            "batches",
+            0,
+            "cause_input_ref"
+          ],
+          "value": "u_fit_approval"
+        }
+      ],
+      "diagnostic": "current input mismatch"
+    },
+    {
+      "id": "profile_foreign",
+      "mutations": [
+        {
+          "path": [
+            "profile",
+            "user_id"
+          ],
+          "value": "user_other"
+        }
+      ],
+      "diagnostic": "profile owner"
+    },
+    {
+      "id": "new_short_wrong_request",
+      "mutations": [
+        {
+          "path": [
+            "batches",
+            0,
+            "actions",
+            0,
+            "new_item",
+            "scope",
+            "request_id"
+          ],
+          "value": "req_clone"
+        }
+      ],
+      "diagnostic": "new item request boundary"
+    },
+    {
+      "id": "proposal_claim_forged",
+      "mutations": [
+        {
+          "path": [
+            "decisions",
+            0,
+            "proposals",
+            0,
+            "claim",
+            "value"
+          ],
+          "value": "forged"
+        }
+      ],
+      "diagnostic": "proposal claim snapshot mismatch"
+    },
+    {
+      "id": "unproven_redacted_parent",
+      "mutations": [
+        {
+          "path": [
+            "memories",
+            0,
+            "lineage"
+          ],
+          "value": {
+            "operation": "replace",
+            "source_memory_id": null,
+            "family_id": "fam_fit",
+            "source_redacted": true,
+            "source_redaction_id": "bogus"
+          }
+        }
+      ],
+      "diagnostic": "unproven source redaction"
+    }
+  ],
+  "cases": [
+    {
+      "case_id": "today_overrides_base",
+      "covers": [
+        "C01"
+      ],
+      "input": {
+        "kind": "context",
+        "request_id": "req_demo",
+        "now": "2026-10-03T09:00:00+09:00",
+        "memory_ids": [
+          "mem_fit_long",
+          "mem_fit_short_exception"
+        ]
+      },
+      "expected": {
+        "used": [
+          "mem_fit_short_exception"
+        ],
+        "excluded": {
+          "mem_fit_long": "conflict"
+        },
+        "overridden": [
+          "mem_fit_long"
+        ],
+        "unresolved": [],
+        "truncated": false
+      }
+    },
+    {
+      "case_id": "new_request_drops_short",
+      "covers": [
+        "C01",
+        "C02"
+      ],
+      "input": {
+        "kind": "context",
+        "request_id": "req_clone",
+        "now": "2026-10-03T09:00:00+09:00",
+        "memory_ids": [
+          "mem_fit_long",
+          "mem_fit_short_exception"
+        ]
+      },
+      "expected": {
+        "used": [
+          "mem_fit_long"
+        ],
+        "excluded": {
+          "mem_fit_short_exception": "wrong_request"
+        },
+        "overridden": [],
+        "unresolved": [],
+        "truncated": false
+      }
+    },
+    {
+      "case_id": "closed_request",
+      "covers": [
+        "C02"
+      ],
+      "input": {
+        "kind": "context",
+        "request_id": "req_demo",
+        "now": "2026-10-03T09:00:00+09:00",
+        "memory_ids": [
+          "mem_fit_long",
+          "mem_fit_short_exception"
+        ],
+        "mutations": [
+          {
+            "path": [
+              "requests",
+              "req_demo",
+              "status"
+            ],
+            "value": "closed"
+          }
+        ]
+      },
+      "expected": {
+        "used": [],
+        "excluded": {
+          "mem_fit_long": "request_closed",
+          "mem_fit_short_exception": "request_closed"
+        },
+        "overridden": [],
+        "unresolved": [],
+        "truncated": false
+      }
+    },
+    {
+      "case_id": "period_end_exclusive",
+      "covers": [
+        "C02",
+        "C10"
+      ],
+      "input": {
+        "kind": "context",
+        "request_id": "req_demo",
+        "now": "2026-10-03T09:00:00+09:00",
+        "memory_ids": [
+          "mem_fit_long",
+          "mem_fit_short_exception"
+        ],
+        "mutations": [
+          {
+            "path": [
+              "memories",
+              "mem_fit_short_exception",
+              "applicability",
+              "valid_until"
+            ],
+            "value": "2026-10-03T09:00:00+09:00"
+          }
+        ]
+      },
+      "expected": {
+        "used": [
+          "mem_fit_long"
+        ],
+        "excluded": {
+          "mem_fit_short_exception": "expired"
+        },
+        "overridden": [],
+        "unresolved": [],
+        "truncated": false
+      }
+    },
+    {
+      "case_id": "period_start_future",
+      "covers": [
+        "C02"
+      ],
+      "input": {
+        "kind": "context",
+        "request_id": "req_demo",
+        "now": "2026-10-03T09:00:00+09:00",
+        "memory_ids": [
+          "mem_fit_long",
+          "mem_fit_short_exception"
+        ],
+        "mutations": [
+          {
+            "path": [
+              "memories",
+              "mem_fit_short_exception",
+              "applicability",
+              "valid_from"
+            ],
+            "value": "2026-10-04T00:00:00+09:00"
+          }
+        ]
+      },
+      "expected": {
+        "used": [
+          "mem_fit_long"
+        ],
+        "excluded": {
+          "mem_fit_short_exception": "expired"
+        },
+        "overridden": [],
+        "unresolved": [],
+        "truncated": false
+      }
+    },
+    {
+      "case_id": "candidate_not_recommendation",
+      "covers": [
+        "C04",
+        "C10"
+      ],
+      "input": {
+        "kind": "context",
+        "request_id": "req_demo",
+        "now": "2026-10-03T09:00:00+09:00",
+        "memory_ids": [
+          "mem_image_candidate"
+        ]
+      },
+      "expected": {
+        "used": [],
+        "excluded": {
+          "mem_image_candidate": "candidate"
+        },
+        "overridden": [],
+        "unresolved": [],
+        "truncated": false
+      }
+    },
+    {
+      "case_id": "other_user_excluded",
+      "covers": [
+        "C10"
+      ],
+      "input": {
+        "kind": "context",
+        "request_id": "req_demo",
+        "now": "2026-10-03T09:00:00+09:00",
+        "memory_ids": [
+          "mem_wrong_owner"
+        ]
+      },
+      "expected": {
+        "used": [],
+        "excluded": {
+          "mem_wrong_owner": "wrong_owner"
+        },
+        "overridden": [],
+        "unresolved": [],
+        "truncated": false
+      }
+    },
+    {
+      "case_id": "withdrawn_excluded",
+      "covers": [
+        "C10",
+        "C12"
+      ],
+      "input": {
+        "kind": "context",
+        "request_id": "req_demo",
+        "now": "2026-10-03T09:00:00+09:00",
+        "memory_ids": [
+          "mem_fit_long"
+        ],
+        "mutations": [
+          {
+            "path": [
+              "memories",
+              "mem_fit_long",
+              "lifecycle",
+              "state"
+            ],
+            "value": "withdrawn"
+          }
+        ]
+      },
+      "expected": {
+        "used": [],
+        "excluded": {
+          "mem_fit_long": "withdrawn"
+        },
+        "overridden": [],
+        "unresolved": [],
+        "truncated": false
+      }
+    },
+    {
+      "case_id": "superseded_excluded",
+      "covers": [
+        "C08",
+        "C10"
+      ],
+      "input": {
+        "kind": "context",
+        "request_id": "req_demo",
+        "now": "2026-10-03T09:00:00+09:00",
+        "memory_ids": [
+          "mem_fit_long"
+        ],
+        "mutations": [
+          {
+            "path": [
+              "memories",
+              "mem_fit_long",
+              "lifecycle",
+              "state"
+            ],
+            "value": "superseded"
+          }
+        ]
+      },
+      "expected": {
+        "used": [],
+        "excluded": {
+          "mem_fit_long": "superseded"
+        },
+        "overridden": [],
+        "unresolved": [],
+        "truncated": false
+      }
+    },
+    {
+      "case_id": "unconfirmed_excluded",
+      "covers": [
+        "C10"
+      ],
+      "input": {
+        "kind": "context",
+        "request_id": "req_demo",
+        "now": "2026-10-03T09:00:00+09:00",
+        "memory_ids": [
+          "mem_fit_short_exception"
+        ],
+        "mutations": [
+          {
+            "path": [
+              "memories",
+              "mem_fit_short_exception",
+              "verification",
+              "state"
+            ],
+            "value": "unconfirmed"
+          }
+        ]
+      },
+      "expected": {
+        "used": [],
+        "excluded": {
+          "mem_fit_short_exception": "not_confirmed"
+        },
+        "overridden": [],
+        "unresolved": [],
+        "truncated": false
+      }
+    },
+    {
+      "case_id": "request_exclusion_preserves_long",
+      "covers": [
+        "C08"
+      ],
+      "input": {
+        "kind": "context",
+        "request_id": "req_demo",
+        "now": "2026-10-03T09:00:00+09:00",
+        "memory_ids": [
+          "mem_fit_long"
+        ],
+        "query": {
+          "exclude_memory_ids": [
+            "mem_fit_long"
+          ]
+        }
+      },
+      "expected": {
+        "used": [],
+        "excluded": {
+          "mem_fit_long": "request_excluded"
+        },
+        "overridden": [],
+        "unresolved": [],
+        "truncated": false
+      }
+    },
+    {
+      "case_id": "empty_profile",
+      "covers": [
+        "C03",
+        "C09"
+      ],
+      "input": {
+        "kind": "context",
+        "request_id": "req_demo",
+        "now": "2026-10-03T09:00:00+09:00",
+        "memory_ids": []
+      },
+      "expected": {
+        "used": [],
+        "excluded": {},
+        "overridden": [],
+        "unresolved": [],
+        "truncated": false
+      }
+    },
+    {
+      "case_id": "irrelevant_long",
+      "covers": [
+        "C09"
+      ],
+      "input": {
+        "kind": "context",
+        "request_id": "req_demo",
+        "now": "2026-10-03T09:00:00+09:00",
+        "memory_ids": [
+          "mem_fit_long"
+        ],
+        "query": {
+          "target_keys": [
+            "color"
+          ],
+          "tags": [
+            "color"
+          ]
+        }
+      },
+      "expected": {
+        "used": [],
+        "excluded": {
+          "mem_fit_long": "irrelevant"
+        },
+        "overridden": [],
+        "unresolved": [],
+        "truncated": false
+      }
+    },
+    {
+      "case_id": "unknown_condition",
+      "covers": [
+        "C09"
+      ],
+      "input": {
+        "kind": "context",
+        "request_id": "req_demo",
+        "now": "2026-10-03T09:00:00+09:00",
+        "memory_ids": [
+          "mem_fit_long"
+        ],
+        "mutations": [
+          {
+            "path": [
+              "memories",
+              "mem_fit_long",
+              "applicability",
+              "predicates"
+            ],
+            "value": [
+              {
+                "field": "occasion",
+                "value": "meeting"
+              }
+            ]
+          }
+        ]
+      },
+      "expected": {
+        "used": [],
+        "excluded": {
+          "mem_fit_long": "condition_unknown"
+        },
+        "overridden": [],
+        "unresolved": [
+          "condition:mem_fit_long"
+        ],
+        "truncated": false
+      }
+    },
+    {
+      "case_id": "mismatching_condition",
+      "covers": [
+        "C09"
+      ],
+      "input": {
+        "kind": "context",
+        "request_id": "req_demo",
+        "now": "2026-10-03T09:00:00+09:00",
+        "memory_ids": [
+          "mem_fit_long"
+        ],
+        "query": {
+          "facts": {
+            "occasion": "everyday"
+          }
+        },
+        "mutations": [
+          {
+            "path": [
+              "memories",
+              "mem_fit_long",
+              "applicability",
+              "predicates"
+            ],
+            "value": [
+              {
+                "field": "occasion",
+                "value": "meeting"
+              }
+            ]
+          }
+        ]
+      },
+      "expected": {
+        "used": [],
+        "excluded": {
+          "mem_fit_long": "irrelevant"
+        },
+        "overridden": [],
+        "unresolved": [],
+        "truncated": false
+      }
+    },
+    {
+      "case_id": "matching_condition",
+      "covers": [
+        "C09"
+      ],
+      "input": {
+        "kind": "context",
+        "request_id": "req_demo",
+        "now": "2026-10-03T09:00:00+09:00",
+        "memory_ids": [
+          "mem_fit_long"
+        ],
+        "query": {
+          "facts": {
+            "occasion": "meeting"
+          }
+        },
+        "mutations": [
+          {
+            "path": [
+              "memories",
+              "mem_fit_long",
+              "applicability",
+              "predicates"
+            ],
+            "value": [
+              {
+                "field": "occasion",
+                "value": "meeting"
+              }
+            ]
+          }
+        ]
+      },
+      "expected": {
+        "used": [
+          "mem_fit_long"
+        ],
+        "excluded": {},
+        "overridden": [],
+        "unresolved": [],
+        "truncated": false
+      }
+    },
+    {
+      "case_id": "unmapped_long",
+      "covers": [
+        "C09"
+      ],
+      "input": {
+        "kind": "context",
+        "request_id": "req_demo",
+        "now": "2026-10-03T09:00:00+09:00",
+        "memory_ids": [
+          "mem_fit_long"
+        ],
+        "mutations": [
+          {
+            "path": [
+              "memories",
+              "mem_fit_long",
+              "claim",
+              "key"
+            ],
+            "value": "free_text"
+          }
+        ]
+      },
+      "expected": {
+        "used": [],
+        "excluded": {
+          "mem_fit_long": "condition_unknown"
+        },
+        "overridden": [],
+        "unresolved": [
+          "claim:mem_fit_long"
+        ],
+        "truncated": false
+      }
+    },
+    {
+      "case_id": "same_scope_conflict",
+      "covers": [
+        "C09"
+      ],
+      "input": {
+        "kind": "context",
+        "request_id": "req_demo",
+        "now": "2026-10-03T09:00:00+09:00",
+        "memory_ids": [
+          "mem_fit_long",
+          "mem_fit_short_exception"
+        ],
+        "mutations": [
+          {
+            "path": [
+              "memories",
+              "mem_fit_short_exception",
+              "scope"
+            ],
+            "value": {
+              "type": "long_term",
+              "approval": {
+                "input_ref": "u_fit_approval",
+                "snapshot_ref": "s_fit_approval",
+                "user_id": "user_demo",
+                "approved_at": "2026-10-01T09:01:00+09:00",
+                "role": "long_term_approval"
+              }
+            }
+          },
+          {
+            "path": [
+              "memories",
+              "mem_fit_short_exception",
+              "applicability",
+              "condition"
+            ],
+            "value": null
+          }
+        ]
+      },
+      "expected": {
+        "used": [],
+        "excluded": {
+          "mem_fit_long": "conflict",
+          "mem_fit_short_exception": "conflict"
+        },
+        "overridden": [],
+        "unresolved": [
+          "conflicting_claims"
+        ],
+        "truncated": false
+      }
+    },
+    {
+      "case_id": "natural_condition_unmapped",
+      "covers": [
+        "C09"
+      ],
+      "input": {
+        "kind": "context",
+        "request_id": "req_demo",
+        "now": "2026-10-03T09:00:00+09:00",
+        "memory_ids": [
+          "mem_fit_long"
+        ],
+        "mutations": [
+          {
+            "path": [
+              "memories",
+              "mem_fit_long",
+              "applicability",
+              "condition"
+            ],
+            "value": "고객 미팅"
+          }
+        ]
+      },
+      "expected": {
+        "used": [],
+        "excluded": {
+          "mem_fit_long": "condition_unknown"
+        },
+        "overridden": [],
+        "unresolved": [
+          "condition:mem_fit_long"
+        ],
+        "truncated": false
+      }
+    },
+    {
+      "case_id": "request_retention_end",
+      "covers": [
+        "C02",
+        "C10"
+      ],
+      "input": {
+        "kind": "context",
+        "request_id": "req_demo",
+        "now": "2026-11-02T09:00:00+09:00",
+        "memory_ids": [
+          "mem_fit_long",
+          "mem_fit_short_exception"
+        ]
+      },
+      "expected": {
+        "used": [],
+        "excluded": {
+          "mem_fit_long": "expired",
+          "mem_fit_short_exception": "expired"
+        },
+        "overridden": [],
+        "unresolved": [],
+        "truncated": false
+      }
+    },
+    {
+      "case_id": "long_consent_expiry",
+      "covers": [
+        "C10"
+      ],
+      "input": {
+        "kind": "context",
+        "request_id": "req_demo",
+        "now": "2027-10-01T09:01:00+09:00",
+        "memory_ids": [
+          "mem_fit_long"
+        ],
+        "mutations": [
+          {
+            "path": [
+              "requests",
+              "req_demo",
+              "retention_until"
+            ],
+            "value": "2027-11-01T00:00:00+09:00"
+          }
+        ]
+      },
+      "expected": {
+        "used": [],
+        "excluded": {
+          "mem_fit_long": "expired"
+        },
+        "overridden": [],
+        "unresolved": [],
+        "truncated": false
+      }
+    },
+    {
+      "case_id": "direct_content_only",
+      "covers": [
+        "C03",
+        "C05"
+      ],
+      "input": {
+        "kind": "interpret",
+        "snapshot_ref": "s_fit_content",
+        "wanted_scope": "short_term",
+        "origin": "current"
+      },
+      "expected": {
+        "status": "ready",
+        "scope": "short_term",
+        "question": false
+      }
+    },
+    {
+      "case_id": "content_is_not_long_consent",
+      "covers": [
+        "C05"
+      ],
+      "input": {
+        "kind": "interpret",
+        "snapshot_ref": "s_fit_content",
+        "wanted_scope": "long_term",
+        "origin": "current"
+      },
+      "expected": {
+        "status": "needs_clarification",
+        "scope": null,
+        "question": true
+      }
+    },
+    {
+      "case_id": "image_selection_uncertain",
+      "covers": [
+        "C03",
+        "C04"
+      ],
+      "input": {
+        "kind": "interpret",
+        "snapshot_ref": "s_image_fit",
+        "wanted_scope": "short_term",
+        "origin": "current"
+      },
+      "expected": {
+        "status": "needs_clarification",
+        "scope": null,
+        "question": true
+      }
+    },
+    {
+      "case_id": "image_followup_confirmation",
+      "covers": [
+        "C04"
+      ],
+      "input": {
+        "kind": "interpret",
+        "snapshot_ref": "s_image_approval",
+        "wanted_scope": "short_term",
+        "origin": "current"
+      },
+      "expected": {
+        "status": "ready",
+        "scope": "short_term",
+        "question": false
+      }
+    },
+    {
+      "case_id": "explicit_forward_consent",
+      "covers": [
+        "C05"
+      ],
+      "input": {
+        "kind": "interpret",
+        "snapshot_ref": "s_multi_fit",
+        "wanted_scope": "long_term",
+        "origin": "current"
+      },
+      "expected": {
+        "status": "ready",
+        "scope": "long_term",
+        "question": false
+      }
+    },
+    {
+      "case_id": "quoted_not_consent",
+      "covers": [
+        "C05"
+      ],
+      "input": {
+        "kind": "interpret",
+        "snapshot_ref": "s_multi_fit",
+        "wanted_scope": "long_term",
+        "origin": "quote"
+      },
+      "expected": {
+        "status": "no_change",
+        "scope": null,
+        "question": false
+      }
+    },
+    {
+      "case_id": "past_not_reconsent",
+      "covers": [
+        "C05",
+        "C12"
+      ],
+      "input": {
+        "kind": "interpret",
+        "snapshot_ref": "s_multi_fit",
+        "wanted_scope": "long_term",
+        "origin": "past"
+      },
+      "expected": {
+        "status": "no_change",
+        "scope": null,
+        "question": false
+      }
+    },
+    {
+      "case_id": "model_not_consent",
+      "covers": [
+        "C05"
+      ],
+      "input": {
+        "kind": "interpret",
+        "snapshot_ref": "s_multi_fit",
+        "wanted_scope": "long_term",
+        "origin": "model"
+      },
+      "expected": {
+        "status": "no_change",
+        "scope": null,
+        "question": false
+      }
+    },
+    {
+      "case_id": "subset_selection",
+      "covers": [
+        "C06"
+      ],
+      "input": {
+        "kind": "choice",
+        "selected_ids": [
+          "fit"
+        ],
+        "confirmed": true,
+        "closed": false
+      },
+      "expected": {
+        "selected": [
+          "fit"
+        ],
+        "long_term_write": true
+      }
+    },
+    {
+      "case_id": "all_unchecked",
+      "covers": [
+        "C06"
+      ],
+      "input": {
+        "kind": "choice",
+        "selected_ids": [],
+        "confirmed": true,
+        "closed": false
+      },
+      "expected": {
+        "selected": [],
+        "long_term_write": false
+      }
+    },
+    {
+      "case_id": "only_this_request",
+      "covers": [
+        "C06"
+      ],
+      "input": {
+        "kind": "choice",
+        "selected_ids": [
+          "fit"
+        ],
+        "confirmed": false,
+        "closed": false
+      },
+      "expected": {
+        "selected": [],
+        "long_term_write": false
+      }
+    },
+    {
+      "case_id": "modal_close",
+      "covers": [
+        "C06"
+      ],
+      "input": {
+        "kind": "choice",
+        "selected_ids": [
+          "fit"
+        ],
+        "confirmed": true,
+        "closed": true
+      },
+      "expected": {
+        "selected": [],
+        "long_term_write": false
+      }
+    },
+    {
+      "case_id": "close_request",
+      "covers": [
+        "C02"
+      ],
+      "input": {
+        "kind": "request",
+        "request_id": "req_demo",
+        "user_id": "user_demo",
+        "now": "2026-10-03T09:00:00+09:00",
+        "action": "close",
+        "confirmed": true
+      },
+      "expected": {
+        "id": "req_demo",
+        "status": "closed",
+        "revision": 4
+      }
+    },
+    {
+      "case_id": "cancel_request",
+      "covers": [
+        "C02"
+      ],
+      "input": {
+        "kind": "request",
+        "request_id": "req_demo",
+        "user_id": "user_demo",
+        "now": "2026-10-03T09:00:00+09:00",
+        "action": "cancel",
+        "confirmed": true
+      },
+      "expected": {
+        "id": "req_demo",
+        "status": "cancelled",
+        "revision": 4
+      }
+    },
+    {
+      "case_id": "resume_same_request",
+      "covers": [
+        "C02"
+      ],
+      "input": {
+        "kind": "request",
+        "request_id": "req_demo",
+        "user_id": "user_demo",
+        "now": "2026-10-03T09:00:00+09:00",
+        "action": "resume",
+        "confirmed": true
+      },
+      "expected": {
+        "id": "req_demo",
+        "status": "open",
+        "revision": 4
+      }
+    },
+    {
+      "case_id": "expired_resume",
+      "covers": [
+        "C02"
+      ],
+      "input": {
+        "kind": "request",
+        "request_id": "req_closed",
+        "user_id": "user_demo",
+        "now": "2026-10-03T09:00:00+09:00",
+        "action": "resume",
+        "confirmed": true
+      },
+      "expected": {
+        "error": "request expired"
+      }
+    },
+    {
+      "case_id": "selected_clone",
+      "covers": [
+        "C02"
+      ],
+      "input": {
+        "kind": "request",
+        "request_id": "req_demo",
+        "user_id": "user_demo",
+        "now": "2026-10-03T09:00:00+09:00",
+        "action": "clone",
+        "confirmed": true,
+        "selected_ids": [
+          "mem_fit_short_exception"
+        ],
+        "new_id": "req_new_copy"
+      },
+      "expected": {
+        "id": "req_new_copy",
+        "source_ids": [
+          "mem_fit_short_exception"
+        ],
+        "copied_approval": false
+      }
+    },
+    {
+      "case_id": "request_retention_formula",
+      "covers": [
+        "C02",
+        "C12"
+      ],
+      "input": {
+        "kind": "retention",
+        "request_id": "req_demo"
+      },
+      "expected": {
+        "until": "2026-11-02T09:00:00+09:00"
+      }
+    },
+    {
+      "case_id": "create_current_color",
+      "covers": [
+        "C03",
+        "C06"
+      ],
+      "input": {
+        "kind": "batch",
+        "batch_id": "batch_create",
+        "observe_ids": [
+          "mem_batch_new"
+        ]
+      },
+      "expected": {
+        "changed": {
+          "mem_batch_new": 1
+        },
+        "states": {
+          "mem_batch_new": "active"
+        },
+        "absent": [],
+        "artifacts": [
+          "cache_fit",
+          "source_fit_span",
+          "summary_fit",
+          "unrelated_artifact"
+        ],
+        "evidence_absent": []
+      }
+    },
+    {
+      "case_id": "confirmed_candidate_promoted",
+      "covers": [
+        "C04",
+        "C05"
+      ],
+      "input": {
+        "kind": "batch",
+        "batch_id": "batch_confirm_promote",
+        "observe_ids": [
+          "mem_image_candidate",
+          "derived::batch_confirm_promote::a_promote"
+        ]
+      },
+      "expected": {
+        "changed": {
+          "mem_image_candidate": 2,
+          "derived::batch_confirm_promote::a_promote": 1
+        },
+        "states": {
+          "mem_image_candidate": "active",
+          "derived::batch_confirm_promote::a_promote": "active"
+        },
+        "absent": [],
+        "artifacts": [
+          "cache_fit",
+          "source_fit_span",
+          "summary_fit",
+          "unrelated_artifact"
+        ],
+        "evidence_absent": []
+      }
+    },
+    {
+      "case_id": "new_long_meaning_replaces",
+      "covers": [
+        "C08"
+      ],
+      "input": {
+        "kind": "batch",
+        "batch_id": "batch_replace",
+        "observe_ids": [
+          "mem_fit_long",
+          "mem_fit_regular"
+        ]
+      },
+      "expected": {
+        "changed": {
+          "mem_fit_long": 3,
+          "mem_fit_regular": 1
+        },
+        "states": {
+          "mem_fit_long": "superseded",
+          "mem_fit_regular": "active"
+        },
+        "absent": [],
+        "artifacts": [
+          "cache_fit",
+          "source_fit_span",
+          "summary_fit",
+          "unrelated_artifact"
+        ],
+        "evidence_absent": []
+      }
+    },
+    {
+      "case_id": "withdraw_use_not_delete",
+      "covers": [
+        "C12"
+      ],
+      "input": {
+        "kind": "batch",
+        "batch_id": "batch_withdraw",
+        "observe_ids": [
+          "mem_fit_long"
+        ]
+      },
+      "expected": {
+        "changed": {
+          "mem_fit_long": 3
+        },
+        "states": {
+          "mem_fit_long": "withdrawn"
+        },
+        "absent": [],
+        "artifacts": [
+          "cache_fit",
+          "source_fit_span",
+          "summary_fit",
+          "unrelated_artifact"
+        ],
+        "evidence_absent": []
+      }
+    },
+    {
+      "case_id": "delete_canonical_and_derived",
+      "covers": [
+        "C12"
+      ],
+      "input": {
+        "kind": "batch",
+        "batch_id": "batch_delete",
+        "observe_absent": [
+          "mem_fit_long"
+        ],
+        "observe_evidence_absent": [
+          "s_fit_content",
+          "s_fit_approval"
+        ]
+      },
+      "expected": {
+        "changed": {
+          "mem_fit_long": null
+        },
+        "states": {},
+        "absent": [
+          "mem_fit_long"
+        ],
+        "artifacts": [
+          "unrelated_artifact"
+        ],
+        "evidence_absent": [
+          "s_fit_approval",
+          "s_fit_content"
+        ]
+      }
+    },
+    {
+      "case_id": "atomic_second_action_failure",
+      "covers": [
+        "C11"
+      ],
+      "input": {
+        "kind": "batch",
+        "batch_id": "batch_confirm_promote",
+        "fail_after": 1
+      },
+      "expected": {
+        "error": "injected storage failure",
+        "rolled_back": true
+      }
+    },
+    {
+      "case_id": "same_payload_replay",
+      "covers": [
+        "C11"
+      ],
+      "input": {
+        "kind": "batch",
+        "batch_id": "batch_create",
+        "replay": true
+      },
+      "expected": {
+        "replayed": true,
+        "event_count": 1,
+        "changed": {
+          "mem_batch_new": 1
+        }
+      }
+    },
+    {
+      "case_id": "different_payload_same_id",
+      "covers": [
+        "C11"
+      ],
+      "input": {
+        "kind": "batch",
+        "batch_id": "batch_create",
+        "replay": true,
+        "replay_mutations": [
+          {
+            "path": [
+              "actions",
+              0,
+              "action_id"
+            ],
+            "value": "different"
+          }
+        ]
+      },
+      "expected": {
+        "error": "idempotency conflict",
+        "event_count": 1,
+        "changed": {
+          "mem_batch_new": 1
+        }
+      }
+    },
+    {
+      "case_id": "stale_item_version",
+      "covers": [
+        "C11"
+      ],
+      "input": {
+        "kind": "batch",
+        "batch_id": "batch_replace",
+        "batch_mutations": [
+          {
+            "path": [
+              "expected_versions",
+              "mem_fit_long"
+            ],
+            "value": 1
+          }
+        ]
+      },
+      "expected": {
+        "error": "stale version",
+        "rolled_back": true
+      }
+    },
+    {
+      "case_id": "late_profile_response",
+      "covers": [
+        "C11"
+      ],
+      "input": {
+        "kind": "batch",
+        "batch_id": "batch_create",
+        "batch_mutations": [
+          {
+            "path": [
+              "profile_revision"
+            ],
+            "value": 1
+          }
+        ]
+      },
+      "expected": {
+        "error": "stale profile",
+        "rolled_back": true
+      }
+    },
+    {
+      "case_id": "late_request_response",
+      "covers": [
+        "C11"
+      ],
+      "input": {
+        "kind": "batch",
+        "batch_id": "batch_create",
+        "batch_mutations": [
+          {
+            "path": [
+              "expected_request_revision"
+            ],
+            "value": 1
+          }
+        ]
+      },
+      "expected": {
+        "error": "stale request revision",
+        "rolled_back": true
+      }
+    },
+    {
+      "case_id": "closed_write_rejected",
+      "covers": [
+        "C11"
+      ],
+      "input": {
+        "kind": "batch",
+        "batch_id": "batch_create",
+        "mutations": [
+          {
+            "path": [
+              "requests",
+              "req_demo",
+              "status"
+            ],
+            "value": "closed"
+          }
+        ]
+      },
+      "expected": {
+        "error": "request closed",
+        "rolled_back": true
+      }
+    },
+    {
+      "case_id": "two_selected_items_one_input",
+      "covers": [
+        "C03",
+        "C06"
+      ],
+      "input": {
+        "kind": "batch",
+        "batch_id": "batch_multi",
+        "memory_ids": [],
+        "observe_ids": [
+          "multi_fit",
+          "multi_color"
+        ]
+      },
+      "expected": {
+        "changed": {
+          "multi_fit": 1,
+          "multi_color": 1
+        },
+        "states": {
+          "multi_fit": "active",
+          "multi_color": "active"
+        },
+        "absent": [],
+        "artifacts": [
+          "cache_fit",
+          "source_fit_span",
+          "summary_fit",
+          "unrelated_artifact"
+        ],
+        "evidence_absent": []
+      }
+    },
+    {
+      "case_id": "trial_baseline_next",
+      "covers": [
+        "C13"
+      ],
+      "input": {
+        "kind": "study",
+        "namespace": "trial_baseline",
+        "request_id": "second",
+        "mode": "unified"
+      },
+      "expected": {
+        "used": [
+          "trial_baseline:temporary"
+        ]
+      }
+    },
+    {
+      "case_id": "trial_split_next",
+      "covers": [
+        "C13"
+      ],
+      "input": {
+        "kind": "study",
+        "namespace": "trial_split",
+        "request_id": "second",
+        "mode": "split"
+      },
+      "expected": {
+        "used": [
+          "trial_split:base"
+        ]
+      }
+    },
+    {
+      "case_id": "foreign_trial_not_visible",
+      "covers": [
+        "C13"
+      ],
+      "input": {
+        "kind": "study",
+        "namespace": "unrelated_trial",
+        "request_id": "second",
+        "mode": "unified"
+      },
+      "expected": {
+        "used": []
+      }
+    },
+    {
+      "case_id": "color_multiple",
+      "covers": [
+        "C07",
+        "C09"
+      ],
+      "input": {
+        "kind": "claim",
+        "left": {
+          "key": "color",
+          "value": "black",
+          "polarity": "prefer",
+          "strength": "soft"
+        },
+        "right": {
+          "key": "color",
+          "value": "white",
+          "polarity": "prefer",
+          "strength": "soft"
+        }
+      },
+      "expected": {
+        "conflict": false
+      }
+    },
+    {
+      "case_id": "color_opposite",
+      "covers": [
+        "C07",
+        "C09"
+      ],
+      "input": {
+        "kind": "claim",
+        "left": {
+          "key": "color",
+          "value": "black",
+          "polarity": "prefer",
+          "strength": "soft"
+        },
+        "right": {
+          "key": "color",
+          "value": "black",
+          "polarity": "avoid",
+          "strength": "soft"
+        }
+      },
+      "expected": {
+        "conflict": true
+      }
+    },
+    {
+      "case_id": "avoid_distinct",
+      "covers": [
+        "C07",
+        "C09"
+      ],
+      "input": {
+        "kind": "claim",
+        "left": {
+          "key": "color",
+          "value": "black",
+          "polarity": "prefer",
+          "strength": "soft"
+        },
+        "right": {
+          "key": "color",
+          "value": "white",
+          "polarity": "avoid",
+          "strength": "soft"
+        }
+      },
+      "expected": {
+        "conflict": false
+      }
+    },
+    {
+      "case_id": "fit_exclusive",
+      "covers": [
+        "C07",
+        "C09"
+      ],
+      "input": {
+        "kind": "claim",
+        "left": {
+          "key": "fit",
+          "value": "slim",
+          "polarity": "prefer",
+          "strength": "soft"
+        },
+        "right": {
+          "key": "fit",
+          "value": "relaxed",
+          "polarity": "prefer",
+          "strength": "soft"
+        }
+      },
+      "expected": {
+        "conflict": true
+      }
+    },
+    {
+      "case_id": "exact_identity",
+      "covers": [
+        "C07"
+      ],
+      "input": {
+        "kind": "identity",
+        "left_id": "mem_fit_long",
+        "right_id": "mem_fit_long",
+        "right_mutations": []
+      },
+      "expected": {
+        "same": true
+      }
+    },
+    {
+      "case_id": "condition_difference",
+      "covers": [
+        "C07"
+      ],
+      "input": {
+        "kind": "identity",
+        "left_id": "mem_fit_long",
+        "right_id": "mem_fit_long",
+        "right_mutations": [
+          {
+            "path": [
+              "applicability",
+              "condition"
+            ],
+            "value": "고객 미팅"
+          }
+        ]
+      },
+      "expected": {
+        "same": false
+      }
+    },
+    {
+      "case_id": "promote_family_once",
+      "covers": [
+        "C07"
+      ],
+      "input": {
+        "kind": "context",
+        "request_id": "req_demo",
+        "now": "2026-10-03T09:00:00+09:00",
+        "memory_ids": [
+          "mem_fit_long"
+        ],
+        "mutations": [
+          {
+            "path": [
+              "memories",
+              "mem_same_short"
+            ],
+            "value": {
+              "contract_type": "memory_item",
+              "schema_version": "0.2",
+              "id": "mem_same_short",
+              "user_id": "user_demo",
+              "version": 2,
+              "content": "여유 있는 핏을 선호한다.",
+              "tags": [
+                "fit"
+              ],
+              "claim": {
+                "key": "fit",
+                "value": "relaxed",
+                "polarity": "prefer",
+                "strength": "soft"
+              },
+              "scope": {
+                "type": "short_term",
+                "request_id": "req_demo"
+              },
+              "applicability": {
+                "condition": null,
+                "predicates": [],
+                "valid_from": null,
+                "valid_until": null
+              },
+              "verification": {
+                "basis": "explicit",
+                "state": "confirmed",
+                "confirmation": {
+                  "input_ref": "u_fit_content",
+                  "snapshot_ref": "s_fit_content",
+                  "user_id": "user_demo",
+                  "confirmed_at": "2026-10-01T09:00:00+09:00",
+                  "role": "content_confirmation"
+                }
+              },
+              "evidence": [
+                {
+                  "input_ref": "u_fit_content",
+                  "snapshot_ref": "s_fit_content",
+                  "roles": [
+                    "content",
+                    "content_confirmation"
+                  ]
+                },
+                {
+                  "input_ref": "u_fit_approval",
+                  "snapshot_ref": "s_fit_approval",
+                  "roles": [
+                    "long_term_approval"
+                  ]
+                }
+              ],
+              "lifecycle": {
+                "state": "active",
+                "changed_at": "2026-10-01T09:01:01+09:00",
+                "reason": "사용자가 내용과 이후 활용을 확인했다."
+              },
+              "created_at": "2026-10-01T09:01:01+09:00",
+              "lineage": {
+                "operation": "create",
+                "source_memory_id": null,
+                "family_id": "fam_fit"
+              }
+            }
+          },
+          {
+            "path": [
+              "memories",
+              "mem_fit_long",
+              "lineage"
+            ],
+            "value": {
+              "operation": "promote",
+              "source_memory_id": "mem_same_short",
+              "family_id": "fam_fit"
+            }
+          }
+        ]
+      },
+      "expected": {
+        "used": [
+          "mem_same_short"
+        ],
+        "excluded": {
+          "mem_fit_long": "duplicate_family"
+        },
+        "overridden": [],
+        "unresolved": [],
+        "truncated": false
+      }
+    },
+    {
+      "case_id": "short_count_budget_preserves_hard_signal",
+      "covers": [
+        "C09"
+      ],
+      "input": {
+        "kind": "context",
+        "request_id": "req_demo",
+        "now": "2026-10-03T09:00:00+09:00",
+        "memory_ids": [],
+        "mutations": [
+          {
+            "path": [
+              "memories"
+            ],
+            "value": {
+              "hard_00": {
+                "contract_type": "memory_item",
+                "schema_version": "0.2",
+                "id": "hard_00",
+                "user_id": "user_demo",
+                "version": 1,
+                "content": "이번 요청에는 슬림한 핏을 원한다.",
+                "tags": [
+                  "fit"
+                ],
+                "claim": {
+                  "key": "fit",
+                  "value": "slim",
+                  "polarity": "require",
+                  "strength": "hard"
+                },
+                "scope": {
+                  "type": "short_term",
+                  "request_id": "req_demo"
+                },
+                "applicability": {
+                  "condition": "이번 요청",
+                  "predicates": [],
+                  "valid_from": null,
+                  "valid_until": null
+                },
+                "verification": {
+                  "basis": "explicit",
+                  "state": "confirmed",
+                  "confirmation": {
+                    "input_ref": "u_short_exception",
+                    "snapshot_ref": "s_short_exception",
+                    "user_id": "user_demo",
+                    "confirmed_at": "2026-10-03T09:00:00+09:00",
+                    "role": "content_confirmation"
+                  }
+                },
+                "evidence": [
+                  {
+                    "input_ref": "u_short_exception",
+                    "snapshot_ref": "s_short_exception",
+                    "roles": [
+                      "content",
+                      "content_confirmation"
+                    ]
+                  }
+                ],
+                "lifecycle": {
+                  "state": "active",
+                  "changed_at": "2026-10-03T09:00:01+09:00",
+                  "reason": "현재 요청의 명시적 예외다."
+                },
+                "created_at": "2026-10-03T09:00:01+09:00",
+                "lineage": {
+                  "operation": "create",
+                  "source_memory_id": null,
+                  "family_id": "family_00"
+                }
+              },
+              "hard_01": {
+                "contract_type": "memory_item",
+                "schema_version": "0.2",
+                "id": "hard_01",
+                "user_id": "user_demo",
+                "version": 1,
+                "content": "이번 요청에는 슬림한 핏을 원한다.",
+                "tags": [
+                  "fit"
+                ],
+                "claim": {
+                  "key": "fit",
+                  "value": "slim",
+                  "polarity": "require",
+                  "strength": "hard"
+                },
+                "scope": {
+                  "type": "short_term",
+                  "request_id": "req_demo"
+                },
+                "applicability": {
+                  "condition": "이번 요청",
+                  "predicates": [],
+                  "valid_from": null,
+                  "valid_until": null
+                },
+                "verification": {
+                  "basis": "explicit",
+                  "state": "confirmed",
+                  "confirmation": {
+                    "input_ref": "u_short_exception",
+                    "snapshot_ref": "s_short_exception",
+                    "user_id": "user_demo",
+                    "confirmed_at": "2026-10-03T09:00:00+09:00",
+                    "role": "content_confirmation"
+                  }
+                },
+                "evidence": [
+                  {
+                    "input_ref": "u_short_exception",
+                    "snapshot_ref": "s_short_exception",
+                    "roles": [
+                      "content",
+                      "content_confirmation"
+                    ]
+                  }
+                ],
+                "lifecycle": {
+                  "state": "active",
+                  "changed_at": "2026-10-03T09:00:01+09:00",
+                  "reason": "현재 요청의 명시적 예외다."
+                },
+                "created_at": "2026-10-03T09:00:01+09:00",
+                "lineage": {
+                  "operation": "create",
+                  "source_memory_id": null,
+                  "family_id": "family_01"
+                }
+              },
+              "hard_02": {
+                "contract_type": "memory_item",
+                "schema_version": "0.2",
+                "id": "hard_02",
+                "user_id": "user_demo",
+                "version": 1,
+                "content": "이번 요청에는 슬림한 핏을 원한다.",
+                "tags": [
+                  "fit"
+                ],
+                "claim": {
+                  "key": "fit",
+                  "value": "slim",
+                  "polarity": "require",
+                  "strength": "hard"
+                },
+                "scope": {
+                  "type": "short_term",
+                  "request_id": "req_demo"
+                },
+                "applicability": {
+                  "condition": "이번 요청",
+                  "predicates": [],
+                  "valid_from": null,
+                  "valid_until": null
+                },
+                "verification": {
+                  "basis": "explicit",
+                  "state": "confirmed",
+                  "confirmation": {
+                    "input_ref": "u_short_exception",
+                    "snapshot_ref": "s_short_exception",
+                    "user_id": "user_demo",
+                    "confirmed_at": "2026-10-03T09:00:00+09:00",
+                    "role": "content_confirmation"
+                  }
+                },
+                "evidence": [
+                  {
+                    "input_ref": "u_short_exception",
+                    "snapshot_ref": "s_short_exception",
+                    "roles": [
+                      "content",
+                      "content_confirmation"
+                    ]
+                  }
+                ],
+                "lifecycle": {
+                  "state": "active",
+                  "changed_at": "2026-10-03T09:00:01+09:00",
+                  "reason": "현재 요청의 명시적 예외다."
+                },
+                "created_at": "2026-10-03T09:00:01+09:00",
+                "lineage": {
+                  "operation": "create",
+                  "source_memory_id": null,
+                  "family_id": "family_02"
+                }
+              },
+              "hard_03": {
+                "contract_type": "memory_item",
+                "schema_version": "0.2",
+                "id": "hard_03",
+                "user_id": "user_demo",
+                "version": 1,
+                "content": "이번 요청에는 슬림한 핏을 원한다.",
+                "tags": [
+                  "fit"
+                ],
+                "claim": {
+                  "key": "fit",
+                  "value": "slim",
+                  "polarity": "require",
+                  "strength": "hard"
+                },
+                "scope": {
+                  "type": "short_term",
+                  "request_id": "req_demo"
+                },
+                "applicability": {
+                  "condition": "이번 요청",
+                  "predicates": [],
+                  "valid_from": null,
+                  "valid_until": null
+                },
+                "verification": {
+                  "basis": "explicit",
+                  "state": "confirmed",
+                  "confirmation": {
+                    "input_ref": "u_short_exception",
+                    "snapshot_ref": "s_short_exception",
+                    "user_id": "user_demo",
+                    "confirmed_at": "2026-10-03T09:00:00+09:00",
+                    "role": "content_confirmation"
+                  }
+                },
+                "evidence": [
+                  {
+                    "input_ref": "u_short_exception",
+                    "snapshot_ref": "s_short_exception",
+                    "roles": [
+                      "content",
+                      "content_confirmation"
+                    ]
+                  }
+                ],
+                "lifecycle": {
+                  "state": "active",
+                  "changed_at": "2026-10-03T09:00:01+09:00",
+                  "reason": "현재 요청의 명시적 예외다."
+                },
+                "created_at": "2026-10-03T09:00:01+09:00",
+                "lineage": {
+                  "operation": "create",
+                  "source_memory_id": null,
+                  "family_id": "family_03"
+                }
+              },
+              "hard_04": {
+                "contract_type": "memory_item",
+                "schema_version": "0.2",
+                "id": "hard_04",
+                "user_id": "user_demo",
+                "version": 1,
+                "content": "이번 요청에는 슬림한 핏을 원한다.",
+                "tags": [
+                  "fit"
+                ],
+                "claim": {
+                  "key": "fit",
+                  "value": "slim",
+                  "polarity": "require",
+                  "strength": "hard"
+                },
+                "scope": {
+                  "type": "short_term",
+                  "request_id": "req_demo"
+                },
+                "applicability": {
+                  "condition": "이번 요청",
+                  "predicates": [],
+                  "valid_from": null,
+                  "valid_until": null
+                },
+                "verification": {
+                  "basis": "explicit",
+                  "state": "confirmed",
+                  "confirmation": {
+                    "input_ref": "u_short_exception",
+                    "snapshot_ref": "s_short_exception",
+                    "user_id": "user_demo",
+                    "confirmed_at": "2026-10-03T09:00:00+09:00",
+                    "role": "content_confirmation"
+                  }
+                },
+                "evidence": [
+                  {
+                    "input_ref": "u_short_exception",
+                    "snapshot_ref": "s_short_exception",
+                    "roles": [
+                      "content",
+                      "content_confirmation"
+                    ]
+                  }
+                ],
+                "lifecycle": {
+                  "state": "active",
+                  "changed_at": "2026-10-03T09:00:01+09:00",
+                  "reason": "현재 요청의 명시적 예외다."
+                },
+                "created_at": "2026-10-03T09:00:01+09:00",
+                "lineage": {
+                  "operation": "create",
+                  "source_memory_id": null,
+                  "family_id": "family_04"
+                }
+              },
+              "hard_05": {
+                "contract_type": "memory_item",
+                "schema_version": "0.2",
+                "id": "hard_05",
+                "user_id": "user_demo",
+                "version": 1,
+                "content": "이번 요청에는 슬림한 핏을 원한다.",
+                "tags": [
+                  "fit"
+                ],
+                "claim": {
+                  "key": "fit",
+                  "value": "slim",
+                  "polarity": "require",
+                  "strength": "hard"
+                },
+                "scope": {
+                  "type": "short_term",
+                  "request_id": "req_demo"
+                },
+                "applicability": {
+                  "condition": "이번 요청",
+                  "predicates": [],
+                  "valid_from": null,
+                  "valid_until": null
+                },
+                "verification": {
+                  "basis": "explicit",
+                  "state": "confirmed",
+                  "confirmation": {
+                    "input_ref": "u_short_exception",
+                    "snapshot_ref": "s_short_exception",
+                    "user_id": "user_demo",
+                    "confirmed_at": "2026-10-03T09:00:00+09:00",
+                    "role": "content_confirmation"
+                  }
+                },
+                "evidence": [
+                  {
+                    "input_ref": "u_short_exception",
+                    "snapshot_ref": "s_short_exception",
+                    "roles": [
+                      "content",
+                      "content_confirmation"
+                    ]
+                  }
+                ],
+                "lifecycle": {
+                  "state": "active",
+                  "changed_at": "2026-10-03T09:00:01+09:00",
+                  "reason": "현재 요청의 명시적 예외다."
+                },
+                "created_at": "2026-10-03T09:00:01+09:00",
+                "lineage": {
+                  "operation": "create",
+                  "source_memory_id": null,
+                  "family_id": "family_05"
+                }
+              },
+              "hard_06": {
+                "contract_type": "memory_item",
+                "schema_version": "0.2",
+                "id": "hard_06",
+                "user_id": "user_demo",
+                "version": 1,
+                "content": "이번 요청에는 슬림한 핏을 원한다.",
+                "tags": [
+                  "fit"
+                ],
+                "claim": {
+                  "key": "fit",
+                  "value": "slim",
+                  "polarity": "require",
+                  "strength": "hard"
+                },
+                "scope": {
+                  "type": "short_term",
+                  "request_id": "req_demo"
+                },
+                "applicability": {
+                  "condition": "이번 요청",
+                  "predicates": [],
+                  "valid_from": null,
+                  "valid_until": null
+                },
+                "verification": {
+                  "basis": "explicit",
+                  "state": "confirmed",
+                  "confirmation": {
+                    "input_ref": "u_short_exception",
+                    "snapshot_ref": "s_short_exception",
+                    "user_id": "user_demo",
+                    "confirmed_at": "2026-10-03T09:00:00+09:00",
+                    "role": "content_confirmation"
+                  }
+                },
+                "evidence": [
+                  {
+                    "input_ref": "u_short_exception",
+                    "snapshot_ref": "s_short_exception",
+                    "roles": [
+                      "content",
+                      "content_confirmation"
+                    ]
+                  }
+                ],
+                "lifecycle": {
+                  "state": "active",
+                  "changed_at": "2026-10-03T09:00:01+09:00",
+                  "reason": "현재 요청의 명시적 예외다."
+                },
+                "created_at": "2026-10-03T09:00:01+09:00",
+                "lineage": {
+                  "operation": "create",
+                  "source_memory_id": null,
+                  "family_id": "family_06"
+                }
+              },
+              "hard_07": {
+                "contract_type": "memory_item",
+                "schema_version": "0.2",
+                "id": "hard_07",
+                "user_id": "user_demo",
+                "version": 1,
+                "content": "이번 요청에는 슬림한 핏을 원한다.",
+                "tags": [
+                  "fit"
+                ],
+                "claim": {
+                  "key": "fit",
+                  "value": "slim",
+                  "polarity": "require",
+                  "strength": "hard"
+                },
+                "scope": {
+                  "type": "short_term",
+                  "request_id": "req_demo"
+                },
+                "applicability": {
+                  "condition": "이번 요청",
+                  "predicates": [],
+                  "valid_from": null,
+                  "valid_until": null
+                },
+                "verification": {
+                  "basis": "explicit",
+                  "state": "confirmed",
+                  "confirmation": {
+                    "input_ref": "u_short_exception",
+                    "snapshot_ref": "s_short_exception",
+                    "user_id": "user_demo",
+                    "confirmed_at": "2026-10-03T09:00:00+09:00",
+                    "role": "content_confirmation"
+                  }
+                },
+                "evidence": [
+                  {
+                    "input_ref": "u_short_exception",
+                    "snapshot_ref": "s_short_exception",
+                    "roles": [
+                      "content",
+                      "content_confirmation"
+                    ]
+                  }
+                ],
+                "lifecycle": {
+                  "state": "active",
+                  "changed_at": "2026-10-03T09:00:01+09:00",
+                  "reason": "현재 요청의 명시적 예외다."
+                },
+                "created_at": "2026-10-03T09:00:01+09:00",
+                "lineage": {
+                  "operation": "create",
+                  "source_memory_id": null,
+                  "family_id": "family_07"
+                }
+              },
+              "hard_08": {
+                "contract_type": "memory_item",
+                "schema_version": "0.2",
+                "id": "hard_08",
+                "user_id": "user_demo",
+                "version": 1,
+                "content": "이번 요청에는 슬림한 핏을 원한다.",
+                "tags": [
+                  "fit"
+                ],
+                "claim": {
+                  "key": "fit",
+                  "value": "slim",
+                  "polarity": "require",
+                  "strength": "hard"
+                },
+                "scope": {
+                  "type": "short_term",
+                  "request_id": "req_demo"
+                },
+                "applicability": {
+                  "condition": "이번 요청",
+                  "predicates": [],
+                  "valid_from": null,
+                  "valid_until": null
+                },
+                "verification": {
+                  "basis": "explicit",
+                  "state": "confirmed",
+                  "confirmation": {
+                    "input_ref": "u_short_exception",
+                    "snapshot_ref": "s_short_exception",
+                    "user_id": "user_demo",
+                    "confirmed_at": "2026-10-03T09:00:00+09:00",
+                    "role": "content_confirmation"
+                  }
+                },
+                "evidence": [
+                  {
+                    "input_ref": "u_short_exception",
+                    "snapshot_ref": "s_short_exception",
+                    "roles": [
+                      "content",
+                      "content_confirmation"
+                    ]
+                  }
+                ],
+                "lifecycle": {
+                  "state": "active",
+                  "changed_at": "2026-10-03T09:00:01+09:00",
+                  "reason": "현재 요청의 명시적 예외다."
+                },
+                "created_at": "2026-10-03T09:00:01+09:00",
+                "lineage": {
+                  "operation": "create",
+                  "source_memory_id": null,
+                  "family_id": "family_08"
+                }
+              },
+              "hard_09": {
+                "contract_type": "memory_item",
+                "schema_version": "0.2",
+                "id": "hard_09",
+                "user_id": "user_demo",
+                "version": 1,
+                "content": "이번 요청에는 슬림한 핏을 원한다.",
+                "tags": [
+                  "fit"
+                ],
+                "claim": {
+                  "key": "fit",
+                  "value": "slim",
+                  "polarity": "require",
+                  "strength": "hard"
+                },
+                "scope": {
+                  "type": "short_term",
+                  "request_id": "req_demo"
+                },
+                "applicability": {
+                  "condition": "이번 요청",
+                  "predicates": [],
+                  "valid_from": null,
+                  "valid_until": null
+                },
+                "verification": {
+                  "basis": "explicit",
+                  "state": "confirmed",
+                  "confirmation": {
+                    "input_ref": "u_short_exception",
+                    "snapshot_ref": "s_short_exception",
+                    "user_id": "user_demo",
+                    "confirmed_at": "2026-10-03T09:00:00+09:00",
+                    "role": "content_confirmation"
+                  }
+                },
+                "evidence": [
+                  {
+                    "input_ref": "u_short_exception",
+                    "snapshot_ref": "s_short_exception",
+                    "roles": [
+                      "content",
+                      "content_confirmation"
+                    ]
+                  }
+                ],
+                "lifecycle": {
+                  "state": "active",
+                  "changed_at": "2026-10-03T09:00:01+09:00",
+                  "reason": "현재 요청의 명시적 예외다."
+                },
+                "created_at": "2026-10-03T09:00:01+09:00",
+                "lineage": {
+                  "operation": "create",
+                  "source_memory_id": null,
+                  "family_id": "family_09"
+                }
+              },
+              "hard_10": {
+                "contract_type": "memory_item",
+                "schema_version": "0.2",
+                "id": "hard_10",
+                "user_id": "user_demo",
+                "version": 1,
+                "content": "이번 요청에는 슬림한 핏을 원한다.",
+                "tags": [
+                  "fit"
+                ],
+                "claim": {
+                  "key": "fit",
+                  "value": "slim",
+                  "polarity": "require",
+                  "strength": "hard"
+                },
+                "scope": {
+                  "type": "short_term",
+                  "request_id": "req_demo"
+                },
+                "applicability": {
+                  "condition": "이번 요청",
+                  "predicates": [],
+                  "valid_from": null,
+                  "valid_until": null
+                },
+                "verification": {
+                  "basis": "explicit",
+                  "state": "confirmed",
+                  "confirmation": {
+                    "input_ref": "u_short_exception",
+                    "snapshot_ref": "s_short_exception",
+                    "user_id": "user_demo",
+                    "confirmed_at": "2026-10-03T09:00:00+09:00",
+                    "role": "content_confirmation"
+                  }
+                },
+                "evidence": [
+                  {
+                    "input_ref": "u_short_exception",
+                    "snapshot_ref": "s_short_exception",
+                    "roles": [
+                      "content",
+                      "content_confirmation"
+                    ]
+                  }
+                ],
+                "lifecycle": {
+                  "state": "active",
+                  "changed_at": "2026-10-03T09:00:01+09:00",
+                  "reason": "현재 요청의 명시적 예외다."
+                },
+                "created_at": "2026-10-03T09:00:01+09:00",
+                "lineage": {
+                  "operation": "create",
+                  "source_memory_id": null,
+                  "family_id": "family_10"
+                }
+              },
+              "hard_11": {
+                "contract_type": "memory_item",
+                "schema_version": "0.2",
+                "id": "hard_11",
+                "user_id": "user_demo",
+                "version": 1,
+                "content": "이번 요청에는 슬림한 핏을 원한다.",
+                "tags": [
+                  "fit"
+                ],
+                "claim": {
+                  "key": "fit",
+                  "value": "slim",
+                  "polarity": "require",
+                  "strength": "hard"
+                },
+                "scope": {
+                  "type": "short_term",
+                  "request_id": "req_demo"
+                },
+                "applicability": {
+                  "condition": "이번 요청",
+                  "predicates": [],
+                  "valid_from": null,
+                  "valid_until": null
+                },
+                "verification": {
+                  "basis": "explicit",
+                  "state": "confirmed",
+                  "confirmation": {
+                    "input_ref": "u_short_exception",
+                    "snapshot_ref": "s_short_exception",
+                    "user_id": "user_demo",
+                    "confirmed_at": "2026-10-03T09:00:00+09:00",
+                    "role": "content_confirmation"
+                  }
+                },
+                "evidence": [
+                  {
+                    "input_ref": "u_short_exception",
+                    "snapshot_ref": "s_short_exception",
+                    "roles": [
+                      "content",
+                      "content_confirmation"
+                    ]
+                  }
+                ],
+                "lifecycle": {
+                  "state": "active",
+                  "changed_at": "2026-10-03T09:00:01+09:00",
+                  "reason": "현재 요청의 명시적 예외다."
+                },
+                "created_at": "2026-10-03T09:00:01+09:00",
+                "lineage": {
+                  "operation": "create",
+                  "source_memory_id": null,
+                  "family_id": "family_11"
+                }
+              },
+              "hard_12": {
+                "contract_type": "memory_item",
+                "schema_version": "0.2",
+                "id": "hard_12",
+                "user_id": "user_demo",
+                "version": 1,
+                "content": "이번 요청에는 슬림한 핏을 원한다.",
+                "tags": [
+                  "fit"
+                ],
+                "claim": {
+                  "key": "fit",
+                  "value": "slim",
+                  "polarity": "require",
+                  "strength": "hard"
+                },
+                "scope": {
+                  "type": "short_term",
+                  "request_id": "req_demo"
+                },
+                "applicability": {
+                  "condition": "이번 요청",
+                  "predicates": [],
+                  "valid_from": null,
+                  "valid_until": null
+                },
+                "verification": {
+                  "basis": "explicit",
+                  "state": "confirmed",
+                  "confirmation": {
+                    "input_ref": "u_short_exception",
+                    "snapshot_ref": "s_short_exception",
+                    "user_id": "user_demo",
+                    "confirmed_at": "2026-10-03T09:00:00+09:00",
+                    "role": "content_confirmation"
+                  }
+                },
+                "evidence": [
+                  {
+                    "input_ref": "u_short_exception",
+                    "snapshot_ref": "s_short_exception",
+                    "roles": [
+                      "content",
+                      "content_confirmation"
+                    ]
+                  }
+                ],
+                "lifecycle": {
+                  "state": "active",
+                  "changed_at": "2026-10-03T09:00:01+09:00",
+                  "reason": "현재 요청의 명시적 예외다."
+                },
+                "created_at": "2026-10-03T09:00:01+09:00",
+                "lineage": {
+                  "operation": "create",
+                  "source_memory_id": null,
+                  "family_id": "family_12"
+                }
+              },
+              "hard_13": {
+                "contract_type": "memory_item",
+                "schema_version": "0.2",
+                "id": "hard_13",
+                "user_id": "user_demo",
+                "version": 1,
+                "content": "이번 요청에는 슬림한 핏을 원한다.",
+                "tags": [
+                  "fit"
+                ],
+                "claim": {
+                  "key": "fit",
+                  "value": "slim",
+                  "polarity": "require",
+                  "strength": "hard"
+                },
+                "scope": {
+                  "type": "short_term",
+                  "request_id": "req_demo"
+                },
+                "applicability": {
+                  "condition": "이번 요청",
+                  "predicates": [],
+                  "valid_from": null,
+                  "valid_until": null
+                },
+                "verification": {
+                  "basis": "explicit",
+                  "state": "confirmed",
+                  "confirmation": {
+                    "input_ref": "u_short_exception",
+                    "snapshot_ref": "s_short_exception",
+                    "user_id": "user_demo",
+                    "confirmed_at": "2026-10-03T09:00:00+09:00",
+                    "role": "content_confirmation"
+                  }
+                },
+                "evidence": [
+                  {
+                    "input_ref": "u_short_exception",
+                    "snapshot_ref": "s_short_exception",
+                    "roles": [
+                      "content",
+                      "content_confirmation"
+                    ]
+                  }
+                ],
+                "lifecycle": {
+                  "state": "active",
+                  "changed_at": "2026-10-03T09:00:01+09:00",
+                  "reason": "현재 요청의 명시적 예외다."
+                },
+                "created_at": "2026-10-03T09:00:01+09:00",
+                "lineage": {
+                  "operation": "create",
+                  "source_memory_id": null,
+                  "family_id": "family_13"
+                }
+              },
+              "hard_14": {
+                "contract_type": "memory_item",
+                "schema_version": "0.2",
+                "id": "hard_14",
+                "user_id": "user_demo",
+                "version": 1,
+                "content": "이번 요청에는 슬림한 핏을 원한다.",
+                "tags": [
+                  "fit"
+                ],
+                "claim": {
+                  "key": "fit",
+                  "value": "slim",
+                  "polarity": "require",
+                  "strength": "hard"
+                },
+                "scope": {
+                  "type": "short_term",
+                  "request_id": "req_demo"
+                },
+                "applicability": {
+                  "condition": "이번 요청",
+                  "predicates": [],
+                  "valid_from": null,
+                  "valid_until": null
+                },
+                "verification": {
+                  "basis": "explicit",
+                  "state": "confirmed",
+                  "confirmation": {
+                    "input_ref": "u_short_exception",
+                    "snapshot_ref": "s_short_exception",
+                    "user_id": "user_demo",
+                    "confirmed_at": "2026-10-03T09:00:00+09:00",
+                    "role": "content_confirmation"
+                  }
+                },
+                "evidence": [
+                  {
+                    "input_ref": "u_short_exception",
+                    "snapshot_ref": "s_short_exception",
+                    "roles": [
+                      "content",
+                      "content_confirmation"
+                    ]
+                  }
+                ],
+                "lifecycle": {
+                  "state": "active",
+                  "changed_at": "2026-10-03T09:00:01+09:00",
+                  "reason": "현재 요청의 명시적 예외다."
+                },
+                "created_at": "2026-10-03T09:00:01+09:00",
+                "lineage": {
+                  "operation": "create",
+                  "source_memory_id": null,
+                  "family_id": "family_14"
+                }
+              },
+              "hard_15": {
+                "contract_type": "memory_item",
+                "schema_version": "0.2",
+                "id": "hard_15",
+                "user_id": "user_demo",
+                "version": 1,
+                "content": "이번 요청에는 슬림한 핏을 원한다.",
+                "tags": [
+                  "fit"
+                ],
+                "claim": {
+                  "key": "fit",
+                  "value": "slim",
+                  "polarity": "require",
+                  "strength": "hard"
+                },
+                "scope": {
+                  "type": "short_term",
+                  "request_id": "req_demo"
+                },
+                "applicability": {
+                  "condition": "이번 요청",
+                  "predicates": [],
+                  "valid_from": null,
+                  "valid_until": null
+                },
+                "verification": {
+                  "basis": "explicit",
+                  "state": "confirmed",
+                  "confirmation": {
+                    "input_ref": "u_short_exception",
+                    "snapshot_ref": "s_short_exception",
+                    "user_id": "user_demo",
+                    "confirmed_at": "2026-10-03T09:00:00+09:00",
+                    "role": "content_confirmation"
+                  }
+                },
+                "evidence": [
+                  {
+                    "input_ref": "u_short_exception",
+                    "snapshot_ref": "s_short_exception",
+                    "roles": [
+                      "content",
+                      "content_confirmation"
+                    ]
+                  }
+                ],
+                "lifecycle": {
+                  "state": "active",
+                  "changed_at": "2026-10-03T09:00:01+09:00",
+                  "reason": "현재 요청의 명시적 예외다."
+                },
+                "created_at": "2026-10-03T09:00:01+09:00",
+                "lineage": {
+                  "operation": "create",
+                  "source_memory_id": null,
+                  "family_id": "family_15"
+                }
+              },
+              "hard_16": {
+                "contract_type": "memory_item",
+                "schema_version": "0.2",
+                "id": "hard_16",
+                "user_id": "user_demo",
+                "version": 1,
+                "content": "이번 요청에는 슬림한 핏을 원한다.",
+                "tags": [
+                  "fit"
+                ],
+                "claim": {
+                  "key": "fit",
+                  "value": "slim",
+                  "polarity": "require",
+                  "strength": "hard"
+                },
+                "scope": {
+                  "type": "short_term",
+                  "request_id": "req_demo"
+                },
+                "applicability": {
+                  "condition": "이번 요청",
+                  "predicates": [],
+                  "valid_from": null,
+                  "valid_until": null
+                },
+                "verification": {
+                  "basis": "explicit",
+                  "state": "confirmed",
+                  "confirmation": {
+                    "input_ref": "u_short_exception",
+                    "snapshot_ref": "s_short_exception",
+                    "user_id": "user_demo",
+                    "confirmed_at": "2026-10-03T09:00:00+09:00",
+                    "role": "content_confirmation"
+                  }
+                },
+                "evidence": [
+                  {
+                    "input_ref": "u_short_exception",
+                    "snapshot_ref": "s_short_exception",
+                    "roles": [
+                      "content",
+                      "content_confirmation"
+                    ]
+                  }
+                ],
+                "lifecycle": {
+                  "state": "active",
+                  "changed_at": "2026-10-03T09:00:01+09:00",
+                  "reason": "현재 요청의 명시적 예외다."
+                },
+                "created_at": "2026-10-03T09:00:01+09:00",
+                "lineage": {
+                  "operation": "create",
+                  "source_memory_id": null,
+                  "family_id": "family_16"
+                }
+              },
+              "hard_17": {
+                "contract_type": "memory_item",
+                "schema_version": "0.2",
+                "id": "hard_17",
+                "user_id": "user_demo",
+                "version": 1,
+                "content": "이번 요청에는 슬림한 핏을 원한다.",
+                "tags": [
+                  "fit"
+                ],
+                "claim": {
+                  "key": "fit",
+                  "value": "slim",
+                  "polarity": "require",
+                  "strength": "hard"
+                },
+                "scope": {
+                  "type": "short_term",
+                  "request_id": "req_demo"
+                },
+                "applicability": {
+                  "condition": "이번 요청",
+                  "predicates": [],
+                  "valid_from": null,
+                  "valid_until": null
+                },
+                "verification": {
+                  "basis": "explicit",
+                  "state": "confirmed",
+                  "confirmation": {
+                    "input_ref": "u_short_exception",
+                    "snapshot_ref": "s_short_exception",
+                    "user_id": "user_demo",
+                    "confirmed_at": "2026-10-03T09:00:00+09:00",
+                    "role": "content_confirmation"
+                  }
+                },
+                "evidence": [
+                  {
+                    "input_ref": "u_short_exception",
+                    "snapshot_ref": "s_short_exception",
+                    "roles": [
+                      "content",
+                      "content_confirmation"
+                    ]
+                  }
+                ],
+                "lifecycle": {
+                  "state": "active",
+                  "changed_at": "2026-10-03T09:00:01+09:00",
+                  "reason": "현재 요청의 명시적 예외다."
+                },
+                "created_at": "2026-10-03T09:00:01+09:00",
+                "lineage": {
+                  "operation": "create",
+                  "source_memory_id": null,
+                  "family_id": "family_17"
+                }
+              },
+              "hard_18": {
+                "contract_type": "memory_item",
+                "schema_version": "0.2",
+                "id": "hard_18",
+                "user_id": "user_demo",
+                "version": 1,
+                "content": "이번 요청에는 슬림한 핏을 원한다.",
+                "tags": [
+                  "fit"
+                ],
+                "claim": {
+                  "key": "fit",
+                  "value": "slim",
+                  "polarity": "require",
+                  "strength": "hard"
+                },
+                "scope": {
+                  "type": "short_term",
+                  "request_id": "req_demo"
+                },
+                "applicability": {
+                  "condition": "이번 요청",
+                  "predicates": [],
+                  "valid_from": null,
+                  "valid_until": null
+                },
+                "verification": {
+                  "basis": "explicit",
+                  "state": "confirmed",
+                  "confirmation": {
+                    "input_ref": "u_short_exception",
+                    "snapshot_ref": "s_short_exception",
+                    "user_id": "user_demo",
+                    "confirmed_at": "2026-10-03T09:00:00+09:00",
+                    "role": "content_confirmation"
+                  }
+                },
+                "evidence": [
+                  {
+                    "input_ref": "u_short_exception",
+                    "snapshot_ref": "s_short_exception",
+                    "roles": [
+                      "content",
+                      "content_confirmation"
+                    ]
+                  }
+                ],
+                "lifecycle": {
+                  "state": "active",
+                  "changed_at": "2026-10-03T09:00:01+09:00",
+                  "reason": "현재 요청의 명시적 예외다."
+                },
+                "created_at": "2026-10-03T09:00:01+09:00",
+                "lineage": {
+                  "operation": "create",
+                  "source_memory_id": null,
+                  "family_id": "family_18"
+                }
+              },
+              "hard_19": {
+                "contract_type": "memory_item",
+                "schema_version": "0.2",
+                "id": "hard_19",
+                "user_id": "user_demo",
+                "version": 1,
+                "content": "이번 요청에는 슬림한 핏을 원한다.",
+                "tags": [
+                  "fit"
+                ],
+                "claim": {
+                  "key": "fit",
+                  "value": "slim",
+                  "polarity": "require",
+                  "strength": "hard"
+                },
+                "scope": {
+                  "type": "short_term",
+                  "request_id": "req_demo"
+                },
+                "applicability": {
+                  "condition": "이번 요청",
+                  "predicates": [],
+                  "valid_from": null,
+                  "valid_until": null
+                },
+                "verification": {
+                  "basis": "explicit",
+                  "state": "confirmed",
+                  "confirmation": {
+                    "input_ref": "u_short_exception",
+                    "snapshot_ref": "s_short_exception",
+                    "user_id": "user_demo",
+                    "confirmed_at": "2026-10-03T09:00:00+09:00",
+                    "role": "content_confirmation"
+                  }
+                },
+                "evidence": [
+                  {
+                    "input_ref": "u_short_exception",
+                    "snapshot_ref": "s_short_exception",
+                    "roles": [
+                      "content",
+                      "content_confirmation"
+                    ]
+                  }
+                ],
+                "lifecycle": {
+                  "state": "active",
+                  "changed_at": "2026-10-03T09:00:01+09:00",
+                  "reason": "현재 요청의 명시적 예외다."
+                },
+                "created_at": "2026-10-03T09:00:01+09:00",
+                "lineage": {
+                  "operation": "create",
+                  "source_memory_id": null,
+                  "family_id": "family_19"
+                }
+              },
+              "hard_20": {
+                "contract_type": "memory_item",
+                "schema_version": "0.2",
+                "id": "hard_20",
+                "user_id": "user_demo",
+                "version": 1,
+                "content": "이번 요청에는 슬림한 핏을 원한다.",
+                "tags": [
+                  "fit"
+                ],
+                "claim": {
+                  "key": "fit",
+                  "value": "slim",
+                  "polarity": "require",
+                  "strength": "hard"
+                },
+                "scope": {
+                  "type": "short_term",
+                  "request_id": "req_demo"
+                },
+                "applicability": {
+                  "condition": "이번 요청",
+                  "predicates": [],
+                  "valid_from": null,
+                  "valid_until": null
+                },
+                "verification": {
+                  "basis": "explicit",
+                  "state": "confirmed",
+                  "confirmation": {
+                    "input_ref": "u_short_exception",
+                    "snapshot_ref": "s_short_exception",
+                    "user_id": "user_demo",
+                    "confirmed_at": "2026-10-03T09:00:00+09:00",
+                    "role": "content_confirmation"
+                  }
+                },
+                "evidence": [
+                  {
+                    "input_ref": "u_short_exception",
+                    "snapshot_ref": "s_short_exception",
+                    "roles": [
+                      "content",
+                      "content_confirmation"
+                    ]
+                  }
+                ],
+                "lifecycle": {
+                  "state": "active",
+                  "changed_at": "2026-10-03T09:00:01+09:00",
+                  "reason": "현재 요청의 명시적 예외다."
+                },
+                "created_at": "2026-10-03T09:00:01+09:00",
+                "lineage": {
+                  "operation": "create",
+                  "source_memory_id": null,
+                  "family_id": "family_20"
+                }
+              }
+            }
+          }
+        ]
+      },
+      "expected": {
+        "used": [
+          "hard_00",
+          "hard_01",
+          "hard_02",
+          "hard_03",
+          "hard_04",
+          "hard_05",
+          "hard_06",
+          "hard_07",
+          "hard_08",
+          "hard_09",
+          "hard_10",
+          "hard_11",
+          "hard_12",
+          "hard_13",
+          "hard_14",
+          "hard_15",
+          "hard_16",
+          "hard_17",
+          "hard_18",
+          "hard_19"
+        ],
+        "excluded": {
+          "hard_20": "budget"
+        },
+        "overridden": [],
+        "unresolved": [
+          "hard_budget:hard_20"
+        ],
+        "truncated": true
+      }
+    },
+    {
+      "case_id": "character_budget_no_partial_item",
+      "covers": [
+        "C09"
+      ],
+      "input": {
+        "kind": "context",
+        "request_id": "req_demo",
+        "now": "2026-10-03T09:00:00+09:00",
+        "memory_ids": [
+          "mem_fit_short_exception"
+        ],
+        "mutations": [
+          {
+            "path": [
+              "memories",
+              "mem_fit_short_exception",
+              "content"
+            ],
+            "value": "핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏핏"
+          }
+        ]
+      },
+      "expected": {
+        "used": [],
+        "excluded": {
+          "mem_fit_short_exception": "budget"
+        },
+        "overridden": [],
+        "unresolved": [
+          "hard_budget:mem_fit_short_exception"
+        ],
+        "truncated": true
+      }
+    },
+    {
+      "case_id": "today_kst",
+      "covers": [
+        "C02"
+      ],
+      "input": {
+        "kind": "today",
+        "occurred_at": "2026-10-03T16:00:00+00:00",
+        "timezone": "Asia/Seoul"
+      },
+      "expected": {
+        "from": "2026-10-03T15:00:00+00:00",
+        "until": "2026-10-04T15:00:00+00:00"
+      }
+    },
+    {
+      "case_id": "today_dst_25h",
+      "covers": [
+        "C02"
+      ],
+      "input": {
+        "kind": "today",
+        "occurred_at": "2026-11-01T16:00:00+00:00",
+        "timezone": "America/New_York"
+      },
+      "expected": {
+        "from": "2026-11-01T04:00:00+00:00",
+        "until": "2026-11-02T05:00:00+00:00"
+      }
+    },
+    {
+      "case_id": "long_count_limit",
+      "covers": [
+        "C09"
+      ],
+      "input": {
+        "kind": "context",
+        "request_id": "req_demo",
+        "now": "2026-10-03T09:00:00+09:00",
+        "memory_ids": [],
+        "mutations": [
+          {
+            "path": [
+              "memories"
+            ],
+            "value": {
+              "base_00": {
+                "contract_type": "memory_item",
+                "schema_version": "0.2",
+                "id": "base_00",
+                "user_id": "user_demo",
+                "version": 2,
+                "content": "여유 있는 핏을 선호한다.",
+                "tags": [
+                  "fit"
+                ],
+                "claim": {
+                  "key": "slot_00",
+                  "value": "relaxed",
+                  "polarity": "prefer",
+                  "strength": "soft"
+                },
+                "scope": {
+                  "type": "long_term",
+                  "approval": {
+                    "input_ref": "u_fit_approval",
+                    "snapshot_ref": "s_fit_approval",
+                    "user_id": "user_demo",
+                    "approved_at": "2026-10-01T09:01:00+09:00",
+                    "role": "long_term_approval"
+                  }
+                },
+                "applicability": {
+                  "condition": null,
+                  "predicates": [],
+                  "valid_from": null,
+                  "valid_until": null
+                },
+                "verification": {
+                  "basis": "explicit",
+                  "state": "confirmed",
+                  "confirmation": {
+                    "input_ref": "u_fit_content",
+                    "snapshot_ref": "s_fit_content",
+                    "user_id": "user_demo",
+                    "confirmed_at": "2026-10-01T09:00:00+09:00",
+                    "role": "content_confirmation"
+                  }
+                },
+                "evidence": [
+                  {
+                    "input_ref": "u_fit_content",
+                    "snapshot_ref": "s_fit_content",
+                    "roles": [
+                      "content",
+                      "content_confirmation"
+                    ]
+                  },
+                  {
+                    "input_ref": "u_fit_approval",
+                    "snapshot_ref": "s_fit_approval",
+                    "roles": [
+                      "long_term_approval"
+                    ]
+                  }
+                ],
+                "lifecycle": {
+                  "state": "active",
+                  "changed_at": "2026-10-01T09:01:01+09:00",
+                  "reason": "사용자가 내용과 이후 활용을 확인했다."
+                },
+                "created_at": "2026-10-01T09:01:01+09:00",
+                "lineage": {
+                  "operation": "create",
+                  "source_memory_id": null,
+                  "family_id": "family_base_00"
+                }
+              },
+              "base_01": {
+                "contract_type": "memory_item",
+                "schema_version": "0.2",
+                "id": "base_01",
+                "user_id": "user_demo",
+                "version": 2,
+                "content": "여유 있는 핏을 선호한다.",
+                "tags": [
+                  "fit"
+                ],
+                "claim": {
+                  "key": "slot_01",
+                  "value": "relaxed",
+                  "polarity": "prefer",
+                  "strength": "soft"
+                },
+                "scope": {
+                  "type": "long_term",
+                  "approval": {
+                    "input_ref": "u_fit_approval",
+                    "snapshot_ref": "s_fit_approval",
+                    "user_id": "user_demo",
+                    "approved_at": "2026-10-01T09:01:00+09:00",
+                    "role": "long_term_approval"
+                  }
+                },
+                "applicability": {
+                  "condition": null,
+                  "predicates": [],
+                  "valid_from": null,
+                  "valid_until": null
+                },
+                "verification": {
+                  "basis": "explicit",
+                  "state": "confirmed",
+                  "confirmation": {
+                    "input_ref": "u_fit_content",
+                    "snapshot_ref": "s_fit_content",
+                    "user_id": "user_demo",
+                    "confirmed_at": "2026-10-01T09:00:00+09:00",
+                    "role": "content_confirmation"
+                  }
+                },
+                "evidence": [
+                  {
+                    "input_ref": "u_fit_content",
+                    "snapshot_ref": "s_fit_content",
+                    "roles": [
+                      "content",
+                      "content_confirmation"
+                    ]
+                  },
+                  {
+                    "input_ref": "u_fit_approval",
+                    "snapshot_ref": "s_fit_approval",
+                    "roles": [
+                      "long_term_approval"
+                    ]
+                  }
+                ],
+                "lifecycle": {
+                  "state": "active",
+                  "changed_at": "2026-10-01T09:01:01+09:00",
+                  "reason": "사용자가 내용과 이후 활용을 확인했다."
+                },
+                "created_at": "2026-10-01T09:01:01+09:00",
+                "lineage": {
+                  "operation": "create",
+                  "source_memory_id": null,
+                  "family_id": "family_base_01"
+                }
+              },
+              "base_02": {
+                "contract_type": "memory_item",
+                "schema_version": "0.2",
+                "id": "base_02",
+                "user_id": "user_demo",
+                "version": 2,
+                "content": "여유 있는 핏을 선호한다.",
+                "tags": [
+                  "fit"
+                ],
+                "claim": {
+                  "key": "slot_02",
+                  "value": "relaxed",
+                  "polarity": "prefer",
+                  "strength": "soft"
+                },
+                "scope": {
+                  "type": "long_term",
+                  "approval": {
+                    "input_ref": "u_fit_approval",
+                    "snapshot_ref": "s_fit_approval",
+                    "user_id": "user_demo",
+                    "approved_at": "2026-10-01T09:01:00+09:00",
+                    "role": "long_term_approval"
+                  }
+                },
+                "applicability": {
+                  "condition": null,
+                  "predicates": [],
+                  "valid_from": null,
+                  "valid_until": null
+                },
+                "verification": {
+                  "basis": "explicit",
+                  "state": "confirmed",
+                  "confirmation": {
+                    "input_ref": "u_fit_content",
+                    "snapshot_ref": "s_fit_content",
+                    "user_id": "user_demo",
+                    "confirmed_at": "2026-10-01T09:00:00+09:00",
+                    "role": "content_confirmation"
+                  }
+                },
+                "evidence": [
+                  {
+                    "input_ref": "u_fit_content",
+                    "snapshot_ref": "s_fit_content",
+                    "roles": [
+                      "content",
+                      "content_confirmation"
+                    ]
+                  },
+                  {
+                    "input_ref": "u_fit_approval",
+                    "snapshot_ref": "s_fit_approval",
+                    "roles": [
+                      "long_term_approval"
+                    ]
+                  }
+                ],
+                "lifecycle": {
+                  "state": "active",
+                  "changed_at": "2026-10-01T09:01:01+09:00",
+                  "reason": "사용자가 내용과 이후 활용을 확인했다."
+                },
+                "created_at": "2026-10-01T09:01:01+09:00",
+                "lineage": {
+                  "operation": "create",
+                  "source_memory_id": null,
+                  "family_id": "family_base_02"
+                }
+              },
+              "base_03": {
+                "contract_type": "memory_item",
+                "schema_version": "0.2",
+                "id": "base_03",
+                "user_id": "user_demo",
+                "version": 2,
+                "content": "여유 있는 핏을 선호한다.",
+                "tags": [
+                  "fit"
+                ],
+                "claim": {
+                  "key": "slot_03",
+                  "value": "relaxed",
+                  "polarity": "prefer",
+                  "strength": "soft"
+                },
+                "scope": {
+                  "type": "long_term",
+                  "approval": {
+                    "input_ref": "u_fit_approval",
+                    "snapshot_ref": "s_fit_approval",
+                    "user_id": "user_demo",
+                    "approved_at": "2026-10-01T09:01:00+09:00",
+                    "role": "long_term_approval"
+                  }
+                },
+                "applicability": {
+                  "condition": null,
+                  "predicates": [],
+                  "valid_from": null,
+                  "valid_until": null
+                },
+                "verification": {
+                  "basis": "explicit",
+                  "state": "confirmed",
+                  "confirmation": {
+                    "input_ref": "u_fit_content",
+                    "snapshot_ref": "s_fit_content",
+                    "user_id": "user_demo",
+                    "confirmed_at": "2026-10-01T09:00:00+09:00",
+                    "role": "content_confirmation"
+                  }
+                },
+                "evidence": [
+                  {
+                    "input_ref": "u_fit_content",
+                    "snapshot_ref": "s_fit_content",
+                    "roles": [
+                      "content",
+                      "content_confirmation"
+                    ]
+                  },
+                  {
+                    "input_ref": "u_fit_approval",
+                    "snapshot_ref": "s_fit_approval",
+                    "roles": [
+                      "long_term_approval"
+                    ]
+                  }
+                ],
+                "lifecycle": {
+                  "state": "active",
+                  "changed_at": "2026-10-01T09:01:01+09:00",
+                  "reason": "사용자가 내용과 이후 활용을 확인했다."
+                },
+                "created_at": "2026-10-01T09:01:01+09:00",
+                "lineage": {
+                  "operation": "create",
+                  "source_memory_id": null,
+                  "family_id": "family_base_03"
+                }
+              },
+              "base_04": {
+                "contract_type": "memory_item",
+                "schema_version": "0.2",
+                "id": "base_04",
+                "user_id": "user_demo",
+                "version": 2,
+                "content": "여유 있는 핏을 선호한다.",
+                "tags": [
+                  "fit"
+                ],
+                "claim": {
+                  "key": "slot_04",
+                  "value": "relaxed",
+                  "polarity": "prefer",
+                  "strength": "soft"
+                },
+                "scope": {
+                  "type": "long_term",
+                  "approval": {
+                    "input_ref": "u_fit_approval",
+                    "snapshot_ref": "s_fit_approval",
+                    "user_id": "user_demo",
+                    "approved_at": "2026-10-01T09:01:00+09:00",
+                    "role": "long_term_approval"
+                  }
+                },
+                "applicability": {
+                  "condition": null,
+                  "predicates": [],
+                  "valid_from": null,
+                  "valid_until": null
+                },
+                "verification": {
+                  "basis": "explicit",
+                  "state": "confirmed",
+                  "confirmation": {
+                    "input_ref": "u_fit_content",
+                    "snapshot_ref": "s_fit_content",
+                    "user_id": "user_demo",
+                    "confirmed_at": "2026-10-01T09:00:00+09:00",
+                    "role": "content_confirmation"
+                  }
+                },
+                "evidence": [
+                  {
+                    "input_ref": "u_fit_content",
+                    "snapshot_ref": "s_fit_content",
+                    "roles": [
+                      "content",
+                      "content_confirmation"
+                    ]
+                  },
+                  {
+                    "input_ref": "u_fit_approval",
+                    "snapshot_ref": "s_fit_approval",
+                    "roles": [
+                      "long_term_approval"
+                    ]
+                  }
+                ],
+                "lifecycle": {
+                  "state": "active",
+                  "changed_at": "2026-10-01T09:01:01+09:00",
+                  "reason": "사용자가 내용과 이후 활용을 확인했다."
+                },
+                "created_at": "2026-10-01T09:01:01+09:00",
+                "lineage": {
+                  "operation": "create",
+                  "source_memory_id": null,
+                  "family_id": "family_base_04"
+                }
+              },
+              "base_05": {
+                "contract_type": "memory_item",
+                "schema_version": "0.2",
+                "id": "base_05",
+                "user_id": "user_demo",
+                "version": 2,
+                "content": "여유 있는 핏을 선호한다.",
+                "tags": [
+                  "fit"
+                ],
+                "claim": {
+                  "key": "slot_05",
+                  "value": "relaxed",
+                  "polarity": "prefer",
+                  "strength": "soft"
+                },
+                "scope": {
+                  "type": "long_term",
+                  "approval": {
+                    "input_ref": "u_fit_approval",
+                    "snapshot_ref": "s_fit_approval",
+                    "user_id": "user_demo",
+                    "approved_at": "2026-10-01T09:01:00+09:00",
+                    "role": "long_term_approval"
+                  }
+                },
+                "applicability": {
+                  "condition": null,
+                  "predicates": [],
+                  "valid_from": null,
+                  "valid_until": null
+                },
+                "verification": {
+                  "basis": "explicit",
+                  "state": "confirmed",
+                  "confirmation": {
+                    "input_ref": "u_fit_content",
+                    "snapshot_ref": "s_fit_content",
+                    "user_id": "user_demo",
+                    "confirmed_at": "2026-10-01T09:00:00+09:00",
+                    "role": "content_confirmation"
+                  }
+                },
+                "evidence": [
+                  {
+                    "input_ref": "u_fit_content",
+                    "snapshot_ref": "s_fit_content",
+                    "roles": [
+                      "content",
+                      "content_confirmation"
+                    ]
+                  },
+                  {
+                    "input_ref": "u_fit_approval",
+                    "snapshot_ref": "s_fit_approval",
+                    "roles": [
+                      "long_term_approval"
+                    ]
+                  }
+                ],
+                "lifecycle": {
+                  "state": "active",
+                  "changed_at": "2026-10-01T09:01:01+09:00",
+                  "reason": "사용자가 내용과 이후 활용을 확인했다."
+                },
+                "created_at": "2026-10-01T09:01:01+09:00",
+                "lineage": {
+                  "operation": "create",
+                  "source_memory_id": null,
+                  "family_id": "family_base_05"
+                }
+              },
+              "base_06": {
+                "contract_type": "memory_item",
+                "schema_version": "0.2",
+                "id": "base_06",
+                "user_id": "user_demo",
+                "version": 2,
+                "content": "여유 있는 핏을 선호한다.",
+                "tags": [
+                  "fit"
+                ],
+                "claim": {
+                  "key": "slot_06",
+                  "value": "relaxed",
+                  "polarity": "prefer",
+                  "strength": "soft"
+                },
+                "scope": {
+                  "type": "long_term",
+                  "approval": {
+                    "input_ref": "u_fit_approval",
+                    "snapshot_ref": "s_fit_approval",
+                    "user_id": "user_demo",
+                    "approved_at": "2026-10-01T09:01:00+09:00",
+                    "role": "long_term_approval"
+                  }
+                },
+                "applicability": {
+                  "condition": null,
+                  "predicates": [],
+                  "valid_from": null,
+                  "valid_until": null
+                },
+                "verification": {
+                  "basis": "explicit",
+                  "state": "confirmed",
+                  "confirmation": {
+                    "input_ref": "u_fit_content",
+                    "snapshot_ref": "s_fit_content",
+                    "user_id": "user_demo",
+                    "confirmed_at": "2026-10-01T09:00:00+09:00",
+                    "role": "content_confirmation"
+                  }
+                },
+                "evidence": [
+                  {
+                    "input_ref": "u_fit_content",
+                    "snapshot_ref": "s_fit_content",
+                    "roles": [
+                      "content",
+                      "content_confirmation"
+                    ]
+                  },
+                  {
+                    "input_ref": "u_fit_approval",
+                    "snapshot_ref": "s_fit_approval",
+                    "roles": [
+                      "long_term_approval"
+                    ]
+                  }
+                ],
+                "lifecycle": {
+                  "state": "active",
+                  "changed_at": "2026-10-01T09:01:01+09:00",
+                  "reason": "사용자가 내용과 이후 활용을 확인했다."
+                },
+                "created_at": "2026-10-01T09:01:01+09:00",
+                "lineage": {
+                  "operation": "create",
+                  "source_memory_id": null,
+                  "family_id": "family_base_06"
+                }
+              },
+              "base_07": {
+                "contract_type": "memory_item",
+                "schema_version": "0.2",
+                "id": "base_07",
+                "user_id": "user_demo",
+                "version": 2,
+                "content": "여유 있는 핏을 선호한다.",
+                "tags": [
+                  "fit"
+                ],
+                "claim": {
+                  "key": "slot_07",
+                  "value": "relaxed",
+                  "polarity": "prefer",
+                  "strength": "soft"
+                },
+                "scope": {
+                  "type": "long_term",
+                  "approval": {
+                    "input_ref": "u_fit_approval",
+                    "snapshot_ref": "s_fit_approval",
+                    "user_id": "user_demo",
+                    "approved_at": "2026-10-01T09:01:00+09:00",
+                    "role": "long_term_approval"
+                  }
+                },
+                "applicability": {
+                  "condition": null,
+                  "predicates": [],
+                  "valid_from": null,
+                  "valid_until": null
+                },
+                "verification": {
+                  "basis": "explicit",
+                  "state": "confirmed",
+                  "confirmation": {
+                    "input_ref": "u_fit_content",
+                    "snapshot_ref": "s_fit_content",
+                    "user_id": "user_demo",
+                    "confirmed_at": "2026-10-01T09:00:00+09:00",
+                    "role": "content_confirmation"
+                  }
+                },
+                "evidence": [
+                  {
+                    "input_ref": "u_fit_content",
+                    "snapshot_ref": "s_fit_content",
+                    "roles": [
+                      "content",
+                      "content_confirmation"
+                    ]
+                  },
+                  {
+                    "input_ref": "u_fit_approval",
+                    "snapshot_ref": "s_fit_approval",
+                    "roles": [
+                      "long_term_approval"
+                    ]
+                  }
+                ],
+                "lifecycle": {
+                  "state": "active",
+                  "changed_at": "2026-10-01T09:01:01+09:00",
+                  "reason": "사용자가 내용과 이후 활용을 확인했다."
+                },
+                "created_at": "2026-10-01T09:01:01+09:00",
+                "lineage": {
+                  "operation": "create",
+                  "source_memory_id": null,
+                  "family_id": "family_base_07"
+                }
+              },
+              "base_08": {
+                "contract_type": "memory_item",
+                "schema_version": "0.2",
+                "id": "base_08",
+                "user_id": "user_demo",
+                "version": 2,
+                "content": "여유 있는 핏을 선호한다.",
+                "tags": [
+                  "fit"
+                ],
+                "claim": {
+                  "key": "slot_08",
+                  "value": "relaxed",
+                  "polarity": "prefer",
+                  "strength": "soft"
+                },
+                "scope": {
+                  "type": "long_term",
+                  "approval": {
+                    "input_ref": "u_fit_approval",
+                    "snapshot_ref": "s_fit_approval",
+                    "user_id": "user_demo",
+                    "approved_at": "2026-10-01T09:01:00+09:00",
+                    "role": "long_term_approval"
+                  }
+                },
+                "applicability": {
+                  "condition": null,
+                  "predicates": [],
+                  "valid_from": null,
+                  "valid_until": null
+                },
+                "verification": {
+                  "basis": "explicit",
+                  "state": "confirmed",
+                  "confirmation": {
+                    "input_ref": "u_fit_content",
+                    "snapshot_ref": "s_fit_content",
+                    "user_id": "user_demo",
+                    "confirmed_at": "2026-10-01T09:00:00+09:00",
+                    "role": "content_confirmation"
+                  }
+                },
+                "evidence": [
+                  {
+                    "input_ref": "u_fit_content",
+                    "snapshot_ref": "s_fit_content",
+                    "roles": [
+                      "content",
+                      "content_confirmation"
+                    ]
+                  },
+                  {
+                    "input_ref": "u_fit_approval",
+                    "snapshot_ref": "s_fit_approval",
+                    "roles": [
+                      "long_term_approval"
+                    ]
+                  }
+                ],
+                "lifecycle": {
+                  "state": "active",
+                  "changed_at": "2026-10-01T09:01:01+09:00",
+                  "reason": "사용자가 내용과 이후 활용을 확인했다."
+                },
+                "created_at": "2026-10-01T09:01:01+09:00",
+                "lineage": {
+                  "operation": "create",
+                  "source_memory_id": null,
+                  "family_id": "family_base_08"
+                }
+              },
+              "base_09": {
+                "contract_type": "memory_item",
+                "schema_version": "0.2",
+                "id": "base_09",
+                "user_id": "user_demo",
+                "version": 2,
+                "content": "여유 있는 핏을 선호한다.",
+                "tags": [
+                  "fit"
+                ],
+                "claim": {
+                  "key": "slot_09",
+                  "value": "relaxed",
+                  "polarity": "prefer",
+                  "strength": "soft"
+                },
+                "scope": {
+                  "type": "long_term",
+                  "approval": {
+                    "input_ref": "u_fit_approval",
+                    "snapshot_ref": "s_fit_approval",
+                    "user_id": "user_demo",
+                    "approved_at": "2026-10-01T09:01:00+09:00",
+                    "role": "long_term_approval"
+                  }
+                },
+                "applicability": {
+                  "condition": null,
+                  "predicates": [],
+                  "valid_from": null,
+                  "valid_until": null
+                },
+                "verification": {
+                  "basis": "explicit",
+                  "state": "confirmed",
+                  "confirmation": {
+                    "input_ref": "u_fit_content",
+                    "snapshot_ref": "s_fit_content",
+                    "user_id": "user_demo",
+                    "confirmed_at": "2026-10-01T09:00:00+09:00",
+                    "role": "content_confirmation"
+                  }
+                },
+                "evidence": [
+                  {
+                    "input_ref": "u_fit_content",
+                    "snapshot_ref": "s_fit_content",
+                    "roles": [
+                      "content",
+                      "content_confirmation"
+                    ]
+                  },
+                  {
+                    "input_ref": "u_fit_approval",
+                    "snapshot_ref": "s_fit_approval",
+                    "roles": [
+                      "long_term_approval"
+                    ]
+                  }
+                ],
+                "lifecycle": {
+                  "state": "active",
+                  "changed_at": "2026-10-01T09:01:01+09:00",
+                  "reason": "사용자가 내용과 이후 활용을 확인했다."
+                },
+                "created_at": "2026-10-01T09:01:01+09:00",
+                "lineage": {
+                  "operation": "create",
+                  "source_memory_id": null,
+                  "family_id": "family_base_09"
+                }
+              },
+              "base_10": {
+                "contract_type": "memory_item",
+                "schema_version": "0.2",
+                "id": "base_10",
+                "user_id": "user_demo",
+                "version": 2,
+                "content": "여유 있는 핏을 선호한다.",
+                "tags": [
+                  "fit"
+                ],
+                "claim": {
+                  "key": "slot_10",
+                  "value": "relaxed",
+                  "polarity": "prefer",
+                  "strength": "soft"
+                },
+                "scope": {
+                  "type": "long_term",
+                  "approval": {
+                    "input_ref": "u_fit_approval",
+                    "snapshot_ref": "s_fit_approval",
+                    "user_id": "user_demo",
+                    "approved_at": "2026-10-01T09:01:00+09:00",
+                    "role": "long_term_approval"
+                  }
+                },
+                "applicability": {
+                  "condition": null,
+                  "predicates": [],
+                  "valid_from": null,
+                  "valid_until": null
+                },
+                "verification": {
+                  "basis": "explicit",
+                  "state": "confirmed",
+                  "confirmation": {
+                    "input_ref": "u_fit_content",
+                    "snapshot_ref": "s_fit_content",
+                    "user_id": "user_demo",
+                    "confirmed_at": "2026-10-01T09:00:00+09:00",
+                    "role": "content_confirmation"
+                  }
+                },
+                "evidence": [
+                  {
+                    "input_ref": "u_fit_content",
+                    "snapshot_ref": "s_fit_content",
+                    "roles": [
+                      "content",
+                      "content_confirmation"
+                    ]
+                  },
+                  {
+                    "input_ref": "u_fit_approval",
+                    "snapshot_ref": "s_fit_approval",
+                    "roles": [
+                      "long_term_approval"
+                    ]
+                  }
+                ],
+                "lifecycle": {
+                  "state": "active",
+                  "changed_at": "2026-10-01T09:01:01+09:00",
+                  "reason": "사용자가 내용과 이후 활용을 확인했다."
+                },
+                "created_at": "2026-10-01T09:01:01+09:00",
+                "lineage": {
+                  "operation": "create",
+                  "source_memory_id": null,
+                  "family_id": "family_base_10"
+                }
+              },
+              "base_11": {
+                "contract_type": "memory_item",
+                "schema_version": "0.2",
+                "id": "base_11",
+                "user_id": "user_demo",
+                "version": 2,
+                "content": "여유 있는 핏을 선호한다.",
+                "tags": [
+                  "fit"
+                ],
+                "claim": {
+                  "key": "slot_11",
+                  "value": "relaxed",
+                  "polarity": "prefer",
+                  "strength": "soft"
+                },
+                "scope": {
+                  "type": "long_term",
+                  "approval": {
+                    "input_ref": "u_fit_approval",
+                    "snapshot_ref": "s_fit_approval",
+                    "user_id": "user_demo",
+                    "approved_at": "2026-10-01T09:01:00+09:00",
+                    "role": "long_term_approval"
+                  }
+                },
+                "applicability": {
+                  "condition": null,
+                  "predicates": [],
+                  "valid_from": null,
+                  "valid_until": null
+                },
+                "verification": {
+                  "basis": "explicit",
+                  "state": "confirmed",
+                  "confirmation": {
+                    "input_ref": "u_fit_content",
+                    "snapshot_ref": "s_fit_content",
+                    "user_id": "user_demo",
+                    "confirmed_at": "2026-10-01T09:00:00+09:00",
+                    "role": "content_confirmation"
+                  }
+                },
+                "evidence": [
+                  {
+                    "input_ref": "u_fit_content",
+                    "snapshot_ref": "s_fit_content",
+                    "roles": [
+                      "content",
+                      "content_confirmation"
+                    ]
+                  },
+                  {
+                    "input_ref": "u_fit_approval",
+                    "snapshot_ref": "s_fit_approval",
+                    "roles": [
+                      "long_term_approval"
+                    ]
+                  }
+                ],
+                "lifecycle": {
+                  "state": "active",
+                  "changed_at": "2026-10-01T09:01:01+09:00",
+                  "reason": "사용자가 내용과 이후 활용을 확인했다."
+                },
+                "created_at": "2026-10-01T09:01:01+09:00",
+                "lineage": {
+                  "operation": "create",
+                  "source_memory_id": null,
+                  "family_id": "family_base_11"
+                }
+              },
+              "base_12": {
+                "contract_type": "memory_item",
+                "schema_version": "0.2",
+                "id": "base_12",
+                "user_id": "user_demo",
+                "version": 2,
+                "content": "여유 있는 핏을 선호한다.",
+                "tags": [
+                  "fit"
+                ],
+                "claim": {
+                  "key": "slot_12",
+                  "value": "relaxed",
+                  "polarity": "prefer",
+                  "strength": "soft"
+                },
+                "scope": {
+                  "type": "long_term",
+                  "approval": {
+                    "input_ref": "u_fit_approval",
+                    "snapshot_ref": "s_fit_approval",
+                    "user_id": "user_demo",
+                    "approved_at": "2026-10-01T09:01:00+09:00",
+                    "role": "long_term_approval"
+                  }
+                },
+                "applicability": {
+                  "condition": null,
+                  "predicates": [],
+                  "valid_from": null,
+                  "valid_until": null
+                },
+                "verification": {
+                  "basis": "explicit",
+                  "state": "confirmed",
+                  "confirmation": {
+                    "input_ref": "u_fit_content",
+                    "snapshot_ref": "s_fit_content",
+                    "user_id": "user_demo",
+                    "confirmed_at": "2026-10-01T09:00:00+09:00",
+                    "role": "content_confirmation"
+                  }
+                },
+                "evidence": [
+                  {
+                    "input_ref": "u_fit_content",
+                    "snapshot_ref": "s_fit_content",
+                    "roles": [
+                      "content",
+                      "content_confirmation"
+                    ]
+                  },
+                  {
+                    "input_ref": "u_fit_approval",
+                    "snapshot_ref": "s_fit_approval",
+                    "roles": [
+                      "long_term_approval"
+                    ]
+                  }
+                ],
+                "lifecycle": {
+                  "state": "active",
+                  "changed_at": "2026-10-01T09:01:01+09:00",
+                  "reason": "사용자가 내용과 이후 활용을 확인했다."
+                },
+                "created_at": "2026-10-01T09:01:01+09:00",
+                "lineage": {
+                  "operation": "create",
+                  "source_memory_id": null,
+                  "family_id": "family_base_12"
+                }
+              }
+            }
+          }
+        ],
+        "query": {
+          "target_keys": [
+            "slot_00",
+            "slot_01",
+            "slot_02",
+            "slot_03",
+            "slot_04",
+            "slot_05",
+            "slot_06",
+            "slot_07",
+            "slot_08",
+            "slot_09",
+            "slot_10",
+            "slot_11",
+            "slot_12"
+          ],
+          "mapped_keys": [
+            "slot_00",
+            "slot_01",
+            "slot_02",
+            "slot_03",
+            "slot_04",
+            "slot_05",
+            "slot_06",
+            "slot_07",
+            "slot_08",
+            "slot_09",
+            "slot_10",
+            "slot_11",
+            "slot_12"
+          ],
+          "tags": []
+        }
+      },
+      "expected": {
+        "used": [
+          "base_00",
+          "base_01",
+          "base_02",
+          "base_03",
+          "base_04",
+          "base_05",
+          "base_06",
+          "base_07",
+          "base_08",
+          "base_09",
+          "base_10",
+          "base_11"
+        ],
+        "excluded": {
+          "base_12": "budget"
+        },
+        "overridden": [],
+        "unresolved": [],
+        "truncated": true
+      }
+    },
+    {
+      "case_id": "delete_blocks_old_source_fresh_reconsent_allowed",
+      "covers": [
+        "C12",
+        "C11"
+      ],
+      "input": {
+        "kind": "sequence",
+        "memory_ids": [],
+        "steps": [
+          {
+            "batch_id": "batch_multi"
+          },
+          {
+            "batch_id": "batch_delete",
+            "batch_mutations": [
+              {
+                "path": [
+                  "expected_versions"
+                ],
+                "value": {
+                  "multi_fit": 1
+                }
+              },
+              {
+                "path": [
+                  "profile_revision"
+                ],
+                "value": 3
+              },
+              {
+                "path": [
+                  "actions",
+                  0,
+                  "target",
+                  "memory_id"
+                ],
+                "value": "multi_fit"
+              }
+            ],
+            "store_mutations": [
+              {
+                "path": [
+                  "evidence",
+                  "s_delete",
+                  "snapshot",
+                  "target_memory_ids"
+                ],
+                "value": [
+                  "multi_fit"
+                ]
+              }
+            ]
+          },
+          {
+            "batch_id": "batch_past_rebuild",
+            "batch_mutations": [
+              {
+                "path": [
+                  "profile_revision"
+                ],
+                "value": 4
+              }
+            ]
+          },
+          {
+            "batch_id": "batch_fresh",
+            "batch_mutations": [
+              {
+                "path": [
+                  "profile_revision"
+                ],
+                "value": 4
+              }
+            ]
+          }
+        ]
+      },
+      "expected": {
+        "memory_ids": [
+          "fresh_fit",
+          "multi_color"
+        ],
+        "errors": [
+          "past input after delete requires fresh confirmation"
+        ],
+        "receipt_count": 1,
+        "deleted_boundary": true
+      }
+    },
+    {
+      "case_id": "delete_replay_opaque_completion",
+      "covers": [
+        "C11",
+        "C12"
+      ],
+      "input": {
+        "kind": "batch",
+        "batch_id": "batch_delete",
+        "replay": true
+      },
+      "expected": {
+        "replayed": true,
+        "event_count": 1,
+        "changed": {}
+      }
+    },
+    {
+      "case_id": "deleted_parent_keeps_independent_new_meaning",
+      "covers": [
+        "C08",
+        "C12"
+      ],
+      "input": {
+        "kind": "sequence",
+        "steps": [
+          {
+            "batch_id": "batch_replace"
+          },
+          {
+            "batch_id": "batch_delete",
+            "batch_mutations": [
+              {
+                "path": [
+                  "profile_revision"
+                ],
+                "value": 3
+              },
+              {
+                "path": [
+                  "expected_versions"
+                ],
+                "value": {
+                  "mem_fit_long": 3,
+                  "mem_fit_regular": 1
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "expected": {
+        "memory_ids": [
+          "mem_fit_regular",
+          "mem_fit_short_exception",
+          "mem_image_candidate",
+          "mem_wrong_owner"
+        ],
+        "errors": [],
+        "receipt_count": 0,
+        "deleted_boundary": true
+      }
+    }
+  ],
+  "now": "2026-10-03T09:00:00+09:00",
+  "batch_templates": [
+    {
+      "contract_type": "batch",
+      "schema_version": "0.2",
+      "batch_id": "batch_multi",
+      "user_id": "user_demo",
+      "request_id": "req_demo",
+      "expected_request_revision": 3,
+      "profile_revision": 2,
+      "context_snapshot_id": "ctx_demo_snapshot_3",
+      "expected_versions": {},
+      "actions": [
+        {
+          "action_id": "create_multi_fit",
+          "type": "create",
+          "target": {
+            "kind": "none"
+          },
+          "depends_on": [],
+          "new_item": {
+            "contract_type": "memory_item",
+            "schema_version": "0.2",
+            "id": "multi_fit",
+            "user_id": "user_demo",
+            "version": 1,
+            "content": "여유 있는 핏을 선호한다.",
+            "tags": [
+              "fit"
+            ],
+            "claim": {
+              "key": "fit",
+              "value": "relaxed",
+              "polarity": "prefer",
+              "strength": "soft"
+            },
+            "scope": {
+              "type": "long_term",
+              "approval": {
+                "input_ref": "u_multi",
+                "snapshot_ref": "s_multi_fit",
+                "user_id": "user_demo",
+                "approved_at": "2026-10-03T09:05:00+09:00",
+                "role": "long_term_approval"
+              }
+            },
+            "applicability": {
+              "condition": null,
+              "predicates": [],
+              "valid_from": null,
+              "valid_until": null
+            },
+            "verification": {
+              "basis": "explicit",
+              "state": "confirmed",
+              "confirmation": {
+                "input_ref": "u_multi",
+                "snapshot_ref": "s_multi_fit",
+                "user_id": "user_demo",
+                "confirmed_at": "2026-10-03T09:05:00+09:00",
+                "role": "content_confirmation"
+              }
+            },
+            "evidence": [
+              {
+                "input_ref": "u_multi",
+                "snapshot_ref": "s_multi_fit",
+                "roles": [
+                  "content",
+                  "content_confirmation",
+                  "long_term_approval"
+                ]
+              }
+            ],
+            "lifecycle": {
+              "state": "active",
+              "changed_at": "2026-10-03T09:05:01+09:00",
+              "reason": "가상 사용자 확인·선택"
+            },
+            "created_at": "2026-10-03T09:05:01+09:00",
+            "lineage": {
+              "operation": "create",
+              "source_memory_id": null,
+              "family_id": "family_multi_fit"
+            }
+          },
+          "evidence": [
+            {
+              "input_ref": "u_multi",
+              "snapshot_ref": "s_multi_fit",
+              "roles": [
+                "content",
+                "content_confirmation",
+                "long_term_approval"
+              ]
+            }
+          ],
+          "deletion_scope": []
+        },
+        {
+          "action_id": "create_multi_color",
+          "type": "create",
+          "target": {
+            "kind": "none"
+          },
+          "depends_on": [],
+          "new_item": {
+            "contract_type": "memory_item",
+            "schema_version": "0.2",
+            "id": "multi_color",
+            "user_id": "user_demo",
+            "version": 1,
+            "content": "차분한 색상을 선호한다.",
+            "tags": [
+              "color"
+            ],
+            "claim": {
+              "key": "color",
+              "value": "muted",
+              "polarity": "prefer",
+              "strength": "soft"
+            },
+            "scope": {
+              "type": "long_term",
+              "approval": {
+                "input_ref": "u_multi",
+                "snapshot_ref": "s_multi_color",
+                "user_id": "user_demo",
+                "approved_at": "2026-10-03T09:05:00+09:00",
+                "role": "long_term_approval"
+              }
+            },
+            "applicability": {
+              "condition": null,
+              "predicates": [],
+              "valid_from": null,
+              "valid_until": null
+            },
+            "verification": {
+              "basis": "explicit",
+              "state": "confirmed",
+              "confirmation": {
+                "input_ref": "u_multi",
+                "snapshot_ref": "s_multi_color",
+                "user_id": "user_demo",
+                "confirmed_at": "2026-10-03T09:05:00+09:00",
+                "role": "content_confirmation"
+              }
+            },
+            "evidence": [
+              {
+                "input_ref": "u_multi",
+                "snapshot_ref": "s_multi_color",
+                "roles": [
+                  "content",
+                  "content_confirmation",
+                  "long_term_approval"
+                ]
+              }
+            ],
+            "lifecycle": {
+              "state": "active",
+              "changed_at": "2026-10-03T09:05:01+09:00",
+              "reason": "가상 사용자 확인·선택"
+            },
+            "created_at": "2026-10-03T09:05:01+09:00",
+            "lineage": {
+              "operation": "create",
+              "source_memory_id": null,
+              "family_id": "family_multi_color"
+            }
+          },
+          "evidence": [
+            {
+              "input_ref": "u_multi",
+              "snapshot_ref": "s_multi_color",
+              "roles": [
+                "content",
+                "content_confirmation",
+                "long_term_approval"
+              ]
+            }
+          ],
+          "deletion_scope": []
+        }
+      ],
+      "issued_at": "2026-10-03T09:05:00+09:00",
+      "cause_input_ref": "u_multi"
+    },
+    {
+      "contract_type": "batch",
+      "schema_version": "0.2",
+      "batch_id": "batch_fresh",
+      "user_id": "user_demo",
+      "request_id": "req_demo",
+      "expected_request_revision": 3,
+      "profile_revision": 2,
+      "context_snapshot_id": "ctx_demo_snapshot_3",
+      "expected_versions": {},
+      "actions": [
+        {
+          "action_id": "create_multi_fit",
+          "type": "create",
+          "target": {
+            "kind": "none"
+          },
+          "depends_on": [],
+          "new_item": {
+            "contract_type": "memory_item",
+            "schema_version": "0.2",
+            "id": "fresh_fit",
+            "user_id": "user_demo",
+            "version": 1,
+            "content": "여유 있는 핏을 선호한다.",
+            "tags": [
+              "fit"
+            ],
+            "claim": {
+              "key": "fit",
+              "value": "relaxed",
+              "polarity": "prefer",
+              "strength": "soft"
+            },
+            "scope": {
+              "type": "long_term",
+              "approval": {
+                "input_ref": "u_fresh",
+                "snapshot_ref": "s_fresh",
+                "user_id": "user_demo",
+                "approved_at": "2026-10-05T09:00:00+09:00",
+                "role": "long_term_approval"
+              }
+            },
+            "applicability": {
+              "condition": null,
+              "predicates": [],
+              "valid_from": null,
+              "valid_until": null
+            },
+            "verification": {
+              "basis": "explicit",
+              "state": "confirmed",
+              "confirmation": {
+                "input_ref": "u_fresh",
+                "snapshot_ref": "s_fresh",
+                "user_id": "user_demo",
+                "confirmed_at": "2026-10-05T09:00:00+09:00",
+                "role": "content_confirmation"
+              }
+            },
+            "evidence": [
+              {
+                "input_ref": "u_fresh",
+                "snapshot_ref": "s_fresh",
+                "roles": [
+                  "content",
+                  "content_confirmation",
+                  "long_term_approval"
+                ]
+              }
+            ],
+            "lifecycle": {
+              "state": "active",
+              "changed_at": "2026-10-05T09:00:01+09:00",
+              "reason": "가상 사용자 확인·선택"
+            },
+            "created_at": "2026-10-05T09:00:01+09:00",
+            "lineage": {
+              "operation": "create",
+              "source_memory_id": null,
+              "family_id": "family_fresh"
+            }
+          },
+          "evidence": [
+            {
+              "input_ref": "u_fresh",
+              "snapshot_ref": "s_fresh",
+              "roles": [
+                "content",
+                "content_confirmation",
+                "long_term_approval"
+              ]
+            }
+          ],
+          "deletion_scope": []
+        }
+      ],
+      "issued_at": "2026-10-05T09:00:01+09:00",
+      "cause_input_ref": "u_fresh"
+    },
+    {
+      "contract_type": "batch",
+      "schema_version": "0.2",
+      "batch_id": "batch_past_rebuild",
+      "user_id": "user_demo",
+      "request_id": "req_demo",
+      "expected_request_revision": 3,
+      "profile_revision": 2,
+      "context_snapshot_id": "ctx_demo_snapshot_3",
+      "expected_versions": {},
+      "actions": [
+        {
+          "action_id": "create_multi_fit",
+          "type": "create",
+          "target": {
+            "kind": "none"
+          },
+          "depends_on": [],
+          "new_item": {
+            "contract_type": "memory_item",
+            "schema_version": "0.2",
+            "id": "past_fit",
+            "user_id": "user_demo",
+            "version": 1,
+            "content": "여유 있는 핏을 선호한다.",
+            "tags": [
+              "fit"
+            ],
+            "claim": {
+              "key": "fit",
+              "value": "relaxed",
+              "polarity": "prefer",
+              "strength": "soft"
+            },
+            "scope": {
+              "type": "long_term",
+              "approval": {
+                "input_ref": "u_multi",
+                "snapshot_ref": "s_multi_fit",
+                "user_id": "user_demo",
+                "approved_at": "2026-10-03T09:05:00+09:00",
+                "role": "long_term_approval"
+              }
+            },
+            "applicability": {
+              "condition": null,
+              "predicates": [],
+              "valid_from": null,
+              "valid_until": null
+            },
+            "verification": {
+              "basis": "explicit",
+              "state": "confirmed",
+              "confirmation": {
+                "input_ref": "u_multi",
+                "snapshot_ref": "s_multi_fit",
+                "user_id": "user_demo",
+                "confirmed_at": "2026-10-03T09:05:00+09:00",
+                "role": "content_confirmation"
+              }
+            },
+            "evidence": [
+              {
+                "input_ref": "u_multi",
+                "snapshot_ref": "s_multi_fit",
+                "roles": [
+                  "content",
+                  "content_confirmation",
+                  "long_term_approval"
+                ]
+              }
+            ],
+            "lifecycle": {
+              "state": "active",
+              "changed_at": "2026-10-03T09:05:01+09:00",
+              "reason": "가상 사용자 확인·선택"
+            },
+            "created_at": "2026-10-03T09:05:01+09:00",
+            "lineage": {
+              "operation": "create",
+              "source_memory_id": null,
+              "family_id": "family_multi_fit"
+            }
+          },
+          "evidence": [
+            {
+              "input_ref": "u_multi",
+              "snapshot_ref": "s_multi_fit",
+              "roles": [
+                "content",
+                "content_confirmation",
+                "long_term_approval"
+              ]
+            }
+          ],
+          "deletion_scope": []
+        }
+      ],
+      "issued_at": "2026-10-03T09:05:00+09:00",
+      "cause_input_ref": "u_multi"
+    }
+  ],
+  "derived_artifacts": {
+    "source_fit_span": {
+      "sources": [
+        "s_fit_content"
+      ]
+    },
+    "summary_fit": {
+      "sources": [
+        "mem_fit_long",
+        "source_fit_span"
+      ]
+    },
+    "cache_fit": {
+      "sources": [
+        "summary_fit"
+      ]
+    },
+    "unrelated_artifact": {
+      "sources": [
+        "mem_wrong_owner"
+      ]
+    }
+  },
+  "study_records": [
+    {
+      "id": "trial_baseline:base",
+      "namespace": "trial_baseline",
+      "confirmed": true,
+      "scope": "long_term",
+      "request_id": "first",
+      "sequence": 1,
+      "key": "fit",
+      "value": "relaxed"
+    },
+    {
+      "id": "trial_baseline:temporary",
+      "namespace": "trial_baseline",
+      "confirmed": true,
+      "scope": "short_term",
+      "request_id": "first",
+      "sequence": 2,
+      "key": "fit",
+      "value": "slim"
+    },
+    {
+      "id": "trial_split:base",
+      "namespace": "trial_split",
+      "confirmed": true,
+      "scope": "long_term",
+      "request_id": "first",
+      "sequence": 1,
+      "key": "fit",
+      "value": "relaxed"
+    },
+    {
+      "id": "trial_split:temporary",
+      "namespace": "trial_split",
+      "confirmed": true,
+      "scope": "short_term",
+      "request_id": "first",
+      "sequence": 2,
+      "key": "fit",
+      "value": "slim"
+    }
+  ],
+  "current_inputs": {
+    "batch_create": "u_multi",
+    "batch_confirm_promote": "u_image_approval",
+    "batch_replace": "u_replace",
+    "batch_withdraw": "u_withdraw",
+    "batch_delete": "u_delete",
+    "batch_multi": "u_multi",
+    "batch_fresh": "u_fresh",
+    "batch_past_rebuild": "u_multi"
+  },
+  "deletion_receipts": [
+    {
+      "contract_type": "deletion_receipt",
+      "schema_version": "0.2",
+      "token": "delete_demo_token",
+      "fingerprint": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "completed_at": "2026-10-04T09:00:01+09:00",
+      "expires_at": "2026-10-05T09:00:01+09:00"
+    }
+  ],
+  "redactions": {},
+  "design_status": "Accepted",
+  "design_approval": {
+    "date": "2026-10-13",
+    "source": "user_reply_in_current_chat",
+    "statement": "권고안 전체 승인",
+    "scope": "D01–D12; ADR 0001/0002; parameters; Python+SQLite memory minimum; implementation plan"
+  }
+}
