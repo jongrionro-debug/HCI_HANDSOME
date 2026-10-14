@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LUMI | 시스템 설계 및 추천 파이프라인 — 잘생긴 팀</title>
+<style>
+:root{
+ --ink:#122538; --ink-2:#345064; --muted:#687a89;
+ --line:#dbe4e9; --paper:#ffffff; --canvas:#eef2f4;
+ --teal:#087e84; --tint:#e8f5f3; --navy:#16304a;
+ --blue-tint:#eef4f9; --warm:#fff7ed; --warm-ink:#8e5b24;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{font-family:"Noto Sans CJK KR","Noto Sans KR","Apple SD Gothic Neo",sans-serif;color:var(--ink);background:var(--canvas);font-size:10.65px;line-height:1.58;letter-spacing:-.018em;-webkit-font-smoothing:antialiased}
+.report{padding:24px 10px 50px}
+.page{width:210mm;min-height:297mm;margin:0 auto 24px;background:var(--paper);box-shadow:0 8px 35px #23394a1a;padding:15.5mm 17mm 13mm;display:flex;flex-direction:column;position:relative;overflow:hidden}
+.p-top{display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--line);padding-bottom:9px;margin-bottom:15px;color:var(--muted);font-size:9px}
+.p-top .brand{font-weight:900;color:var(--teal);letter-spacing:.13em;font-size:11px}
+.p-top span:last-child{font-weight:600}
+.eyebrow{font-size:9.5px;letter-spacing:.16em;color:var(--teal);font-weight:800;text-transform:uppercase}
+h1{font-size:28px;line-height:1.26;letter-spacing:-.06em;margin:8px 0 4px;font-weight:900;color:#102a40}
+.subtitle{font-size:11.5px;color:var(--ink-2);margin:0 0 16px}
+.title-row{display:flex;justify-content:space-between;align-items:flex-end;gap:10px}
+.hero-mark{min-width:60px;height:60px;border-radius:17px;border:1px solid #c7dedc;background:linear-gradient(145deg,#e8f5f3,#f5fbfa);display:flex;align-items:center;justify-content:center;font-size:26px;font-weight:950;letter-spacing:-.09em;color:#097a7d}
+.lead{padding:12px 14px;background:var(--tint);border-left:3px solid var(--teal);border-radius:0 9px 9px 0;margin-bottom:18px;font-size:11px;color:var(--ink-2)}
+.lead strong{color:var(--ink)}
+section{margin:0 0 18px;break-inside:avoid}
+.section-head{display:flex;align-items:center;gap:9px;margin-bottom:10px}
+.num{width:22px;height:22px;flex:none;border-radius:7px;background:var(--navy);color:#fff;display:grid;place-items:center;font-size:11px;font-weight:800}
+h2{font-size:14px;margin:0;color:#162e44;line-height:1.25;letter-spacing:-.045em}
+h3{font-size:11.7px;margin:0 0 7px;letter-spacing:-.025em;color:var(--ink)}
+p{margin:0 0 7px}strong{font-weight:800}
+small,.small{font-size:9.5px;color:var(--muted)}
+.note{font-size:9.5px;color:var(--muted);margin-top:6px}
+.pill{display:inline-block;vertical-align:middle;padding:1px 7px;background:#f1f5f8;border:1px solid #dee7eb;color:var(--ink-2);border-radius:20px;font-size:8.7px;font-weight:700;white-space:nowrap}
+.pill.teal{background:var(--tint);border-color:#c7e3df;color:#08696e}
+.pill.warm{background:var(--warm);border-color:#f1dfc5;color:var(--warm-ink)}
+.cards-3,.cards-2{display:grid;gap:8px}
+.cards-3{grid-template-columns:repeat(3,1fr)}
+.cards-2{grid-template-columns:repeat(2,1fr)}
+.card{border:1px solid var(--line);background:#fff;border-radius:9px;padding:11px 11px 9px;min-width:0}
+.card.soft{background:#f8fafb}
+.card.tealbg{background:#f1f9f8;border-color:#cce5e1}
+.card-title{font-size:10.5px;font-weight:850;margin-bottom:5px;color:var(--ink)}
+.card p{color:var(--ink-2);font-size:9.65px;line-height:1.55;margin-bottom:0}
+.diagram{padding:11px;border:1px solid #d9e3e8;border-radius:11px;background:#fbfcfd}
+.flow-row{display:flex;align-items:center;gap:6px;justify-content:space-between}
+.flow-col{display:flex;flex-direction:column;align-items:center;gap:5px}
+.flow-block{border:1px solid #d6e1e6;background:#fff;border-radius:8px;text-align:center;padding:8px 7px;flex:1;min-width:0;font-size:9.3px;font-weight:750;line-height:1.4;color:var(--ink)}
+.flow-block em{font-weight:450;display:block;font-style:normal;font-size:8px;color:var(--muted);margin-top:2px}
+.flow-block.primary{background:var(--navy);color:#fff;border-color:var(--navy)}
+.flow-block.primary em{color:#d4e2ec}
+.flow-block.tint{background:var(--tint);border-color:#b8dad5}
+.arr{font-size:16px;font-weight:800;color:var(--teal);flex:none}
+.flow-detail{display:flex;align-items:center;justify-content:space-between;gap:5px;margin-top:7px}
+.flow-detail .mini{flex:1;border:1px dashed #cbd9df;border-radius:7px;padding:5px 8px;text-align:center;color:var(--ink-2);font-size:8.6px;background:#fff}
+.flow-down{text-align:center;font-size:14px;line-height:1.3;color:var(--teal);font-weight:900;margin:3px 0}
+.table{width:100%;border-collapse:collapse;font-size:9.5px;line-height:1.5;table-layout:fixed}
+.table th{text-align:left;font-size:9px;color:#496274;background:#eef3f6;font-weight:800;padding:7px 8px;border-bottom:1px solid #dae4e8}
+.table td{padding:7px 8px;border-bottom:1px solid #e8edf0;vertical-align:top;color:var(--ink-2)}
+.table td strong{color:var(--ink)}
+.table tr:last-child td{border-bottom:0}
+.table-wrap{border:1px solid var(--line);border-radius:9px;overflow:hidden}
+.split{display:grid;grid-template-columns:1.15fr .85fr;gap:9px}
+.qbox{padding:10px 12px;border-radius:9px;background:#f4f8fb;border:1px solid #dbe6ee}
+.qbox .question{font-weight:800;font-size:10.1px;line-height:1.48;margin-bottom:7px}
+.chips{display:flex;flex-wrap:wrap;gap:5px}
+.chip{display:inline-block;background:#fff;border:1px solid #cbdbe3;color:#2d4b60;padding:5px 8px;border-radius:6px;font-size:9.1px;font-weight:650;white-space:nowrap}
+.chip.hl{background:#e7f3f1;border-color:#a7d7d1;color:#087079}
+.step-row{display:flex;gap:8px;align-items:stretch}
+.step{flex:1;min-width:0;padding:10px 9px;border:1px solid var(--line);border-radius:9px;background:#fff}
+.step b{display:block;margin:0 0 4px;color:var(--teal);font-size:9px}
+.step strong{font-size:9.8px}
+.step p{font-size:9.05px;color:var(--muted);margin-top:4px}
+.rule-list{margin:0;padding-left:16px;color:var(--ink-2);font-size:9.6px;line-height:1.75}
+.rule-list li{padding-left:1px}
+.callout{border-left:3px solid #b6ced9;background:#f4f8fa;border-radius:0 7px 7px 0;padding:9px 11px;font-size:9.5px;color:var(--ink-2)}
+.endbar{margin-top:10px;display:flex;gap:8px;align-items:center;padding:10px 12px;background:var(--navy);color:#fff;border-radius:9px;font-size:10.2px}
+.endbar strong{color:#9ee4df}
+.footer{display:flex;justify-content:space-between;align-items:center;margin-top:auto;padding-top:10px;border-top:1px solid var(--line);font-size:8.7px;color:#84929b}
+.footer strong{color:#526b7c}
+.page-label{padding-top:6px;margin:0 0 12px;color:var(--muted);font-size:9.5px}
+.kv{display:grid;grid-template-columns:85px 1fr;gap:7px;font-size:9.4px;color:var(--ink-2)}
+.kv b{color:var(--ink)}
+.taglegend{display:flex;gap:5px;align-items:center;flex-wrap:wrap;margin-top:8px}
+.tight section{margin-bottom:15px}
+/* More compact feedback and decision panels on printable A4 pages */
+.page:nth-of-type(2) section{margin-bottom:14px}
+.page:nth-of-type(2) .table td{padding-top:6px;padding-bottom:6px}
+.page:nth-of-type(2) .qbox{padding:9px 10px}
+.page:nth-of-type(3) .diagram .flow-block{padding:7px 6px}
+
+/* print-safe flex text sizing */
+.title-row > div:first-child{flex:1;min-width:0}
+.subtitle{font-size:10.9px}
+.section-head h2{flex:1 1 auto;white-space:nowrap;min-width:0}
+.p-top{gap:18px}
+.p-top span:last-child{white-space:nowrap}
+.footer{gap:12px}
+.footer span{flex:1 1 auto;white-space:nowrap}
+.footer strong{flex:none;white-space:nowrap}
+.endbar strong{flex:none;white-space:nowrap}
+.endbar span{flex:1}
+
+@page{size:A4;margin:0}
+@media print{
+ html,body{background:#fff!important;margin:0;padding:0}
+ .report{padding:0}
+ .page{margin:0;box-shadow:none;width:210mm;height:297mm;min-height:297mm;max-height:297mm;page-break-after:always;break-after:page}
+ .page:last-child{page-break-after:auto;break-after:auto}
+ body{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+}
+@media screen and (max-width:850px){
+ .report{padding:0}
+ .page{width:100%;max-width:794px;min-height:auto;padding:25px 22px;margin:0 auto 12px}
+}
+@media screen and (max-width:550px){
+ .cards-3,.cards-2,.split{grid-template-columns:1fr}
+ .flow-row{flex-wrap:wrap}
+ .flow-block{flex-basis:43%}
+ .arr{display:none}
+ h1{font-size:24px}
+ .step-row{flex-direction:column}
+}
+</style>
+</head>
+<body>
+<main class="report">
+<!-- PAGE 1 -->
+<article class="page" aria-label="1페이지: 전체 구조와 초기 후보 생성">
+ <header class="p-top"><span class="brand">LUMI / SYSTEM DESIGN</span><span>잘생긴 팀 · HCI 프로젝트 · 2026.10.14</span></header>
+ <div class="title-row">
+  <div><div class="eyebrow">Recommendation Agent · Design Brief</div><h1>LUMI</h1><p class="subtitle"><strong>Long&amp;short-term User Memory with Image-selection</strong><br>이미지 선택 기반 적응형 패션 추천 Agent — 시스템 설계 요약</p></div>
+  <div class="hero-mark" aria-hidden="true">L<span style="color:#72bbb5">·</span></div>
+ </div>
+ <div class="lead"><strong>목표</strong> · 자신의 패션 취향을 말로 정확히 설명하기 어려운 사용자도 <strong>기억 + 현재 요청 + 이미지 선택</strong>을 통해 선호를 발견하고, 적은 질문으로 만족스러운 코디에 도달하도록 돕는다.</div>
+
+ <section>
+  <div class="section-head"><span class="num">1</span><h2>전체 시스템 Architecture</h2></div>
+  <div class="diagram">
+   <div class="flow-row">
+    <div class="flow-block"><strong>사용자 입력</strong><em>현재 요청 · 상황</em></div><span class="arr">+</span>
+    <div class="flow-block"><strong>Memory Layer</strong><em>장기기억 · 세션기억</em></div><span class="arr">→</span>
+    <div class="flow-block primary"><strong>LLM 선호 해석</strong><em>명시 조건 · 잠정 가설</em></div>
+   </div>
+   <div class="flow-down">↓</div>
+   <div class="flow-row">
+    <div class="flow-block tint"><strong>User Preference Map</strong><em>확정 · 추론 · Unknown</em></div><span class="arr">→</span>
+    <div class="flow-block"><strong>Candidate Look 설계</strong><em>5개 코디 방향 · 2:1:2</em></div><span class="arr">→</span>
+    <div class="flow-block tint"><strong>Recommendation Engine</strong><em>실제 상품 검색 · 코디 구성</em></div>
+   </div>
+   <div class="flow-detail">
+    <div class="mini">Product Feature Map<br>VLM/메타데이터 기반 실제 상품 속성</div>
+    <span class="arr">↗</span>
+    <div class="mini">이미지 제시 → 선택 → 피드백 → 세션 선호 업데이트 <strong>↺</strong></div>
+   </div>
+  </div>
+  <p class="note">※ 사용자 선호 상태, 후보 코디 설계, 실제 상품 속성은 별개로 관리한다. Agent는 피드백에 따라 후보 생성·질문·종료를 반복 선택한다.</p>
+ </section>
+
+ <section>
+  <div class="section-head"><span class="num">2</span><h2>초기 사용자 선호 분석 및 후보 생성</h2></div>
+  <div class="cards-2" style="margin-bottom:9px">
+   <div class="card soft">
+    <div class="card-title">① 초기 선호 해석 <span class="pill teal">LLM</span></div>
+    <p><strong>Explicit</strong> 현재 요청에 명시된 조건<br><strong>Long-term</strong> 동의를 받아 저장된 평소 취향<br><strong>Context-derived</strong> 계절·상황 기반 잠정 추론<br><strong>Hypothesis</strong> 근거가 약한 선호 가설</p>
+   </div>
+   <div class="card soft">
+    <div class="card-title">② Feature Map 운용 <span class="pill">Policy</span></div>
+    <p>확실하지 않은 사용자 선호는 <strong>Unknown</strong> 가능.<br>모든 속성을 사용자 취향으로 채울 필요 없음.<br>후보에 필요한 값은 <strong>코디 설계 + 실제 상품 검색</strong>으로 구체화.</p>
+   </div>
+  </div>
+  <div class="table-wrap">
+   <table class="table" aria-label="초기 후보 다섯 개의 역할"><thead><tr><th style="width:17%">후보</th><th style="width:28%">전략</th><th>의도</th></tr></thead>
+    <tbody>
+     <tr><td><strong>LOOK A · B</strong></td><td><span class="pill teal">장기기억 기반 ×2</span></td><td>평소 선호를 충실히 반영하되 두 코디 사이에도 다양성 확보</td></tr>
+     <tr><td><strong>LOOK C</strong></td><td><span class="pill">인접 스타일 ×1</span></td><td>기존 취향에서 자연스럽게 확장</td></tr>
+     <tr><td><strong>LOOK D · E</strong></td><td><span class="pill warm">새로운 스타일 ×2</span></td><td>숨은 취향·이번 요청의 다른 선호 탐색</td></tr>
+    </tbody>
+   </table>
+  </div>
+  <p class="note"><strong>우선순위:</strong> 현재 요청의 명시적 제약 &gt; 이번 세션에서 확인된 선호 &gt; 관련 장기기억 &gt; LLM 가설. <strong>2:1:2는 초기 기본 전략</strong>이며, 현재 요청과 충돌하면 조정한다.</p>
+ </section>
+ <footer class="footer"><span>잘생긴 팀 · LUMI / 시스템 설계 요약</span><strong>01 / 03</strong></footer>
+</article>
+
+<!-- PAGE 2 -->
+<article class="page" aria-label="2페이지: 이미지 선택과 적응형 피드백">
+ <header class="p-top"><span class="brand">LUMI / INTERACTION</span><span>Image-first · Text-first Clarification</span></header>
+ <p class="page-label">사용자 인터랙션과 선호 업데이트</p>
+ <section>
+  <div class="section-head"><span class="num">3</span><h2>Image-first 기반 사용자 피드백</h2></div>
+  <p>초기 <strong>LOOK 5개</strong>를 제시하고 사용자가 마음에 드는 후보를 <strong>0~5개 복수 선택</strong>한다. 전체 룩의 상의·하의 등 <strong>이미지 부분 선택</strong>도 허용한다.</p>
+  <div class="cards-3" style="margin-top:9px">
+   <div class="card tealbg"><div class="card-title">1개 선택</div><p>선택 룩을 긍정적 증거로 기록. 특정 속성 선호는 아직 가설.</p></div>
+   <div class="card tealbg"><div class="card-title">복수 선택</div><p>선택 룩의 공통·차이 및 미선택 후보와의 차이를 분석.</p></div>
+   <div class="card tealbg"><div class="card-title">0개 선택</div><p>전부 불만족. 이유를 짧게 확인하거나 다른 방향으로 재탐색.</p></div>
+  </div>
+  <p class="note">※ <strong>미선택 ≠ 싫어함.</strong> 부분 선택은 상의·하의 등 Item-level 근거, 전체 룩 선택은 Outfit-level 근거로 분리한다.</p>
+ </section>
+
+ <section>
+  <div class="section-head"><span class="num">4</span><h2>Adaptive Feedback &amp; Questioning</h2></div>
+  <p><strong>LLM이 선택·미선택 LOOK의 Feature와 부분 선택 근거를 분석</strong>해 선택 이유의 가설을 만든다. 설명이 충분하면 <strong>질문 없이 잠정 가설로 재추천</strong>하고, 확인이 유용할 때만 <strong>LLM이 구체적인 이유를 먼저 제안</strong>한다.</p>
+  <div class="split" style="margin:9px 0">
+   <div class="qbox">
+    <div class="small" style="color:var(--teal);font-weight:850;margin-bottom:4px">선택 이유가 불확실할 때 · LLM의 가설 확인</div>
+    <div class="question">“두 코디 모두 여유로운 핏이네요. 이런 핏이 마음에 드셨나요?”</div>
+    <div class="chips"><span class="chip">맞아요</span><span class="chip">다른 부분이 좋아요</span><span class="chip hl">잘 모르겠어요</span></div>
+    <p class="note" style="margin:5px 0 0;font-size:8.8px">‘다른 부분’ 선택 시 → [상의] [하의] [색감] [전체 조합] 등 보조 칩</p>
+   </div>
+   <div class="qbox">
+    <div class="small" style="color:var(--teal);font-weight:850;margin-bottom:4px">기존 선호와 충돌할 때 · 이번 세션만 확인</div>
+    <div class="question">“이번에는 Oversized 기반으로 추천할까요?”</div>
+    <div class="chips"><span class="chip">이번엔 Oversized</span><span class="chip">평소대로</span><span class="chip">둘 다</span><span class="chip">직접 입력</span></div>
+   </div>
+  </div>
+  <div class="table-wrap">
+   <table class="table"><thead><tr><th style="width:30%">사용자 반응 / 상태</th><th>Agent의 처리</th></tr></thead><tbody>
+    <tr><td><strong>LLM의 추론으로 충분</strong></td><td>질문 생략 → <strong>Hypothesis</strong>로만 반영해 재추천 (확정 금지)</td></tr>
+    <tr><td><strong>“맞아요”</strong> / <strong>“다른 부분”</strong></td><td>가설 확인 → 세션 선호 갱신 / 보조 선택지로 이유 좁히기</td></tr>
+    <tr><td><strong>“잘 모르겠어요”</strong><br><strong>“그냥 느낌이 좋아요”</strong></td><td>이유 질문 중단. 선택 LOOK 선호는 유지; <strong>유용할 때만</strong> 이미지 비교, 아니면 유사 코디 재추천</td></tr>
+    <tr><td><strong>장기기억과 충돌</strong></td><td>텍스트 원탭으로 현재 요청에 적용할 선호 확인; 장기기억 보존</td></tr>
+   </tbody></table>
+  </div>
+  <p class="note"><strong>이미지 비교는 선택적 Fallback:</strong> 말로 이유를 설명하기 어렵고, 해당 속성 구분이 추천에 중요하며, 비교 가능한 후보가 있을 때만 2~3개 제시한다.</p>
+ </section>
+
+ <section>
+  <div class="section-head"><span class="num">5</span><h2>Preference Update &amp; Re-recommendation</h2></div>
+  <p style="font-size:9.6px;margin-bottom:8px"><strong>Evidence 기록</strong>(LOOK·부분 선택·원탭) → <strong>Session Preference 갱신</strong>(Confirmed / Hypothesis 구분) → 재추천 또는 종료 제안. 기존 장기기억과의 일시적 불일치는 세션에서만 우선 적용한다.</p>
+  <div class="cards-2">
+   <div class="card soft" style="padding:8px 10px"><div class="card-title">사용자가 언제든 종료 <span class="pill teal">최종 결정권</span></div><p><strong>[이 코디로 확정] [여기서 종료]</strong>를 상시 제공. Agent 판단과 무관하게 사용자가 확정·중단할 수 있다.</p></div>
+   <div class="card soft" style="padding:8px 10px"><div class="card-title">Agent는 종료를 <u>제안</u> <span class="pill">Hybrid</span></div><p>긍정적 반응 + 필수 제약 충족 + 추가 개선 여지 감소 시 <strong>[확정] [더 탐색]</strong> 제안. 반복 불만족·피로 신호에는 <strong>[방향 전환] [조건 수정] [종료]</strong> 제공.</p></div>
+  </div>
+  <div class="callout" style="margin-top:8px"><strong>세션 종료 ≠ 장기기억 변경</strong> · 종료 후에는 선택적으로, 저장할 <strong>구체적 선호를 사용자에게 보여주고 향후 활용 동의를 별도로 확인</strong>한다. 자동 저장·교체 금지.</div>
+ </section>
+ <footer class="footer"><span>선호를 설명하기 어려워도 추천은 계속된다.</span><strong>02 / 03</strong></footer>
+</article>
+
+<!-- PAGE 3 -->
+<article class="page" aria-label="3페이지: Agent 분담과 실제 사용 시나리오">
+ <header class="p-top"><span class="brand">LUMI / DECISION AGENT</span><span>Hybrid Decision-making · Use Case</span></header>
+ <p class="page-label">Agent 역할과 엔드투엔드 흐름</p>
+ <section>
+  <div class="section-head"><span class="num">6</span><h2>Agent Architecture</h2></div>
+  <div class="table-wrap">
+   <table class="table"><thead><tr><th style="width:30%">컴포넌트</th><th>주요 책임</th></tr></thead><tbody>
+    <tr><td><strong>LLM Interpreter</strong></td><td>단기 입력 해석, 초기 선호 추론, 이미지 선택 이유 분석, 피드백 가설·질문 문구 제안</td></tr>
+    <tr><td><strong>Decision Agent</strong></td><td>상태·불확실성·추천 개선 가능성에 따라 <strong>질문 생략 / 원탭 확인 / 이미지 비교 / 재추천 / 종료 제안</strong> 선택</td></tr>
+    <tr><td><strong>Rule-based Policy</strong></td><td>명시적 조건 우선, Feature 값 검증, 기억 충돌·상태 갱신, 질문 예산·비교 조건 및 사용자 종료권 보장</td></tr>
+    <tr><td><strong>Recommendation Engine</strong></td><td>Product Feature DB 검색, 실제 상품 기반 코디 구성, 다양성·연관성 반영, 후보 재정렬</td></tr>
+    <tr><td><strong>Memory Layer</strong></td><td>장기/세션기억 분리, 근거·적용 범위 검증, 종료 후 장기기억 후보에 대한 별도 동의 관리</td></tr>
+   </tbody></table>
+  </div>
+  <p class="note"><strong>설계 원칙:</strong> LLM은 의미를 추론하고, 정책은 무근거 확정·기억 오염을 막는다. 각 컴포넌트는 논리적 역할이며 반드시 별도의 LLM Agent일 필요는 없다.</p>
+ </section>
+
+ <section>
+  <div class="section-head"><span class="num">7</span><h2>최종 파이프라인 <span style="font-size:10px;font-weight:600;color:var(--muted)">/ 실제 사용 시나리오 + 통합 흐름</span></h2></div>
+  <div class="card soft" style="margin-bottom:9px">
+   <div class="card-title">CASE · 평소에는 Minimal, 이번에는 Street일 수 있는 사용자</div>
+   <div class="kv"><b>장기기억</b><span>Minimal Style · Relaxed Fit 선호</span><b>현재 입력</b><span>“가을에 입을 갈색옷 추천해줘.”</span></div>
+  </div>
+  <div class="diagram" style="padding:10px 11px">
+   <div class="flow-row"><div class="flow-block tint">① 상태 해석<em>Brown·Autumn 명시<br>Minimal 장기 / 나머지 가설</em></div><span class="arr">→</span><div class="flow-block">② 초기 LOOK 5개<em>Minimal 2 · 인접 1<br>새로운 스타일 2</em></div><span class="arr">→</span><div class="flow-block tint">③ 이미지 선택<em>Street 계열 D·E 선택<br>장기기억과 다른 신호</em></div></div>
+   <div class="flow-down">↓</div>
+   <div class="flow-row"><div class="flow-block">④ LLM 선택 이유 분석<em>Street 때문인지<br>아이템·핏 때문인지 가설</em></div><span class="arr">→</span><div class="flow-block primary">⑤ 필요한 경우 원탭 확인<em>“이번에는 Street 느낌?”<br>모르면 이미지 탐색</em></div><span class="arr">→</span><div class="flow-block">⑥ 세션 기준 재추천<em>Street 비중 확대<br>Minimal 장기기억 보존</em></div></div>
+   <div class="flow-down">↓</div>
+   <div class="flow-row"><div class="flow-block tint">⑦ Agent의 종료 제안<em>긍정 반응 · 개선 여지↓<br>미만족 시 방향 전환</em></div><span class="arr">→</span><div class="flow-block tint">⑧ 사용자 최종 결정<em>코디 확정 / 계속 탐색<br>언제든 직접 종료 가능</em></div><span class="arr">→</span><div class="flow-block">⑨ 기억 저장은 선택<em>구체적 선호 확인 +<br>향후 활용 동의 필요</em></div></div>
+  </div>
+  <div class="endbar"><strong>핵심 루프</strong><span>IMAGE → LLM 선택 이유 가설 → 필요 시 원탭 확인 / 이미지 Fallback → 세션 재추천 ↺ → Agent 종료 제안 → 사용자 확정</span></div>
+ </section>
+
+ <section style="margin-top:2px;margin-bottom:10px">
+  <div class="section-head" style="margin-bottom:7px"><span class="num" style="background:#e6f2f1;color:var(--teal)">✓</span><h2>팀 내 합의·검증 포인트</h2></div>
+  <div class="cards-2">
+   <div class="card" style="padding:9px 10px"><div class="card-title">기존 설계와 유지할 원칙</div><p>장기/단기 기억 구분 · 명시적 요청 우선 · 장기기억 저장 동의 · Feature Map 기반의 근거 있는 상태 관리</p></div>
+   <div class="card" style="padding:9px 10px"><div class="card-title">이번 파이프라인 제안 · 실험 필요</div><p>초기 5개(2:1:2) · LLM의 이유 가설 제시 + 원탭 확인 · 선택적 이미지 비교 · Hybrid 종료 제안(최종 결정은 사용자)</p></div>
+  </div>
+ </section>
+ <footer class="footer"><span>설계 제안서 · 구현 전 팀 합의 및 사용자 실험으로 검증 필요</span><strong>03 / 03</strong></footer>
+</article>
+</main>
+</body>
+</html>
