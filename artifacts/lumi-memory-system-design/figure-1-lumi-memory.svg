@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE svg
+  PUBLIC '-//W3C//DTD SVG 1.0//EN'
+  'http://www.w3.org/TR/2001/REC-SVG-20010904/DTD/svg10.dtd'>
+<svg width="1800" height="1180" preserveAspectRatio="xMinYMin meet" viewBox="0 0 1800 1180" xmlns="http://www.w3.org/2000/svg" version="1.0" fill-rule="evenodd" xmlns:xlink="http://www.w3.org/1999/xlink">
+	<title>...</title>
+	<desc>...</desc>
+	<clipPath id="clip">
+		<rect x="0" y="0" width="1800" height="1180"/>
+	</clipPath>
+	<g id="group" transform="scale(1,-1) translate(0,-1180)" style="clip-path: url(#clip)">
+		<g transform="">
+			<rect x="0" y="0" width="1800" height="1180" style="stroke: rgb(100%,100%,100%); stroke-linecap: butt; stroke-width: 0; fill: rgb(100%,100%,100%); fill-rule: evenodd;"/>
+			<text x="40" y="1132" style="font-family: 'Arial Unicode MS', 'Apple SD Gothic Neo', 'Noto Sans CJK KR', sans-serif; font-size: 34px;fill: rgb(9%,13%,17%); stroke:none;" transform="translate(0,2264) scale(1,-1)">a   사용자 의미의 보존과 요청별 해석</text>
+			<rect x="420" y="506" width="480" height="576" rx="12" ry="12" style="stroke: rgb(72%,75%,78%); stroke-linecap: butt; stroke-width: 2; fill: rgb(97%,98%,98%); fill-rule: evenodd;"/>
+			<text x="444" y="1042" style="font-family: 'Arial Unicode MS', 'Apple SD Gothic Neo', 'Noto Sans CJK KR', sans-serif; font-size: 28px;fill: rgb(9%,13%,17%); stroke:none;" transform="translate(0,2084) scale(1,-1)">Memory Layer · 표현 / 근거 / 범위</text>
+			<rect x="444" y="846" width="432" height="169" rx="8" ry="8" style="stroke: rgb(9%,42%,38%); stroke-linecap: butt; stroke-width: 2; fill: rgb(92%,96%,94%); fill-rule: evenodd;"/>
+			<text x="468" y="967" style="font-family: 'Arial Unicode MS', 'Apple SD Gothic Neo', 'Noto Sans CJK KR', sans-serif; font-size: 31px;fill: rgb(9%,42%,38%); stroke:none;" transform="translate(0,1934) scale(1,-1)">장기 기억</text>
+			<text x="468" y="924" style="font-family: 'Arial Unicode MS', 'Apple SD Gothic Neo', 'Noto Sans CJK KR', sans-serif; font-size: 27px;fill: rgb(9%,13%,17%); stroke:none;" transform="translate(0,1848) scale(1,-1)">이후 활용에 동의한 선호</text>
+			<text x="468" y="892" style="font-family: 'Arial Unicode MS', 'Apple SD Gothic Neo', 'Noto Sans CJK KR', sans-serif; font-size: 27px;fill: rgb(9%,13%,17%); stroke:none;" transform="translate(0,1784) scale(1,-1)">예: 평소 바지는 여유 핏</text>
+			<text x="468" y="860" style="font-family: 'Arial Unicode MS', 'Apple SD Gothic Neo', 'Noto Sans CJK KR', sans-serif; font-size: 27px;fill: rgb(9%,13%,17%); stroke:none;" transform="translate(0,1720) scale(1,-1)">다음 요청에도 조건별 활용</text>
+			<rect x="444" y="744" width="432" height="72" rx="8" ry="8" style="stroke: rgb(54%,36%,9%); stroke-linecap: butt; stroke-width: 2; fill: rgb(100%,96%,90%); fill-rule: evenodd;"/>
+			<text x="474.7373046875" y="784" style="font-family: 'Arial Unicode MS', 'Apple SD Gothic Neo', 'Noto Sans CJK KR', sans-serif; font-size: 26px;fill: rgb(54%,36%,9%); stroke:none;" transform="translate(0,1568) scale(1,-1)">내용 확인 + 별도 장기 활용 동의</text>
+			<text x="490.6640625" y="758" style="font-family: 'Arial Unicode MS', 'Apple SD Gothic Neo', 'Noto Sans CJK KR', sans-serif; font-size: 24px;fill: rgb(54%,36%,9%); stroke:none;" transform="translate(0,1516) scale(1,-1)">선택한 항목만 추가·구체화·교체</text>
+			<path d="M 660,816 L 660,846 Z" style="stroke: rgb(54%,36%,9%); stroke-linecap: butt; stroke-width: 2.8;"/>
+			<polygon points="660 846, 655.2 836, 664.8 836" style="stroke: none; stroke-linecap: butt; stroke-width: 1; fill: rgb(54%,36%,9%); fill-rule: evenodd;"/>
+			<rect x="444" y="545" width="432" height="169" rx="8" ry="8" style="stroke: rgb(12%,36%,56%); stroke-linecap: butt; stroke-width: 2; fill: rgb(92%,95%,98%); fill-rule: evenodd;"/>
+			<text x="468" y="666" style="font-family: 'Arial Unicode MS', 'Apple SD Gothic Neo', 'Noto Sans CJK KR', sans-serif; font-size: 31px;fill: rgb(12%,36%,56%); stroke:none;" transform="translate(0,1332) scale(1,-1)">단기 기억</text>
+			<text x="468" y="623" style="font-family: 'Arial Unicode MS', 'Apple SD Gothic Neo', 'Noto Sans CJK KR', sans-serif; font-size: 27px;fill: rgb(9%,13%,17%); stroke:none;" transform="translate(0,1246) scale(1,-1)">이번 요청의 조건과 예외</text>
+			<text x="468" y="591" style="font-family: 'Arial Unicode MS', 'Apple SD Gothic Neo', 'Noto Sans CJK KR', sans-serif; font-size: 27px;fill: rgb(9%,13%,17%); stroke:none;" transform="translate(0,1182) scale(1,-1)">예: 오늘 바지는 슬림 핏</text>
+			<text x="468" y="559" style="font-family: 'Arial Unicode MS', 'Apple SD Gothic Neo', 'Noto Sans CJK KR', sans-serif; font-size: 27px;fill: rgb(9%,13%,17%); stroke:none;" transform="translate(0,1118) scale(1,-1)">새 요청에는 자동 이월 안 함</text>
+			<path d="M 660,714 L 660,744 Z" style="stroke: rgb(54%,36%,9%); stroke-linecap: butt; stroke-width: 2.8;"/>
+			<polygon points="660 744, 655.2 734, 664.8 734" style="stroke: none; stroke-linecap: butt; stroke-width: 1; fill: rgb(54%,36%,9%); fill-rule: evenodd;"/>
+			<text x="442.134521484375" y="522" style="font-family: 'Arial Unicode MS', 'Apple SD Gothic Neo', 'Noto Sans CJK KR', sans-serif; font-size: 23px;fill: rgb(29%,33%,38%); stroke:none;" transform="translate(0,1044) scale(1,-1)">반복 선택·요청 종료만으로 장기 변경 안 함</text>
+			<rect x="40" y="545" width="300" height="169" rx="8" ry="8" style="stroke: rgb(66%,70%,73%); stroke-linecap: butt; stroke-width: 2; fill: rgb(100%,100%,100%); fill-rule: evenodd;"/>
+			<text x="64" y="666" style="font-family: 'Arial Unicode MS', 'Apple SD Gothic Neo', 'Noto Sans CJK KR', sans-serif; font-size: 31px;fill: rgb(9%,13%,17%); stroke:none;" transform="translate(0,1332) scale(1,-1)">입력·선택 근거</text>
+			<text x="64" y="623" style="font-family: 'Arial Unicode MS', 'Apple SD Gothic Neo', 'Noto Sans CJK KR', sans-serif; font-size: 27px;fill: rgb(9%,13%,17%); stroke:none;" transform="translate(0,1246) scale(1,-1)">요청·설명·수정</text>
+			<text x="64" y="591" style="font-family: 'Arial Unicode MS', 'Apple SD Gothic Neo', 'Noto Sans CJK KR', sans-serif; font-size: 27px;fill: rgb(9%,13%,17%); stroke:none;" transform="translate(0,1182) scale(1,-1)">이미지·부분 선택</text>
+			<text x="64" y="559" style="font-family: 'Arial Unicode MS', 'Apple SD Gothic Neo', 'Noto Sans CJK KR', sans-serif; font-size: 27px;fill: rgb(9%,13%,17%); stroke:none;" transform="translate(0,1118) scale(1,-1)">선택 이유는 가설</text>
+			<path d="M 340,627 L 444,627 Z" style="stroke: rgb(12%,36%,56%); stroke-linecap: butt; stroke-width: 2.8;"/>
+			<polygon points="444 627, 433 632.28, 433 621.72" style="stroke: none; stroke-linecap: butt; stroke-width: 1; fill: rgb(12%,36%,56%); fill-rule: evenodd;"/>
+			<text x="344.94384765625" y="688" style="font-family: 'Arial Unicode MS', 'Apple SD Gothic Neo', 'Noto Sans CJK KR', sans-serif; font-size: 22px;fill: rgb(12%,36%,56%); stroke:none;" transform="translate(0,1376) scale(1,-1)">의미 추출</text>
+			<text x="344.94384765625" y="659" style="font-family: 'Arial Unicode MS', 'Apple SD Gothic Neo', 'Noto Sans CJK KR', sans-serif; font-size: 22px;fill: rgb(12%,36%,56%); stroke:none;" transform="translate(0,1318) scale(1,-1)">내용 확인</text>
+			<rect x="990" y="799" width="360" height="216" rx="8" ry="8" style="stroke: rgb(66%,70%,73%); stroke-linecap: butt; stroke-width: 2; fill: rgb(100%,100%,100%); fill-rule: evenodd;"/>
+			<text x="1014" y="967" style="font-family: 'Arial Unicode MS', 'Apple SD Gothic Neo', 'Noto Sans CJK KR', sans-serif; font-size: 31px;fill: rgb(9%,13%,17%); stroke:none;" transform="translate(0,1934) scale(1,-1)">관련 기억 조회</text>
+			<text x="1014" y="924" style="font-family: 'Arial Unicode MS', 'Apple SD Gothic Neo', 'Noto Sans CJK KR', sans-serif; font-size: 27px;fill: rgb(9%,13%,17%); stroke:none;" transform="translate(0,1848) scale(1,-1)">대상·상황·유효 상태</text>
+			<text x="1014" y="889" style="font-family: 'Arial Unicode MS', 'Apple SD Gothic Neo', 'Noto Sans CJK KR', sans-serif; font-size: 27px;fill: rgb(9%,13%,17%); stroke:none;" transform="translate(0,1778) scale(1,-1)">현재 요청의 조건 우선</text>
+			<text x="1014" y="854" style="font-family: 'Arial Unicode MS', 'Apple SD Gothic Neo', 'Noto Sans CJK KR', sans-serif; font-size: 27px;fill: rgb(9%,13%,17%); stroke:none;" transform="translate(0,1708) scale(1,-1)">같은 순위 충돌은 확인</text>
+			<text x="1014" y="819" style="font-family: 'Arial Unicode MS', 'Apple SD Gothic Neo', 'Noto Sans CJK KR', sans-serif; font-size: 27px;fill: rgb(9%,13%,17%); stroke:none;" transform="translate(0,1638) scale(1,-1)">장기 원본은 보존</text>
+			<path d="M 876,932 L 990,932 Z" style="stroke: rgb(9%,42%,38%); stroke-linecap: butt; stroke-width: 2.8;"/>
+			<polygon points="990 932, 979 937.28, 979 926.72" style="stroke: none; stroke-linecap: butt; stroke-width: 1; fill: rgb(9%,42%,38%); fill-rule: evenodd;"/>
+			<path d="M 876,627 L 944,627 Z" style="stroke: rgb(12%,36%,56%); stroke-linecap: butt; stroke-width: 2.8;"/>
+			<path d="M 944,627 L 944,854 Z" style="stroke: rgb(12%,36%,56%); stroke-linecap: butt; stroke-width: 2.8;"/>
+			<path d="M 944,854 L 990,854 Z" style="stroke: rgb(12%,36%,56%); stroke-linecap: butt; stroke-width: 2.8;"/>
+			<polygon points="990 854, 979 859.28, 979 848.72" style="stroke: none; stroke-linecap: butt; stroke-width: 1; fill: rgb(12%,36%,56%); fill-rule: evenodd;"/>
+			<rect x="990" y="545" width="360" height="169" rx="8" ry="8" style="stroke: rgb(66%,70%,73%); stroke-linecap: butt; stroke-width: 2; fill: rgb(95%,96%,96%); fill-rule: evenodd;"/>
+			<text x="1014" y="666" style="font-family: 'Arial Unicode MS', 'Apple SD Gothic Neo', 'Noto Sans CJK KR', sans-serif; font-size: 31px;fill: rgb(9%,13%,17%); stroke:none;" transform="translate(0,1332) scale(1,-1)">요청별 선호 해석</text>
+			<text x="1014" y="623" style="font-family: 'Arial Unicode MS', 'Apple SD Gothic Neo', 'Noto Sans CJK KR', sans-serif; font-size: 27px;fill: rgb(9%,13%,17%); stroke:none;" transform="translate(0,1246) scale(1,-1)">User Preference Map</text>
+			<text x="1014" y="591" style="font-family: 'Arial Unicode MS', 'Apple SD Gothic Neo', 'Noto Sans CJK KR', sans-serif; font-size: 27px;fill: rgb(9%,13%,17%); stroke:none;" transform="translate(0,1182) scale(1,-1)">확정 조건 / 가설 / 미정</text>
+			<text x="1014" y="559" style="font-family: 'Arial Unicode MS', 'Apple SD Gothic Neo', 'Noto Sans CJK KR', sans-serif; font-size: 27px;fill: rgb(9%,13%,17%); stroke:none;" transform="translate(0,1118) scale(1,-1)">의미와 속성 해석 분리</text>
+			<path d="M 1170,799 L 1170,714 Z" style="stroke: rgb(29%,33%,38%); stroke-linecap: butt; stroke-width: 2.8;"/>
+			<polygon points="1170 714, 1175.28 725, 1164.72 725" style="stroke: none; stroke-linecap: butt; stroke-width: 1; fill: rgb(29%,33%,38%); fill-rule: evenodd;"/>
+			<text x="1190" y="750" style="font-family: 'Arial Unicode MS', 'Apple SD Gothic Neo', 'Noto Sans CJK KR', sans-serif; font-size: 25px;fill: rgb(29%,33%,38%); stroke:none;" transform="translate(0,1500) scale(1,-1)">요청마다 재구성</text>
+			<rect x="1440" y="545" width="320" height="169" rx="8" ry="8" style="stroke: rgb(66%,70%,73%); stroke-linecap: butt; stroke-width: 2; fill: rgb(100%,100%,100%); fill-rule: evenodd;"/>
+			<text x="1464" y="666" style="font-family: 'Arial Unicode MS', 'Apple SD Gothic Neo', 'Noto Sans CJK KR', sans-serif; font-size: 31px;fill: rgb(9%,13%,17%); stroke:none;" transform="translate(0,1332) scale(1,-1)">추천·이미지 선택</text>
+			<text x="1464" y="623" style="font-family: 'Arial Unicode MS', 'Apple SD Gothic Neo', 'Noto Sans CJK KR', sans-serif; font-size: 27px;fill: rgb(9%,13%,17%); stroke:none;" transform="translate(0,1246) scale(1,-1)">상품 속성과 대조</text>
+			<text x="1464" y="591" style="font-family: 'Arial Unicode MS', 'Apple SD Gothic Neo', 'Noto Sans CJK KR', sans-serif; font-size: 27px;fill: rgb(9%,13%,17%); stroke:none;" transform="translate(0,1182) scale(1,-1)">전체·부분 선택</text>
+			<text x="1464" y="559" style="font-family: 'Arial Unicode MS', 'Apple SD Gothic Neo', 'Noto Sans CJK KR', sans-serif; font-size: 27px;fill: rgb(9%,13%,17%); stroke:none;" transform="translate(0,1118) scale(1,-1)">설명·확인·재추천</text>
+			<path d="M 1350,627 L 1440,627 Z" style="stroke: rgb(29%,33%,38%); stroke-linecap: butt; stroke-width: 2.8;"/>
+			<polygon points="1440 627, 1429 632.28, 1429 621.72" style="stroke: none; stroke-linecap: butt; stroke-width: 1; fill: rgb(29%,33%,38%); fill-rule: evenodd;"/>
+			<text x="1440" y="967" style="font-family: 'Arial Unicode MS', 'Apple SD Gothic Neo', 'Noto Sans CJK KR', sans-serif; font-size: 28px;fill: rgb(29%,33%,38%); stroke:none;" transform="translate(0,1934) scale(1,-1)">해석 결과 ≠ 장기 갱신</text>
+			<text x="1440" y="924" style="font-family: 'Arial Unicode MS', 'Apple SD Gothic Neo', 'Noto Sans CJK KR', sans-serif; font-size: 28px;fill: rgb(29%,33%,38%); stroke:none;" transform="translate(0,1848) scale(1,-1)">Map이 바뀌어도</text>
+			<text x="1440" y="881" style="font-family: 'Arial Unicode MS', 'Apple SD Gothic Neo', 'Noto Sans CJK KR', sans-serif; font-size: 28px;fill: rgb(29%,33%,38%); stroke:none;" transform="translate(0,1762) scale(1,-1)">사용자의 의미는 보존</text>
+			<path d="M 1600,545 L 1600,461 Z" style="stroke: rgb(29%,33%,38%); stroke-linecap: butt; stroke-width: 2.8; stroke-dasharray: 10, 8;"/>
+			<path d="M 1600,461 L 190,461 Z" style="stroke: rgb(29%,33%,38%); stroke-linecap: butt; stroke-width: 2.8; stroke-dasharray: 10, 8;"/>
+			<path d="M 190,461 L 190,545 Z" style="stroke: rgb(29%,33%,38%); stroke-linecap: butt; stroke-width: 2.8; stroke-dasharray: 10, 8;"/>
+			<polygon points="190 545, 185.2 535, 194.8 535" style="stroke: none; stroke-linecap: butt; stroke-width: 1; fill: rgb(29%,33%,38%); fill-rule: evenodd;"/>
+			<rect x="785" y="439" width="420" height="54" rx="8" ry="8" style="stroke: rgb(100%,100%,100%); stroke-linecap: butt; stroke-width: 0; fill: rgb(100%,100%,100%); fill-rule: evenodd;"/>
+			<text x="798.67333984375" y="458" style="font-family: 'Arial Unicode MS', 'Apple SD Gothic Neo', 'Noto Sans CJK KR', sans-serif; font-size: 26px;fill: rgb(29%,33%,38%); stroke:none;" transform="translate(0,916) scale(1,-1)">피드백 → 이번 요청의 선호 구체화</text>
+			<path d="M 40,400 L 1760,400 Z" style="stroke: rgb(79%,82%,84%); stroke-linecap: butt; stroke-width: 2;"/>
+			<text x="40" y="349" style="font-family: 'Arial Unicode MS', 'Apple SD Gothic Neo', 'Noto Sans CJK KR', sans-serif; font-size: 34px;fill: rgb(9%,13%,17%); stroke:none;" transform="translate(0,698) scale(1,-1)">b   반복 사용 예시: 일시적 요구와 지속적 변화의 구분</text>
+			<rect x="40" y="91" width="400" height="224" rx="8" ry="8" style="stroke: rgb(9%,42%,38%); stroke-linecap: butt; stroke-width: 2; fill: rgb(92%,96%,94%); fill-rule: evenodd;"/>
+			<text x="64" y="267" style="font-family: 'Arial Unicode MS', 'Apple SD Gothic Neo', 'Noto Sans CJK KR', sans-serif; font-size: 31px;fill: rgb(9%,42%,38%); stroke:none;" transform="translate(0,534) scale(1,-1)">01  평소 취향</text>
+			<text x="64" y="224" style="font-family: 'Arial Unicode MS', 'Apple SD Gothic Neo', 'Noto Sans CJK KR', sans-serif; font-size: 27px;fill: rgb(9%,13%,17%); stroke:none;" transform="translate(0,448) scale(1,-1)">내용 확인 + 장기 활용 동의</text>
+			<text x="64" y="179" style="font-family: 'Arial Unicode MS', 'Apple SD Gothic Neo', 'Noto Sans CJK KR', sans-serif; font-size: 27px;fill: rgb(9%,13%,17%); stroke:none;" transform="translate(0,358) scale(1,-1)">바지: 여유 핏</text>
+			<text x="64" y="134" style="font-family: 'Arial Unicode MS', 'Apple SD Gothic Neo', 'Noto Sans CJK KR', sans-serif; font-size: 27px;fill: rgb(9%,13%,17%); stroke:none;" transform="translate(0,268) scale(1,-1)">색상: 네이비</text>
+			<rect x="480" y="91" width="400" height="224" rx="8" ry="8" style="stroke: rgb(12%,36%,56%); stroke-linecap: butt; stroke-width: 2; fill: rgb(92%,95%,98%); fill-rule: evenodd;"/>
+			<text x="504" y="267" style="font-family: 'Arial Unicode MS', 'Apple SD Gothic Neo', 'Noto Sans CJK KR', sans-serif; font-size: 31px;fill: rgb(12%,36%,56%); stroke:none;" transform="translate(0,534) scale(1,-1)">02  오늘만 다른 요구</text>
+			<text x="504" y="224" style="font-family: 'Arial Unicode MS', 'Apple SD Gothic Neo', 'Noto Sans CJK KR', sans-serif; font-size: 27px;fill: rgb(9%,13%,17%); stroke:none;" transform="translate(0,448) scale(1,-1)">오늘 발표에는 슬림 핏</text>
+			<text x="504" y="179" style="font-family: 'Arial Unicode MS', 'Apple SD Gothic Neo', 'Noto Sans CJK KR', sans-serif; font-size: 27px;fill: rgb(9%,13%,17%); stroke:none;" transform="translate(0,358) scale(1,-1)">단기: 슬림 / 장기: 여유</text>
+			<text x="504" y="134" style="font-family: 'Arial Unicode MS', 'Apple SD Gothic Neo', 'Noto Sans CJK KR', sans-serif; font-size: 27px;fill: rgb(9%,13%,17%); stroke:none;" transform="translate(0,268) scale(1,-1)">이번 추천: 슬림 + 네이비</text>
+			<rect x="920" y="91" width="400" height="224" rx="8" ry="8" style="stroke: rgb(9%,42%,38%); stroke-linecap: butt; stroke-width: 2; fill: rgb(92%,96%,94%); fill-rule: evenodd;"/>
+			<text x="944" y="267" style="font-family: 'Arial Unicode MS', 'Apple SD Gothic Neo', 'Noto Sans CJK KR', sans-serif; font-size: 31px;fill: rgb(9%,42%,38%); stroke:none;" transform="translate(0,534) scale(1,-1)">03  다음 요청</text>
+			<text x="944" y="224" style="font-family: 'Arial Unicode MS', 'Apple SD Gothic Neo', 'Noto Sans CJK KR', sans-serif; font-size: 27px;fill: rgb(9%,13%,17%); stroke:none;" transform="translate(0,448) scale(1,-1)">새 요청에 추가 조건 없음</text>
+			<text x="944" y="179" style="font-family: 'Arial Unicode MS', 'Apple SD Gothic Neo', 'Noto Sans CJK KR', sans-serif; font-size: 27px;fill: rgb(9%,13%,17%); stroke:none;" transform="translate(0,358) scale(1,-1)">이전 단기는 적용하지 않음</text>
+			<text x="944" y="134" style="font-family: 'Arial Unicode MS', 'Apple SD Gothic Neo', 'Noto Sans CJK KR', sans-serif; font-size: 27px;fill: rgb(9%,13%,17%); stroke:none;" transform="translate(0,268) scale(1,-1)">이번 추천: 여유 + 네이비</text>
+			<rect x="1360" y="91" width="400" height="224" rx="8" ry="8" style="stroke: rgb(54%,36%,9%); stroke-linecap: butt; stroke-width: 2; fill: rgb(100%,96%,90%); fill-rule: evenodd;"/>
+			<text x="1384" y="267" style="font-family: 'Arial Unicode MS', 'Apple SD Gothic Neo', 'Noto Sans CJK KR', sans-serif; font-size: 31px;fill: rgb(54%,36%,9%); stroke:none;" transform="translate(0,534) scale(1,-1)">04  동의한 지속적 변화</text>
+			<text x="1384" y="224" style="font-family: 'Arial Unicode MS', 'Apple SD Gothic Neo', 'Noto Sans CJK KR', sans-serif; font-size: 27px;fill: rgb(9%,13%,17%); stroke:none;" transform="translate(0,448) scale(1,-1)">앞으로도 슬림 핏을 선호</text>
+			<text x="1384" y="179" style="font-family: 'Arial Unicode MS', 'Apple SD Gothic Neo', 'Noto Sans CJK KR', sans-serif; font-size: 27px;fill: rgb(9%,13%,17%); stroke:none;" transform="translate(0,358) scale(1,-1)">새 내용 확인 + 활용 동의</text>
+			<text x="1384" y="134" style="font-family: 'Arial Unicode MS', 'Apple SD Gothic Neo', 'Noto Sans CJK KR', sans-serif; font-size: 27px;fill: rgb(9%,13%,17%); stroke:none;" transform="translate(0,268) scale(1,-1)">장기 핏 교체 / 네이비 유지</text>
+			<path d="M 443,200 L 476,200 Z" style="stroke: rgb(29%,33%,38%); stroke-linecap: butt; stroke-width: 2;"/>
+			<polygon points="476 200, 468 203.84, 468 196.16" style="stroke: none; stroke-linecap: butt; stroke-width: 1; fill: rgb(29%,33%,38%); fill-rule: evenodd;"/>
+			<path d="M 883,200 L 916,200 Z" style="stroke: rgb(29%,33%,38%); stroke-linecap: butt; stroke-width: 2;"/>
+			<polygon points="916 200, 908 203.84, 908 196.16" style="stroke: none; stroke-linecap: butt; stroke-width: 1; fill: rgb(29%,33%,38%); fill-rule: evenodd;"/>
+			<path d="M 1323,200 L 1356,200 Z" style="stroke: rgb(29%,33%,38%); stroke-linecap: butt; stroke-width: 2;"/>
+			<polygon points="1356 200, 1348 203.84, 1348 196.16" style="stroke: none; stroke-linecap: butt; stroke-width: 1; fill: rgb(29%,33%,38%); fill-rule: evenodd;"/>
+			<text x="258.5517578125" y="44" style="font-family: 'Arial Unicode MS', 'Apple SD Gothic Neo', 'Noto Sans CJK KR', sans-serif; font-size: 28px;fill: rgb(9%,42%,38%); stroke:none;" transform="translate(0,88) scale(1,-1)">일시적 예외 후 기존 취향 재적용</text>
+			<text x="1156.44140625" y="44" style="font-family: 'Arial Unicode MS', 'Apple SD Gothic Neo', 'Noto Sans CJK KR', sans-serif; font-size: 28px;fill: rgb(54%,36%,9%); stroke:none;" transform="translate(0,88) scale(1,-1)">확인·동의한 변화만 장기 반영</text>
+		</g>
+	</g>
+</svg>

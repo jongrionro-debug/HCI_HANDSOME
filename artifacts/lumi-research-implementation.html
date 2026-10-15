@@ -1,0 +1,875 @@
+<!doctype html>
+<html lang="zh-CN" data-theme="shadcn" data-mode="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="generator" content="Answer me with HTML 0.4.6">
+<title>LUMI, 메모리에서 상품 선택까지</title>
+<style>
+html[data-theme="blueprint"], html[data-theme="blueprint"][data-mode="light"] {
+  --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, "JetBrains Mono", Menlo, Consolas, "Liberation Mono", monospace;
+  --radius: 0px;
+  --shadow: none;
+  --bw: 1.5px;
+  --head-font: var(--font-sans);
+  --bg: #f6f6f3;
+  --paper: #ffffff;
+  --ink: #16181d;
+  --ink-2: #4b5260;
+  --ink-3: #8b929e;
+  --line: #1d2026;
+  --line-2: #d6dae1;
+  --fill: #f3f5f8;
+  --accent: #1d5fbf;
+  --accent-bg: #e4ecf8;
+  --ok: #1d5fbf;
+  --ok-bg: #e4ecf8;
+  --err: #c62828;
+  --err-bg: #fbeaea;
+  --warn: #a8620a;
+  --warn-bg: #fdf3e2;
+  --head-bg: #16181d;
+  --head-fg: #ffffff;
+}
+html[data-theme="blueprint"][data-mode="dark"] {
+  --bg: #081322;
+  --paper: #0d1c31;
+  --ink: #e6edf7;
+  --ink-2: #a9b8cc;
+  --ink-3: #6b7f99;
+  --line: #c9d6e8;
+  --line-2: #23385a;
+  --fill: #12253f;
+  --accent: #6ea8ff;
+  --accent-bg: #16305a;
+  --ok: #6ea8ff;
+  --ok-bg: #16305a;
+  --err: #ff7070;
+  --err-bg: #3b1620;
+  --warn: #f0b14a;
+  --warn-bg: #3a2a10;
+  --head-bg: #e6edf7;
+  --head-fg: #081322;
+}
+@media (prefers-color-scheme: dark) {
+html[data-theme="blueprint"][data-mode="auto"] {
+  --bg: #081322;
+  --paper: #0d1c31;
+  --ink: #e6edf7;
+  --ink-2: #a9b8cc;
+  --ink-3: #6b7f99;
+  --line: #c9d6e8;
+  --line-2: #23385a;
+  --fill: #12253f;
+  --accent: #6ea8ff;
+  --accent-bg: #16305a;
+  --ok: #6ea8ff;
+  --ok-bg: #16305a;
+  --err: #ff7070;
+  --err-bg: #3b1620;
+  --warn: #f0b14a;
+  --warn-bg: #3a2a10;
+  --head-bg: #e6edf7;
+  --head-fg: #081322;
+}
+}
+
+html[data-theme="shadcn"], html[data-theme="shadcn"][data-mode="light"] {
+  --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, "JetBrains Mono", Menlo, Consolas, "Liberation Mono", monospace;
+  --radius: 8px;
+  --shadow: 0 1px 2px 0 rgba(0,0,0,0.05);
+  --bw: 1px;
+  --head-font: var(--font-sans);
+  --bg: #fafafa;
+  --paper: #ffffff;
+  --ink: #09090b;
+  --ink-2: #71717a;
+  --ink-3: #a1a1aa;
+  --line: #e4e4e7;
+  --line-2: #f0f0f2;
+  --fill: #f4f4f5;
+  --accent: #2563eb;
+  --accent-bg: #eff6ff;
+  --ok: #16a34a;
+  --ok-bg: #f0fdf4;
+  --err: #dc2626;
+  --err-bg: #fef2f2;
+  --warn: #d97706;
+  --warn-bg: #fffbeb;
+  --head-bg: #18181b;
+  --head-fg: #fafafa;
+}
+html[data-theme="shadcn"][data-mode="dark"] {
+  --bg: #09090b;
+  --paper: #121215;
+  --ink: #fafafa;
+  --ink-2: #a1a1aa;
+  --ink-3: #71717a;
+  --line: #27272a;
+  --line-2: #1c1c1f;
+  --fill: #18181b;
+  --accent: #60a5fa;
+  --accent-bg: #172554;
+  --ok: #4ade80;
+  --ok-bg: #052e16;
+  --err: #f87171;
+  --err-bg: #450a0a;
+  --warn: #fbbf24;
+  --warn-bg: #451a03;
+  --head-bg: #fafafa;
+  --head-fg: #18181b;
+}
+@media (prefers-color-scheme: dark) {
+html[data-theme="shadcn"][data-mode="auto"] {
+  --bg: #09090b;
+  --paper: #121215;
+  --ink: #fafafa;
+  --ink-2: #a1a1aa;
+  --ink-3: #71717a;
+  --line: #27272a;
+  --line-2: #1c1c1f;
+  --fill: #18181b;
+  --accent: #60a5fa;
+  --accent-bg: #172554;
+  --ok: #4ade80;
+  --ok-bg: #052e16;
+  --err: #f87171;
+  --err-bg: #450a0a;
+  --warn: #fbbf24;
+  --warn-bg: #451a03;
+  --head-bg: #fafafa;
+  --head-fg: #18181b;
+}
+}
+
+html[lang="ja"][data-theme][data-mode] {
+  --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic UI", "Yu Gothic", Meiryo, "Noto Sans CJK JP", "Noto Sans JP", "PingFang SC", "Microsoft YaHei", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+html[lang="ja"][data-theme="3b1b"][data-mode] {
+  --v-title-font: "CMU Serif", "Latin Modern Roman", "Iowan Old Style", "Palatino", "Hiragino Mincho ProN", "Yu Mincho", "Noto Serif CJK JP", "Noto Serif JP", "Songti SC", serif;
+}
+
+/* Answer me with HTML base — 只引用主题变量，禁止写死颜色（主题 token 见 themes/index.js） */
+*, *::before, *::after { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+body {
+  background: var(--bg); color: var(--ink);
+  font-family: var(--font-sans); font-size: 14px; line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+}
+code, pre, kbd { font-family: var(--font-mono); }
+
+/* ── 工具栏 ─────────────────────────────── */
+.am-toolbar {
+  position: fixed; top: 12px; right: 12px; z-index: 10; display: flex; gap: 6px;
+}
+.am-btn {
+  font: 12px/1 var(--font-sans); color: var(--ink); background: var(--paper);
+  border: 1px solid var(--line-2); border-radius: var(--radius); padding: 7px 10px; cursor: pointer;
+}
+.am-btn:hover { border-color: var(--ink-3); }
+.am-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+/* ── 页头 ───────────────────────────────── */
+.am-head { margin: 0 0 20px; padding-right: 260px; }
+.am-head h1 { margin: 0; font-size: 24px; line-height: 1.25; letter-spacing: -0.01em; }
+.am-sub { margin: 4px 0 0; color: var(--ink-2); }
+.am-head-meta { display: flex; flex-wrap: wrap; gap: 6px 18px; margin-top: 10px; font-size: 12px; color: var(--ink-2); }
+.am-head-meta b { font-family: var(--font-mono); font-weight: 400; color: var(--ink-3); margin-right: 6px; }
+.am-intro { margin-top: 12px; max-width: 80ch; }
+
+/* ── sheet 图纸板 ────────────────────────── */
+.am-sheet { max-width: 1680px; margin: 0 auto; padding: 32px 28px 40px; }
+.am-frame { position: relative; }
+.am-grid {
+  display: grid; grid-template-columns: repeat(var(--cols, 3), minmax(0, 1fr));
+  gap: 20px; align-items: start;
+}
+.am-ruler { display: none; }
+html[data-theme="blueprint"] .am-frame { border: 1px solid var(--line); padding: 30px; }
+html[data-theme="blueprint"] .am-frame::before {
+  content: ""; position: absolute; inset: 18px; border: 1px solid var(--line); pointer-events: none;
+}
+html[data-theme="blueprint"] .am-ruler {
+  display: flex; position: absolute; font: 10px/1 var(--font-mono); color: var(--ink-3);
+}
+.am-ruler span { flex: 1; display: flex; align-items: center; justify-content: center; }
+.am-ruler--top, .am-ruler--bottom { left: 18px; right: 18px; height: 18px; }
+.am-ruler--top { top: 0; }
+.am-ruler--bottom { bottom: 0; }
+.am-ruler--left, .am-ruler--right { top: 18px; bottom: 18px; width: 18px; flex-direction: column; }
+.am-ruler--left { left: 0; }
+.am-ruler--right { right: 0; }
+.am-ruler--top span + span, .am-ruler--bottom span + span { border-left: 1px solid var(--line); }
+.am-ruler--left span + span, .am-ruler--right span + span { border-top: 1px solid var(--line); }
+
+/* ── 面板 ───────────────────────────────── */
+.am-panel {
+  background: var(--paper); border: var(--bw) solid var(--line); border-radius: var(--radius);
+  box-shadow: var(--shadow); min-width: 0; overflow: hidden;
+}
+.am-panel-head {
+  display: flex; align-items: stretch; gap: 0; border-bottom: var(--bw) solid var(--line); min-height: 34px;
+}
+.am-panel-id {
+  display: flex; align-items: center; justify-content: center; min-width: 34px; padding: 0 8px;
+  background: var(--head-bg); color: var(--head-fg); font-weight: 600; font-size: 14px;
+}
+html[data-theme="shadcn"] .am-panel-id { border-radius: 6px; min-width: 24px; height: 24px; margin: 9px 0 9px 14px; font-size: 12px; }
+html[data-theme="shadcn"] .am-panel-head { border-bottom-width: 1px; }
+.am-panel-head h2 { margin: 0; padding: 7px 12px; font-size: 15px; font-weight: 600; flex: 1; display: flex; align-items: center; }
+.am-panel-meta { align-self: center; padding: 0 12px; font: 11px/1.3 var(--font-mono); color: var(--ink-2); text-align: right; }
+.am-panel-body { padding: 14px 16px 16px; }
+.am-panel-body > * + * { margin-top: 12px; }
+
+/* ── Markdown 正文 ───────────────────────── */
+.am-md > :first-child { margin-top: 0; }
+.am-md > :last-child { margin-bottom: 0; }
+.am-md p { margin: 0 0 8px; }
+.am-md ul, .am-md ol { margin: 0 0 8px; padding-left: 20px; }
+.am-md li + li { margin-top: 3px; }
+.am-md h3, .am-md h4 { margin: 14px 0 6px; font-size: 13px; }
+.am-md a { color: var(--accent); }
+.am-md blockquote { margin: 0 0 8px; padding: 2px 12px; border-left: 3px solid var(--line-2); color: var(--ink-2); }
+.am-md :not(pre) > code { font-size: 0.9em; background: var(--fill); padding: 1px 5px; border-radius: 4px; }
+.am-md hr { border: 0; border-top: 1px solid var(--line-2); margin: 12px 0; }
+.am-md table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.am-md th {
+  text-align: left; font: 11px/1.3 var(--font-mono); color: var(--ink-2); font-weight: 400;
+  padding: 6px 10px; border-bottom: 1px solid var(--line-2);
+}
+.am-md td { padding: 7px 10px; border-bottom: 1px solid var(--line-2); vertical-align: top; }
+.am-md tbody tr:nth-child(even) td { background: var(--fill); }
+.am-table-wrap { overflow-x: auto; }
+.am-code {
+  margin: 0; padding: 12px 14px; background: var(--fill); border: 1px solid var(--line-2);
+  border-radius: var(--radius); overflow-x: auto; font-size: 12.5px; line-height: 1.5;
+}
+
+/* ── 状态徽章 ok / no / warn ──────────────── */
+.am-status { white-space: nowrap; font-weight: 500; }
+.am-status--ok { color: var(--ok); }
+.am-status--no { color: var(--err); }
+.am-status--warn { color: var(--warn); }
+.am-status-icon { display: inline-block; width: 1.1em; font-weight: 700; }
+
+/* ── callout ─────────────────────────────── */
+.am-callout {
+  border: 1px solid var(--line-2); border-left: 3px solid var(--accent); background: var(--accent-bg);
+  padding: 10px 14px; border-radius: var(--radius);
+}
+.am-callout--ok { border-left-color: var(--ok); background: var(--ok-bg); }
+.am-callout--warn { border-left-color: var(--warn); background: var(--warn-bg); }
+.am-callout--err { border-left-color: var(--err); background: var(--err-bg); }
+.am-callout-title { font-weight: 600; margin-bottom: 4px; }
+
+/* ── kv 标题栏格 ─────────────────────────── */
+.am-kv {
+  display: grid; grid-template-columns: repeat(var(--kv-cols, 2), minmax(0, 1fr)); margin: 0;
+  border-top: var(--bw) solid var(--line); border-left: var(--bw) solid var(--line);
+}
+.am-kv-cell { border-right: var(--bw) solid var(--line); border-bottom: var(--bw) solid var(--line); padding: 6px 10px 8px; min-width: 0; }
+.am-kv-cell--wide { grid-column: 1 / -1; }
+.am-kv dt { font: 11px/1.4 var(--font-mono); color: var(--ink-2); }
+.am-kv dd { margin: 2px 0 0; font-size: 14px; font-weight: 500; overflow-wrap: anywhere; }
+.am-kv-cell--wide dd { font-size: 17px; font-weight: 600; }
+html[data-theme="shadcn"] .am-kv { border-color: var(--line); border-radius: var(--radius); overflow: hidden; }
+
+/* ── timeline ────────────────────────────── */
+.am-timeline { list-style: none; margin: 0; padding: 0; }
+.am-timeline--h { display: grid; grid-template-columns: repeat(var(--n, 1), minmax(0, 1fr)); padding-top: 4px; }
+.am-timeline--h li { position: relative; text-align: center; padding: 0 6px; }
+.am-timeline--h li::before {
+  content: ""; position: absolute; top: 31px; left: 0; right: 0; border-top: var(--bw) solid var(--line);
+}
+.am-timeline--h li:first-child::before { left: 50%; }
+.am-timeline--h li:last-child::before { right: 50%; }
+.am-tl-when { display: block; font-size: 15px; font-weight: 500; height: 24px; }
+.am-tl-dot {
+  position: relative; display: block; width: 11px; height: 11px; margin: 2px auto 8px;
+  border: var(--bw) solid var(--line); border-radius: 50%; background: var(--paper);
+}
+.am-tl-item--hi .am-tl-dot { background: var(--accent); border-color: var(--accent); }
+.am-tl-title { display: block; font-size: 12.5px; font-weight: 500; }
+.am-tl-text { display: block; font-size: 12px; color: var(--ink-2); line-height: 1.45; }
+.am-timeline--v li { position: relative; padding: 0 0 14px 22px; }
+.am-timeline--v li::before { content: ""; position: absolute; left: 5px; top: 6px; bottom: -6px; border-left: var(--bw) solid var(--line-2); }
+.am-timeline--v li:last-child::before { display: none; }
+.am-timeline--v .am-tl-dot { position: absolute; left: 0; top: 4px; margin: 0; }
+.am-timeline--v .am-tl-when { display: inline; height: auto; font: 12px var(--font-mono); color: var(--ink-2); margin-right: 8px; }
+.am-timeline--v .am-tl-title { display: inline; font-size: 14px; }
+.am-timeline--v .am-tl-text { margin-top: 2px; }
+
+/* ── annot 句子标注 ──────────────────────── */
+.am-annot + .am-annot { border-top: 1px solid var(--line-2); padding-top: 12px; }
+.am-annot-head { display: flex; justify-content: space-between; gap: 12px; font-size: 13px; font-weight: 600; margin-bottom: 8px; }
+.am-annot-meta { font: 11px var(--font-mono); font-weight: 400; color: var(--ink-2); }
+.am-annot-scroll { overflow-x: auto; }
+.am-annot-line {
+  position: relative; display: inline-block; white-space: pre; font: 14px/1.6 var(--font-mono);
+  padding-bottom: calc(var(--rows, 0) * 17px + 14px);
+}
+.am-annot-line--wrap { display: block; white-space: normal; padding-bottom: 10px; }
+.am-annot-line--wrap .am-seg { white-space: nowrap; }
+.am-seg { position: relative; }
+.am-seg::after {
+  content: ""; position: absolute; left: 1px; right: 1px; top: calc(100% + 1px); height: 5px;
+  border: 1px solid var(--accent); border-top: 0;
+}
+.am-seg-n {
+  position: absolute; left: 0; top: calc(100% + 8px + var(--row, 0) * 17px);
+  font: 11px/16px var(--font-sans); color: var(--accent); white-space: nowrap;
+}
+.am-seg--err { color: var(--err); }
+.am-seg--err::after { border-color: var(--err); }
+.am-seg--err .am-seg-n { color: var(--err); }
+.am-annot-caption { font-size: 12px; color: var(--ink-2); }
+
+/* ── limits 限值条 ───────────────────────── */
+.am-lim + .am-lim { margin-top: 14px; }
+.am-lim-head { display: flex; justify-content: space-between; gap: 12px; font-size: 13px; margin-bottom: 4px; }
+.am-lim-val { font: 12px var(--font-mono); color: var(--accent); white-space: nowrap; }
+.am-lim-track { position: relative; height: 12px; border: 1px solid var(--line-2); background: var(--fill); border-radius: calc(var(--radius) / 2); }
+.am-lim-fill { position: absolute; left: 0; top: 0; bottom: 0; background: var(--accent-bg); border-right: 1px solid var(--accent); }
+.am-lim-mark { position: absolute; top: -4px; bottom: -4px; border-left: 2px solid var(--accent); }
+.am-lim.is-over .am-lim-fill { background: var(--err-bg); border-right-color: var(--err); }
+.am-lim.is-over .am-lim-val { color: var(--err); }
+.am-lim-ticks { position: relative; height: 16px; font: 10px/16px var(--font-mono); color: var(--ink-3); }
+.am-lim-ticks span { position: absolute; transform: translateX(-50%); }
+.am-lim-ticks span:first-child { transform: none; }
+.am-lim-note { font-size: 11px; color: var(--ink-2); margin-left: 6px; }
+
+/* ── tree 结构树 ─────────────────────────── */
+.am-tree { font-size: 13px; }
+.am-tree-root { display: flex; justify-content: center; position: relative; padding-bottom: 18px; }
+.am-tree-root::after { content: ""; position: absolute; bottom: 0; left: 50%; height: 18px; border-left: var(--bw) solid var(--line); }
+.am-tree-root--solo { padding-bottom: 12px; }
+.am-tree-root--solo::after { display: none; }
+.am-tree-box {
+  border: var(--bw) solid var(--line); background: var(--paper); padding: 6px 14px; text-align: center;
+  border-radius: var(--radius); font-weight: 600;
+}
+.am-tree-box small { display: block; font-weight: 400; color: var(--ink-2); font-size: 12px; }
+.am-tree-box--root { background: var(--accent-bg); font-size: 15px; padding: 8px 28px; }
+.am-tree-cols { display: grid; grid-template-columns: repeat(var(--n, 1), minmax(0, 1fr)); }
+.am-tree-col { position: relative; padding: 18px 8px 0; min-width: 0; }
+.am-tree-col::before { content: ""; position: absolute; top: 0; left: 0; right: 0; border-top: var(--bw) solid var(--line); }
+.am-tree-col:first-child::before { left: 50%; }
+.am-tree-col:last-child::before { right: 50%; }
+.am-tree-col::after { content: ""; position: absolute; top: 0; left: 50%; height: 18px; border-left: var(--bw) solid var(--line); }
+.am-tree-list, .am-tree-list ul { list-style: none; margin: 0; padding: 0; }
+.am-tree-col > .am-tree-list { margin: 8px 0 0 14px; }
+.am-tree-list ul { margin-left: 16px; }
+.am-tree-list li { position: relative; padding: 3px 0 3px 18px; }
+.am-tree-list li::before { content: ""; position: absolute; left: 0; top: 0.95em; width: 12px; border-top: 1px solid var(--ink-3); }
+.am-tree-list li::after { content: ""; position: absolute; left: 0; top: 0; bottom: 0; border-left: 1px solid var(--ink-3); }
+.am-tree-list li:last-child::after { bottom: auto; height: 0.95em; }
+.am-tree-tag { font: 11px var(--font-mono); color: var(--ink-3); margin-right: 4px; }
+.am-tree code { font: 12px var(--font-mono); }
+.am-tree-sub { display: block; font-size: 11.5px; color: var(--ink-2); }
+.am-tree-hi > .am-tree-label { color: var(--accent); font-weight: 600; }
+
+/* ── 图（flow / sequence）───────────────── */
+.am-diagram { margin: 0; overflow-x: auto; text-align: center; }
+.am-diagram svg { max-width: 100%; height: auto; font-family: var(--font-sans); }
+.am-diagram text { fill: var(--ink); font-size: 13px; }
+.am-node-shape { fill: var(--paper); stroke: var(--line); stroke-width: var(--bw); }
+.am-node--hi .am-node-shape { fill: var(--accent-bg); stroke: var(--accent); }
+.am-node--hi text { fill: var(--accent); font-weight: 600; }
+.am-edge { fill: none; stroke: var(--ink-2); stroke-width: 1.3; }
+.am-edge--dashed { stroke-dasharray: 5 4; }
+.am-arrow { fill: var(--ink-2); }
+.am-edge-label rect { fill: var(--paper); }
+.am-diagram .am-edge-label text { fill: var(--accent); font-size: 11.5px; }
+.am-cluster { fill: var(--fill); stroke: var(--line-2); stroke-width: 1; stroke-dasharray: 4 3; }
+.am-diagram .am-cluster-label { fill: var(--ink-2); font: 11px var(--font-mono); }
+.am-lifeline { stroke: var(--ink-3); stroke-width: 1; stroke-dasharray: 4 4; }
+.am-actor { fill: var(--paper); stroke: var(--line); stroke-width: var(--bw); }
+.am-note { fill: var(--warn-bg); stroke: var(--warn); stroke-width: 1; }
+.am-diagram .am-step { fill: var(--ink-3); font: 10px var(--font-mono); }
+
+/* ── doc 线性讲解 ────────────────────────── */
+.am-doc { max-width: 1120px; margin: 0 auto; padding: 40px 28px 64px; }
+.am-doc-layout { display: grid; grid-template-columns: 200px minmax(0, 1fr); gap: 32px; align-items: start; }
+.am-doc-layout--notoc { grid-template-columns: minmax(0, 1fr); max-width: 860px; }
+.am-toc { position: sticky; top: 24px; font-size: 13px; }
+.am-toc a { display: block; color: var(--ink-2); text-decoration: none; padding: 4px 0 4px 10px; border-left: 2px solid var(--line-2); }
+.am-toc a:hover { color: var(--ink); border-left-color: var(--accent); }
+.am-doc-body > .am-panel + .am-panel { margin-top: 20px; }
+
+/* ── 响应式与打印 ─────────────────────────── */
+@media (max-width: 1100px) {
+  .am-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .am-grid > .am-panel { grid-column: auto !important; }
+  .am-grid > .am-panel.am-span-wide { grid-column: 1 / -1 !important; }
+}
+@media (max-width: 760px) {
+  .am-sheet, .am-doc { padding: 56px 12px 24px; }
+  .am-head { padding-right: 0; }
+  .am-grid { grid-template-columns: minmax(0, 1fr); }
+  .am-grid > .am-panel.am-span-wide { grid-column: auto !important; }
+  html[data-theme="blueprint"] .am-frame { padding: 0; border: 0; }
+  html[data-theme="blueprint"] .am-frame::before, html[data-theme="blueprint"] .am-ruler { display: none; }
+  .am-doc-layout { grid-template-columns: minmax(0, 1fr); }
+  .am-toc { position: static; }
+  .am-timeline--h { grid-template-columns: minmax(0, 1fr); }
+  .am-tree-cols { grid-template-columns: minmax(0, 1fr); }
+}
+.am-colophon { text-align: center; padding: 0 0 28px; font: 11px var(--font-mono); color: var(--ink-3); }
+
+@media print {
+  .am-toolbar { display: none; }
+  body { background: var(--paper); }
+  .am-panel { break-inside: avoid; box-shadow: none; }
+}
+.am-panel--bare { border: 0; background: transparent; box-shadow: none; }
+.am-panel--bare > .am-panel-body { padding: 0; }
+.am-panel--bare .am-kv { background: var(--paper); }
+
+</style>
+</head>
+<body>
+<div class="am-toolbar">
+<button class="am-btn" type="button" data-am="theme" data-labels="{&quot;blueprint&quot;:&quot;主题：图纸&quot;,&quot;shadcn&quot;:&quot;主题：卡片&quot;}">主题：卡片</button>
+<button class="am-btn" type="button" data-am="mode" data-labels="{&quot;auto&quot;:&quot;明暗：跟随系统&quot;,&quot;light&quot;:&quot;明暗：亮&quot;,&quot;dark&quot;:&quot;明暗：暗&quot;}">明暗：亮</button>
+<button class="am-btn" type="button" data-am="copy" data-done="已复制 ✓">复制源稿</button>
+</div>
+<main class="am-doc">
+<header class="am-head"><h1>LUMI, 메모리에서 상품 선택까지</h1><p class="am-sub">이번에 구현한 연구용 추천 흐름과 검증 범위</p><div class="am-head-meta"><span><b>date</b>2026-10-14</span><span><b>branch</b>codex/lumi-research-loop · 로컬 변경</span></div><div class="am-intro am-md"><div class="am-md"><p>기존 메모리 기반에 실제 상품 LOOK과 이미지 선택을 연결했습니다. 사용자는 필요한 확인을 거쳐 추천을 조정합니다. 장기기억은 저장할 내용을 고르고 별도로 동의할 때만 바뀝니다.</p>
+</div></div></header>
+<div class="am-doc-layout">
+<nav class="am-toc" aria-label="目录"><a href="#panel-A">A · 이번에 무엇이 달라졌나요?</a><a href="#panel-B">B · 사용자는 어떤 순서로 이용하나요?</a><a href="#panel-C">C · 선호·후보·상품 속성을 왜 구분하나요?</a><a href="#panel-D">D · 갈색 바지 요청은 어떻게 기억으로 이어지나요?</a><a href="#panel-E">E · 기억은 어떤 조건에서 저장되나요?</a><a href="#panel-F">F · 모델과 정책은 각각 무엇을 맡나요?</a><a href="#panel-G">G · 무엇을 검증했고 무엇이 남았나요?</a></nav><div class="am-doc-body">
+<section class="am-panel" id="panel-A">
+<header class="am-panel-head"><span class="am-panel-id">A</span><h2>이번에 무엇이 달라졌나요?</h2></header>
+<div class="am-panel-body"><div class="am-md"><p>이전에는 기억을 저장하고 원하는 아이템의 목표 속성을 확인했습니다. 이제는 그 결과로 상품 코디를 보여줍니다. 선택과 재추천도 한 화면에서 이어집니다.</p>
+<div class="am-table-wrap"><table>
+<thead>
+<tr>
+<th>영역</th>
+<th>이전 구현</th>
+<th>이번에 연결한 기능</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>메모리</td>
+<td>장·단기 분리와 확인·동의</td>
+<td>선택한 선호의 저장 검토와 다음 요청 활용</td>
+</tr>
+<tr>
+<td>선호 해석</td>
+<td>아이템 목표 속성 17개</td>
+<td>선택 근거·잠정 가설·이번에 확인한 선호</td>
+</tr>
+<tr>
+<td>상품</td>
+<td>추천 경로가 없었음</td>
+<td>공식 상품을 참조한 셔츠 6개·바지 6개</td>
+</tr>
+<tr>
+<td>코디</td>
+<td>화면 후보가 없었음</td>
+<td>가능한 상품 조합으로 LOOK 구성</td>
+</tr>
+<tr>
+<td>상호작용</td>
+<td>개발자용 기억 확인</td>
+<td>전체·부분 선택과 필요한 질문·재추천</td>
+</tr>
+</tbody></table></div>
+</div>
+<div class="am-callout am-callout--info" role="note"><div class="am-callout-title">이번 구현의 목표</div><div class="am-callout-body am-md"><p>연구용 전체 흐름을 실행할 수 있게 만들었습니다. 고정 상품을 이용합니다. 추천 품질과 사용자 연구 효과는 별도로 검증해야 합니다.</p>
+</div></div>
+<div class="am-md"><p><a href="http://127.0.0.1:8766/">연구 화면 열기</a> · 현재 실행 계약 (개발 브랜치의 <code>docs/research-prototype.md</code>)</p>
+</div></div>
+</section>
+<section class="am-panel" id="panel-B">
+<header class="am-panel-head"><span class="am-panel-id">B</span><h2>사용자는 어떤 순서로 이용하나요?</h2></header>
+<div class="am-panel-body"><figure class="am-diagram am-flow"><svg viewBox="0 0 362 657" width="362" height="657" role="img" aria-label="流程图：현재 요청、조건 검토、상품 LOOK、이미지 선택、재추천、확정 또는 중단、저장 검토、요청 닫기" xmlns="http://www.w3.org/2000/svg"><defs><marker id="am1-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="am-arrow" d="M0,0 L10,5 L0,10 z"/></marker></defs><g></g><g><g data-step="0"><path class="am-edge" d="M162,49 L162,65 Q162,81 162,97 L162,113" marker-end="url(#am1-arrow)"/><g class="am-edge-label"><rect x="113.3" y="72" width="97.4" height="18" rx="3"/><text x="162" y="81" text-anchor="middle" dominant-baseline="central">적용할 내용 선택</text></g></g><g data-step="1"><path class="am-edge" d="M162,148 L162,164 Q162,180 162,196 L162,212" marker-end="url(#am1-arrow)"/><g class="am-edge-label"><rect x="113.3" y="171" width="97.4" height="18" rx="3"/><text x="162" y="180" text-anchor="middle" dominant-baseline="central">확인한 조건 반영</text></g></g><g data-step="2"><path class="am-edge" d="M180.9,247 L198.3,263 Q215.6,279 215.6,295 L215.6,311" marker-end="url(#am1-arrow)"/><g class="am-edge-label"><rect x="159.4" y="270" width="112.4" height="18" rx="3"/><text x="215.6" y="279" text-anchor="middle" dominant-baseline="central">전체 또는 일부 선택</text></g></g><g data-step="3"><path class="am-edge" d="M191.1,346 L168.8,362 Q146.4,378 129.1,394 L111.7,410" marker-end="url(#am1-arrow)"/><g class="am-edge-label"><rect x="71.2" y="369" width="150.3" height="18" rx="3"/><text x="146.4" y="378" text-anchor="middle" dominant-baseline="central">가설 또는 확인한 선호 활용</text></g></g><g data-step="4"><path class="am-edge" d="M75.8,410 L60.3,394 Q44.7,378 44.7,353.3 Q44.7,328.5 44.7,303.8 Q44.7,279 82.6,263 L120.5,247" marker-end="url(#am1-arrow)"/><g class="am-edge-label"><rect x="15" y="319.5" width="59.5" height="18" rx="3"/><text x="44.7" y="328.5" text-anchor="middle" dominant-baseline="central">탐색 계속</text></g></g><g data-step="5"><path class="am-edge" d="M240,346 L262.4,362 Q284.8,378 284.8,394 L284.8,410" marker-end="url(#am1-arrow)"/><g class="am-edge-label"><rect x="243.5" y="369" width="82.5" height="18" rx="3"/><text x="284.8" y="378" text-anchor="middle" dominant-baseline="central">사용자가 결정</text></g></g><g data-step="6"><path class="am-edge" d="M284.8,445 L284.8,461 Q284.8,477 284.8,493 L284.8,509" marker-end="url(#am1-arrow)"/><g class="am-edge-label"><rect x="249.3" y="468" width="71" height="18" rx="3"/><text x="284.8" y="477" text-anchor="middle" dominant-baseline="central">저장은 선택</text></g></g><g data-step="7"><path class="am-edge" d="M284.8,544 L284.8,560 Q284.8,576 284.8,592 L284.8,608" marker-end="url(#am1-arrow)"/><g class="am-edge-label"><rect x="230.3" y="567" width="108.9" height="18" rx="3"/><text x="284.8" y="576" text-anchor="middle" dominant-baseline="central">저장 또는 건너뛰기</text></g></g></g><g><g class="am-node am-node--round" data-key="현재 요청" data-step="0"><rect class="am-node-shape" x="114" y="14" width="95.9" height="35" rx="17.5"/><text x="162" y="31.5" text-anchor="middle" dominant-baseline="central">현재 요청</text></g><g class="am-node am-node--rect" data-key="조건 검토" data-step="0"><rect class="am-node-shape" x="120" y="113" width="83.9" height="35" rx="3"/><text x="162" y="130.5" text-anchor="middle" dominant-baseline="central">조건 검토</text></g><g class="am-node am-node--rect" data-key="상품 LOOK" data-step="1"><rect class="am-node-shape" x="113" y="212" width="97.9" height="35" rx="3"/><text x="162" y="229.5" text-anchor="middle" dominant-baseline="central">상품 LOOK</text></g><g class="am-node am-node--rect" data-key="이미지 선택" data-step="2"><rect class="am-node-shape" x="167.1" y="311" width="96.9" height="35" rx="3"/><text x="215.6" y="328.5" text-anchor="middle" dominant-baseline="central">이미지 선택</text></g><g class="am-node am-node--rect" data-key="재추천" data-step="3"><rect class="am-node-shape" x="59.3" y="410" width="67" height="35" rx="3"/><text x="92.8" y="427.5" text-anchor="middle" dominant-baseline="central">재추천</text></g><g class="am-node am-node--round" data-key="확정 또는 중단" data-step="5"><rect class="am-node-shape" x="221.9" y="410" width="125.8" height="35" rx="17.5"/><text x="284.8" y="427.5" text-anchor="middle" dominant-baseline="central">확정 또는 중단</text></g><g class="am-node am-node--rect" data-key="저장 검토" data-step="6"><rect class="am-node-shape" x="242.8" y="509" width="83.9" height="35" rx="3"/><text x="284.8" y="526.5" text-anchor="middle" dominant-baseline="central">저장 검토</text></g><g class="am-node am-node--round" data-key="요청 닫기" data-step="7"><rect class="am-node-shape" x="236.8" y="608" width="95.9" height="35" rx="17.5"/><text x="284.8" y="625.5" text-anchor="middle" dominant-baseline="central">요청 닫기</text></g></g></svg></figure>
+<div class="am-md"><p>처음에는 LOOK을 최대 5개 제시합니다. 조건에 맞는 상품이 부족하면 후보 수가 줄어듭니다. 부족한 조건을 몰래 완화하지 않습니다.</p>
+<p>전체 룩과 개별 상품을 함께 선택할 수 있습니다. 마음에 드는 것이 없다는 응답도 가능합니다. 사용자는 질문 중에도 현재 코디를 확정하거나 중단할 수 있습니다.</p>
+</div></div>
+</section>
+<section class="am-panel" id="panel-C">
+<header class="am-panel-head"><span class="am-panel-id">C</span><h2>선호·후보·상품 속성을 왜 구분하나요?</h2></header>
+<div class="am-panel-body"><div class="am-md"><p>“내가 원하는 것”과 “보여준 것”과 “상품의 속성”은 다릅니다. 이 정보를 섞으면 추천 결과가 사용자 취향으로 잘못 저장될 수 있습니다.</p>
+<div class="am-table-wrap"><table>
+<thead>
+<tr>
+<th>구분</th>
+<th>담는 내용</th>
+<th>예시</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>사용자 선호 상태</td>
+<td>이번 조건, 관련 기억, 확인한 선호, 가설</td>
+<td>이번에는 갈색 바지가 필요함</td>
+</tr>
+<tr>
+<td>후보 LOOK</td>
+<td>추천기가 구성한 상품 조합</td>
+<td>베이지 셔츠와 갈색 바지</td>
+</tr>
+<tr>
+<td>상품 속성</td>
+<td>상품 정보와 그 근거</td>
+<td>바지 색상은 갈색이라는 공식 표기</td>
+</tr>
+</tbody></table></div>
+</div>
+<div class="am-callout am-callout--warn" role="note"><div class="am-callout-title">선택한 사실과 선택 이유는 다릅니다</div><div class="am-callout-body am-md"><p>룩을 고르면 그 조합에 대한 긍정 근거를 남깁니다. 그 안의 색상·핏·소재를 모두 좋아한다고 확정하지 않습니다. 상의를 고른 근거를 하의 취향으로 확대하지 않습니다.</p>
+</div></div>
+<div class="am-md"><p>선택하지 않은 상품은 싫어함으로 기록하지 않습니다. 모델이 제안한 이유는 확인 전까지 가설입니다.</p>
+<p>상품 정보도 근거를 구분합니다. 공식 표기, 이미지 관측, 추론, 가상 검증값을 별도로 표시합니다. 이번 스타일 라벨은 Codex가 작성한 추론값입니다. 사람의 라벨 검수 결과가 아닙니다.</p>
+</div></div>
+</section>
+<section class="am-panel" id="panel-D">
+<header class="am-panel-head"><span class="am-panel-id">D</span><h2>갈색 바지 요청은 어떻게 기억으로 이어지나요?</h2></header>
+<div class="am-panel-body"><div class="am-md"><p>다음은 실제 브라우저 검증에서 확인한 흐름을 요약한 예시입니다. 참여자 연구 결과는 아닙니다.</p>
+</div>
+<ol class="am-timeline am-timeline--v"><li class="am-tl-item"><span class="am-tl-when">1</span><span class="am-tl-dot"></span><span class="am-tl-title">현재 요청</span><span class="am-tl-text">“갈색 바지가 필수인 코디를 추천해줘.”</span></li><li class="am-tl-item"><span class="am-tl-when">2</span><span class="am-tl-dot"></span><span class="am-tl-title">조건 확인</span><span class="am-tl-text">사용자가 갈색 바지 조건을 확인합니다.</span></li><li class="am-tl-item"><span class="am-tl-when">3</span><span class="am-tl-dot"></span><span class="am-tl-title">첫 추천</span><span class="am-tl-text">갈색 바지를 포함한 LOOK 5개를 보여줍니다.</span></li><li class="am-tl-item"><span class="am-tl-when">4</span><span class="am-tl-dot"></span><span class="am-tl-title">상의 부분 선택</span><span class="am-tl-text">사용자가 마음에 드는 셔츠만 고릅니다.</span></li><li class="am-tl-item"><span class="am-tl-when">5</span><span class="am-tl-dot"></span><span class="am-tl-title">이유 가설</span><span class="am-tl-text">시스템은 여유 있는 셔츠 핏을 좋아하는지 묻습니다.</span></li><li class="am-tl-item"><span class="am-tl-when">6</span><span class="am-tl-dot"></span><span class="am-tl-title">이번에 적용</span><span class="am-tl-text">사용자가 맞다고 답합니다. 이번 추천의 선호를 갱신합니다.</span></li><li class="am-tl-item"><span class="am-tl-when">7</span><span class="am-tl-dot"></span><span class="am-tl-title">저장 검토</span><span class="am-tl-text">코디를 확정하고 저장할 셔츠 핏 선호를 고릅니다.</span></li><li class="am-tl-item"><span class="am-tl-when">8</span><span class="am-tl-dot"></span><span class="am-tl-title">별도 동의</span><span class="am-tl-text">다음 추천에 활용하는 데 동의한 뒤 저장합니다.</span></li><li class="am-tl-item"><span class="am-tl-when">9</span><span class="am-tl-dot"></span><span class="am-tl-title">새 요청</span><span class="am-tl-text">갈색 바지 조건은 이월하지 않습니다. 동의한 셔츠 핏은 활용합니다.</span></li></ol>
+<div class="am-md"><div class="am-table-wrap"><table>
+<thead>
+<tr>
+<th>정보</th>
+<th>이번 요청에서의 역할</th>
+<th>다음 요청에서의 역할</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>갈색 바지 필수</td>
+<td>현재 요청의 조건</td>
+<td>저장하지 않았으므로 적용하지 않음</td>
+</tr>
+<tr>
+<td>선택한 셔츠</td>
+<td>해당 상품의 긍정 근거</td>
+<td>선택 기록을 자동 이월하지 않음</td>
+</tr>
+<tr>
+<td>여유 있는 셔츠 핏</td>
+<td>이유 확인 후 이번 추천에 반영</td>
+<td>별도 저장 동의가 있을 때 활용</td>
+</tr>
+<tr>
+<td>셔츠의 다른 속성</td>
+<td>상품 정보</td>
+<td>선택만으로 사용자 취향이 되지 않음</td>
+</tr>
+</tbody></table></div>
+</div></div>
+</section>
+<section class="am-panel" id="panel-E">
+<header class="am-panel-head"><span class="am-panel-id">E</span><h2>기억은 어떤 조건에서 저장되나요?</h2></header>
+<div class="am-panel-body"><figure class="am-diagram am-seq"><svg viewBox="0 0 383 310" width="383" height="310" role="img" aria-label="时序图：사용자、화면、저장소" xmlns="http://www.w3.org/2000/svg"><defs><marker id="am2-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="am-arrow" d="M0,0 L10,5 L0,10 z"/></marker></defs><line class="am-lifeline" x1="54" y1="42" x2="54" y2="306"/><g data-key="사용자"><rect class="am-actor" x="12" y="8" width="84" height="34" rx="2"/><text x="54" y="25" text-anchor="middle" dominant-baseline="central" font-weight="600">사용자</text></g><line class="am-lifeline" x1="216.7" y1="42" x2="216.7" y2="306"/><g data-key="화면"><rect class="am-actor" x="174.7" y="8" width="84" height="34" rx="2"/><text x="216.7" y="25" text-anchor="middle" dominant-baseline="central" font-weight="600">화면</text></g><line class="am-lifeline" x1="328.7" y1="42" x2="328.7" y2="306"/><g data-key="저장소"><rect class="am-actor" x="286.7" y="8" width="84" height="34" rx="2"/><text x="328.7" y="25" text-anchor="middle" dominant-baseline="central" font-weight="600">저장소</text></g><g data-step="0"><text x="135.4" y="70" text-anchor="middle">확정 또는 중단</text><path class="am-edge" d="M54,80 L214.7,80" marker-end="url(#am2-arrow)"/><text class="am-step" x="60" y="74" text-anchor="start">1</text></g><g data-step="1"><text x="135.4" y="110" text-anchor="middle">저장할 내용 표시</text><path class="am-edge am-edge--dashed" d="M216.7,120 L56,120" marker-end="url(#am2-arrow)"/><text class="am-step" x="210.7" y="114" text-anchor="end">2</text></g><g data-step="2"><text x="135.4" y="150" text-anchor="middle">항목 선택과 활용 동의</text><path class="am-edge" d="M54,160 L214.7,160" marker-end="url(#am2-arrow)"/><text class="am-step" x="60" y="154" text-anchor="start">3</text></g><g data-step="3"><text x="272.7" y="190" text-anchor="middle">선호 저장</text><path class="am-edge" d="M216.7,200 L326.7,200" marker-end="url(#am2-arrow)"/><text class="am-step" x="222.7" y="194" text-anchor="start">4</text></g><g data-step="4"><text x="272.7" y="230" text-anchor="middle">저장 결과</text><path class="am-edge am-edge--dashed" d="M328.7,240 L218.7,240" marker-end="url(#am2-arrow)"/><text class="am-step" x="322.7" y="234" text-anchor="end">5</text></g><g data-step="5"><text x="272.7" y="270" text-anchor="middle">요청 닫기</text><path class="am-edge" d="M216.7,280 L326.7,280" marker-end="url(#am2-arrow)"/><text class="am-step" x="222.7" y="274" text-anchor="start">6</text></g></svg></figure>
+<div class="am-md"><p>저장하지 않기를 고르면 장기기억을 바꾸지 않습니다. 코디 확정도 자동 저장 동의가 아닙니다.</p>
+<p>기존 선호를 대체할 때는 그 내용을 화면에 표시합니다. 사용자가 해당 항목을 선택하고 별도로 동의해야 대체합니다. 다른 아이템이나 조건부 기억은 조용히 바꾸지 않습니다.</p>
+</div>
+<div class="am-callout am-callout--info" role="note"><div class="am-callout-title">종료와 요청 닫기는 순서가 다릅니다</div><div class="am-callout-body am-md"><p>먼저 추천 탐색을 마칩니다. 다음으로 선택적 저장을 처리합니다. 마지막으로 저장 계층의 요청을 닫습니다. 요청을 먼저 닫으면 새 저장 작업이 거부됩니다.</p>
+</div></div>
+<div class="am-md"><p>선택 근거·가설·세션 선호는 실행 중인 메모리에 둡니다. 확인한 요청 조건과 동의한 장기 선호는 기존 SQLite 저장 계약을 따릅니다.</p>
+</div></div>
+</section>
+<section class="am-panel" id="panel-F">
+<header class="am-panel-head"><span class="am-panel-id">F</span><h2>모델과 정책은 각각 무엇을 맡나요?</h2></header>
+<div class="am-panel-body"><div class="am-md"><div class="am-table-wrap"><table>
+<thead>
+<tr>
+<th>역할</th>
+<th>담당하는 일</th>
+<th>처리 경계</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>요청 해석</td>
+<td>원문에서 조건 후보를 추출</td>
+<td>사용자가 확인한 조건만 적용</td>
+</tr>
+<tr>
+<td>선택 이유 해석</td>
+<td>선택한 상품에서 이유 가설을 제안</td>
+<td>허용값·대상·선택 근거를 검사</td>
+</tr>
+<tr>
+<td>추천기</td>
+<td>상품 조건 검사와 조합·정렬</td>
+<td>필수 조건과 회피 조건을 유지</td>
+</tr>
+<tr>
+<td>행동 정책</td>
+<td>질문·비교·재추천·종료 제안을 선택</td>
+<td>질문 예산과 사용자 결정권을 유지</td>
+</tr>
+<tr>
+<td>메모리 저장소</td>
+<td>확인·동의·버전과 저장을 관리</td>
+<td>모델이 직접 쓰지 못함</td>
+</tr>
+</tbody></table></div>
+<p>기본 화면은 오프라인 사전과 규칙을 사용합니다. 실제 모델 모드는 기존 Codex CLI를 사용합니다. 실제 모드는 요청 해석, 목표 속성 추론, 선택 이유 해석을 수행합니다.</p>
+<ul>
+<li>초기 LOOK 구성은 기본 2:1:2 전략을 사용합니다. 관련 장기기억이 없으면 장기기억 기반이라고 표시하지 않습니다.</li>
+<li>질문 예산 기본값은 3입니다. 이유 질문·보조 질문·이미지 비교를 합산합니다.</li>
+<li>“잘 모르겠어요”에는 같은 속성의 이유 질문을 반복하지 않습니다. 비교할 상품이 있을 때만 이미지 비교를 제공합니다.</li>
+<li>추론으로 붙인 상품 속성은 필수 조건 충족의 근거로 쓰지 않습니다. 확인할 수 없는 속성은 조건 검사에서 통과시키지 않습니다.</li>
+<li>이전 회차 응답과 위조한 근거를 거부합니다. 모델 실패 때는 조건과 선택을 유지하고 재시도·종료를 제공합니다.</li>
+</ul>
+<p>후보 비율·질문 예산·거리 가중치·종료 제안은 연구용 규칙입니다. 가장 좋은 정책이라는 실험 결과는 아직 없습니다.</p>
+<p>코드: 흐름 조정 (개발 브랜치의 <code>src/stylemate_memory/research.py</code>) · 코드: 상품 추천 (개발 브랜치의 <code>src/stylemate_memory/research_catalog.py</code>) · 구현 결정 (개발 브랜치의 <code>docs/decisions/0004-research-loop.md</code>)</p>
+</div></div>
+</section>
+<section class="am-panel" id="panel-G">
+<header class="am-panel-head"><span class="am-panel-id">G</span><h2>무엇을 검증했고 무엇이 남았나요?</h2></header>
+<div class="am-panel-body"><div class="am-md"><p>아래 결과는 앞선 구현 작업에서 실제로 실행한 검증입니다. 이번 설명 페이지를 만들면서 제품 테스트를 다시 실행한 것은 아닙니다.</p>
+<div class="am-table-wrap"><table>
+<thead>
+<tr>
+<th>검증</th>
+<th>결과</th>
+<th>확인한 범위</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Python 3.11</td>
+<td><span class="am-status am-status--ok"><span class="am-status-icon" aria-hidden="true">✓</span>147개 통과</span></td>
+<td>기존 메모리와 새 연구 흐름의 오프라인 테스트</td>
+</tr>
+<tr>
+<td>Python 3.14</td>
+<td><span class="am-status am-status--ok"><span class="am-status-icon" aria-hidden="true">✓</span>147개 통과</span></td>
+<td>같은 테스트의 버전 호환성</td>
+</tr>
+<tr>
+<td>실제 gpt-6-luna</td>
+<td><span class="am-status am-status--ok"><span class="am-status-icon" aria-hidden="true">✓</span>연결 확인</span></td>
+<td>합성 요청의 추출·목표 추론·부분 선택 해석</td>
+</tr>
+<tr>
+<td>실제 상품 화면</td>
+<td><span class="am-status am-status--ok"><span class="am-status-icon" aria-hidden="true">✓</span>표시 확인</span></td>
+<td>LOOK 5개와 이미지 10개 로드</td>
+</tr>
+<tr>
+<td>브라우저 상호작용</td>
+<td><span class="am-status am-status--ok"><span class="am-status-icon" aria-hidden="true">✓</span>흐름 확인</span></td>
+<td>선택·확인·재추천·확정·동의 저장·새 요청</td>
+</tr>
+<tr>
+<td>화면과 설치</td>
+<td><span class="am-status am-status--ok"><span class="am-status-icon" aria-hidden="true">✓</span>검증 완료</span></td>
+<td>데스크톱·390px 모바일·오프라인 패키지 설치</td>
+</tr>
+</tbody></table></div>
+<p>첫 실제 모델 호출에서는 불필요한 조건 때문에 추천이 보류됐습니다. 현재 요청과 조건부 기억을 구분하도록 지시문을 보완했습니다. 보완 후 같은 합성 흐름이 통과했습니다.</p>
+</div>
+<div class="am-callout am-callout--warn" role="note"><div class="am-callout-title">테스트 통과와 연구 효과는 구분합니다</div><div class="am-callout-body am-md"><p>현재 결과는 코드 연결과 처리 경계를 확인합니다. 일반적인 취향 해석 정확도를 입증하지 않습니다. 사용자 취향 재현과 표현 부담 감소도 별도의 연구로 평가해야 합니다.</p>
+</div></div>
+<div class="am-md"><p>남은 작업은 상품 라벨과 코디 품질의 검수입니다. 다음으로 질문·비교·종료 정책을 파일럿으로 평가해야 합니다. RQ1·RQ2의 대조 조건과 평가 프로토콜도 합의해야 합니다.</p>
+<p>실시간 재고·가격·사이즈·구매 연동은 후속 범위입니다. 전체 코디의 장기 저장과 다중 사용자 서비스도 후속 결정입니다.</p>
+<p>실행 계약 (개발 브랜치의 <code>docs/research-prototype.md</code>) · <a href="../docs/workflow.md">설계와 구현 대응</a> · <a href="../docs/master.md">연구 기준</a> · <a href="../LUMI_system_design.html">LUMI 설계 보고서</a></p>
+</div></div>
+</section>
+</div>
+</div>
+</main>
+<footer class="am-colophon">Generated by Answer me with HTML 0.4.6 · 2026-10-14 19:48</footer>
+<textarea id="am-source" hidden readonly aria-hidden="true">---
+template: doc
+theme: shadcn
+mode: light
+style: 80
+title: LUMI, 메모리에서 상품 선택까지
+subtitle: 이번에 구현한 연구용 추천 흐름과 검증 범위
+date: 2026-10-14
+branch: codex/lumi-research-loop · 로컬 변경
+---
+기존 메모리 기반에 실제 상품 LOOK과 이미지 선택을 연결했습니다. 사용자는 필요한 확인을 거쳐 추천을 조정합니다. 장기기억은 저장할 내용을 고르고 별도로 동의할 때만 바뀝니다.
+
+## A 이번에 무엇이 달라졌나요?
+
+이전에는 기억을 저장하고 원하는 아이템의 목표 속성을 확인했습니다. 이제는 그 결과로 상품 코디를 보여줍니다. 선택과 재추천도 한 화면에서 이어집니다.
+
+| 영역 | 이전 구현 | 이번에 연결한 기능 |
+|---|---|---|
+| 메모리 | 장·단기 분리와 확인·동의 | 선택한 선호의 저장 검토와 다음 요청 활용 |
+| 선호 해석 | 아이템 목표 속성 17개 | 선택 근거·잠정 가설·이번에 확인한 선호 |
+| 상품 | 추천 경로가 없었음 | 공식 상품을 참조한 셔츠 6개·바지 6개 |
+| 코디 | 화면 후보가 없었음 | 가능한 상품 조합으로 LOOK 구성 |
+| 상호작용 | 개발자용 기억 확인 | 전체·부분 선택과 필요한 질문·재추천 |
+
+```callout info 이번 구현의 목표
+연구용 전체 흐름을 실행할 수 있게 만들었습니다. 고정 상품을 이용합니다. 추천 품질과 사용자 연구 효과는 별도로 검증해야 합니다.
+```
+
+[연구 화면 열기](http://127.0.0.1:8766/) · 현재 실행 계약 (개발 브랜치의 `docs/research-prototype.md`)
+
+## B 사용자는 어떤 순서로 이용하나요?
+
+```flow
+(현재 요청) -&gt; 조건 검토: 적용할 내용 선택
+조건 검토 -&gt; 상품 LOOK: 확인한 조건 반영
+상품 LOOK -&gt; 이미지 선택: 전체 또는 일부 선택
+이미지 선택 -&gt; 재추천: 가설 또는 확인한 선호 활용
+재추천 -&gt; 상품 LOOK: 탐색 계속
+이미지 선택 -&gt; (확정 또는 중단): 사용자가 결정
+(확정 또는 중단) -&gt; 저장 검토: 저장은 선택
+저장 검토 -&gt; (요청 닫기): 저장 또는 건너뛰기
+```
+
+처음에는 LOOK을 최대 5개 제시합니다. 조건에 맞는 상품이 부족하면 후보 수가 줄어듭니다. 부족한 조건을 몰래 완화하지 않습니다.
+
+전체 룩과 개별 상품을 함께 선택할 수 있습니다. 마음에 드는 것이 없다는 응답도 가능합니다. 사용자는 질문 중에도 현재 코디를 확정하거나 중단할 수 있습니다.
+
+## C 선호·후보·상품 속성을 왜 구분하나요?
+
+“내가 원하는 것”과 “보여준 것”과 “상품의 속성”은 다릅니다. 이 정보를 섞으면 추천 결과가 사용자 취향으로 잘못 저장될 수 있습니다.
+
+| 구분 | 담는 내용 | 예시 |
+|---|---|---|
+| 사용자 선호 상태 | 이번 조건, 관련 기억, 확인한 선호, 가설 | 이번에는 갈색 바지가 필요함 |
+| 후보 LOOK | 추천기가 구성한 상품 조합 | 베이지 셔츠와 갈색 바지 |
+| 상품 속성 | 상품 정보와 그 근거 | 바지 색상은 갈색이라는 공식 표기 |
+
+```callout warn 선택한 사실과 선택 이유는 다릅니다
+룩을 고르면 그 조합에 대한 긍정 근거를 남깁니다. 그 안의 색상·핏·소재를 모두 좋아한다고 확정하지 않습니다. 상의를 고른 근거를 하의 취향으로 확대하지 않습니다.
+```
+
+선택하지 않은 상품은 싫어함으로 기록하지 않습니다. 모델이 제안한 이유는 확인 전까지 가설입니다.
+
+상품 정보도 근거를 구분합니다. 공식 표기, 이미지 관측, 추론, 가상 검증값을 별도로 표시합니다. 이번 스타일 라벨은 Codex가 작성한 추론값입니다. 사람의 라벨 검수 결과가 아닙니다.
+
+## D 갈색 바지 요청은 어떻게 기억으로 이어지나요?
+
+다음은 실제 브라우저 검증에서 확인한 흐름을 요약한 예시입니다. 참여자 연구 결과는 아닙니다.
+
+```timeline v
+1 | 현재 요청 | “갈색 바지가 필수인 코디를 추천해줘.”
+2 | 조건 확인 | 사용자가 갈색 바지 조건을 확인합니다.
+3 | 첫 추천 | 갈색 바지를 포함한 LOOK 5개를 보여줍니다.
+4 | 상의 부분 선택 | 사용자가 마음에 드는 셔츠만 고릅니다.
+5 | 이유 가설 | 시스템은 여유 있는 셔츠 핏을 좋아하는지 묻습니다.
+6 | 이번에 적용 | 사용자가 맞다고 답합니다. 이번 추천의 선호를 갱신합니다.
+7 | 저장 검토 | 코디를 확정하고 저장할 셔츠 핏 선호를 고릅니다.
+8 | 별도 동의 | 다음 추천에 활용하는 데 동의한 뒤 저장합니다.
+9 | 새 요청 | 갈색 바지 조건은 이월하지 않습니다. 동의한 셔츠 핏은 활용합니다.
+```
+
+| 정보 | 이번 요청에서의 역할 | 다음 요청에서의 역할 |
+|---|---|---|
+| 갈색 바지 필수 | 현재 요청의 조건 | 저장하지 않았으므로 적용하지 않음 |
+| 선택한 셔츠 | 해당 상품의 긍정 근거 | 선택 기록을 자동 이월하지 않음 |
+| 여유 있는 셔츠 핏 | 이유 확인 후 이번 추천에 반영 | 별도 저장 동의가 있을 때 활용 |
+| 셔츠의 다른 속성 | 상품 정보 | 선택만으로 사용자 취향이 되지 않음 |
+
+## E 기억은 어떤 조건에서 저장되나요?
+
+```sequence num
+participants: 사용자, 화면, 저장소
+사용자 -&gt; 화면: 확정 또는 중단
+화면 --&gt; 사용자: 저장할 내용 표시
+사용자 -&gt; 화면: 항목 선택과 활용 동의
+화면 -&gt; 저장소: 선호 저장
+저장소 --&gt; 화면: 저장 결과
+화면 -&gt; 저장소: 요청 닫기
+```
+
+저장하지 않기를 고르면 장기기억을 바꾸지 않습니다. 코디 확정도 자동 저장 동의가 아닙니다.
+
+기존 선호를 대체할 때는 그 내용을 화면에 표시합니다. 사용자가 해당 항목을 선택하고 별도로 동의해야 대체합니다. 다른 아이템이나 조건부 기억은 조용히 바꾸지 않습니다.
+
+```callout info 종료와 요청 닫기는 순서가 다릅니다
+먼저 추천 탐색을 마칩니다. 다음으로 선택적 저장을 처리합니다. 마지막으로 저장 계층의 요청을 닫습니다. 요청을 먼저 닫으면 새 저장 작업이 거부됩니다.
+```
+
+선택 근거·가설·세션 선호는 실행 중인 메모리에 둡니다. 확인한 요청 조건과 동의한 장기 선호는 기존 SQLite 저장 계약을 따릅니다.
+## F 모델과 정책은 각각 무엇을 맡나요?
+
+| 역할 | 담당하는 일 | 처리 경계 |
+|---|---|---|
+| 요청 해석 | 원문에서 조건 후보를 추출 | 사용자가 확인한 조건만 적용 |
+| 선택 이유 해석 | 선택한 상품에서 이유 가설을 제안 | 허용값·대상·선택 근거를 검사 |
+| 추천기 | 상품 조건 검사와 조합·정렬 | 필수 조건과 회피 조건을 유지 |
+| 행동 정책 | 질문·비교·재추천·종료 제안을 선택 | 질문 예산과 사용자 결정권을 유지 |
+| 메모리 저장소 | 확인·동의·버전과 저장을 관리 | 모델이 직접 쓰지 못함 |
+
+기본 화면은 오프라인 사전과 규칙을 사용합니다. 실제 모델 모드는 기존 Codex CLI를 사용합니다. 실제 모드는 요청 해석, 목표 속성 추론, 선택 이유 해석을 수행합니다.
+
+- 초기 LOOK 구성은 기본 2:1:2 전략을 사용합니다. 관련 장기기억이 없으면 장기기억 기반이라고 표시하지 않습니다.
+- 질문 예산 기본값은 3입니다. 이유 질문·보조 질문·이미지 비교를 합산합니다.
+- “잘 모르겠어요”에는 같은 속성의 이유 질문을 반복하지 않습니다. 비교할 상품이 있을 때만 이미지 비교를 제공합니다.
+- 추론으로 붙인 상품 속성은 필수 조건 충족의 근거로 쓰지 않습니다. 확인할 수 없는 속성은 조건 검사에서 통과시키지 않습니다.
+- 이전 회차 응답과 위조한 근거를 거부합니다. 모델 실패 때는 조건과 선택을 유지하고 재시도·종료를 제공합니다.
+
+후보 비율·질문 예산·거리 가중치·종료 제안은 연구용 규칙입니다. 가장 좋은 정책이라는 실험 결과는 아직 없습니다.
+
+코드: 흐름 조정 (개발 브랜치의 `src/stylemate_memory/research.py`) · 코드: 상품 추천 (개발 브랜치의 `src/stylemate_memory/research_catalog.py`) · 구현 결정 (개발 브랜치의 `docs/decisions/0004-research-loop.md`)
+
+## G 무엇을 검증했고 무엇이 남았나요?
+
+아래 결과는 앞선 구현 작업에서 실제로 실행한 검증입니다. 이번 설명 페이지를 만들면서 제품 테스트를 다시 실행한 것은 아닙니다.
+
+| 검증 | 결과 | 확인한 범위 |
+|---|---|---|
+| Python 3.11 | ok 147개 통과 | 기존 메모리와 새 연구 흐름의 오프라인 테스트 |
+| Python 3.14 | ok 147개 통과 | 같은 테스트의 버전 호환성 |
+| 실제 gpt-6-luna | ok 연결 확인 | 합성 요청의 추출·목표 추론·부분 선택 해석 |
+| 실제 상품 화면 | ok 표시 확인 | LOOK 5개와 이미지 10개 로드 |
+| 브라우저 상호작용 | ok 흐름 확인 | 선택·확인·재추천·확정·동의 저장·새 요청 |
+| 화면과 설치 | ok 검증 완료 | 데스크톱·390px 모바일·오프라인 패키지 설치 |
+
+첫 실제 모델 호출에서는 불필요한 조건 때문에 추천이 보류됐습니다. 현재 요청과 조건부 기억을 구분하도록 지시문을 보완했습니다. 보완 후 같은 합성 흐름이 통과했습니다.
+
+```callout warn 테스트 통과와 연구 효과는 구분합니다
+현재 결과는 코드 연결과 처리 경계를 확인합니다. 일반적인 취향 해석 정확도를 입증하지 않습니다. 사용자 취향 재현과 표현 부담 감소도 별도의 연구로 평가해야 합니다.
+```
+
+남은 작업은 상품 라벨과 코디 품질의 검수입니다. 다음으로 질문·비교·종료 정책을 파일럿으로 평가해야 합니다. RQ1·RQ2의 대조 조건과 평가 프로토콜도 합의해야 합니다.
+
+실시간 재고·가격·사이즈·구매 연동은 후속 범위입니다. 전체 코디의 장기 저장과 다중 사용자 서비스도 후속 결정입니다.
+
+실행 계약 (개발 브랜치의 `docs/research-prototype.md`) · [설계와 구현 대응](../docs/workflow.md) · [연구 기준](../docs/master.md) · [LUMI 설계 보고서](../LUMI_system_design.html)
+</textarea>
+<script>
+(() => {
+  const root = document.documentElement;
+  const cycle = (list, cur) => list[(list.indexOf(cur) + 1) % list.length];
+  const label = (btn, value) => {
+    const map = JSON.parse(btn.dataset.labels || '{}');
+    btn.textContent = map[value] || value;
+  };
+  const bind = (name, attr, values) => {
+    const btn = document.querySelector(`[data-am="${name}"]`);
+    if (!btn) return;
+    label(btn, root.getAttribute(attr));
+    btn.addEventListener('click', () => {
+      const next = cycle(values, root.getAttribute(attr));
+      root.setAttribute(attr, next);
+      label(btn, next);
+    });
+  };
+  bind('theme', 'data-theme', ['blueprint', 'shadcn']);
+  bind('mode', 'data-mode', ['auto', 'light', 'dark']);
+
+  const copyBtn = document.querySelector('[data-am="copy"]');
+  copyBtn?.addEventListener('click', async () => {
+    const nodes = document.querySelectorAll('#am-source');
+    const text = nodes[nodes.length - 1]?.value ?? '';
+    try {
+      await navigator.clipboard.writeText(text);
+    } catch {
+      const ta = Object.assign(document.createElement('textarea'), { value: text });
+      document.body.append(ta);
+      ta.select();
+      document.execCommand('copy');
+      ta.remove();
+    }
+    const original = copyBtn.textContent;
+    copyBtn.textContent = copyBtn.dataset.done;
+    setTimeout(() => { copyBtn.textContent = original; }, 1400);
+  });
+})();
+</script>
+</body>
+</html>

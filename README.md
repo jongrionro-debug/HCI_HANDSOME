@@ -1,5 +1,7 @@
 # LUMI · HCI_HANDSOME
 
+> **보고서·과제 전용 브랜치:** `codex/reports-and-assignments`. [원고·그림·설명 산출물](artifacts/README.md)과 [과제 자료](Assignment/Readme.md)를 관리한다. 시스템 개발은 `codex/lumi-research-loop`에서 진행하며, 이 브랜치를 `main`으로 병합하지 않는다. 아래 시스템 설명은 공통 기반의 문서 지도다.
+
 **LUMI — Long&short-term User Memory with Image-selection.** 장기·세션 기억과 현재 요청, 이미지 선택을 활용해 자신의 패션 취향을 말로 정확히 설명하기 어려운 사용자도 적은 질문으로 선호를 발견하고 만족스러운 코디에 도달하도록 돕는 추천 에이전트 연구 프로젝트다.
 
 ## 시스템 파이프라인
