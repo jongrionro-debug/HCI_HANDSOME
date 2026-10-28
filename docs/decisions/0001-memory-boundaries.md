@@ -1,7 +1,9 @@
 # 0001 · 요청 범위·사용자 동의와 삭제 경계
 
 - Status: Accepted
+- Applies to: 기존 로컬 메모리 프로토타입. 현재 동작은 [실행 계약](../shopping-memory-prototype.md), 보고서와의 차이는 [구현 대응](../workflow.md)을 따른다. 이 ADR을 최종 시스템 전체의 확정 요구사항으로 확대하지 않는다.
 - Date: 2026-10-13
+- Historical context: 본문의 연구 기준·제품 흐름은 당시 [master](../../archive/docs/lumi-master-20261014.md)·[workflow](../../archive/docs/lumi-workflow-20261014.md)의 논의를 가리킨다.
 - Related Issue: [#1](https://github.com/jongrionro-debug/HCI_HANDSOME/issues/1)
 - Approval: 2026-10-13 · 현재 채팅의 승인 질문(D01–D12·ADR 0001/0002·보관 기간·Python+SQLite 최소안)에 사용자가 **“권고안 전체 승인”**으로 응답했다.
 

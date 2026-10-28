@@ -1,6 +1,7 @@
 # 0003 · 소비자용 쇼핑 메모리와 목표 feature 프로토타입
 
 - Status: Accepted
+- Applies to: 기존 로컬 메모리 프로토타입. 현재 동작은 [실행 계약](../shopping-memory-prototype.md), 보고서와의 차이는 [구현 대응](../workflow.md)을 따른다. 이 ADR을 최종 시스템 전체의 확정 요구사항으로 확대하지 않는다.
 - Date: 2026-10-14
 - Related Issue: [#2](https://github.com/jongrionro-debug/HCI_HANDSOME/issues/2)
 - Approval: 사용자가 현재 채팅에서 기획 기반 구현을 전부 위임하고 LLM 연결까지 진행하며 스키마/feature를 일반 쇼핑에 맞게 줄여도 된다고 명시했다. 연결 방식 확인에서는 **“연결 코드와 테스트까지 만들고 실제 호출은 나중에”**를 선택했다.

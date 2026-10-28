@@ -1,10 +1,10 @@
 # 쇼핑 메모리·목표 feature 프로토타입
 
 - Related Issue: [#2](https://github.com/jongrionro-debug/HCI_HANDSOME/issues/2)
-- 승인·축소 이유: [ADR 0003](decisions/0003-consumer-shopping-prototype.md)
+- 로컬 프로토타입의 승인·축소 이유: [ADR 0003](decisions/0003-consumer-shopping-prototype.md)
 - 역할: `src/stylemate_memory/`의 현재 실행 계약. 보관된 [v0.2 설계](../archive/docs/memory-design.md)와 [전체 목표 feature 계획](../archive/docs/target-feature-inference-plan.md)은 역사적 설계/확장 참조이며 실행 객체와 동일한 JSON 형식이 아니다.
 
-**LUMI 설계와의 관계 · 2026-10-14:** 시스템 설계는 [LUMI 보고서](../LUMI_system_design.html)를 따른다. 이 프로토타입은 Memory Layer와 아이템 목표 속성 추론의 실행 기반이다. 출력은 전체 User Preference Map·Candidate Look·실제 Product Feature Map이 아니며, 이미지 선택·상품 추천·Decision Agent는 미구현이다. [단계별 구현 대응](workflow.md)을 따른다. 기존 `stylemate_memory` 이름과 저장·확인·동의·API 계약은 유지한다.
+**보고서와의 관계:** 시스템 설계는 [Team4_mid-term_report.pdf](sources/Team4_mid-term_report.pdf)를 따른다. 이 문서는 기존 Memory Layer·목표 Item Feature Map의 실행 계약을 설명한다. 이미지 선택·상품별 Item Feature Map·상품 검색/추천은 미구현이다. 보고서 단계별 차이와 다음 개발 범위는 [workflow](workflow.md)에 있다. 기존 `stylemate_memory` 이름과 저장·확인·동의·API 계약은 유지한다.
 
 ## 1. 구현 흐름과 범위
 
@@ -16,13 +16,13 @@
 
 ### 연구 목적과 현재 구현의 경계
 
-[현재 연구 목표](master.md)는 우리가 설계한 메모리 시스템을 활용한 에이전트가 사용자의 아이템 선호 판단을 얼마나 충실하게 재현하는지 평가하는 것이다. 이 모듈은 아이템·조건별 기억과 장·단기 범위, 유효 context, 목표 속성 추론·검증의 실행 기반이다. 확인된 조건과 목표 속성을 보존하는 검증은 취향 판단 재현의 일부 근거이며, 평가용 상품에 대한 사용자 선호·선택과 시스템 판단의 일치를 검증한 것은 아니다. 실제 후보·판단 경로와 비교 과제·평가 지표는 후속 연구 설계에 필요하며 저장 계약이나 추천 기능을 이번 문서 정리에서 추가하지 않았다.
+[연구 기준](master.md)은 보고서의 통제감·코디 적합성·표현 부담·스타일 구체화·이해받는 느낌 평가를 따른다. 이 모듈의 저장/context·목표 속성 검증은 그 시스템의 실행 기반이며 사용자 효과나 실제 상품 추천 품질의 증거가 아니다. 자유 취향 문장과 대화 맥락의 지속 보존, 이미지 선택 근거, 상품/피드백 연결은 후속 개발 범위다.
 
 ## 2. 일반 쇼핑용 17개 속성
 
-원본 PDF의 item65/outfit9를 모두 채우지 않는다. 기본 카테고리는 아이템 종류로 결정하고 기장은 대상별 한 속성으로 통합했다. 미정 속성은 사용자에게 모든 값을 입력하게 하는 대신 미정으로 남긴다.
+현재 사전은 [이전 전체 feature 계획](../archive/docs/target-feature-inference-plan.md)의 item65/outfit9를 축소한 `consumer-17-v1`이다. 중간보고서는 전체 속성 수·허용값을 지정하지 않는다. 아래 표의 과거 대응과 `pdf` metadata를 중간보고서에서 정한 상품 스키마로 읽지 않는다. 기본 카테고리는 아이템 종류에서 파생하고 기장은 대상별로 통합했으며 근거 없는 값은 미정으로 남긴다.
 
-| key | 표시 | 원본 대응·축소 |
+| key | 표시 | 과거 사전 대응·축소 |
 |---|---|---|
 | garment_type | 아이템 종류 | Garment Type. Main Category는 파생; Type Variant 제외 |
 | color | 기본 색상 | Primary Color. 패턴/그래픽 색과 별도 |
@@ -42,7 +42,7 @@
 | warmth | 보온성 | Thermal Insulation |
 | functions | 기능 | Functional Properties. 원하는 성능이며 실제 상품 성능은 별도 근거 필요 |
 
-`registry.py`가 허용값·적용 category·원본 추출 source·한국어 표시의 단일 정본이다. model prompt도 이 사전에서 만든다. PDF의 상품 추출 source는 사용자 목표를 추론한 근거와 다르다. 예를 들어 기능의 실제 추출 source는 Metadata이며, Waterproof 목표 제안은 상품의 방수 성능 증명이 아니다.
+`registry.py`가 현재 실행 허용값·적용 category·과거 추출 source·한국어 표시를 관리한다. model prompt도 이 사전에서 만든다. `pdf`/`source` metadata는 이전 feature 자료의 상품 추출 방법이며 중간보고서 인용이나 사용자 목표를 추론한 근거가 아니다. 예를 들어 기능의 실제 추출 source는 Metadata이며, Waterproof 목표 제안은 상품의 방수 성능 증명이 아니다.
 
 `occasion`, `activity`, `goal`은 목표 feature가 아닌 확인된 상황 facts다. 상황과 그 조건·대상/근거를 보존하고, fact를 모델이 추론한 hard feature로 자동 변환하지 않는다.
 
@@ -138,33 +138,18 @@ create action 예시(현재 요청에만 적용, 장기 자동 저장 없음):
 ]
 ```
 
-## 6. 향후 실제 LLM 호출
+## 6. 실제 모델 연결
 
-이번에는 실제 호출을 하지 않는다. 연결 adapter는 명시적 model/key와 fake transport로 검증한다. 코드 import, demo, 기본 rule 추론은 자격 증명을 읽지 않는다. `.env.example`은 빈 설정 이름만 제공하며 자동으로 `.env` 파일을 읽지 않는다.
+CLI의 Responses adapter는 명시적 model/key로 연결하며 테스트는 fake transport를 사용한다. 코드 import, demo, 기본 rule 추론은 자격 증명을 읽거나 실제 모델을 호출하지 않는다. Codex CLI로 실제 추출·목표 추론을 실행하는 [개발자 관찰 도구](developer-memory-inspector.md)는 별도 실행 경로다.
 
-향후 사용자가 로컬 환경에 `OPENAI_API_KEY`, `STYLEMATE_OPENAI_MODEL`을 설정하고 명시적으로 `infer --provider openai`를 실행할 때만 실제 연결을 사용한다. `--model`로 호출 모델을 지정할 수도 있다. 키를 CLI 인자·로그·오류·PR에 넣지 않는다. 모델 접근권한과 structured output 지원은 실제 호출 시 확인해야 한다.
+사용자가 로컬 환경에 `OPENAI_API_KEY`, `STYLEMATE_OPENAI_MODEL`을 설정하고 명시적으로 `infer --provider openai`를 실행할 때만 실제 연결을 사용한다. `--model`로 호출 모델을 지정할 수도 있다. 키를 CLI 인자·로그·오류·PR에 넣지 않는다. 모델 접근권한과 structured output 지원은 실제 호출 시 확인해야 한다.
 
 adapter는 OpenAI Responses API에 `text.format`의 strict JSON Schema·`store=false`·출력 상한·timeout을 전달한다. [공식 Structured Outputs 이동 안내](https://developers.openai.com/api/docs/guides/migrate-to-responses#6-update-structured-outputs-definitions)를 기준으로 wire 형식을 구현했다. 응답 거부·불완전·비정상 JSON·HTTP/timeout 오류는 안전한 오류 코드로 반환하고 자동 무한 재시도·부분 성공으로 처리하지 않는다. 구조 검증은 의미 품질/공급자 전체 보관 정책의 증명이 아니다.
 
 ## 7. 검증과 남은 범위
 
-테스트는 실제 SQLite와 synthetic 사용자·가상 HTTP 응답을 사용한다. 모델 연결 테스트는 전송 형식/오류 처리/출력 검증·메모리 불변을 확인하며 실제 모델 호출 결과가 아니다. 실행 결과·독립 리뷰 반영과 원격 CI 상태는 작업 완료 후 PR에 기록한다.
+테스트는 실제 SQLite와 합성 사용자·가상 모델/HTTP 응답으로 저장·동의·요청 격리·대상/상황별 context·충돌·목표값·최신성·삭제 경계를 확인한다. 위 실행 명령으로 현재 결과를 확인한다. 과거 테스트 수와 PR/임시 설치 결과는 [2026-10-14 보관 기록](../archive/docs/shopping-memory-prototype-20261014.md)에 있으며 이번 실행 결과로 재사용하지 않는다.
 
-2026-10-14 로컬 검증 결과:
+실제 모델의 자연어 해석 품질, 자유 표현·이미지 근거의 지속 보존, 상품 검색/매칭·추천 품질, 소비자 UI/로그인·사용자 연구는 이 오프라인 검증에 포함되지 않는다. 원격 CI도 실제 실행을 별도로 확인한다.
 
-| 실제 실행 | 결과·범위 |
-|---|---|
-| Python 3.11.15의 `PYTHONPATH=src python3.11 -m unittest discover -s tests -q` | **PASS —79개** 단위·SQLite·context·목표 검증·가상 HTTP adapter·앱 통합 테스트 |
-| Python 3.14.5의 동일 테스트 | **PASS —79개** |
-| store test suite 10회 반복 | **PASS**. 동일시각 UUID 정렬에 의존한 fixture를 receipt의 정확 ID로 수정 |
-| `python3 scripts/check_repository.py` | **PASS** — 로컬 전체185 Markdown 링크·HTML 원문쌍5·Issue Form2·PR양식1. 미커밋 설명 산출물도 포함한 검사이며 PR checkout 범위와 개수는 다름 |
-| `git diff --check`와 새 파일 공백/구문 검사 | **PASS** |
-| 임시 Python 3.11 환경의 오프라인 editable 설치와 설치된 `stylemate-memory features` | **PASS** — 실행 feature17개, 런타임 추가 패키지 없음 |
-| `demo --synthetic` | **PASS** — 오늘 Slim/다음 Relaxed, 추론 전후 기억 불변, 실제 LLM 호출false |
-| 기존 v0.2 검증기 | **PASS** — 계약39·가상시나리오70·거부변조31. 새 코드/DB/LLM 검증과 별개의 역사적 설계 검증 |
-| 독립 리뷰·수정 후 재검토 | 요청 격리/동의·승격/삭제 영수증·기간·조건부/대상별 facts·복수값/연산·모델 출력/오류 경계를 보완. 최신 spot check의 차단 발견은 없음 |
-| PR에 포함할 index만 임시 checkout으로 검증 | **PASS** — Python 3.11/3.14 각각79개, Markdown 링크168·HTML 원문쌍2. 제외한 기존 변경/설명 산출물 없이도 재현 |
-
-원격 CI의 실제 실행 상태는 PR에서 별도로 확인한다. 실제 API 키 접근/모델 호출·의미 품질·제품 UI/로그인·이미지/상품 처리·연구 효과·SSD/OS 백업 소거는 이번에 실행하지 않았다.
-
-남은 제품 범위는 자연어/이미지 입력의 실제 확인·동의 UI, 로그인·서버·실제 모델 의미 품질 평가, 상품 데이터·매칭/추천, 사용자 연구다. 관리 DB 삭제는 row/관련 내용·영수증·journal 정리 범위이며 사용자가 만든 사본·OS 백업·저장매체 소거는 포함하지 않는다.
+보관 기간·조회 예산·17개 사전은 현재 로컬 프로토타입의 설정이다. 이를 최종 서비스 정책으로 확정하거나 문서 정리만으로 변경하지 않는다. 관리 DB 삭제는 행·관련 내용/영수증·journal 정리 범위이며 사용자가 만든 사본·OS 백업·저장매체 소거는 포함하지 않는다.

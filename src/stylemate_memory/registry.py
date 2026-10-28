@@ -1,9 +1,9 @@
-"""The small, consumer-facing feature vocabulary used by StyleMate.
+"""The executable 17-feature vocabulary of the LUMI memory prototype.
 
-The source feature map contains many attributes that are useful to a product
-designer or an extractor.  A shopper-facing memory context only needs a small
-set of attributes that can be expressed as a preference.  This module is the
-single Python source of truth for that set; callers should not copy the lists
+The vocabulary and legacy `pdf` metadata came from the earlier feature-map
+design, not from Team4_mid-term_report.pdf. The report defines the system flow
+without fixing this complete enum set or the final product catalog schema.
+This module owns the current runtime values; callers should not copy the lists
 into JSON prompts or database migrations.
 """
 

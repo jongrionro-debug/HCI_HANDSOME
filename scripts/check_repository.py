@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Run lightweight, dependency-free checks for this document-first repository.
+"""Run lightweight, dependency-free repository checks.
 
 The checks intentionally cover repository wiring rather than product behavior:
 local Markdown links, generated HTML/source pairs, and workflow templates.
@@ -41,7 +41,7 @@ EXCLUDED_DIRS = {
 EXCLUDED_PATH_PREFIXES = {
     ("data", "private"),
     ("data", "raw"),
-    # Frozen pre-LUMI records keep their original relative links and are not
+    # Frozen historical records keep their original relative links and are not
     # maintained; see archive/README.md.
     ("archive",),
 }
