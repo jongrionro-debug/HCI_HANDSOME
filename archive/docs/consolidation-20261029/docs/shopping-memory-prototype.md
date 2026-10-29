@@ -4,7 +4,7 @@
 - 로컬 프로토타입의 승인·축소 이유: [ADR 0003](decisions/0003-consumer-shopping-prototype.md)
 - 역할: `src/stylemate_memory/`의 현재 실행 계약. 보관된 [v0.2 설계](../archive/docs/memory-design.md)와 [전체 목표 feature 계획](../archive/docs/target-feature-inference-plan.md)은 역사적 설계/확장 참조이며 실행 객체와 동일한 JSON 형식이 아니다.
 
-**보고서와의 관계:** 시스템 설계는 [Team4_mid-term_report.pdf](sources/Team4_mid-term_report.pdf)를 따른다. 이 문서는 기존 Memory Layer·목표 Item Feature Map의 실행 계약을 설명한다. 이미지 선택·상품별 Item Feature Map·상품 검색/추천은 미구현이다. 보고서 단계별 차이와 다음 개발 범위는 [workflow](workflow.md)에 있다. 기존 `stylemate_memory` 이름과 저장·확인·동의·API 계약은 유지한다.
+**보고서와의 관계:** 시스템 설계는 [Team4_mid-term_report.pdf](sources/Team4_mid-term_report.pdf)를 따른다. 보고서가 정하지 않은 속성 사전은 [ADR 0004](decisions/0004-adopt-park-2025-feature-map.md)의 사용자 승인으로 구체화했다. 이 문서는 확정한 사전과 현재 Memory Layer·목표 Item Feature Map의 실행 계약을 구분한다. 이미지 선택·상품별 Item Feature Map·상품 검색/추천과 새 사전으로의 이관은 미구현이다. 단계별 차이와 다음 개발 범위는 [workflow](workflow.md)에 있다. 기존 `stylemate_memory` 이름과 저장·확인·동의·API 계약은 유지한다.
 
 ## 1. 구현 흐름과 범위
 
@@ -18,9 +18,52 @@
 
 [연구 기준](master.md)은 보고서의 통제감·코디 적합성·표현 부담·스타일 구체화·이해받는 느낌 평가를 따른다. 이 모듈의 저장/context·목표 속성 검증은 그 시스템의 실행 기반이며 사용자 효과나 실제 상품 추천 품질의 증거가 아니다. 자유 취향 문장과 대화 맥락의 지속 보존, 이미지 선택 근거, 상품/피드백 연결은 후속 개발 범위다.
 
-## 2. 일반 쇼핑용 17개 속성
+## 2. 확정 Feature Map과 현재 실행 사전
 
-현재 사전은 [이전 전체 feature 계획](../archive/docs/target-feature-inference-plan.md)의 item65/outfit9를 축소한 `consumer-17-v1`이다. 중간보고서는 전체 속성 수·허용값을 지정하지 않는다. 아래 표의 과거 대응과 `pdf` metadata를 중간보고서에서 정한 상품 스키마로 읽지 않는다. 기본 카테고리는 아이템 종류에서 파생하고 기장은 대상별로 통합했으며 근거 없는 값은 미정으로 남긴다.
+### 확정 Feature Map
+
+**2026-10-29 사용자 확정: Park et al. (2025)의 Table 2 상품정보 7항목과 Table 1 FEA 소비자 요구 30개 태그를 고정 사전으로 차용한다.** [JSON](../output/feature-map/park-2025-feature-map.json)이 이름·허용값·분류·승인 메타데이터를 관리하고, [CSV](../output/feature-map/park-2025-feature-map.csv)는 같은 목록의 표 형식이다. 출처는 [자료 안내](sources/README.md#확정-feature-map의-출처), 결정 근거는 [ADR 0004](decisions/0004-adopt-park-2025-feature-map.md)에 있다. 기존 RQ·평가 계획·이미지 선택·메모리 흐름은 변경하지 않는다.
+
+상품정보(PI)는 다음 7항목이다. 영문 이름·허용값은 원문을 보존한다.
+
+| 항목 | 원문 허용값 | 원문 개수 |
+|---|---|---:|
+| Type | Jeans, Leggings, Slacks, Overalls, Cargo pants, Chinos, Jogger | 7 |
+| Brand | 전체 목록 미공개. 원문은 일부 예시만 제시 | 419 |
+| Price | 0~43,900; 43,900~54,360; 54,360~69,000; 69,000~89,000; 89,000~ | 5 |
+| Color | White, Gray, Charcoal, Black, Pink, Light blue, Blue, Navy, Beige, Brown, Green, Khaki, Red, Yellow, Purple | 15 |
+| Fit | Baggy, Bootcut, Skinny, Straight, Slim, Wide | 6 |
+| Fabric | Nylon, Rayon, Linen, Cotton, Wool, Polyurethane, Polyester | 7 |
+| Detail | Roll-up, Banding, Washing, Pleats, Distressed | 5 |
+
+소비자 요구(FEA)는 다음 30개 태그다. 상품정보 항목과 수준이 다르므로 합쳐서 37개의 동등한 상품 속성으로 취급하지 않는다.
+
+| 큰 분류 | 소분류 | 태그 |
+|---|---|---|
+| Functional (8) | Protection | Warmth, Durability |
+| Functional | Mobility | Lightweight, Elasticity |
+| Functional | Comfort | Waterproof, Windproof |
+| Functional | Donning | Ease, Easy maintenance |
+| Expressive (13) | Role | Teen fashion, Young adult fashion, Mature fashion, Working professional, Student |
+| Expressive | TPO | Business wear, Wedding guest wear, Sportswear, Loungewear, Travel wear |
+| Expressive | Status | Good value for money, Luxury |
+| Expressive | Self-esteem | Positive feedback |
+| Aesthetic (9) | Body/garment relationship | Opaque, Groin coverage, Waist contouring, Hip contouring, Leg contouring |
+| Aesthetic | Matching item | Sneakers, Sandals, Formal shoes |
+| Aesthetic | Design principle | Trends |
+
+고정 사전은 상품 Map과 목표 Map에서 같은 이름·값·의미로 참조한다. 대화·이미지 선택·부분 선택·관련 메모리는 이 사전에 매핑하는 입력이며 대화 중 새 속성이나 허용값을 추가하지 않는다. 목표의 근거 부족은 미정, 상품의 근거 부족은 미확인으로 유지한다. 이미지 선택만으로 모든 속성 선호를 확정하거나, 방수·보온 같은 성능을 사진만으로 확인된 사실로 만들지 않는다. 기존 확인·별도 장기 활용 동의·현재 요청 우선 규칙도 유지한다.
+
+원문 범위와 아직 정하지 않은 실행 규칙은 다음과 같다.
+
+- 상품정보 값은 **무신사 여성 바지** 기준이다. 이 선택이 기존 연구 과제를 바지로 바꾼다는 뜻은 아니며, 상의·아우터·드레스의 허용값이 원문에 있다고 보지 않는다. 그 범위의 실행 매핑은 아직 제공하지 않는다.
+- Brand의 419개 전체 목록은 공개되지 않았다. 예시만으로 전체 enum을 만들지 않는다. Price는 원문 구간 표기를 보존하며 경계값 포함 규칙·통화 코드는 원문 Table 2만으로 확정하지 않는다.
+- Fit은 바지 형태이며 기존 `fit`의 Regular·Relaxed·Oversized와 자동 대응하지 않는다. Fabric은 섬유 원료이므로 기존 `fabric`의 Denim·Knit 같은 원단 종류와 단순 치환하지 않는다.
+- FEA는 소비자 요구의 의미 분류다. Role 태그를 사용자 나이·직업 추정으로 사용하거나, 리뷰의 체감과 확인된 상품 성능을 동일시하지 않는다.
+
+### 현재 실행 중인 17개 속성
+
+**현재 실행 코드는 여전히 `consumer-17-v1`을 사용한다.** 이는 [이전 전체 feature 계획](../archive/docs/target-feature-inference-plan.md)의 item65/outfit9를 축소한 로컬 실행 사전이며 위의 확정 사전과 다르다. 아래 표의 과거 대응과 `pdf` metadata를 중간보고서나 Park et al. 논문에서 정한 상품 스키마로 읽지 않는다. 기본 카테고리는 아이템 종류에서 파생하고 기장은 대상별로 통합했으며 근거 없는 값은 미정으로 남긴다.
 
 | key | 표시 | 과거 사전 대응·축소 |
 |---|---|---|
@@ -45,6 +88,8 @@
 `registry.py`가 현재 실행 허용값·적용 category·과거 추출 source·한국어 표시를 관리한다. model prompt도 이 사전에서 만든다. `pdf`/`source` metadata는 이전 feature 자료의 상품 추출 방법이며 중간보고서 인용이나 사용자 목표를 추론한 근거가 아니다. 예를 들어 기능의 실제 추출 source는 Metadata이며, Waterproof 목표 제안은 상품의 방수 성능 증명이 아니다.
 
 `occasion`, `activity`, `goal`은 목표 feature가 아닌 확인된 상황 facts다. 상황과 그 조건·대상/근거를 보존하고, fact를 모델이 추론한 hard feature로 자동 변환하지 않는다.
+
+확정 사전의 실행 적용에는 `registry.py`뿐 아니라 후보 추출·저장 payload·context·목표 검증·관찰 도구·기존 데이터의 사전 버전 이관이 필요하다. 기존 값·원문·근거·확인·동의를 보존하고 의미가 다른 값을 임의 변환하지 않는다. 이번 문서 반영은 이 구현·이관을 완료한 것이 아니다.
 
 ## 3. 작은 메모리 입력 계약
 

@@ -1,7 +1,7 @@
 # 0001 · 요청 범위·사용자 동의와 삭제 경계
 
 - Status: Accepted
-- Applies to: 기존 로컬 메모리 프로토타입. 현재 동작은 [실행 계약](../shopping-memory-prototype.md), 보고서와의 차이는 [구현 대응](../workflow.md)을 따른다. 이 ADR을 최종 시스템 전체의 확정 요구사항으로 확대하지 않는다.
+- Applies to: 기존 로컬 메모리 프로토타입. 현재 동작은 [실행 계약](../master.md#메모리-실행-계약), 보고서와의 차이는 [구현 대응](../master.md#현재-구현과-실행)을 따른다. 이 ADR을 최종 시스템 전체의 확정 요구사항으로 확대하지 않는다.
 - Date: 2026-10-13
 - Historical context: 본문의 연구 기준·제품 흐름은 당시 [master](../../archive/docs/lumi-master-20261014.md)·[workflow](../../archive/docs/lumi-workflow-20261014.md)의 논의를 가리킨다.
 - Related Issue: [#1](https://github.com/jongrionro-debug/HCI_HANDSOME/issues/1)
@@ -9,7 +9,7 @@
 
 ## Context
 
-[연구 기준](../master.md)의 RQ1은 기본·일시 선호의 분리와 사용자 확인·수정을 다룬다. 기존 [제품 흐름](../workflow.md)과 보관 초안은 자동 장기 덮어쓰기를 막지만 요청 종료·재개, 동의 대상, 실제 삭제·파생 데이터와 보관 기간은 정하지 않았다. 이번 요청에만 쓰는 정보와 오래 보관되는 정보를 같은 의미로 취급하면 다음 요청 오염과 UI의 잘못된 보관 약속이 생긴다.
+[연구 기준](../../archive/docs/lumi-master-20261014.md)의 RQ1은 기본·일시 선호의 분리와 사용자 확인·수정을 다룬다. 기존 [제품 흐름](../../archive/docs/lumi-workflow-20261014.md)과 보관 초안은 자동 장기 덮어쓰기를 막지만 요청 종료·재개, 동의 대상, 실제 삭제·파생 데이터와 보관 기간은 정하지 않았다. 이번 요청에만 쓰는 정보와 오래 보관되는 정보를 같은 의미로 취급하면 다음 요청 오염과 UI의 잘못된 보관 약속이 생긴다.
 
 ## Decision
 

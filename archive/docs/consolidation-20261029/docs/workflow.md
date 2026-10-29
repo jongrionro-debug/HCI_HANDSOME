@@ -2,6 +2,8 @@
 
 기준: [Team4_mid-term_report.pdf](sources/Team4_mid-term_report.pdf) 3장. 아래는 보고서의 설계를 현재 코드와 연결한 안내다. 실행 계약은 [메모리 프로토타입](shopping-memory-prototype.md), 연구 기준은 [master](master.md), 작업 절차는 [engineering-workflow](engineering-workflow.md)를 따른다.
 
+**Feature Map의 고정 사전은 Park et al. (2025)의 상품정보 7항목·FEA 소비자 요구 30개 태그로 확정했다.** [ADR 0004](decisions/0004-adopt-park-2025-feature-map.md)의 2026-10-29 사용자 승인에 따른다. [사전과 적용 범위](shopping-memory-prototype.md#확정-feature-map)는 설계 기준이며, 현재 실행 코드는 여전히 기존 17개 사전을 사용한다. RQ·평가 계획·이미지 선택·메모리 흐름은 유지한다.
+
 ## 보고서 단계별 구현 대응
 
 | 보고서 | 현재 코드·검증의 범위 | 남은 범위 |
@@ -9,7 +11,7 @@
 | 3.2 · Input-to-Memory Model | [codex_llm.py](../src/stylemate_memory/codex_llm.py)의 텍스트 후보 추출·형식/인용 검사, [inspector.py](../src/stylemate_memory/inspector.py)의 수동 확인·동의 | 사전으로 표현되지 않는 취향과 대화 맥락의 지속 보존, 이미지 선택 입력·근거 연결, 소비자 입력 흐름 |
 | 3.2 · Memory Layer | [store.py](../src/stylemate_memory/store.py)의 장·단기 항목, 대상/상황/근거 참조, 확인·동의·교체·철회·삭제, SQLite 원자성 | 자유 표현·선택 사실·미확인 이유를 함께 다룰 표현과 확인 흐름. 현재 메모리는 지원 feature/fact와 values가 필요함 |
 | 3.3 · Context-Aware Memory Retrieval | [context.py](../src/stylemate_memory/context.py)의 요청/대상/조건/기간 필터, 단기 예외·장기 보존, 출처·제외 이유 | 자연어·이미지 선택 근거까지 포함하는 조회와 관련성 평가. 현재 미확인 후보는 확정 binding에서 제외됨 |
-| 3.4 · 목표 Item Feature Map | [registry.py](../src/stylemate_memory/registry.py)의 17개 사전, [inference.py](../src/stylemate_memory/inference.py)의 지정/추론/미정/상충 구분, [app.py](../src/stylemate_memory/app.py)의 최신성 재검사 | 실제 상품과 공유할 속성 체계·확인 질문·검색 입력 연결. 현재 17개가 최종 상품 스키마로 확정된 것은 아님 |
+| 3.4 · 목표 Item Feature Map | [registry.py](../src/stylemate_memory/registry.py)의 기존 17개 사전, [inference.py](../src/stylemate_memory/inference.py)의 지정/추론/미정/상충 구분, [app.py](../src/stylemate_memory/app.py)의 최신성 재검사 | 확정한 PI 7항목·FEA 30개 태그로 사전·추출·저장·목표 검증 이관, 확인 질문·검색 입력 연결 |
 | 3.5 · Item Retrieval / Final Suggestion | 미구현 | 상품 수집·속성 검증, 필수 조건 필터, 선호 랭킹, 결과 없음과 사용자 조건 조정, 최종 제안 |
 | 3.6 · Feedback / Memory Update | 확인·승격·교체의 저장 기반과 개발자 도구의 텍스트 수정 | 이미지/부분 선택·선택 이유 가설·필요한 확인·재검색·최종 확정/장기 저장 통합 |
 | 3.7 · UI | 개발자 관찰 도구만 존재 | 보고서의 온보딩·새 요청·이미지 탐색·반영 정보 확인·최종 선택·별도 저장 UI |
@@ -33,10 +35,10 @@
 
 **첫 작업은 보고서 3.2~3.3의 입력→메모리→조회 경로를 기존 프로토타입에 연결하는 것이다.** 아래는 후속 작업의 범위와 완료 조건이며 이번 문서 정리로 구현됐다는 뜻은 아니다.
 
-1. **입력·근거 표현:** 현재 `MemoryStore._validate_memory_payload()`는 feature/values를 요구한다. 추출 프롬프트는 사전에 없는 내용을 `unmapped`로 반환하도록 지시하고, `validate_extraction()`은 미지원 후보값을 거부한다. 자유 취향 문장·선택 사실·추정 이유를 임의 enum으로 확정하지 않고 보존·확인할 표현을 먼저 정한다. 저장 모델이 바뀌면 기존 항목·근거·동의의 마이그레이션을 함께 다룬다.
+1. **입력·근거 표현:** 현재 `MemoryStore._validate_memory_payload()`는 feature/values를 요구한다. 추출 프롬프트는 사전에 없는 내용을 `unmapped`로 반환하도록 지시하고, `validate_extraction()`은 미지원 후보값을 거부한다. 확정한 PI/FEA 사전을 추출·저장·검증에 연결하면서, 사전으로 표현되지 않는 취향 문장·선택 사실·추정 이유는 원문과 함께 보존·확인할 표현을 정한다. 기존 17개와 새 사전의 의미 차이를 검토하고 항목·근거·동의·사전 버전의 마이그레이션을 함께 다룬다.
 2. **확정 내용과 해석 분리:** `Inspector.chat()` → `MemoryStore.apply_batch()`의 후보·확인·장기 동의를 유지하며, 발화/선택 근거와 가설의 상태를 연결한다. 현재 전체 대화와 후보의 scope/교체 설명은 프로세스 메모리에만 있어 재시작 후 맥락이 복원되지 않는다.
 3. **요청별 조회와 목표 연결:** `build_context()` → `ShoppingApp.infer_request()`에서 현재 대상·상황에 맞는 근거를 전달한다. 미확인 해석은 사용자 확정 조건과 구분하고 필수 조건·장기 취향을 자동 변경하지 않는다.
-4. **동작 확인 후 확장:** 메모리 흐름의 회귀 검증을 먼저 완료한 뒤 3.6의 이미지 피드백과 3.5의 실제 상품 조회를 연결한다. 상품 속성 체계·제품 UI·스택은 담당 작업에서 정한다.
+4. **동작 확인 후 연결:** 메모리 흐름의 회귀 검증을 먼저 완료한 뒤 3.6의 이미지 피드백과 3.5의 실제 상품 조회를 연결한다. 상품 Map과 목표 Map은 확정한 PI/FEA 사전을 공유한다. 원문의 미공개 브랜드 목록·가격 경계와 적용 품목 범위를 처리하고, 제품 UI·스택은 담당 작업에서 정한다. 대화 중 사전의 속성·허용값을 추가하지 않는다.
 
 | 완료 조건 | 확인할 결과 |
 |---|---|
@@ -47,7 +49,7 @@
 | 내용 확인·추천 확정·반복 선택 | 별도 이후 활용 동의 없이는 장기 쓰기 없음 |
 | 조건 수정·기억 철회 뒤 늦은 모델 응답 | 이전 근거의 응답을 적용하지 않고 다시 조회/추론하도록 처리 |
 
-Navy/Relaxed→Slim→새 요청, 동의·요청 격리·최신성은 [기존 테스트](../tests/)와 가상 데모가 일부 검증한다. 자유 표현의 지속 보존과 이미지 근거를 추가할 때 새 회귀 테스트가 필요하다. 모델이 자연어 의미를 올바르게 해석했는지와 실제 추천 품질은 별도 평가다.
+Navy/Relaxed→Slim→새 요청, 동의·요청 격리·최신성은 **기존 17개 사전**으로 [현재 테스트](../tests/)와 가상 데모가 일부 검증한다. `Relaxed`는 확정한 논문의 Fit 허용값이 아니므로 새 사전의 동작 예시로 그대로 승계하지 않는다. 이관 시 기존 표현·근거를 보존하면서 미지원 값을 처리하고, 자유 표현의 지속 보존과 이미지 근거를 추가할 때 새 회귀 테스트가 필요하다. 모델의 의미 해석과 실제 추천 품질은 별도 평가다.
 
 ## 기존 결정의 적용 범위
 
@@ -56,6 +58,8 @@ Navy/Relaxed→Slim→새 요청, 동의·요청 격리·최신성은 [기존 �
 | [ADR 0001](decisions/0001-memory-boundaries.md) | 확인·이후 활용 동의 분리, 요청 범위·교체/철회/삭제·보관 경계 |
 | [ADR 0002](decisions/0002-memory-prototype-storage.md) | Python·SQLite 기반, 배치/버전/멱등·조회/삭제 설계 근거. 역사적 v0.2 JSON Schema 자체가 현재 실행 형식은 아님 |
 | [ADR 0003](decisions/0003-consumer-shopping-prototype.md) | 현재 17개 사전·로컬 신뢰 호출자·읽기 전용 모델 제안과 축소 실행 계약 |
+
+확정 사전과 후속 이관에는 [ADR 0004](decisions/0004-adopt-park-2025-feature-map.md)를 추가로 적용한다. ADR 0003은 현재 실행 코드의 기록으로 보존하며 이번 문서 반영으로 대체 구현이 완료됐다고 보지 않는다.
 
 보관 기간(요청 비활동30일/생성90일, 장기 동의365일), 장기12/단기20개·6,000자 context 예산, 17개 속성은 기존 로컬 설정이다. 보고서의 확정 정책이나 검증된 최적값으로 승계하지 않는다. 현재 코드가 사용하므로 문서 정리만으로 삭제하지 않으며 변경할 때 실행 문서·새 결정·필요한 마이그레이션을 함께 다룬다.
 

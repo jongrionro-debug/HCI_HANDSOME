@@ -1,0 +1,1872 @@
+{
+  "name": "LUMI Fixed Feature Map",
+  "version": "lumi-fixed-25-proposed-v1",
+  "status": "Withdrawn",
+  "runtime_implemented": false,
+  "scope": "상의·하의·아우터·드레스 단품 25개와 코디 9개. 신발·가방·액세서리는 범위 밖이다.",
+  "evidence_boundary": "Fashionpedia와 FashionIQ를 참고하여 LUMI용으로 재구성한 설계안이다. 25개라는 개수나 이 허용값 조합이 논문에서 최적이라고 검증된 것은 아니다.",
+  "sources": [
+    {
+      "title": "LUMI Mid-Term Report",
+      "path": "docs/sources/Team4_mid-term_report.pdf",
+      "role": "LUMI 흐름의 설계 기준. 이 보고서가 25개 속성이나 본 허용값을 정했다는 뜻은 아니다."
+    },
+    {
+      "title": "사용자 제공 FeatureMap 압축 ver.",
+      "path": "/Users/nojonghyeon/Downloads/1eb56875-e081-4033-a140-6f0da070897c_FeatureMap_압축_ver..pdf",
+      "role": "기존 허용값 및 단품/코디 구분의 출발점"
+    },
+    {
+      "title": "Fashionpedia (ECCV 2020)",
+      "url": "https://arxiv.org/abs/2004.12276",
+      "role": "품목·부위·속성 구분, 동의어 정규화, 미확인 상태 구분"
+    },
+    {
+      "title": "Fashion IQ (CVPR 2021)",
+      "url": "https://arxiv.org/abs/1905.12794",
+      "role": "상품 속성 및 비교형 자연어 피드백에 기반한 의류 검색"
+    }
+  ],
+  "fixed_contract": [
+    "상품 Map과 목표 Map은 같은 25개 item key와 같은 허용값 사전을 사용한다. 키는 항상 모두 존재한다.",
+    "코디를 구성하는 각 목표 아이템은 별도의 target_id로 동일한 25개 key를 가진다. 상의와 하의의 조건을 전역 한 값으로 합치지 않는다.",
+    "상품 등록 시 25개 전체를 판정한다. 미확인은 Unknown, 비적용은 NotApplicable로 명시한다.",
+    "대화 중 새 key, 새 enum, 새 하위 품목 사전을 추가하지 않는다. 목표 Map의 값과 상태만 갱신한다.",
+    "목표에서 근거 없는 속성은 Unspecified이며 채움 개수의 하한/상한을 두지 않는다.",
+    "길이와 실루엣의 품목별 허용값은 아래 사전에 처음부터 모두 고정되어 있다.",
+    "구매 조건/상품 메타데이터와 코디 속성은 별도의 고정 영역으로 보유한다."
+  ],
+  "derived_category_by_garment_type": {
+    "T-shirt": "Tops",
+    "Shirt": "Tops",
+    "Blouse": "Tops",
+    "Knit/Sweater": "Tops",
+    "Sweatshirt": "Tops",
+    "Hoodie": "Tops",
+    "Polo": "Tops",
+    "Tank Top": "Tops",
+    "Pants": "Bottoms",
+    "Skirt": "Bottoms",
+    "Jacket": "Outerwear",
+    "Coat": "Outerwear",
+    "Cardigan": "Outerwear",
+    "Vest": "Outerwear",
+    "Dress": "Dresses"
+  },
+  "feature_count": 25,
+  "item_features": {
+    "garment_type": {
+      "label_ko": "의류 종류",
+      "product_value_type": "single_enum",
+      "allowed_values": [
+        "T-shirt",
+        "Shirt",
+        "Blouse",
+        "Knit/Sweater",
+        "Sweatshirt",
+        "Hoodie",
+        "Polo",
+        "Tank Top",
+        "Pants",
+        "Skirt",
+        "Jacket",
+        "Coat",
+        "Cardigan",
+        "Vest",
+        "Dress"
+      ],
+      "applicable_garment_types": [
+        "T-shirt",
+        "Shirt",
+        "Blouse",
+        "Knit/Sweater",
+        "Sweatshirt",
+        "Hoodie",
+        "Polo",
+        "Tank Top",
+        "Pants",
+        "Skirt",
+        "Jacket",
+        "Coat",
+        "Cardigan",
+        "Vest",
+        "Dress"
+      ],
+      "extraction_sources": [
+        "Image",
+        "Metadata"
+      ],
+      "definition": "하나의 의류 상품 단위. 민소매라는 소매 속성과 Tank Top이라는 의류 종류를 구분한다."
+    },
+    "type_variant": {
+      "label_ko": "세부 종류",
+      "product_value_type": "single_enum",
+      "allowed_values": [
+        "Jeans",
+        "Slacks",
+        "Cargo",
+        "Jogger",
+        "Other",
+        "Bomber",
+        "Blouson",
+        "Blazer",
+        "Puffer",
+        "Windbreaker",
+        "Trench",
+        "Wrap Dress",
+        "Shirt Dress",
+        "Slip Dress"
+      ],
+      "applicable_garment_types": [
+        "Pants",
+        "Jacket",
+        "Coat",
+        "Dress"
+      ],
+      "extraction_sources": [
+        "Image",
+        "Metadata"
+      ],
+      "definition": "Pants/Jacket/Coat/Dress의 세부 종류. Other는 이 사전 밖의 확인된 세부 종류이며 미확인을 뜻하지 않는다.",
+      "allowed_values_by_garment_type": {
+        "Pants": [
+          "Jeans",
+          "Slacks",
+          "Cargo",
+          "Jogger",
+          "Other"
+        ],
+        "Jacket": [
+          "Bomber",
+          "Blouson",
+          "Blazer",
+          "Puffer",
+          "Windbreaker",
+          "Other"
+        ],
+        "Coat": [
+          "Trench",
+          "Other"
+        ],
+        "Dress": [
+          "Wrap Dress",
+          "Shirt Dress",
+          "Slip Dress",
+          "Other"
+        ]
+      }
+    },
+    "colors": {
+      "label_ko": "색상",
+      "product_value_type": "structured_list",
+      "allowed_values": [
+        "Black",
+        "White",
+        "Ivory",
+        "Cream",
+        "Gray",
+        "Charcoal",
+        "Beige",
+        "Brown",
+        "Navy",
+        "Blue",
+        "Green",
+        "Khaki",
+        "Red",
+        "Pink",
+        "Orange",
+        "Yellow",
+        "Purple",
+        "Multi-color",
+        "Other"
+      ],
+      "applicable_garment_types": [
+        "T-shirt",
+        "Shirt",
+        "Blouse",
+        "Knit/Sweater",
+        "Sweatshirt",
+        "Hoodie",
+        "Polo",
+        "Tank Top",
+        "Pants",
+        "Skirt",
+        "Jacket",
+        "Coat",
+        "Cardigan",
+        "Vest",
+        "Dress"
+      ],
+      "extraction_sources": [
+        "Image",
+        "Metadata"
+      ],
+      "definition": "색과 역할을 함께 기록한다. 주색과 배색/포인트색을 동일시하지 않는다.",
+      "structured_value": {
+        "entry_fields": {
+          "color": "allowed_values 중 하나",
+          "role": [
+            "Primary",
+            "Secondary",
+            "Accent"
+          ]
+        },
+        "max_entries": 3,
+        "max_primary_entries": 1,
+        "multi_color_rule": "색이 많아 최대 세 색으로 나타내기 어려울 때만 Multi-color를 사용한다."
+      }
+    },
+    "fit": {
+      "label_ko": "신체 여유도",
+      "product_value_type": "single_enum",
+      "allowed_values": [
+        "Slim",
+        "Regular",
+        "Relaxed",
+        "Oversized"
+      ],
+      "applicable_garment_types": [
+        "T-shirt",
+        "Shirt",
+        "Blouse",
+        "Knit/Sweater",
+        "Sweatshirt",
+        "Hoodie",
+        "Polo",
+        "Tank Top",
+        "Pants",
+        "Skirt",
+        "Jacket",
+        "Coat",
+        "Cardigan",
+        "Vest",
+        "Dress"
+      ],
+      "extraction_sources": [
+        "Image",
+        "Metadata"
+      ],
+      "definition": "착용 시 몸에 대한 여유도. 바짓단 너비나 A-line 같은 외곽선 형태는 silhouette에 기록한다."
+    },
+    "silhouette": {
+      "label_ko": "외곽선 형태",
+      "product_value_type": "single_enum",
+      "allowed_values": [
+        "Straight",
+        "Boxy",
+        "Tapered",
+        "A-line",
+        "Other",
+        "Skinny",
+        "Slim",
+        "Wide",
+        "Baggy",
+        "Flared",
+        "Balloon",
+        "Bootcut",
+        "Pencil",
+        "Fit-and-flare",
+        "Bodycon",
+        "Empire",
+        "Mermaid",
+        "Shift",
+        "Tent"
+      ],
+      "applicable_garment_types": [
+        "T-shirt",
+        "Shirt",
+        "Blouse",
+        "Knit/Sweater",
+        "Sweatshirt",
+        "Hoodie",
+        "Polo",
+        "Tank Top",
+        "Pants",
+        "Skirt",
+        "Jacket",
+        "Coat",
+        "Cardigan",
+        "Vest",
+        "Dress"
+      ],
+      "extraction_sources": [
+        "Image",
+        "Metadata"
+      ],
+      "definition": "품목별 외곽선 형태. Straight는 상하 폭이 대체로 일정한 형태이며 H-line은 Straight로 정규화한다.",
+      "allowed_values_by_garment_type": {
+        "T-shirt": [
+          "Straight",
+          "Boxy",
+          "Tapered",
+          "A-line",
+          "Other"
+        ],
+        "Shirt": [
+          "Straight",
+          "Boxy",
+          "Tapered",
+          "A-line",
+          "Other"
+        ],
+        "Blouse": [
+          "Straight",
+          "Boxy",
+          "Tapered",
+          "A-line",
+          "Other"
+        ],
+        "Knit/Sweater": [
+          "Straight",
+          "Boxy",
+          "Tapered",
+          "A-line",
+          "Other"
+        ],
+        "Sweatshirt": [
+          "Straight",
+          "Boxy",
+          "Tapered",
+          "A-line",
+          "Other"
+        ],
+        "Hoodie": [
+          "Straight",
+          "Boxy",
+          "Tapered",
+          "A-line",
+          "Other"
+        ],
+        "Polo": [
+          "Straight",
+          "Boxy",
+          "Tapered",
+          "A-line",
+          "Other"
+        ],
+        "Tank Top": [
+          "Straight",
+          "Boxy",
+          "Tapered",
+          "A-line",
+          "Other"
+        ],
+        "Jacket": [
+          "Straight",
+          "Boxy",
+          "Tapered",
+          "A-line",
+          "Other"
+        ],
+        "Coat": [
+          "Straight",
+          "Boxy",
+          "Tapered",
+          "A-line",
+          "Other"
+        ],
+        "Cardigan": [
+          "Straight",
+          "Boxy",
+          "Tapered",
+          "A-line",
+          "Other"
+        ],
+        "Vest": [
+          "Straight",
+          "Boxy",
+          "Tapered",
+          "A-line",
+          "Other"
+        ],
+        "Pants": [
+          "Skinny",
+          "Slim",
+          "Straight",
+          "Tapered",
+          "Wide",
+          "Baggy",
+          "Flared",
+          "Balloon",
+          "Bootcut",
+          "Other"
+        ],
+        "Skirt": [
+          "Straight",
+          "A-line",
+          "Flared",
+          "Pencil",
+          "Other"
+        ],
+        "Dress": [
+          "Straight",
+          "A-line",
+          "Fit-and-flare",
+          "Bodycon",
+          "Empire",
+          "Mermaid",
+          "Shift",
+          "Tent",
+          "Other"
+        ]
+      }
+    },
+    "length": {
+      "label_ko": "몸판·하의 기장",
+      "product_value_type": "single_enum",
+      "allowed_values": [
+        "Cropped",
+        "Waist-length",
+        "Hip-length",
+        "Below-hip",
+        "Short",
+        "Knee-length",
+        "Ankle-length",
+        "Full-length",
+        "Mini",
+        "Above-knee",
+        "Midi",
+        "Maxi",
+        "Thigh-length",
+        "Long"
+      ],
+      "applicable_garment_types": [
+        "T-shirt",
+        "Shirt",
+        "Blouse",
+        "Knit/Sweater",
+        "Sweatshirt",
+        "Hoodie",
+        "Polo",
+        "Tank Top",
+        "Pants",
+        "Skirt",
+        "Jacket",
+        "Coat",
+        "Cardigan",
+        "Vest",
+        "Dress"
+      ],
+      "extraction_sources": [
+        "Image",
+        "Metadata"
+      ],
+      "definition": "소매를 제외한 의류 길이. 착용자 기준 정보가 없으면 Estimated 또는 Unknown으로 기록한다.",
+      "allowed_values_by_garment_type": {
+        "T-shirt": [
+          "Cropped",
+          "Waist-length",
+          "Hip-length",
+          "Below-hip"
+        ],
+        "Shirt": [
+          "Cropped",
+          "Waist-length",
+          "Hip-length",
+          "Below-hip"
+        ],
+        "Blouse": [
+          "Cropped",
+          "Waist-length",
+          "Hip-length",
+          "Below-hip"
+        ],
+        "Knit/Sweater": [
+          "Cropped",
+          "Waist-length",
+          "Hip-length",
+          "Below-hip"
+        ],
+        "Sweatshirt": [
+          "Cropped",
+          "Waist-length",
+          "Hip-length",
+          "Below-hip"
+        ],
+        "Hoodie": [
+          "Cropped",
+          "Waist-length",
+          "Hip-length",
+          "Below-hip"
+        ],
+        "Polo": [
+          "Cropped",
+          "Waist-length",
+          "Hip-length",
+          "Below-hip"
+        ],
+        "Tank Top": [
+          "Cropped",
+          "Waist-length",
+          "Hip-length",
+          "Below-hip"
+        ],
+        "Pants": [
+          "Short",
+          "Knee-length",
+          "Cropped",
+          "Ankle-length",
+          "Full-length"
+        ],
+        "Skirt": [
+          "Mini",
+          "Above-knee",
+          "Knee-length",
+          "Midi",
+          "Maxi"
+        ],
+        "Jacket": [
+          "Cropped",
+          "Waist-length",
+          "Hip-length",
+          "Thigh-length",
+          "Knee-length",
+          "Long"
+        ],
+        "Coat": [
+          "Cropped",
+          "Waist-length",
+          "Hip-length",
+          "Thigh-length",
+          "Knee-length",
+          "Long"
+        ],
+        "Cardigan": [
+          "Cropped",
+          "Waist-length",
+          "Hip-length",
+          "Thigh-length",
+          "Knee-length",
+          "Long"
+        ],
+        "Vest": [
+          "Cropped",
+          "Waist-length",
+          "Hip-length",
+          "Thigh-length",
+          "Knee-length",
+          "Long"
+        ],
+        "Dress": [
+          "Mini",
+          "Above-knee",
+          "Knee-length",
+          "Midi",
+          "Ankle-length",
+          "Maxi"
+        ]
+      }
+    },
+    "sleeve_length": {
+      "label_ko": "소매 길이",
+      "product_value_type": "single_enum",
+      "allowed_values": [
+        "Sleeveless",
+        "Cap",
+        "Short",
+        "Elbow-length",
+        "Three-quarter",
+        "Long"
+      ],
+      "applicable_garment_types": [
+        "T-shirt",
+        "Shirt",
+        "Blouse",
+        "Knit/Sweater",
+        "Sweatshirt",
+        "Hoodie",
+        "Polo",
+        "Tank Top",
+        "Jacket",
+        "Coat",
+        "Cardigan",
+        "Vest",
+        "Dress"
+      ],
+      "extraction_sources": [
+        "Image",
+        "Metadata"
+      ],
+      "definition": "몸판 기장과 독립된 소매 길이. Vest와 Tank Top의 민소매는 Sleeveless이며 NotApplicable이 아니다."
+    },
+    "neckline": {
+      "label_ko": "목선 형태",
+      "product_value_type": "single_enum",
+      "allowed_values": [
+        "Crew",
+        "V-neck",
+        "U-neck",
+        "Square",
+        "Boat",
+        "Sweetheart",
+        "Halter",
+        "Off-shoulder",
+        "One-shoulder",
+        "Mock Neck",
+        "Turtleneck",
+        "Strapless",
+        "Other"
+      ],
+      "applicable_garment_types": [
+        "T-shirt",
+        "Shirt",
+        "Blouse",
+        "Knit/Sweater",
+        "Sweatshirt",
+        "Hoodie",
+        "Polo",
+        "Tank Top",
+        "Jacket",
+        "Coat",
+        "Cardigan",
+        "Vest",
+        "Dress"
+      ],
+      "extraction_sources": [
+        "Image",
+        "Metadata"
+      ],
+      "definition": "목 둘레 개구부의 형태. 카라가 있어 목선 자체를 판정할 수 없으면 collar만 확인하고 neckline은 Unknown으로 둔다."
+    },
+    "collar": {
+      "label_ko": "카라 형태",
+      "product_value_type": "single_enum",
+      "allowed_values": [
+        "None",
+        "Shirt",
+        "Stand",
+        "Spread",
+        "Camp",
+        "Mandarin",
+        "Shawl",
+        "Notched Lapel",
+        "Other"
+      ],
+      "applicable_garment_types": [
+        "T-shirt",
+        "Shirt",
+        "Blouse",
+        "Knit/Sweater",
+        "Sweatshirt",
+        "Hoodie",
+        "Polo",
+        "Tank Top",
+        "Jacket",
+        "Coat",
+        "Cardigan",
+        "Vest",
+        "Dress"
+      ],
+      "extraction_sources": [
+        "Image",
+        "Metadata"
+      ],
+      "definition": "부착된 카라/라펠의 주된 형태. 특수 카라 값을 우선하고 일반 셔츠 카라는 Shirt로 기록한다."
+    },
+    "hood": {
+      "label_ko": "후드 유무",
+      "product_value_type": "single_enum",
+      "allowed_values": [
+        "Present",
+        "Absent"
+      ],
+      "applicable_garment_types": [
+        "T-shirt",
+        "Shirt",
+        "Blouse",
+        "Knit/Sweater",
+        "Sweatshirt",
+        "Hoodie",
+        "Polo",
+        "Tank Top",
+        "Jacket",
+        "Coat",
+        "Cardigan",
+        "Vest",
+        "Dress"
+      ],
+      "extraction_sources": [
+        "Image",
+        "Metadata"
+      ],
+      "definition": "해당 상품의 후드 부착 여부. 탈착 가능한 후드도 기본 구성에 포함되어 있으면 Present이다."
+    },
+    "pattern": {
+      "label_ko": "무늬",
+      "product_value_type": "multi_label",
+      "allowed_values": [
+        "Solid",
+        "Stripe",
+        "Check",
+        "Dot",
+        "Floral",
+        "Animal",
+        "Camouflage",
+        "Geometric",
+        "Abstract",
+        "Graphic",
+        "Other"
+      ],
+      "applicable_garment_types": [
+        "T-shirt",
+        "Shirt",
+        "Blouse",
+        "Knit/Sweater",
+        "Sweatshirt",
+        "Hoodie",
+        "Polo",
+        "Tank Top",
+        "Pants",
+        "Skirt",
+        "Jacket",
+        "Coat",
+        "Cardigan",
+        "Vest",
+        "Dress"
+      ],
+      "extraction_sources": [
+        "Image",
+        "Metadata"
+      ],
+      "definition": "원단 무늬와 눈에 띄는 그래픽의 종류. Plaid는 Check로 정규화한다. Solid는 다른 pattern 값과 함께 사용할 수 없다. 브랜드 로고만 있는 경우 logo로 기록하고 Graphic을 강제하지 않는다."
+    },
+    "logo": {
+      "label_ko": "로고의 시각적 크기",
+      "product_value_type": "single_enum",
+      "allowed_values": [
+        "None",
+        "Small",
+        "Medium",
+        "Large"
+      ],
+      "applicable_garment_types": [
+        "T-shirt",
+        "Shirt",
+        "Blouse",
+        "Knit/Sweater",
+        "Sweatshirt",
+        "Hoodie",
+        "Polo",
+        "Tank Top",
+        "Pants",
+        "Skirt",
+        "Jacket",
+        "Coat",
+        "Cardigan",
+        "Vest",
+        "Dress"
+      ],
+      "extraction_sources": [
+        "Image",
+        "Metadata"
+      ],
+      "definition": "식별 가능한 브랜드 로고 중 가장 두드러지는 로고의 상대 크기. 상품 전체에서 로고 부재가 확인되지 않으면 None을 확정하지 않는다."
+    },
+    "fabric": {
+      "label_ko": "주요 원단",
+      "product_value_type": "multi_label",
+      "allowed_values": [
+        "Denim",
+        "Jersey",
+        "Knit",
+        "Twill",
+        "Fleece",
+        "Corduroy",
+        "Satin",
+        "Chiffon",
+        "Tweed",
+        "Canvas",
+        "Lace",
+        "Mesh",
+        "Leather",
+        "Faux Leather",
+        "Other"
+      ],
+      "applicable_garment_types": [
+        "T-shirt",
+        "Shirt",
+        "Blouse",
+        "Knit/Sweater",
+        "Sweatshirt",
+        "Hoodie",
+        "Polo",
+        "Tank Top",
+        "Pants",
+        "Skirt",
+        "Jacket",
+        "Coat",
+        "Cardigan",
+        "Vest",
+        "Dress"
+      ],
+      "extraction_sources": [
+        "Image",
+        "Metadata"
+      ],
+      "definition": "겉감의 원단 종류. 섬유 원료와 구분한다. 여러 원단이 상품의 외관을 구성하면 복수값을 사용한다."
+    },
+    "fiber_composition": {
+      "label_ko": "겉감 섬유 조성",
+      "product_value_type": "structured_list",
+      "allowed_values": [
+        "Cotton",
+        "Polyester",
+        "Wool",
+        "Nylon",
+        "Linen",
+        "Rayon",
+        "Acrylic",
+        "Spandex",
+        "Silk",
+        "Cashmere",
+        "Lyocell",
+        "Other"
+      ],
+      "applicable_garment_types": [
+        "T-shirt",
+        "Shirt",
+        "Blouse",
+        "Knit/Sweater",
+        "Sweatshirt",
+        "Hoodie",
+        "Polo",
+        "Tank Top",
+        "Pants",
+        "Skirt",
+        "Jacket",
+        "Coat",
+        "Cardigan",
+        "Vest",
+        "Dress"
+      ],
+      "extraction_sources": [
+        "Metadata"
+      ],
+      "definition": "제품에 명시된 겉감 원료와 혼용률. 사진으로 섬유 종류나 비율을 확정하지 않는다. 안감/충전재는 겉감과 섞지 않는다.",
+      "structured_value": {
+        "entry_fields": {
+          "fiber": "allowed_values 중 하나",
+          "percentage": "0 초과 100 이하의 수 또는 null"
+        },
+        "percentage_rule": "표기된 비율만 보존하며 합계를 맞추려고 미확인 비율을 채우지 않는다. 알려진 비율 합은 100 이하여야 한다."
+      }
+    },
+    "texture": {
+      "label_ko": "표면 질감",
+      "product_value_type": "multi_label",
+      "allowed_values": [
+        "Smooth",
+        "Ribbed",
+        "Cable-knit",
+        "Waffle",
+        "Fuzzy",
+        "Boucle",
+        "Quilted",
+        "Corded",
+        "Lace-textured",
+        "Other"
+      ],
+      "applicable_garment_types": [
+        "T-shirt",
+        "Shirt",
+        "Blouse",
+        "Knit/Sweater",
+        "Sweatshirt",
+        "Hoodie",
+        "Polo",
+        "Tank Top",
+        "Pants",
+        "Skirt",
+        "Jacket",
+        "Coat",
+        "Cardigan",
+        "Vest",
+        "Dress"
+      ],
+      "extraction_sources": [
+        "Image",
+        "Metadata"
+      ],
+      "definition": "관찰되는 표면 요철/질감. Knit 원단과 Cable-knit 표면 무늬는 별개의 차원이다."
+    },
+    "finish": {
+      "label_ko": "광택·표면 가공",
+      "product_value_type": "multi_label",
+      "allowed_values": [
+        "Matte",
+        "Low Sheen",
+        "Glossy",
+        "Washed",
+        "Faded",
+        "Distressed"
+      ],
+      "applicable_garment_types": [
+        "T-shirt",
+        "Shirt",
+        "Blouse",
+        "Knit/Sweater",
+        "Sweatshirt",
+        "Hoodie",
+        "Polo",
+        "Tank Top",
+        "Pants",
+        "Skirt",
+        "Jacket",
+        "Coat",
+        "Cardigan",
+        "Vest",
+        "Dress"
+      ],
+      "extraction_sources": [
+        "Image",
+        "Metadata"
+      ],
+      "definition": "광택 상태와 가공 흔적. Matte/Low Sheen/Glossy 중 최대 하나를 쓰고 Washed/Faded/Distressed는 동시 기록할 수 있다. Vintage라는 스타일 해석을 가공 사실로 바꾸지 않는다."
+    },
+    "transparency": {
+      "label_ko": "비침",
+      "product_value_type": "single_enum",
+      "allowed_values": [
+        "Opaque",
+        "Semi-sheer",
+        "Sheer"
+      ],
+      "applicable_garment_types": [
+        "T-shirt",
+        "Shirt",
+        "Blouse",
+        "Knit/Sweater",
+        "Sweatshirt",
+        "Hoodie",
+        "Polo",
+        "Tank Top",
+        "Pants",
+        "Skirt",
+        "Jacket",
+        "Coat",
+        "Cardigan",
+        "Vest",
+        "Dress"
+      ],
+      "extraction_sources": [
+        "Image",
+        "Metadata"
+      ],
+      "definition": "겉감의 비침 정도. 사진 배경이나 안감으로 판별이 어려우면 Unknown이다."
+    },
+    "closure": {
+      "label_ko": "여밈 방식",
+      "product_value_type": "multi_label",
+      "allowed_values": [
+        "Pullover",
+        "Button",
+        "Zipper",
+        "Snap",
+        "Drawstring",
+        "Open-front",
+        "Other"
+      ],
+      "applicable_garment_types": [
+        "T-shirt",
+        "Shirt",
+        "Blouse",
+        "Knit/Sweater",
+        "Sweatshirt",
+        "Hoodie",
+        "Polo",
+        "Tank Top",
+        "Pants",
+        "Skirt",
+        "Jacket",
+        "Coat",
+        "Cardigan",
+        "Vest",
+        "Dress"
+      ],
+      "extraction_sources": [
+        "Image",
+        "Metadata"
+      ],
+      "definition": "주요 여밈 구조. 지퍼와 버튼처럼 함께 사용된 장치는 복수값이다. Open-front는 여밈 없이 열린 구조이며, 풀어 놓은 버튼을 뜻하지 않는다."
+    },
+    "waist_rise": {
+      "label_ko": "하의 허리 높이",
+      "product_value_type": "single_enum",
+      "allowed_values": [
+        "Low",
+        "Mid",
+        "High"
+      ],
+      "applicable_garment_types": [
+        "Pants",
+        "Skirt"
+      ],
+      "extraction_sources": [
+        "Image",
+        "Metadata"
+      ],
+      "definition": "하의 허리선 위치. 드레스의 허리 강조나 허리 절개와 구분한다."
+    },
+    "details": {
+      "label_ko": "주요 디자인 장식",
+      "product_value_type": "multi_label",
+      "allowed_values": [
+        "None",
+        "Pleated",
+        "Ruffled",
+        "Slit",
+        "Belted",
+        "Drawstring",
+        "Elastic Waist",
+        "Wrap",
+        "Tiered",
+        "Gathered",
+        "Pocket",
+        "Other"
+      ],
+      "applicable_garment_types": [
+        "T-shirt",
+        "Shirt",
+        "Blouse",
+        "Knit/Sweater",
+        "Sweatshirt",
+        "Hoodie",
+        "Polo",
+        "Tank Top",
+        "Pants",
+        "Skirt",
+        "Jacket",
+        "Coat",
+        "Cardigan",
+        "Vest",
+        "Dress"
+      ],
+      "extraction_sources": [
+        "Image",
+        "Metadata"
+      ],
+      "definition": "장식·허리 처리·주머니의 존재를 기록한다. 위치/개수는 이 사전에서 구분하지 않는다. Shirred/Smocked/Ruched는 Gathered로 묶는다. None은 다른 값과 함께 사용할 수 없다.",
+      "value_applicability": {
+        "Slit": [
+          "Pants",
+          "Skirt",
+          "Dress"
+        ],
+        "Elastic Waist": [
+          "Pants",
+          "Skirt",
+          "Dress"
+        ]
+      }
+    },
+    "thickness": {
+      "label_ko": "두께",
+      "product_value_type": "single_enum",
+      "allowed_values": [
+        "Thin",
+        "Medium",
+        "Thick"
+      ],
+      "applicable_garment_types": [
+        "T-shirt",
+        "Shirt",
+        "Blouse",
+        "Knit/Sweater",
+        "Sweatshirt",
+        "Hoodie",
+        "Polo",
+        "Tank Top",
+        "Pants",
+        "Skirt",
+        "Jacket",
+        "Coat",
+        "Cardigan",
+        "Vest",
+        "Dress"
+      ],
+      "extraction_sources": [
+        "Metadata",
+        "Image"
+      ],
+      "definition": "원단 두께. 보온성을 뜻하지 않는다. 사진만으로 제안하면 Estimated이며 판단할 수 없으면 Unknown이다."
+    },
+    "functions": {
+      "label_ko": "명시된 착용 기능",
+      "product_value_type": "multi_label",
+      "allowed_values": [
+        "None",
+        "Water-resistant",
+        "Waterproof",
+        "Wind-resistant",
+        "Breathable",
+        "Stretch",
+        "Quick-drying"
+      ],
+      "applicable_garment_types": [
+        "T-shirt",
+        "Shirt",
+        "Blouse",
+        "Knit/Sweater",
+        "Sweatshirt",
+        "Hoodie",
+        "Polo",
+        "Tank Top",
+        "Pants",
+        "Skirt",
+        "Jacket",
+        "Coat",
+        "Cardigan",
+        "Vest",
+        "Dress"
+      ],
+      "extraction_sources": [
+        "Metadata"
+      ],
+      "definition": "상품 정보에 명시된 기능만 기록한다. None은 대상 기능이 없음을 확인한 경우에만 쓰고, 미기재는 Unknown이다. None은 다른 값과 함께 사용할 수 없다."
+    },
+    "season": {
+      "label_ko": "착용 계절",
+      "product_value_type": "multi_label",
+      "allowed_values": [
+        "Spring",
+        "Summer",
+        "Autumn",
+        "Winter"
+      ],
+      "applicable_garment_types": [
+        "T-shirt",
+        "Shirt",
+        "Blouse",
+        "Knit/Sweater",
+        "Sweatshirt",
+        "Hoodie",
+        "Polo",
+        "Tank Top",
+        "Pants",
+        "Skirt",
+        "Jacket",
+        "Coat",
+        "Cardigan",
+        "Vest",
+        "Dress"
+      ],
+      "extraction_sources": [
+        "Metadata",
+        "Inference"
+      ],
+      "definition": "단품의 착용 계절 적합성. 레이어링 및 지역/기온에 따라 달라질 수 있는 추정이며 기본적으로 Soft에만 사용한다."
+    },
+    "style": {
+      "label_ko": "스타일 성향",
+      "product_value_type": "multi_label",
+      "allowed_values": [
+        "Casual",
+        "Minimal",
+        "Street",
+        "Classic",
+        "Sporty",
+        "Workwear",
+        "Vintage",
+        "Preppy",
+        "Outdoor",
+        "Romantic",
+        "Chic",
+        "Other"
+      ],
+      "applicable_garment_types": [
+        "T-shirt",
+        "Shirt",
+        "Blouse",
+        "Knit/Sweater",
+        "Sweatshirt",
+        "Hoodie",
+        "Polo",
+        "Tank Top",
+        "Pants",
+        "Skirt",
+        "Jacket",
+        "Coat",
+        "Cardigan",
+        "Vest",
+        "Dress"
+      ],
+      "extraction_sources": [
+        "Image",
+        "Metadata",
+        "Inference"
+      ],
+      "definition": "단품이 갖는 미적 스타일 성향. 기본적으로 Estimated/Soft로 사용한다. Formal은 formality로 구분하며, Outdoor 스타일이 방수 같은 성능을 뜻하지 않는다."
+    },
+    "formality": {
+      "label_ko": "격식 정도",
+      "product_value_type": "single_enum",
+      "allowed_values": [
+        "Casual",
+        "Smart Casual",
+        "Formal"
+      ],
+      "applicable_garment_types": [
+        "T-shirt",
+        "Shirt",
+        "Blouse",
+        "Knit/Sweater",
+        "Sweatshirt",
+        "Hoodie",
+        "Polo",
+        "Tank Top",
+        "Pants",
+        "Skirt",
+        "Jacket",
+        "Coat",
+        "Cardigan",
+        "Vest",
+        "Dress"
+      ],
+      "extraction_sources": [
+        "Image",
+        "Metadata",
+        "Inference"
+      ],
+      "definition": "세 단계의 착장 격식. Casual은 일상 비격식, Smart Casual은 단정한 일상/업무, Formal은 격식 행사 수준이다. 맥락에 따라 달라지므로 추정은 Soft에만 사용한다."
+    }
+  },
+  "value_envelope": {
+    "values": "값 배열. 구조형인 colors/fiber_composition은 위에 정한 객체 배열이다.",
+    "status": [
+      "Known",
+      "Estimated",
+      "Unknown",
+      "Unspecified",
+      "NotApplicable",
+      "Conflict"
+    ],
+    "evidence_refs": "발화·기억·상품 정보·이미지 근거 참조 배열",
+    "coverage": [
+      "Complete",
+      "Partial"
+    ],
+    "status_rules": [
+      "Known은 확인된 값, Estimated는 추정된 값이다.",
+      "Unknown은 상품에서 판정할 수 없음, Unspecified는 목표에 조건이 없음이다.",
+      "NotApplicable은 해당 품목에 적용되지 않음이며, Conflict는 해결되지 않은 충돌이다.",
+      "Unknown/Unspecified/NotApplicable/Conflict의 values는 빈 배열이다. 충돌 원문은 evidence_refs에 보존한다.",
+      "Known/Estimated의 values는 비어 있을 수 없다. None은 허용된 feature에서만 실제 부재를 뜻한다.",
+      "Other는 사전 밖의 관찰값이며 미확인이 아니다. 원래 표현을 근거에 보존하되 enum을 자동 생성하지 않는다.",
+      "coverage=Partial은 알려진 값이 전체를 포괄하지 않음을 뜻한다. 나열되지 않았다는 이유로 부재를 단정하지 않는다."
+    ]
+  },
+  "target_constraint_metadata": {
+    "polarity": [
+      "Positive",
+      "Negative",
+      "Neutral"
+    ],
+    "constraint_type": [
+      "Hard",
+      "Soft"
+    ],
+    "match": [
+      "Any",
+      "All",
+      "Range"
+    ],
+    "origin": [
+      "Explicit",
+      "Inferred"
+    ],
+    "confirmed": "boolean",
+    "memory_scope": [
+      "Session",
+      "Candidate",
+      "Long-term"
+    ],
+    "rules": [
+      "명시 여부와 Hard/Soft는 독립이다. 직접 말한 선호도 Soft일 수 있다.",
+      "사용자 명시 Hard 조건만 필수 필터로 사용하고 시스템 추정은 Soft 랭킹에만 사용한다.",
+      "상품의 Unknown/Estimated/Conflict를 Hard 충족으로 판정하지 않는다.",
+      "명목형 다중값의 Any/All과 회피 조건을 구분한다. None/Other를 와일드카드로 사용하지 않는다.",
+      "formality Range는 Casual < Smart Casual < Formal 순서로 해석한다.",
+      "미정 속성은 점수 일치로 보상하지 않는다. Soft 점수는 활성 목표 조건만으로 비교한다.",
+      "Other와 Other의 동일 문자열도 일치로 판정하지 않는다. Other는 Hard/Soft 값 비교에서 비비교로 처리하고, 이를 구체적인 필수 조건으로 요청하면 사전 범위 내 재표현이 필요함을 알린다."
+    ]
+  },
+  "fixed_product_metadata": {
+    "product_id": "string",
+    "brand": "string 또는 null",
+    "product_url": "string",
+    "price": {
+      "amount": "number 또는 null",
+      "currency": "통화 코드 또는 null"
+    },
+    "size_options": {
+      "entry_fields": {
+        "label": "판매자 사이즈 문자열",
+        "system": "판매자가 명시한 사이즈 체계 또는 null",
+        "stock": "InStock / OutOfStock / Unknown",
+        "measurements_mm": "상품 실측 수치 객체 또는 null"
+      },
+      "measurement_keys": [
+        "chest_width",
+        "waist_width",
+        "hip_width",
+        "shoulder_width",
+        "garment_length",
+        "sleeve_length",
+        "inseam"
+      ],
+      "rule": "상품의 실제 실측 단위만 mm로 정규화한다. 신체 치수와 상품 실측을 동일하게 비교하지 않는다. 단면과 둘레를 임의로 혼용하지 않는다."
+    },
+    "availability": [
+      "InStock",
+      "OutOfStock",
+      "Unknown"
+    ],
+    "role": "시각 속성과 분리된 고정 상품 영역. 목표의 예산·사이즈·재고 조건을 여기와 비교한다."
+  },
+  "outfit_feature_count": 9,
+  "outfit_features": {
+    "outfit_items": {
+      "label_ko": "구성 상품",
+      "value_type": "product_id_list"
+    },
+    "composition_type": {
+      "label_ko": "구성 유형",
+      "value_type": "single_enum",
+      "allowed_values": [
+        "Top + Bottom",
+        "Top + Bottom + Outerwear",
+        "Dress Only",
+        "Dress + Outerwear",
+        "Dress + Layering"
+      ]
+    },
+    "overall_style": {
+      "label_ko": "전체 스타일",
+      "value_type": "multi_label",
+      "allowed_values": [
+        "Casual",
+        "Minimal",
+        "Street",
+        "Classic",
+        "Sporty",
+        "Workwear",
+        "Vintage",
+        "Preppy",
+        "Outdoor",
+        "Romantic",
+        "Chic",
+        "Other"
+      ]
+    },
+    "overall_mood": {
+      "label_ko": "전체 분위기",
+      "value_type": "multi_label",
+      "allowed_values": [
+        "Clean",
+        "Soft",
+        "Rugged",
+        "Edgy",
+        "Relaxed",
+        "Refined",
+        "Bold",
+        "Understated"
+      ]
+    },
+    "color_harmony": {
+      "label_ko": "색 조화",
+      "value_type": "multi_label",
+      "allowed_values": [
+        "Monochromatic",
+        "Analogous",
+        "Complementary",
+        "Neutral",
+        "Mixed"
+      ],
+      "rule": "같은 코디가 Monochromatic과 Neutral을 함께 가질 수 있다."
+    },
+    "silhouette_balance": {
+      "label_ko": "전체 실루엣 균형",
+      "value_type": "single_enum",
+      "allowed_values": [
+        "Slim",
+        "Balanced",
+        "Relaxed",
+        "Oversized",
+        "Mixed"
+      ]
+    },
+    "layering": {
+      "label_ko": "겹쳐 입기",
+      "value_type": "single_enum",
+      "allowed_values": [
+        "None",
+        "Light",
+        "Heavy"
+      ]
+    },
+    "overall_formality": {
+      "label_ko": "전체 격식",
+      "value_type": "single_enum",
+      "allowed_values": [
+        "Casual",
+        "Smart Casual",
+        "Formal"
+      ]
+    },
+    "seasonal_suitability": {
+      "label_ko": "전체 계절 적합성",
+      "value_type": "multi_label",
+      "allowed_values": [
+        "Spring",
+        "Summer",
+        "Autumn",
+        "Winter"
+      ]
+    }
+  },
+  "normalization_and_tradeoffs": [
+    "Main Category는 garment_type에서 파생하며 독립 라벨링 key로 중복 저장하지 않는다.",
+    "원본의 품목별 기장 5개와 형태 속성은 각각 length와 silhouette의 고정 품목별 사전으로 통합한다.",
+    "원본 Garment Type의 Sleeveless는 소매 속성과 겹치므로 Tank Top을 사용한다. 기존 데이터를 일괄 치환한다는 뜻은 아니다.",
+    "Long-sleeve를 type_variant에서 제외하고 sleeve_length=Long으로 표현한다.",
+    "Plaid와 Check는 Check로, H-line은 Straight로 정규화한다.",
+    "문자/사진/캐릭터 프린트의 구분은 pattern=Graphic으로 축소하며 로고 크기는 별도로 보존한다.",
+    "주름·트임·허리 장식은 details로 통합하며 위치/개수 차이는 범위 밖이다.",
+    "원본 5단계 격식은 Casual/Smart Casual/Formal 3단계로 단순화한다. 단품과 코디에 같은 사전을 쓴다.",
+    "Brightness, Color Arrangement, 패턴 크기/밀도/방향/위치, 그래픽 종류/위치, Structure, Drape, Thermal Insulation, Visual Mood, Visual Complexity, Transitional Suitability는 단품 key에서 제외한다. 단품 Visual Mood 대신 코디 overall_mood를 유지한다.",
+    "제외한 세부 차이는 자동 복원하거나 사후 속성 확장으로 처리하지 않는다. 원래 사용자 표현은 발화 근거로 보존한다."
+  ],
+  "empty_product_template": {
+    "garment_type": {
+      "values": [],
+      "status": "Unknown",
+      "evidence_refs": [],
+      "coverage": "Partial"
+    },
+    "type_variant": {
+      "values": [],
+      "status": "Unknown",
+      "evidence_refs": [],
+      "coverage": "Partial"
+    },
+    "colors": {
+      "values": [],
+      "status": "Unknown",
+      "evidence_refs": [],
+      "coverage": "Partial"
+    },
+    "fit": {
+      "values": [],
+      "status": "Unknown",
+      "evidence_refs": [],
+      "coverage": "Partial"
+    },
+    "silhouette": {
+      "values": [],
+      "status": "Unknown",
+      "evidence_refs": [],
+      "coverage": "Partial"
+    },
+    "length": {
+      "values": [],
+      "status": "Unknown",
+      "evidence_refs": [],
+      "coverage": "Partial"
+    },
+    "sleeve_length": {
+      "values": [],
+      "status": "Unknown",
+      "evidence_refs": [],
+      "coverage": "Partial"
+    },
+    "neckline": {
+      "values": [],
+      "status": "Unknown",
+      "evidence_refs": [],
+      "coverage": "Partial"
+    },
+    "collar": {
+      "values": [],
+      "status": "Unknown",
+      "evidence_refs": [],
+      "coverage": "Partial"
+    },
+    "hood": {
+      "values": [],
+      "status": "Unknown",
+      "evidence_refs": [],
+      "coverage": "Partial"
+    },
+    "pattern": {
+      "values": [],
+      "status": "Unknown",
+      "evidence_refs": [],
+      "coverage": "Partial"
+    },
+    "logo": {
+      "values": [],
+      "status": "Unknown",
+      "evidence_refs": [],
+      "coverage": "Partial"
+    },
+    "fabric": {
+      "values": [],
+      "status": "Unknown",
+      "evidence_refs": [],
+      "coverage": "Partial"
+    },
+    "fiber_composition": {
+      "values": [],
+      "status": "Unknown",
+      "evidence_refs": [],
+      "coverage": "Partial"
+    },
+    "texture": {
+      "values": [],
+      "status": "Unknown",
+      "evidence_refs": [],
+      "coverage": "Partial"
+    },
+    "finish": {
+      "values": [],
+      "status": "Unknown",
+      "evidence_refs": [],
+      "coverage": "Partial"
+    },
+    "transparency": {
+      "values": [],
+      "status": "Unknown",
+      "evidence_refs": [],
+      "coverage": "Partial"
+    },
+    "closure": {
+      "values": [],
+      "status": "Unknown",
+      "evidence_refs": [],
+      "coverage": "Partial"
+    },
+    "waist_rise": {
+      "values": [],
+      "status": "Unknown",
+      "evidence_refs": [],
+      "coverage": "Partial"
+    },
+    "details": {
+      "values": [],
+      "status": "Unknown",
+      "evidence_refs": [],
+      "coverage": "Partial"
+    },
+    "thickness": {
+      "values": [],
+      "status": "Unknown",
+      "evidence_refs": [],
+      "coverage": "Partial"
+    },
+    "functions": {
+      "values": [],
+      "status": "Unknown",
+      "evidence_refs": [],
+      "coverage": "Partial"
+    },
+    "season": {
+      "values": [],
+      "status": "Unknown",
+      "evidence_refs": [],
+      "coverage": "Partial"
+    },
+    "style": {
+      "values": [],
+      "status": "Unknown",
+      "evidence_refs": [],
+      "coverage": "Partial"
+    },
+    "formality": {
+      "values": [],
+      "status": "Unknown",
+      "evidence_refs": [],
+      "coverage": "Partial"
+    }
+  },
+  "empty_target_template": {
+    "garment_type": {
+      "values": [],
+      "status": "Unspecified",
+      "evidence_refs": [],
+      "coverage": "Partial"
+    },
+    "type_variant": {
+      "values": [],
+      "status": "Unspecified",
+      "evidence_refs": [],
+      "coverage": "Partial"
+    },
+    "colors": {
+      "values": [],
+      "status": "Unspecified",
+      "evidence_refs": [],
+      "coverage": "Partial"
+    },
+    "fit": {
+      "values": [],
+      "status": "Unspecified",
+      "evidence_refs": [],
+      "coverage": "Partial"
+    },
+    "silhouette": {
+      "values": [],
+      "status": "Unspecified",
+      "evidence_refs": [],
+      "coverage": "Partial"
+    },
+    "length": {
+      "values": [],
+      "status": "Unspecified",
+      "evidence_refs": [],
+      "coverage": "Partial"
+    },
+    "sleeve_length": {
+      "values": [],
+      "status": "Unspecified",
+      "evidence_refs": [],
+      "coverage": "Partial"
+    },
+    "neckline": {
+      "values": [],
+      "status": "Unspecified",
+      "evidence_refs": [],
+      "coverage": "Partial"
+    },
+    "collar": {
+      "values": [],
+      "status": "Unspecified",
+      "evidence_refs": [],
+      "coverage": "Partial"
+    },
+    "hood": {
+      "values": [],
+      "status": "Unspecified",
+      "evidence_refs": [],
+      "coverage": "Partial"
+    },
+    "pattern": {
+      "values": [],
+      "status": "Unspecified",
+      "evidence_refs": [],
+      "coverage": "Partial"
+    },
+    "logo": {
+      "values": [],
+      "status": "Unspecified",
+      "evidence_refs": [],
+      "coverage": "Partial"
+    },
+    "fabric": {
+      "values": [],
+      "status": "Unspecified",
+      "evidence_refs": [],
+      "coverage": "Partial"
+    },
+    "fiber_composition": {
+      "values": [],
+      "status": "Unspecified",
+      "evidence_refs": [],
+      "coverage": "Partial"
+    },
+    "texture": {
+      "values": [],
+      "status": "Unspecified",
+      "evidence_refs": [],
+      "coverage": "Partial"
+    },
+    "finish": {
+      "values": [],
+      "status": "Unspecified",
+      "evidence_refs": [],
+      "coverage": "Partial"
+    },
+    "transparency": {
+      "values": [],
+      "status": "Unspecified",
+      "evidence_refs": [],
+      "coverage": "Partial"
+    },
+    "closure": {
+      "values": [],
+      "status": "Unspecified",
+      "evidence_refs": [],
+      "coverage": "Partial"
+    },
+    "waist_rise": {
+      "values": [],
+      "status": "Unspecified",
+      "evidence_refs": [],
+      "coverage": "Partial"
+    },
+    "details": {
+      "values": [],
+      "status": "Unspecified",
+      "evidence_refs": [],
+      "coverage": "Partial"
+    },
+    "thickness": {
+      "values": [],
+      "status": "Unspecified",
+      "evidence_refs": [],
+      "coverage": "Partial"
+    },
+    "functions": {
+      "values": [],
+      "status": "Unspecified",
+      "evidence_refs": [],
+      "coverage": "Partial"
+    },
+    "season": {
+      "values": [],
+      "status": "Unspecified",
+      "evidence_refs": [],
+      "coverage": "Partial"
+    },
+    "style": {
+      "values": [],
+      "status": "Unspecified",
+      "evidence_refs": [],
+      "coverage": "Partial"
+    },
+    "formality": {
+      "values": [],
+      "status": "Unspecified",
+      "evidence_refs": [],
+      "coverage": "Partial"
+    }
+  },
+  "fixed_target_purchase_conditions": {
+    "price": {
+      "status": [
+        "Specified",
+        "Unspecified"
+      ],
+      "min_amount": "number 또는 null",
+      "max_amount": "number 또는 null",
+      "currency": "통화 코드 또는 null",
+      "constraint_type": [
+        "Hard",
+        "Soft"
+      ]
+    },
+    "size": {
+      "status": [
+        "Specified",
+        "Unspecified"
+      ],
+      "accepted_labels": "판매자 사이즈 문자열 배열",
+      "system": "지정 사이즈 체계 또는 null",
+      "garment_measurement_ranges_mm": "위 상품 실측 key별 {min,max} 객체. 양끝 포함. 미지정은 빈 객체.",
+      "constraint_type": [
+        "Hard",
+        "Soft"
+      ]
+    },
+    "availability": {
+      "status": [
+        "Specified",
+        "Unspecified"
+      ],
+      "accepted_values": [
+        "InStock",
+        "OutOfStock"
+      ],
+      "constraint_type": [
+        "Hard",
+        "Soft"
+      ]
+    },
+    "rules": [
+      "price/size/availability는 항상 존재하는 고정 구매조건 영역이다. 미지정 조건의 status는 Unspecified이다.",
+      "가격은 같은 통화의 상품 amount와 목표 min/max를 비교한다. 통화가 다르면 임의 환산하지 않고 미확인으로 처리한다.",
+      "사이즈 라벨은 지정된 판매자/브랜드/상품 맥락에서 비교한다. 다른 브랜드의 M이 동일한 실측이라는 가정은 하지 않는다.",
+      "라벨 조건과 상품 실측 범위 조건이 함께 주어지면 같은 size option이 두 조건을 충족해야 한다.",
+      "사이즈와 재고를 함께 요구하면 매칭된 size option의 stock을 검사한다. 상품 전체 InStock만으로 특정 사이즈의 재고를 충족했다고 보지 않는다.",
+      "가격/사이즈/재고의 Unknown은 Hard 조건을 충족하지 않는다."
+    ]
+  },
+  "outfit_composition_rules": {
+    "outfit_items_rule": "product_id는 중복될 수 없으며 모든 ID가 25개 단품 Map으로 연결되어야 한다. 구성 유형은 아래 품목 수 조건으로부터 산출한다.",
+    "counts_by_derived_category": {
+      "Top + Bottom": {
+        "Tops": {
+          "min": 1
+        },
+        "Bottoms": {
+          "exact": 1
+        },
+        "Outerwear": {
+          "exact": 0
+        },
+        "Dresses": {
+          "exact": 0
+        }
+      },
+      "Top + Bottom + Outerwear": {
+        "Tops": {
+          "min": 1
+        },
+        "Bottoms": {
+          "exact": 1
+        },
+        "Outerwear": {
+          "min": 1
+        },
+        "Dresses": {
+          "exact": 0
+        }
+      },
+      "Dress Only": {
+        "Tops": {
+          "exact": 0
+        },
+        "Bottoms": {
+          "exact": 0
+        },
+        "Outerwear": {
+          "exact": 0
+        },
+        "Dresses": {
+          "exact": 1
+        }
+      },
+      "Dress + Outerwear": {
+        "Tops": {
+          "exact": 0
+        },
+        "Bottoms": {
+          "exact": 0
+        },
+        "Outerwear": {
+          "min": 1
+        },
+        "Dresses": {
+          "exact": 1
+        }
+      },
+      "Dress + Layering": {
+        "Tops": {
+          "min": 1
+        },
+        "Bottoms": {
+          "exact": 0
+        },
+        "Outerwear": {
+          "min": 0
+        },
+        "Dresses": {
+          "exact": 1
+        }
+      }
+    },
+    "dress_layering_rule": "Dress + Layering은 드레스와 별도 Tops 아이템이 함께 있는 조합이다. 아우터 추가는 허용한다. 드레스와 아우터만 있으면 Dress + Outerwear이다.",
+    "layering_rule": "겹치는 상체 의류 수 = Tops + Outerwear + Dresses. 1개면 None, 2개면 Light, 3개 이상이면 Heavy. Bottoms는 세지 않는다.",
+    "scope_boundary": "여기서 지원하지 않는 구성 유형을 유사한 값으로 강제 매핑하지 않는다."
+  },
+  "withdrawal_reason": "25개 속성의 선택·통합·제외를 정당화하는 직접적인 문헌 또는 시나리오 검증이 부족하므로 확정 추천안을 철회한다. 기존 내용은 검토 이력으로 보존한다."
+}

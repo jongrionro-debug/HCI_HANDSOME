@@ -2,6 +2,8 @@
 
 텍스트가 후보가 되고, 확인된 기억이 목표값에 반영되는 과정을 확인하는 로컬 개발 도구다. 시스템 설계는 [Team4_mid-term_report.pdf](sources/Team4_mid-term_report.pdf), 구현 대응은 [workflow](workflow.md)를 따른다. 도구의 Feature Map은 현재 아이템의 목표값이며 실제 상품의 속성이 아니다. 이미지 선택·상품 검색/추천·소비자 UI는 미구현이다. 세 패널을 보고서 3.7의 제품 화면으로 사용하지 않는다.
 
+**확정 설계는 Park et al. (2025)의 PI 7항목·FEA 30개 태그이며, 이 도구에는 아직 적용되지 않았다.** 관찰 화면·추출 프롬프트·검증은 기존 17개 실행 사전을 사용한다. [확정 사전과 현재 실행의 차이](shopping-memory-prototype.md#확정-feature-map), 승인 근거는 [ADR 0004](decisions/0004-adopt-park-2025-feature-map.md)를 따른다.
+
 ## 실행
 
 Python 3.11 이상과 기존 로그인된 Codex CLI가 필요하다. 추가 Python/프런트엔드 패키지는 없다. 이전에 사용자가 선택한 `gpt-6-luna`를 기본 모델로 사용한다.
@@ -28,7 +30,7 @@ PYTHONPATH=src python3 -m stylemate_memory.inspector \
 |---|---|
 | Chat | 현재 요청의 메시지, 실제 LLM 추출 답변/질문, 입력창. 샘플 버튼은 입력만 채우고 자동 전송하지 않는다. |
 | Memory | 항목별 원문 내용·canonical 값·대상 selector·범위·상태·버전·근거. 후보/이번 요청/장기 항목을 나눈다. 내용 확인과 이번 적용, 이후 활용 동의, 철회를 명시 클릭한다. |
-| Feature Map | [현재 17개 사전](shopping-memory-prototype.md)의 값·지정/추론/미정/비적용/상충 상태·source ID·제약과 연산. 이미지에서 추출한 실제 상품 속성이 아닌 원하는 아이템의 목표값이다. |
+| Feature Map | [현재 실행 중인 17개 사전](shopping-memory-prototype.md#현재-실행-중인-17개-속성)의 값·지정/추론/미정/비적용/상충 상태·source ID·제약과 연산. 이미지에서 추출한 실제 상품 속성이 아닌 원하는 아이템의 목표값이다. |
 | Processing trace / raw JSON | 단계별 입력·모델 원본 출력·검증·저장 batch·유효 context·최종 프로필. model/provider·호출 시도/완료 응답·단계도 표시한다. |
 
 상단 대상 선택은 **현재 요청에서 관찰할 아이템**을 바꾼다. 다른 대상의 기억을 지우거나 색/핏을 옮기지 않는다. New request는 이전 단기를 이월하지 않고 유효 장기만 다시 조회한다. 기존 요청의 DB 항목을 삭제하는 버튼은 아니다. Infer는 동일 기억으로 목표값만 다시 생성한다.

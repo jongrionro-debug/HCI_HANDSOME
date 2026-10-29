@@ -6,6 +6,8 @@
 
 시스템·연구 설계는 [중간보고서](sources/Team4_mid-term_report.pdf)를 따른다. 원문·보조 자료의 우선순위는 [자료 안내](sources/README.md), 설계와 현재 코드의 차이는 [workflow](workflow.md), 현재 실행 계약은 [메모리 프로토타입](shopping-memory-prototype.md)에서 확인한다. 연구 작업은 보고서 2장·4~5장과 [master](master.md)를 따른다.
 
+보고서가 정하지 않은 Feature Map 사전은 사용자 승인된 [ADR 0004](decisions/0004-adopt-park-2025-feature-map.md)를 따른다. 확정 사전과 현재 17개 실행 사전을 구분하고, 후속 코드·데이터 이관 전에는 문서 반영만으로 새 사전이 실행된다고 기록하지 않는다.
+
 [archive](../archive/README.md)의 당시 설계·승인·검증은 역사적 기록이다. 현재 코드에 적용 중인 ADR과 보고서의 요구사항을 구분한다. 문서 지도는 [README](../README.md), 필수 작업 규칙은 [AGENTS.md](../AGENTS.md)를 따른다.
 
 ## 1. 범위 확인
