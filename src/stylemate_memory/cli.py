@@ -14,7 +14,7 @@ from zoneinfo import ZoneInfo
 from .app import ShoppingApp
 from .errors import StyleMateError
 from .inference import RuleAdapter
-from .registry import FEATURES, registry_metadata
+from .registry import FEATURES, REGISTRY_VERSION, V1_REGISTRY_VERSION, registry_metadata
 from .store import MemoryStore
 
 
@@ -93,7 +93,8 @@ def _parser() -> argparse.ArgumentParser:
     sub = parser.add_subparsers(dest="command", required=True)
     demo = sub.add_parser("demo", help="가상 사용자로 오늘 예외와 다음 요청을 시연")
     demo.add_argument("--synthetic", action="store_true", required=True)
-    sub.add_parser("features", help="소비자용 feature 사전 출력")
+    features = sub.add_parser("features", help="feature 사전 출력 (기본값: 기존 17개)")
+    features.add_argument("--registry", choices=(REGISTRY_VERSION, V1_REGISTRY_VERSION), default=REGISTRY_VERSION)
     for name in ("request", "batch", "infer"):
         command = sub.add_parser(name)
         command.add_argument("--db", required=True, help="저장소 밖의 로컬 SQLite 경로")
@@ -125,7 +126,7 @@ def main(argv: list[str] | None = None) -> int:
     args = _parser().parse_args(argv)
     try:
         if args.command == "features":
-            result = registry_metadata()
+            result = registry_metadata(args.registry)
         elif args.command == "demo":
             result = synthetic_demo()
         else:

@@ -16,4 +16,4 @@ stylemate-memory = "stylemate_memory.cli:main"
 where = ["src"]
 
 [tool.setuptools.package-data]
-stylemate_memory = ["inspector.html"]
+stylemate_memory = ["inspector.html", "resources/park-2025-feature-map.json"]
