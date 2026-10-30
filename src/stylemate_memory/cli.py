@@ -7,6 +7,7 @@ from datetime import datetime, time, timedelta, timezone
 import json
 import os
 from pathlib import Path
+import sqlite3
 import tempfile
 from typing import Any
 from zoneinfo import ZoneInfo
@@ -112,6 +113,15 @@ def _parser() -> argparse.ArgumentParser:
             command.add_argument("--targets-file", required=True)
             command.add_argument("--provider", choices=("rule", "openai"), default="rule")
             command.add_argument("--model")
+    from .consumer import add_options
+    for name in ("serve", "catalog-import", "catalog-map"):
+        command = sub.add_parser(name, help={"serve": "LUMI v1 로컬 소비자 서버", "catalog-import": "표준 상품 JSON/JSONL 가져오기",
+                                             "catalog-map": "공급 근거로 상품 Map 생성"}[name])
+        add_options(command, provider=name == "serve")
+        if name == "catalog-import":
+            command.add_argument("--file", required=True)
+        if name == "serve":
+            command.add_argument("--port", type=int)
     return parser
 
 
@@ -129,6 +139,17 @@ def main(argv: list[str] | None = None) -> int:
             result = registry_metadata(args.registry)
         elif args.command == "demo":
             result = synthetic_demo()
+        elif args.command in ("serve", "catalog-import", "catalog-map"):
+            from .settings import ConsumerSettings
+            settings = ConsumerSettings.from_options(args)
+            if args.command == "serve":
+                from .consumer import serve
+                return serve(settings)
+            # Importing/building supplied product facts is always offline,
+            # including when a shell happens to configure an OpenAI provider.
+            from .model_io import FakeModelGateway
+            with settings.open_service(gateway=FakeModelGateway()) as service:
+                result = (service.import_catalog(args.file) if args.command == "catalog-import" else service.build_catalog_maps())
         else:
             # Credentials are read only for an explicit future openai command,
             # never during imports, demos, rule inference, or ordinary tests.
@@ -153,7 +174,7 @@ def main(argv: list[str] | None = None) -> int:
     except StyleMateError as error:
         print(json.dumps({"error": error.as_dict()}, ensure_ascii=False))
         return 2
-    except (OSError, TypeError, ValueError):
+    except (OSError, TypeError, ValueError, sqlite3.Error):
         print(json.dumps({"error": {"code": "invalid_input", "message": "입력 또는 로컬 저장 경로를 확인해 주세요."}}, ensure_ascii=False))
         return 2
 

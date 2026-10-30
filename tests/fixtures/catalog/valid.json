@@ -1,0 +1,49 @@
+[
+  {
+    "format_version": "lumi-catalog-v1",
+    "product_id": "synthetic-pants-1",
+    "source": {
+      "source_id": "synthetic",
+      "url": "https://example.invalid/pants/1",
+      "collected_at": "2026-10-29T12:00:00+09:00"
+    },
+    "title": "합성 네이비 바지",
+    "description": "공급 형식 검증용 합성 상품이며 판매 상품이 아닙니다.",
+    "garment_type": "Pants",
+    "raw_metadata": {"supplier_color": "Navy", "supplier_fit": "Wide", "review": "따뜻한 느낌"},
+    "images": [
+      {
+        "image_id": "synthetic-image-1", "kind": "local", "location": "pants-1.png",
+        "source_revision": "supplied-1", "sha256": null,
+        "regions": [{"region_id": "pants", "garment_type": "Pants", "box": [0.1, 0.1, 0.9, 0.9]}]
+      }
+    ],
+    "labels": [
+      {
+        "observation": {"domain": "PI", "feature": "Color", "values": ["Navy"]},
+        "status": "confirmed",
+        "provenance": [{"kind": "verified_label", "source_field": "raw_metadata.supplier_color", "quote": "Navy", "verifier": "synthetic-labeler", "evidence_ref": "synthetic-color-check-1", "verified_at": "2026-10-29T12:00:00+09:00"}]
+      },
+      {
+        "observation": {"domain": "FEA", "category": "Functional", "subcategory": "Protection", "tag": "Warmth", "present": true},
+        "status": "inferred",
+        "provenance": [{"kind": "provided_label", "source_field": "raw_metadata.review", "quote": "따뜻한 느낌", "verifier": "synthetic-reviewer", "evidence_ref": null, "verified_at": null}]
+      },
+      {
+        "observation": {"domain": "PI", "feature": "Fabric", "values": null},
+        "status": "unknown", "provenance": []
+      }
+    ]
+  },
+  {
+    "format_version": "lumi-catalog-v1",
+    "product_id": "synthetic-pants-2",
+    "source": {"source_id": "synthetic", "url": "https://example.invalid/pants/2", "collected_at": "2026-10-29T12:00:00+09:00"},
+    "title": "합성 상품 원자료만 제공",
+    "description": null,
+    "garment_type": "Pants",
+    "raw_metadata": {"supplier_fit": "Straight"},
+    "images": [{"image_id": "synthetic-image-2", "kind": "remote", "location": "https://images.example.invalid/pants-2.png", "source_revision": "supplied-1", "sha256": null, "regions": []}],
+    "labels": []
+  }
+]

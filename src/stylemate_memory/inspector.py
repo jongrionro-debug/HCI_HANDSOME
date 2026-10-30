@@ -359,6 +359,28 @@ def make_server(inspector: Inspector, port: int = 8765) -> ThreadingHTTPServer:
 
 
 def main(argv: list[str] | None = None) -> int:
+    import sys
+    arguments = list(sys.argv[1:] if argv is None else argv)
+    if "--consumer-state" in arguments:
+        from .consumer import add_options
+        from .model_io import FakeModelGateway
+        from .settings import ConsumerSettings
+        parser = argparse.ArgumentParser(description="LUMI v1 적용 상태의 로컬 개발자 관찰 (읽기 전용·오프라인)")
+        parser.add_argument("--consumer-state", action="store_true")
+        parser.add_argument("--request")
+        add_options(parser, provider=False)
+        options = parser.parse_args(arguments)
+        try:
+            settings = ConsumerSettings.from_options(options)
+            with settings.open_service(gateway=FakeModelGateway()) as service:
+                state = service.state(options.request)
+                result = {"state": state, "internal": service.inspect_request(state["request"]["id"]) if state["request"] else None}
+            print(json.dumps(result, ensure_ascii=False, indent=2))
+            return 0
+        except StyleMateError as error:
+            from .app import _error
+            print(json.dumps({"error": _error(error)}, ensure_ascii=False))
+            return 2
     parser = argparse.ArgumentParser(description="StyleMate 개발자용 채팅/메모리/Feature Map 관찰 도구")
     parser.add_argument("--db", default=str(Path(tempfile.gettempdir()) / "stylemate-inspector" / "memory.sqlite3"))
     parser.add_argument("--port", type=int, default=8765)

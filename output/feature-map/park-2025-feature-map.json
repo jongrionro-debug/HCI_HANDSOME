@@ -2,7 +2,7 @@
   "name": "Park et al. (2025) Product Information + FEA Vocabulary",
   "version": "park-2025-source-v1",
   "status": "Accepted",
-  "runtime_implemented": false,
+  "runtime_implemented": true,
   "scope": "원문의 무신사 여성 바지 상품정보 사전과 FEA 소비자 요구 분류를 차용한 자료이다.",
   "lumi_use": "사용자가 확정한 LUMI의 고정 feature-value 매핑 사전이다. 기존 연구 질문·평가 계획·이미지 선택·메모리 흐름은 변경하지 않는다.",
   "source": {

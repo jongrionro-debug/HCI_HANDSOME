@@ -112,8 +112,8 @@ class MemoryStore(AbstractContextManager["MemoryStore"]):
 
     ``clock`` is injected for deterministic expiry and DST-boundary tests.  A
     failure hook is intentionally local: it can raise at a named write point
-    so callers can verify the transaction rolls back.  No credentials or raw
-    conversation text are ever written by this class.
+    so callers can verify the transaction rolls back. No credentials or full
+    conversation logs are stored; v1 retains bounded, explicit Evidence quotes.
     """
 
     def __init__(
@@ -129,8 +129,17 @@ class MemoryStore(AbstractContextManager["MemoryStore"]):
             self.path, timeout=10, isolation_level=None, check_same_thread=False
         )
         self._connection.row_factory = sqlite3.Row
-        self._configure()
-        self._migrate()
+        try:
+            self._configure()
+            self._migrate()
+            # Loaded only when a store is opened; imports/tests remain offline.
+            from .store_v1 import V1Storage
+
+            self._v1 = V1Storage(self)
+            self._v1.migrate_schema()
+        except Exception:
+            self.close()
+            raise
 
     @property
     def connection(self) -> sqlite3.Connection:
@@ -310,6 +319,10 @@ class MemoryStore(AbstractContextManager["MemoryStore"]):
             "DELETE FROM deletion_receipts WHERE user_id=? AND expires_at<=?",
             (user_id, now_s),
         )
+        self.connection.execute(
+            "DELETE FROM v1_request_deletions WHERE user_id=? AND expires_at<=?",
+            (user_id, now_s),
+        )
 
     def _assert_input_not_tombstoned(self, user_id: str, input_id: str, now: datetime) -> None:
         row = self.connection.execute(
@@ -350,6 +363,8 @@ class MemoryStore(AbstractContextManager["MemoryStore"]):
         return row
 
     def _request_dict(self, row: sqlite3.Row) -> dict[str, Any]:
+        if row["contract_version"] is not None:
+            return self._v1.request_dict(row)
         return {
             "id": row["id"],
             "user_id": row["user_id"],
@@ -380,8 +395,18 @@ class MemoryStore(AbstractContextManager["MemoryStore"]):
             raise _fail("revision_conflict", f"{name} revision does not match")
 
     def start_request(
-        self, user_id: str, *, input_id: str, text: str, timezone: str
+        self, user_id: str, *, input_id: str, text: str | None, timezone: str,
+        contract_version: str | None = None, registry_version: str | None = None,
+        mode: str = "shopping", targets: list[dict[str, str]] | None = None,
     ) -> dict[str, Any]:
+        if contract_version is not None:
+            return self._v1.start_request(
+                user_id, input_id=input_id, text=text, timezone=timezone,
+                contract_version=contract_version, registry_version=registry_version,
+                mode=mode, targets=targets,
+            )
+        if registry_version is not None or mode != "shopping" or targets is not None:
+            raise _fail("unsupported_contract", "v1 request options require an explicit contract")
         user_id = _nonblank(user_id, "user_id")
         input_id = _nonblank(input_id, "input_id")
         if not isinstance(text, str) or not text.strip():
@@ -413,6 +438,7 @@ class MemoryStore(AbstractContextManager["MemoryStore"]):
                 (user_id, input_id),
             ).fetchone()
             if existing is not None:
+                self._v1.check_contract(existing, None)
                 if existing["status"] == "expired" or self._expired_request(existing, now):
                     conn.execute(
                         "UPDATE requests SET status='expired' WHERE id=? AND user_id=?",
@@ -466,6 +492,7 @@ class MemoryStore(AbstractContextManager["MemoryStore"]):
         try:
             conn.execute("BEGIN IMMEDIATE")
             row = self._request_row(user_id, request_id)
+            self._v1.check_contract(row, None)
             self._check_revision(int(row["revision"]), expected_revision, "request")
             self._assert_request_retained(row, now)
             if row["status"] == "open":
@@ -506,6 +533,7 @@ class MemoryStore(AbstractContextManager["MemoryStore"]):
         try:
             conn.execute("BEGIN IMMEDIATE")
             row = self._request_row(user_id, request_id)
+            self._v1.check_contract(row, None)
             self._check_revision(int(row["revision"]), expected_revision, "request")
             self._assert_request_retained(row, now)
             if row["status"] == "closed":
@@ -782,6 +810,10 @@ class MemoryStore(AbstractContextManager["MemoryStore"]):
         )
 
     def _fetch_batch_receipt(self, user_id: str, batch_id: str, digest: str) -> dict[str, Any] | None:
+        if self.connection.execute(
+            "SELECT 1 FROM v1_batch_receipts WHERE user_id=? AND batch_id=?", (user_id, batch_id)
+        ).fetchone() is not None:
+            raise _fail("idempotency_conflict", "batch_id belongs to another contract")
         deletion = self.connection.execute(
             "SELECT * FROM deletion_receipts WHERE user_id=? AND batch_id=?",
             (user_id, batch_id),
@@ -820,7 +852,20 @@ class MemoryStore(AbstractContextManager["MemoryStore"]):
         actions: list[Mapping[str, Any]],
         expected_request_revision: int | None = None,
         expected_profile_revision: int | None = None,
+        contract_version: str | None = None,
+        expected: dict[str, Any] | None = None,
+        catalog_freshness: Any = None,
     ) -> dict[str, Any]:
+        if contract_version is not None:
+            return self._v1.apply_batch(
+                user_id, request_id, batch_id=batch_id, actions=actions,
+                contract_version=contract_version, expected=expected,
+                expected_request_revision=expected_request_revision,
+                expected_profile_revision=expected_profile_revision,
+                catalog_freshness=catalog_freshness,
+            )
+        if expected is not None or catalog_freshness is not None:
+            raise _fail("unsupported_contract", "v1 batch options require an explicit contract")
         user_id = _nonblank(user_id, "user_id")
         request_id = _nonblank(request_id, "request_id")
         batch_id = _nonblank(batch_id, "batch_id")
@@ -851,6 +896,7 @@ class MemoryStore(AbstractContextManager["MemoryStore"]):
                 return receipt
             self._assert_batch_not_tombstoned(user_id, batch_id, now)
             request = self._request_row(user_id, request_id)
+            self._v1.check_contract(request, None)
             self._assert_request_open(request, now)
             self._check_revision(int(request["revision"]), expected_request_revision, "request")
             profile_revision = self._profile_revision(user_id)
@@ -1174,11 +1220,21 @@ class MemoryStore(AbstractContextManager["MemoryStore"]):
         )
         return {"memory_ids": ids, "changed": True, "profile_changed": any(r["scope"] == "long_term" for r in family_rows), "needs_vacuum": True}
 
-    def snapshot(self, user_id: str, request_id: str) -> dict[str, Any]:
+    def snapshot(
+        self, user_id: str, request_id: str, *, contract_version: str | None = None,
+        include_closed: bool = False,
+    ) -> dict[str, Any]:
+        if contract_version is not None:
+            return self._v1.snapshot(
+                user_id, request_id, contract_version=contract_version, include_closed=include_closed
+            )
+        if include_closed:
+            raise _fail("unsupported_contract", "include_closed requires an explicit v1 contract")
         user_id = _nonblank(user_id, "user_id")
         request_id = _nonblank(request_id, "request_id")
         now = self._now()
         row = self._request_row(user_id, request_id)
+        self._v1.check_contract(row, None)
         self._assert_request_retained(row, now)
         if row["status"] != "open":
             raise _fail("request_closed", "request is not open")
@@ -1197,6 +1253,45 @@ class MemoryStore(AbstractContextManager["MemoryStore"]):
             "now": _iso(now),
         }
 
+    def migrate_legacy(
+        self, user_id: str, request_id: str, *, registry_version: str
+    ) -> dict[str, Any]:
+        """Explicitly copy a legacy request/profile into v1; keep the source intact.
+
+        Validate this path with synthetic databases before supplying user data.
+        The returned RequestRecord identifies the separate v1 projection.
+        """
+        return self._v1.migrate_legacy(user_id, request_id, registry_version=registry_version)
+
+    def interpretation_status(
+        self, user_id: str, request_id: str, feedback_ref: dict[str, Any]
+    ) -> dict[str, Any]:
+        """Read intake progress independently of its immutable batch receipt."""
+        return self._v1.interpretation_status(user_id, request_id, feedback_ref)
+
+    def publish_candidates(
+        self, user_id: str, request_id: str, *, batch_id: str,
+        plan: dict[str, Any], catalog_freshness: Any,
+    ) -> dict[str, Any]:
+        """Persist a validated CandidatePlan; product selection belongs to D."""
+        return self._v1.feedback.publish(user_id, request_id, batch_id=batch_id,
+                                         plan=plan, catalog_freshness=catalog_freshness)
+
+    def issue_display(
+        self, user_id: str, request_id: str, *, purpose: str,
+        snapshot: dict[str, Any], basis: dict[str, Any],
+    ) -> dict[str, Any]:
+        """Persist a v1 review assembled by the trusted local service."""
+        return self._v1.issue_display(user_id, request_id, purpose=purpose, snapshot=snapshot, basis=basis)
+
+    def record_user_event(
+        self, user_id: str, request_id: str, *, command_id: str,
+        display_ref: dict[str, Any], purpose: str, expected: dict[str, Any],
+    ) -> dict[str, Any]:
+        """The trusted service calls this only after an explicit review accept."""
+        return self._v1.record_user_event(user_id, request_id, command_id=command_id,
+                                         display_ref=display_ref, purpose=purpose, expected=expected)
+
     def _vacuum(self) -> None:
         # VACUUM requires a clean transaction.  SQLite's secure_delete pragma
         # remains enabled after the operation.
@@ -1206,14 +1301,16 @@ class MemoryStore(AbstractContextManager["MemoryStore"]):
         if user_id is not None:
             user_id = _nonblank(user_id, "user_id")
         now = self._now()
+        from .store_cleanup import CleanupStorage
+        v1_counts = CleanupStorage(self._v1).prune(user_id)
         conn = self.connection
         needs_vacuum = False
         try:
             conn.execute("BEGIN IMMEDIATE")
-            request_query = "SELECT id,user_id,input_id,retention_until FROM requests"
+            request_query = "SELECT id,user_id,input_id,retention_until FROM requests WHERE contract_version IS NULL"
             request_args: tuple[Any, ...] = ()
             if user_id:
-                request_query += " WHERE user_id=?"
+                request_query += " AND user_id=?"
                 request_args = (user_id,)
             request_rows = [
                 row
@@ -1320,16 +1417,22 @@ class MemoryStore(AbstractContextManager["MemoryStore"]):
             raise
         if needs_vacuum:
             self._vacuum()
-        return {"requests": len(request_ids), "memories": len(memory_ids)}
+        return {"requests": len(request_ids) + v1_counts["requests"],
+                "memories": len(memory_ids) + v1_counts["memories"]}
 
     def delete_request(self, user_id: str, request_id: str) -> dict[str, Any]:
         user_id = _nonblank(user_id, "user_id")
         request_id = _nonblank(request_id, "request_id")
+        request = self.connection.execute("SELECT contract_version FROM requests WHERE user_id=? AND id=?", (user_id, request_id)).fetchone()
+        if request is None or request["contract_version"] is not None:
+            from .store_cleanup import CleanupStorage
+            return CleanupStorage(self._v1).delete_request(user_id, request_id)
         conn = self.connection
         now = self._now()
         try:
             conn.execute("BEGIN IMMEDIATE")
             row = self._request_row(user_id, request_id)
+            self._v1.check_contract(row, None)
             memory_rows = conn.execute(
                 "SELECT id FROM memories WHERE user_id=? AND request_id=?", (user_id, request_id)
             ).fetchall()

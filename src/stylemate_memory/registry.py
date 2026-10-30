@@ -723,7 +723,7 @@ class ParkRegistry:
             "price_currency": None,
             "price_boundary_inclusion": None,
             "target_statuses": list(get_args(MapStatus)),
-            "runtime_integration": False,
+            "runtime_integration": True,
         }
         return result
 

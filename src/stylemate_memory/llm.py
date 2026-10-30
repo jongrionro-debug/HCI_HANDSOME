@@ -1,14 +1,17 @@
-"""OpenAI Responses API adapter for target-feature proposals.
+"""Explicit OpenAI Responses JSON gateway and legacy target-feature adapter.
 
 The adapter is deliberately small and dependency free.  It owns the wire
 contract and output validation, while memory retrieval and policy decisions
 remain in the local application.  A transport can be injected for tests;
-the default urllib transport is only called from :meth:`propose`.
+the default urllib transport is lazy. No CLI, environment or credential file
+is consulted. Domain methods project their fixed DTO before calling complete;
+other complete callers own their minimal payload and domain output validation.
 """
 
 from __future__ import annotations
 
 import json
+import math
 import socket
 import urllib.error
 import urllib.request
@@ -16,12 +19,15 @@ from collections.abc import Callable, Mapping
 from typing import Any
 
 from .errors import StyleMateError
+from .model_io import MAX_JSON_BYTES, FakeModelGateway, ModelOperations
 from .registry import FEATURES, category_for_garment_type, validate_values
 
 
 DEFAULT_ENDPOINT = "https://api.openai.com/v1/responses"
+DEFAULT_MODEL = "gpt-6-luna"
 DEFAULT_TIMEOUT = 30
 DEFAULT_MAX_OUTPUT_TOKENS = 1200
+_MAX_RESPONSE_BYTES = 1_000_000
 
 _SAFE_TRANSPORT_MESSAGES = {
     "provider_timeout": "The feature proposal request timed out.",
@@ -617,7 +623,9 @@ def _urllib_transport(
     try:
         with urllib.request.urlopen(request, timeout=timeout) as response:
             status = int(getattr(response, "status", 200))
-            body = response.read()
+            if status >= 400:
+                raise _ProviderHTTPError(status)
+            body = response.read(_MAX_RESPONSE_BYTES + 1)
     except urllib.error.HTTPError as error:
         raise _ProviderHTTPError(int(error.code)) from None
     except urllib.error.URLError as error:
@@ -628,24 +636,46 @@ def _urllib_transport(
         raise StyleMateError("provider_timeout", "The feature proposal request timed out.") from None
     if status >= 400:
         raise _ProviderHTTPError(status)
+    if len(body) > _MAX_RESPONSE_BYTES:
+        raise StyleMateError("provider_invalid_response", "The provider returned an invalid response.")
     try:
-        decoded = json.loads(body.decode("utf-8"))
-    except (UnicodeDecodeError, json.JSONDecodeError):
+        decoded = _decode_json(body.decode("utf-8"))
+    except (UnicodeError, ValueError, RecursionError):
         raise StyleMateError("provider_invalid_response", "The provider returned an invalid response.") from None
     if not isinstance(decoded, Mapping):
         raise StyleMateError("provider_invalid_response", "The provider returned an invalid response.")
     return decoded
 
 
-class OpenAIResponsesAdapter:
-    """Read-only target feature proposal adapter using Responses API JSON mode."""
+def _decode_json(text: str) -> Any:
+    """Reject duplicate keys and non-JSON NaN/Infinity instead of hiding them."""
+    def pairs(items: list[tuple[str, Any]]) -> dict[str, Any]:
+        result = {}
+        for key, value in items:
+            if key in result:
+                raise ValueError("duplicate JSON key")
+            result[key] = value
+        return result
+
+    def constant(value: str) -> None:
+        raise ValueError("non-JSON constant")
+
+    return json.loads(text, object_pairs_hook=pairs, parse_constant=constant)
+
+
+class OpenAIResponsesGateway(ModelOperations):
+    """ModelGateway v1. Errors contain only public codes and fixed messages.
+
+    complete is a JSON conversion boundary, not a domain or database validator.
+    No response body, model raw text or request headers are retained as metadata.
+    """
 
     endpoint = DEFAULT_ENDPOINT
 
     def __init__(
         self,
         *,
-        model: str,
+        model: str = DEFAULT_MODEL,
         api_key: str,
         transport: Transport | None = None,
         timeout: float = DEFAULT_TIMEOUT,
@@ -655,7 +685,7 @@ class OpenAIResponsesAdapter:
             raise StyleMateError("invalid_model", "A model name is required.")
         if not isinstance(api_key, str) or not api_key.strip():
             raise StyleMateError("invalid_api_key", "An API key is required.")
-        if isinstance(timeout, bool) or not isinstance(timeout, (int, float)) or timeout <= 0:
+        if isinstance(timeout, bool) or not isinstance(timeout, (int, float)) or not math.isfinite(timeout) or timeout <= 0:
             raise StyleMateError("invalid_timeout", "Timeout must be greater than zero.")
         if isinstance(max_output_tokens, bool) or not isinstance(max_output_tokens, int) or max_output_tokens <= 0:
             raise StyleMateError("invalid_output_limit", "Max output tokens must be greater than zero.")
@@ -665,27 +695,30 @@ class OpenAIResponsesAdapter:
         self.max_output_tokens = max_output_tokens
         self._transport = transport if transport is not None else _urllib_transport
 
-    def propose(self, context: dict[str, Any]) -> dict[str, Any]:
-        if not isinstance(context, dict):
-            raise StyleMateError("invalid_context", "Feature context must be an object.")
-        safe_context = _sanitize_context(context)
+    def complete(self, instructions: str, payload: dict[str, Any], schema: dict[str, Any]) -> dict[str, Any]:
+        return self._complete(instructions, payload, schema, name="lumi_json")
+
+    def _complete(self, instructions: str, data: dict[str, Any], schema: dict[str, Any], *, name: str) -> dict[str, Any]:
+        if not isinstance(instructions, str) or not isinstance(data, dict) or not isinstance(schema, dict):
+            raise StyleMateError("invalid_input", "JSON conversion requires instructions, payload and schema.")
         try:
-            # Serialization here catches custom/non-JSON values before a
-            # network call and prevents accidentally forwarding them.
-            user_input = json.dumps({"context": safe_context}, ensure_ascii=False, sort_keys=True)
-        except (TypeError, ValueError, OverflowError):
-            raise StyleMateError("invalid_context", "Feature context is not JSON serializable.") from None
+            user_input = json.dumps(data, ensure_ascii=False, sort_keys=True, allow_nan=False)
+            if len(user_input.encode("utf-8")) > MAX_JSON_BYTES:
+                raise ValueError("payload too large")
+            json.dumps(schema, ensure_ascii=False, allow_nan=False).encode("utf-8")
+        except (TypeError, ValueError, OverflowError, UnicodeError, RecursionError):
+            raise StyleMateError("invalid_input", "JSON conversion input is invalid or too large.") from None
 
         payload: dict[str, Any] = {
             "model": self.model,
-            "instructions": _INSTRUCTIONS,
+            "instructions": instructions,
             "input": user_input,
             "text": {
                 "format": {
                     "type": "json_schema",
-                    "name": "target_feature_suggestions",
+                    "name": name,
                     "strict": True,
-                    "schema": _output_schema(),
+                    "schema": schema,
                 }
             },
             "max_output_tokens": self.max_output_tokens,
@@ -730,18 +763,24 @@ class OpenAIResponsesAdapter:
         if response.get("refusal") is not None:
             raise StyleMateError("provider_refusal", "The feature proposal provider declined the request.")
 
-        output_text = response.get("output_text")
-        if not isinstance(output_text, str):
-            output_text = self._extract_output_text(response.get("output"))
+        # Always inspect canonical output first, including when a test/SDK also
+        # supplies output_text. A convenience field cannot conceal a refusal.
+        canonical_text = self._extract_output_text(response.get("output"))
+        output_text = canonical_text if "output" in response else response.get("output_text")
+        if output_text is not None and not isinstance(output_text, str):
+            raise StyleMateError("provider_invalid_response", "The provider returned an invalid response.")
         if output_text is None or not output_text.strip():
             raise StyleMateError("empty_response", "The provider returned no feature proposal.")
         try:
-            result = json.loads(output_text)
-        except (TypeError, json.JSONDecodeError):
+            if len(output_text.encode("utf-8")) > _MAX_RESPONSE_BYTES or self._api_key in output_text:
+                raise ValueError("unsafe response")
+            result = _decode_json(output_text)
+            if self._api_key in json.dumps(result, ensure_ascii=False):
+                raise ValueError("unsafe response")
+        except (TypeError, ValueError, UnicodeError, RecursionError):
             raise StyleMateError("invalid_output", "The provider returned invalid feature JSON.") from None
-        if not _schema_is_valid(result):
-            raise StyleMateError("invalid_output", "The provider returned an unsupported feature shape.")
-        _validate_target_semantics(result, safe_context)
+        if not isinstance(result, dict):
+            raise StyleMateError("invalid_output", "The provider returned invalid feature JSON.")
         return result
 
     @staticmethod
@@ -752,23 +791,63 @@ class OpenAIResponsesAdapter:
         saw_refusal = False
         for item in output:
             if not isinstance(item, Mapping):
-                continue
+                raise StyleMateError("provider_invalid_response", "The provider returned an invalid response.")
             if item.get("type") == "refusal" or item.get("refusal") is not None:
                 saw_refusal = True
+            elif item.get("type") not in ("message", "reasoning"):
+                raise StyleMateError("provider_invalid_response", "The provider returned an invalid response.")
+            if item.get("status") not in (None, "completed"):
+                raise StyleMateError("provider_incomplete", "The feature proposal response was incomplete.")
+            if item.get("role") not in (None, "assistant"):
+                raise StyleMateError("provider_invalid_response", "The provider returned an invalid response.")
             content = item.get("content")
             if not isinstance(content, list):
                 continue
             for part in content:
                 if not isinstance(part, Mapping):
-                    continue
+                    raise StyleMateError("provider_invalid_response", "The provider returned an invalid response.")
                 if part.get("type") == "refusal" or part.get("refusal") is not None:
                     saw_refusal = True
+                elif part.get("type") not in (None, "output_text", "text"):
+                    raise StyleMateError("provider_invalid_response", "The provider returned an invalid response.")
                 text = part.get("text")
-                if isinstance(text, str) and part.get("type") in {None, "output_text", "text"}:
+                if isinstance(text, str) and part.get("type") in (None, "output_text", "text"):
+                    if item.get("type") != "message":
+                        raise StyleMateError("provider_invalid_response", "The provider returned an invalid response.")
                     texts.append(text)
         if saw_refusal:
             raise StyleMateError("provider_refusal", "The feature proposal provider declined the request.")
         return "".join(texts) or None
 
 
-__all__ = ["OpenAIResponsesAdapter", "Transport"]
+class OpenAIResponsesAdapter(OpenAIResponsesGateway):
+    """Legacy consumer-17-v1 propose(context) compatibility boundary."""
+
+    def propose(self, context: dict[str, Any]) -> dict[str, Any]:
+        if not isinstance(context, dict):
+            raise StyleMateError("invalid_context", "Feature context must be an object.")
+        safe_context = _sanitize_context(context)
+        result = self._complete(_INSTRUCTIONS, {"context": safe_context}, _output_schema(), name="target_feature_suggestions")
+        if not _schema_is_valid(result):
+            raise StyleMateError("invalid_output", "The provider returned an unsupported feature shape.")
+        _validate_target_semantics(result, safe_context)
+        return result
+
+
+def create_model_gateway(
+    provider: str = "fake", *, model: str = DEFAULT_MODEL, api_key: str | None = None,
+    transport: Transport | None = None, timeout: float = DEFAULT_TIMEOUT,
+    max_output_tokens: int = DEFAULT_MAX_OUTPUT_TOKENS,
+) -> FakeModelGateway | OpenAIResponsesGateway:
+    """No environment lookup or automatic provider fallback. A owns CLI wiring."""
+    if provider == "fake":
+        if api_key is not None or transport is not None:
+            raise StyleMateError("invalid_input", "OpenAI configuration requires provider=openai.")
+        return FakeModelGateway()
+    if provider == "openai":
+        return OpenAIResponsesGateway(model=model, api_key=api_key, transport=transport,
+                                      timeout=timeout, max_output_tokens=max_output_tokens)
+    raise StyleMateError("invalid_input", "Unknown model provider.")
+
+
+__all__ = ["OpenAIResponsesGateway", "OpenAIResponsesAdapter", "FakeModelGateway", "create_model_gateway", "Transport"]

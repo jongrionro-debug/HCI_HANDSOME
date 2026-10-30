@@ -48,7 +48,7 @@
 | [ADR 0001](decisions/0001-memory-boundaries.md) | 확인·이후 활용 동의 분리, 요청 범위·교체/철회/삭제·보관 경계 |
 | [ADR 0002](decisions/0002-memory-prototype-storage.md) | Python·SQLite 기반, 배치/버전/멱등·조회/삭제 설계 근거. 역사적 v0.2 JSON Schema 자체가 현재 실행 형식은 아님 |
 | [ADR 0003](decisions/0003-consumer-shopping-prototype.md) | 현재 17개 사전·로컬 신뢰 호출자·읽기 전용 모델 제안과 축소 실행 계약 |
-| [ADR 0005 · Accepted](decisions/0005-evidence-linked-memory.md) | 2026-10-29 A0 실행 요청으로 1차 로컬 구현 기준 채택. 공통 인터페이스만 정의됐으며 저장·모델·검색·UI 연결은 단계별 미구현 |
+| [ADR 0005 · Accepted](decisions/0005-evidence-linked-memory.md) | 2026-10-29 A0 실행 요청으로 1차 로컬 구현 기준 채택. 로컬 서비스와 A3 검증 범위는 [현재 구현과 실행](#현재-구현과-실행) 참조. 실제 모델·상품 의미 품질·연구 효과는 별도 검증 |
 
 확정 사전과 후속 이관에는 [ADR 0004](decisions/0004-adopt-park-2025-feature-map.md)를 추가로 적용한다. ADR 0003은 현재 실행 코드의 기록으로 보존하며 이번 문서 반영으로 대체 구현이 완료됐다고 보지 않는다.
 
@@ -81,7 +81,7 @@
 
 ### 장단기 메모리 핵심 설계안
 
-**2026-10-29 A0 · 1차 로컬 구현 기준 승인, 실행 연결 미구현.** 사용자가 공통 규칙과 TASK A0를 실행하라고 요청하면서 아래 방향과 v1 계약을 제한된 로컬 구현 기준으로 채택했다. 공통 Python 인터페이스 정의와 실행 기능 구현은 구분한다. 결정 이유·승인 범위는 [ADR 0005](decisions/0005-evidence-linked-memory.md), 실제 동작은 [현재 구현과 실행](#현재-구현과-실행)을 따른다. 보고서의 RQ·평가·이미지 선택 흐름과 기존 확인·동의·삭제 경계는 유지한다.
+**2026-10-29 A0 · 1차 로컬 구현 기준 승인.** 승인 당시 실행 연결은 미구현이었으며 A2의 연결 범위는 [현재 구현과 실행](#현재-구현과-실행)에 별도로 기록한다. 사용자가 공통 규칙과 TASK A0를 실행하라고 요청하면서 아래 방향과 v1 계약을 제한된 로컬 구현 기준으로 채택했다. 공통 Python 인터페이스 정의와 실행 기능 구현은 구분한다. 결정 이유·승인 범위는 [ADR 0005](decisions/0005-evidence-linked-memory.md), 실제 동작은 [현재 구현과 실행](#현재-구현과-실행)을 따른다. 보고서의 RQ·평가·이미지 선택 흐름과 기존 확인·동의·삭제 경계는 유지한다.
 
 #### 기억 표현과 정본
 
@@ -145,7 +145,7 @@ Python·SQLite를 정본으로 유지하며 근거·항목·관계·동의 snaps
 | 역할 | 승인한 1차 로컬 구현 방향 | 연결 위치·범위 |
 |---|---|---|
 | 정책·저장 | 기존 Python·SQLite, 항목별 관계·버전, 원자적 batch | `store.py` 확장. 별도 DB·메모리 제품·멀티 에이전트 프레임워크는 추가하지 않음 |
-| 입력·목표 해석 | 교체 가능한 공통 complete/extract/propose adapter. 기본 실행은 fake, 명시적 OpenAI 설정의 기본 모델 후보는 `gpt-6-luna` | `llm.py`·`codex_llm.py`와 `inference.py` 검증 확장 예정. Responses API 연결 코드는 후속 C1이며 실제 호출·키 접근은 이번 승인에 포함되지 않음 |
+| 입력·목표 해석 | 교체 가능한 공통 complete/extract/propose adapter. 소비자 기본 실행은 fake, 명시적 OpenAI 설정의 기본 모델 후보는 `gpt-6-luna` | `llm.py`·`model_io.py`의 v1 adapter와 `inference.py` 검증을 A2 서비스에 연결. 실제 호출·키 접근은 이번 검증에 포함되지 않음 |
 | 기억 검색 | SQL 필터 + 키워드/별칭 + 교체 가능한 의미 검색 adapter | 구조 검색 기준선을 만든 뒤 같은 합성 한국어 질의에서 누락 개선·오탐·비용을 비교. 최초 연결은 fake adapter, 실제 임베딩 모델/의존성은 비교 결과로 선택 |
 | 요청 맥락·요약 | 근거 ID/버전으로 재구성하는 현재 상태와 제한된 근거 묶음 | 초기에는 결정적 묶음/축약. LLM 오프라인 요약은 별도 효과 검증 전 필수 경로로 넣지 않음 |
 | 사용자 제어 | 현재 반영 내용·미확인 가설·다음 활용 선택의 분리 | 관찰 도구에서 상태 변화를 먼저 확인한 뒤 보고서 3.7 소비자 UI에 연결 |
@@ -167,7 +167,7 @@ Python·SQLite를 정본으로 유지하며 근거·항목·관계·동의 snaps
 
 ### 저장·입출력 계약 v1
 
-**2026-10-29 A0 · 인터페이스 고정, 실행 연결 미구현.** 계약 이름은 `lumi-memory-v1`이며 저장 형식 버전과 사전 버전 `park-2025-source-v1`을 구분한다. 사용자 실행 요청으로 아래 제한된 로컬 구현 기준을 승인했다. Python/JSON 필드·함수 경계는 [contracts.py](../src/stylemate_memory/contracts.py), 공통 오류 이름은 [errors.py](../src/stylemate_memory/errors.py)가 정의한다. 이 절은 현재 `consumer-17-v1` 실행 경로를 변경하거나 DB를 이관한 결과가 아니다. 구조·대안·영향은 [ADR 0005](decisions/0005-evidence-linked-memory.md)에 연결하며 기존 보관·동의·삭제 경계는 유지한다.
+**2026-10-29 A0에서 인터페이스 고정, A2에서 별도 로컬 서비스에 연결.** 계약 이름은 `lumi-memory-v1`이며 저장 형식 버전과 사전 버전 `park-2025-source-v1`을 구분한다. 사용자 실행 요청으로 아래 제한된 로컬 구현 기준을 승인했다. Python/JSON 필드·함수 경계는 [contracts.py](../src/stylemate_memory/contracts.py), 공통 오류 이름은 [errors.py](../src/stylemate_memory/errors.py)가 정의한다. 기존 `consumer-17-v1` 호출은 유지하고 실제 사용자 DB를 자동 이관하지 않는다. 구조·대안·영향은 [ADR 0005](decisions/0005-evidence-linked-memory.md)에 연결하며 기존 보관·동의·삭제 경계는 유지한다.
 
 #### 공통 형식과 객체 경계
 
@@ -304,7 +304,7 @@ CandidateSet은 공통 메타데이터와 `target_ids`, `cards`, `compared_featu
 
 #### A0 공통 인터페이스와 담당 경계
 
-아래는 **후속 세션이 구현할 고정 인터페이스**다. A0에서 실행되는 것은 `validate_ref()`의 작은 참조 형식 검사와 `batch_fingerprint()`뿐이다. TypedDict는 닫힌 필드 목록의 정의이고 런타임 검증기가 아니다. 객체의 모든 키는 기본적으로 필수이며 예외는 `MemoryItem.legacy`(NotRequired)와 Conditions의 선택적 occasion/activity/goal key다. 값 없음은 명시적 `null`, 매핑 없음은 `bindings=[]`다. PI/FEA 이름·허용값은 이 파일에 복제하지 않고 A1의 사전에서 읽는다. 객체별 소유권·의미·권한·원자성 검증은 각 담당 모듈에서 구현해야 한다.
+아래는 **A0에서 정한 고정 인터페이스**다. 현재 연결 범위는 [현재 구현과 실행](#현재-구현과-실행)을 따르며, A0 당시 실행된 것은 `validate_ref()`의 작은 참조 형식 검사와 `batch_fingerprint()`뿐이다. TypedDict는 닫힌 필드 목록의 정의이고 런타임 검증기가 아니다. 객체의 모든 키는 기본적으로 필수이며 예외는 `MemoryItem.legacy`(NotRequired)와 Conditions의 선택적 occasion/activity/goal key다. 값 없음은 명시적 `null`, 매핑 없음은 `bindings=[]`다. PI/FEA 이름·허용값은 이 파일에 복제하지 않고 A1의 사전에서 읽는다. 객체별 소유권·의미·권한·원자성 검증은 각 담당 모듈에서 구현해야 한다.
 
 | 담당 | 실제 연결 위치 / 고정 호출 경계 | 입출력·소유권 |
 |---|---|---|
@@ -333,9 +333,9 @@ CandidateSet은 공통 메타데이터와 `target_ids`, `cards`, `compared_featu
 
 `select_final`은 유효 set의 candidate ID를 실제 상품/목표로 해석해 `RequestState.final_selection`만 바꾸며 요청은 open이다. `end_request`는 별도 전이로 탐색을 closed로 바꾸며 final_selection=null도 허용하고 기존 선택을 보존한다. 두 전이 모두 Confirmation/Consent/장기 기억을 만들지 않는다. closed에서는 새 피드백·재탐색·최종 선택 변경을 막고, 보관 시한 내 요약 읽기와 이미 확인한 내용의 별도 장기 활용·개별 기억 관리만 허용한다. 만료·삭제된 요청에서는 재활용할 snapshot을 발행하지 않는다. 기존 `close_request()`는 legacy 동작을 보존하며 A2가 v1 end_request와 연결한다.
 
-**최신성 공급과 적용:** Basis는 request_id, request/profile revision, object_versions, contract/registry/index version, CatalogVersions, 가장 이른 valid_until을 가진다. B가 객체·요청·현재 시각을, C가 사전/색인·조회 근거를, D의 `CatalogPort.current_versions(product_ids,image_ids)`가 raw/map/image/catalog 버전을 공급한다. A2는 모델/검색 후 재조회하고 B의 쓰기 직전에도 D 공급자를 `catalog_freshness`로 전달한다. 선택 카드뿐 아니라 발행 set 전체의 모든 Map·이미지 참조가 현재 버전과 같아야 한다. 공급자가 없거나 버전/의존성이 누락되면 적용하지 않는다. 변경·철회/삭제·만료·종료·색인 미완료는 stale_context/context_blocked로 보류한다. A2 로컬 서비스는 카탈로그 쓰기와 적용을 같은 lock으로 직렬화한다. 서버가 떠 있는 동안 별도 프로세스에서 카탈로그를 변경하는 운영은 지원하지 않으며 가져오기는 중지 후 또는 같은 서비스 경계에서 수행한다.
+**최신성 공급과 적용:** Basis는 request_id, request/profile revision, object_versions, contract/registry/index version, CatalogVersions, 가장 이른 valid_until을 가진다. B가 객체·요청·현재 시각을, C가 사전/색인·조회 근거를, D의 `CatalogPort.current_versions(product_ids,image_ids)`가 raw/map/image/catalog 버전을 공급한다. A2는 모델/검색 후 재조회하고 B의 쓰기 직전에도 D 공급자를 `catalog_freshness`로 전달한다. 선택 카드뿐 아니라 발행 set 전체의 모든 Map·이미지 참조가 현재 버전과 같아야 한다. 공급자가 없거나 버전/의존성이 누락되면 적용하지 않는다. 변경·철회/삭제·만료·종료·색인 미완료는 stale_context/context_blocked로 보류한다. A2 로컬 서비스는 카탈로그 쓰기와 적용을 같은 DB executor에서 직렬화한다. 서버가 떠 있는 동안 별도 프로세스에서 카탈로그를 변경하는 운영은 지원하지 않으며 가져오기는 중지 후 또는 같은 서비스 경계에서 수행한다.
 
-**로컬 소비자 경계:** 후속 A2의 고정 경로는 `GET /api/state[?request_id=opaque-id]`, `POST /api/command`, `GET /api/images/{image_id}?version=N`이며 자산은 패키지 allowlist에서만 제공한다. 서버 생성 시 하나의 trusted user_id·외부 DB/상품/이미지 root를 설정하고 HTTP body/query로 user_id·provider·파일 경로·임의 StoreAction을 받지 않는다. 루프백 단일 테스터, Host/동일 Origin·JSON 형식·기존 24,000-byte HTTP body 상한을 유지한다. 내부 JSON 256 KiB 상한은 HTTP 허용량을 늘리는 근거가 아니다. 이미지 요청은 catalog ID/version을 설정 root 안에서 해석하며 traversal/symlink escape를 거부한다. 이미지 공급 ref를 가져오는 크롤러·임의 파일 탐색 API는 만들지 않는다.
+**로컬 소비자 경계:** A2의 고정 경로는 `GET /api/state[?request_id=opaque-id]`, `POST /api/command`, `GET /api/images/{image_id}?version=N`이며 자산은 패키지 allowlist에서만 제공한다. 서버 생성 시 하나의 trusted user_id·외부 DB/상품/이미지 root를 설정하고 HTTP body/query로 user_id·provider·파일 경로·임의 StoreAction을 받지 않는다. 루프백 단일 테스터, Host/동일 Origin·JSON 형식·기존 24,000-byte HTTP body 상한을 유지한다. 내부 JSON 256 KiB 상한은 HTTP 허용량을 늘리는 근거가 아니다. 이미지 요청은 catalog ID/version을 설정 root 안에서 해석하며 traversal/symlink escape를 거부한다. 이미지 공급 ref를 가져오는 크롤러·임의 파일 탐색 API는 만들지 않는다.
 
 `ConsumerCommand`는 contract_version/command_id/request_id/expected/action을 가진다. start_request만 request_id/expected=null이며 나머지는 서버 state의 해당 request/expected를 사용한다. `prepare_review`는 표시 준비일 뿐 확인/동의가 아니다. 수정은 proposed_text를 새 사용자 근거로 검증하고 서버가 교체할 의미를 구성해 다시 표시한다.
 
@@ -486,7 +486,7 @@ ProductAssertion은 PI 관찰(values) 또는 FEA 관찰(present:bool|null), stat
 
 ### 이미지·텍스트 인터랙션
 
-**2026-10-29 A0 · 인터랙션 구현 기준 승인, 화면·검색 미구현.** 사용자는 짧은 자유 텍스트 뒤 미정인 Feature Map 값을 구체화할 이미지 후보를 제시하고, 선택과 텍스트 보완을 반복하는 방향을 채택했다. 목표는 **현재 조건에 맞는 실제 상품 예시를 비교하면서 여러 feature의 선호를 함께 좁히는 것**이다. 한 번의 선택에서 얻은 정보는 여러 feature의 가설에 활용하되, 각 값의 확정 여부는 따로 판단한다. 보고서 3.5~3.7을 구체화하며 RQ·비교 조건·과제·설문·장기 동의 흐름은 유지한다.
+**2026-10-29 A0 · 인터랙션 구현 기준 승인.** 승인 당시 화면·검색은 미구현이었으며 A2 서비스 연결과 E2 브라우저 검증의 경계는 [현재 구현과 실행](#현재-구현과-실행)을 따른다. 사용자는 짧은 자유 텍스트 뒤 미정인 Feature Map 값을 구체화할 이미지 후보를 제시하고, 선택과 텍스트 보완을 반복하는 방향을 채택했다. 목표는 **현재 조건에 맞는 실제 상품 예시를 비교하면서 여러 feature의 선호를 함께 좁히는 것**이다. 한 번의 선택에서 얻은 정보는 여러 feature의 가설에 활용하되, 각 값의 확정 여부는 따로 판단한다. 보고서 3.5~3.7을 구체화하며 RQ·비교 조건·과제·설문·장기 동의 흐름은 유지한다.
 
 #### 흐름과 사용자 조작
 
@@ -613,19 +613,19 @@ RQ의 초점을 나눈 것이 메모리·이미지·질문의 독립 효과를 �
 
 ## 현재 구현과 실행
 
-이 절은 현재 코드의 실행 계약이다. **A1에서 Park et al. PI/FEA 사전의 명시적 로딩·검증·패키징을 구현했다. 저장·추출·목표 생성·상품·화면의 v1 연결과 데이터 이관은 아직 미구현**이며 기존 실행의 기본 사전은 `consumer-17-v1`이다. 두 사전의 값은 혼용하지 않는다. 기존 Python 패키지·CLI·환경 변수의 `stylemate_memory`/`STYLEMATE_` 이름은 호환성을 위해 유지한다.
+이 절은 현재 코드의 실행 계약이다. **`lumi-memory-v1` 소비자 서비스·로컬 HTTP·브라우저의 합성 실행 경로를 A3에서 통합 검증했다.** 기본 provider는 외부 호출 없는 fake다. 기존 CLI·개발자 HTTP 관찰 도구의 기본 사전은 `consumer-17-v1`로 유지하고, 별도 소비자 경로는 `park-2025-source-v1`을 사용한다. 실제 사용자 DB의 자동 이관·실제 OpenAI 호출·상품 의미 품질·연구 효과는 검증 범위 밖이다. Python 패키지·환경 변수의 `stylemate_memory`/`STYLEMATE_` 이름과 기존 호출을 유지한다.
 
 ### 구현 상태
 
 | 보고서 | 현재 코드·검증의 범위 | 남은 범위 |
 |---|---|---|
-| 3.2 · Input-to-Memory Model | [codex_llm.py](../src/stylemate_memory/codex_llm.py)의 텍스트 후보 추출·형식/인용 검사, [inspector.py](../src/stylemate_memory/inspector.py)의 수동 확인·동의 | 사전으로 표현되지 않는 취향과 대화 맥락의 지속 보존, 이미지 선택 입력·근거 연결, 소비자 입력 흐름 |
-| 3.2 · Memory Layer | [store.py](../src/stylemate_memory/store.py)의 장·단기 항목, 대상/상황/근거 참조, 확인·동의·교체·철회·삭제, SQLite 원자성 | 자유 표현·선택 사실·미확인 이유를 함께 다룰 표현과 확인 흐름. 현재 메모리는 지원 feature/fact와 values가 필요함 |
-| 3.3 · Context-Aware Memory Retrieval | [context.py](../src/stylemate_memory/context.py)의 요청/대상/조건/기간 필터, 단기 예외·장기 보존, 출처·제외 이유 | 자연어·이미지 선택 근거까지 포함하는 조회와 관련성 평가. 현재 미확인 후보는 확정 binding에서 제외됨 |
-| 3.4 · 목표 Item Feature Map | [registry.py](../src/stylemate_memory/registry.py)의 기존 17개 사전과 명시적 PI 7항목·FEA 30태그 로딩/검증, [inference.py](../src/stylemate_memory/inference.py)의 기존 지정/추론/미정/상충 구분, [app.py](../src/stylemate_memory/app.py)의 기존 최신성 재검사 | 새 사전을 추출·저장·목표 생성에 연결·이관, 확인 질문·검색 입력 연결 |
-| 3.5 · Item Retrieval / Final Suggestion | 미구현 | 상품 수집·속성 검증, 필수 조건 필터, 선호 랭킹, 결과 없음과 사용자 조건 조정, 최종 제안 |
-| 3.6 · Feedback / Memory Update | 확인·승격·교체의 저장 기반과 개발자 도구의 텍스트 수정 | 이미지/부분 선택·선택 이유 가설·필요한 확인·재검색·최종 확정/장기 저장 통합 |
-| 3.7 · UI | 개발자 관찰 도구만 존재 | 보고서의 온보딩·새 요청·이미지 탐색·반영 정보 확인·최종 선택·별도 저장 UI |
+| 3.2 · Input-to-Memory Model | [model_io.py](../src/stylemate_memory/model_io.py)·[llm.py](../src/stylemate_memory/llm.py)의 complete/extract/propose, 인용·출처 alias 검증과 pending 재처리 | 실제 한국어/선택 의미 품질, 실제 provider 실행 |
+| 3.2 · Memory Layer | [store.py](../src/stylemate_memory/store.py)와 v1 저장 모듈의 자연어·선택 근거·선택적 binding, 확인·동의·교체·철회·삭제. 합성 이관 테스트 존재 | 실제 사용자 DB 이관·운영 자료 검증 |
+| 3.3 · Context-Aware Memory Retrieval | [retrieval.py](../src/stylemate_memory/retrieval.py)의 유효성 필터·근거 묶음·대상/요청 격리, 교체 가능한 의미 검색 포트 | 실제 의미 검색 모델 선정·관련성 평가 |
+| 3.4 · 목표 Item Feature Map | [inference.py](../src/stylemate_memory/inference.py)의 PI/FEA 목표와 [app.py](../src/stylemate_memory/app.py)의 적용 직전 최신성 재검사 | 실제 모델 의미 품질 |
+| 3.5 · Item Retrieval / Final Suggestion | [catalog.py](../src/stylemate_memory/catalog.py)·[catalog_mapping.py](../src/stylemate_memory/catalog_mapping.py)·[product_search.py](../src/stylemate_memory/product_search.py)·[comparison.py](../src/stylemate_memory/comparison.py)의 가져오기·상품 Map·필수 필터·후보 발행·결과 없음. 별도 합성 파일의 교체 리허설과 오프라인 평가 통과 | 실제 수집·상품 검증·추천 품질 |
+| 3.6 · Feedback / Memory Update | [app.py](../src/stylemate_memory/app.py)의 선택+텍스트 접수→추출→내용/binding 확인→재탐색, 최종 선택/종료/별도 동의. 브라우저 조작과 SQLite 상태를 함께 확인 | 실제 선택 이유·표현의 해석 품질 |
+| 3.7 · UI | [로컬 서버](../src/stylemate_memory/consumer.py)·HTTP adapter로 온보딩·복수/부분 선택·오류 복구·종료·동의·삭제 완주. Chromium 데스크톱·390/320px·키보드 검증 | 실제 상품 이미지/참가자 사용성, 다른 브라우저·기기 검증 |
 
 코드의 `stylemate_memory`는 이전 명칭을 유지하는 실행 패키지다. 개발자 관찰 도구의 세 패널을 보고서의 소비자 UI로 보지 않는다. 목표 Item Feature Map과 상품별 Item Feature Map도 구분한다.
 
@@ -643,7 +643,7 @@ RQ의 초점을 나눈 것이 메모리·이미지·질문의 독립 효과를 �
 
 사전이 없거나 형식/개수가 손상되면 `registry_unavailable`, 명시한 사전 버전이 미지원이면 `unsupported_contract`로 실패한다. 새 사전 경로의 형식 오류는 `invalid_input`, 미지원 값/경로/품목/연산은 `unsupported_mapping`이다. [사전 테스트](../tests/test_registry.py)는 전체 정본 값·FEA 경로, 오류/상태, 기존 실행 호환과 자원 동일성을 검사한다.
 
-패키지의 [JSON 자원](../src/stylemate_memory/resources/park-2025-feature-map.json)은 [정본](../output/feature-map/park-2025-feature-map.json)의 생성 사본이며 수동 편집하지 않는다. [동기화 스크립트](../scripts/sync_feature_registry.py)가 byte 그대로 복사하고 `--check`와 사전 테스트가 동일성을 확인한다. 자원은 `pyproject.toml`의 package-data로 배포하며 `importlib.resources`로 네트워크 없이 읽는다. 원본의 `runtime_implemented=false`는 전체 실행 경로 전환 전까지 보존하고 현재 단계는 `execution`과 이 절에서 구분한다.
+패키지의 [JSON 자원](../src/stylemate_memory/resources/park-2025-feature-map.json)은 [정본](../output/feature-map/park-2025-feature-map.json)의 생성 사본이며 수동 편집하지 않는다. [동기화 스크립트](../scripts/sync_feature_registry.py)가 byte 그대로 복사하고 `--check`와 사전 테스트가 동일성을 확인한다. 자원은 `pyproject.toml`의 package-data로 배포하며 `importlib.resources`로 네트워크 없이 읽는다. A3의 소비자 실행 연결·설치 패키지 검증에 따라 `runtime_implemented`와 `execution.runtime_integration`은 true다. 이는 위 Pants 지원 범위의 로컬 구현을 뜻하며 Brand 목록·수치 Price/range·타 품목 매핑이나 실제 의미 품질의 완성을 뜻하지 않는다. 값·출처는 보존했다.
 
 ```sh
 python3 scripts/sync_feature_registry.py         # 정본 변경 시 패키지 사본 생성
@@ -653,7 +653,93 @@ PYTHONPATH=src python3 -m stylemate_memory.cli features --registry park-2025-sou
 
 위 features 명령은 사전 조회이며 DB 이관·v1 목표 생성·소비자 서버 연결을 수행하지 않는다.
 
+### 로컬 소비자 서비스 실행 (A2)
+
+[ConsumerService](../src/stylemate_memory/app.py)는 기존 `ShoppingApp`과 별도인 v1 진입점이다. `state(request_id=None)`와 `command(ConsumerCommand)`는 [고정 command/state 계약](#입력모델-제안쓰기조회-경계)을 사용한다. [consumer.py](../src/stylemate_memory/consumer.py)는 루프백 단일 테스터 HTTP만 제공하며 사용자 ID·provider·파일 경로·StoreAction을 HTTP로 받지 않는다. [settings.py](../src/stylemate_memory/settings.py)가 외부 경로와 서버에 고정할 trusted user를 공급한다.
+
+| 설정 환경변수 | CLI 대응 / 기본값 |
+|---|---|
+| `STYLEMATE_DB` | `--db`, 필수 외부 메모리 SQLite 경로 |
+| `STYLEMATE_CATALOG_DB` | `--catalog-db`, 필수 별도 외부 상품 SQLite 경로 |
+| `STYLEMATE_IMAGE_ROOT` | `--image-root`, 선택한 외부 로컬 이미지 root |
+| `STYLEMATE_USER_ID` | `--user`, 기본 `local-tester`; 서버 생성 시에만 고정 |
+| `STYLEMATE_PROVIDER` | `--provider fake\|openai`, 기본 `fake` |
+| `STYLEMATE_OPENAI_MODEL` | `--model`, 소비자 기본 `gpt-6-luna` |
+| `STYLEMATE_PORT` | `--port`, 기본 `8766`, 루프백만 바인딩 |
+| `OPENAI_API_KEY` | `openai`를 명시적으로 선택해 실행할 때만 조회. CLI 인자로 받거나 기록하지 않음 |
+
+환경변수에는 경로만 먼저 설정할 수 있다. 아래 예시는 작은 합성 fixture 가져오기이며 실제 수집은 하지 않는다. JSON은 CatalogRecord 배열, JSONL은 줄별 CatalogRecord다. [합성 예시](../tests/fixtures/catalog/valid.jsonl)와 [형식 정의](../src/stylemate_memory/contracts.py)를 따른다. 각 레코드는 format_version/product_id/source/title/description/garment_type/raw_metadata/images/labels를 가지며 source에는 source_id/url/collected_at을 제공한다. 잘못된 자료는 파일 내 줄/레코드·필드 위치와 보완 이유를 반환한다. 이미지 바이트는 자동 수집하지 않는다.
+
+이미지를 표시하는 최소 레코드 예시다. URL·ID는 합성 예시이므로 실제 공급 출처와 이미지 파일로 교체한다. JSONL에서는 아래 객체를 한 줄로 기록한다.
+
+```json
+{
+  "format_version": "lumi-catalog-v1",
+  "product_id": "supplier-pants-001",
+  "source": {"source_id": "supplier", "url": "https://example.invalid/pants/001", "collected_at": "2026-10-30T09:00:00+09:00"},
+  "title": "공급 바지", "description": null, "garment_type": "Pants",
+  "raw_metadata": {"supplier_type": "Slacks", "supplier_color": "Navy", "supplier_fit": "Wide"},
+  "images": [{"image_id": "supplier-image-001", "kind": "local", "location": "pants/001.png", "source_revision": "v1", "sha256": null, "regions": []}],
+  "labels": []
+}
+```
+
+사진이 없으면 `images=[]`로 가져올 수 있다. 실제 비교 화면에는 외부 `STYLEMATE_IMAGE_ROOT` 아래 상대 경로의 PNG/JPEG/WebP/GIF(각 10 MiB 이하)를 준비한다. 바이트·영역 변경 시 `source_revision`을 바꾸고 선택적 SHA-256을 공급한다. remote 참조는 가져오지만 소비자 화면에서 다운로드·표시하지 않는다. `labels=[]`는 라벨 미확인 상태를 유지한다. FEA 성능을 confirmed로 쓰려면 공급자 `verified_label`의 verifier/verified_at/evidence_ref가 필요하며 사진·모델 추정만으로 검증하지 않는다. PI는 공급 메타데이터의 정확한 사전 값만 직접 정규화한다.
+
+```sh
+export STYLEMATE_DB=/private/tmp/lumi-local/memory.sqlite3
+export STYLEMATE_CATALOG_DB=/private/tmp/lumi-local/catalog.sqlite3
+# 로컬 이미지를 준비한 경우에만 STYLEMATE_IMAGE_ROOT를 외부 디렉터리로 설정
+
+PYTHONPATH=src python3 -m stylemate_memory.cli catalog-import --file tests/fixtures/catalog/valid.jsonl
+PYTHONPATH=src python3 -m stylemate_memory.cli catalog-map
+PYTHONPATH=src python3 -m stylemate_memory.consumer --provider fake
+# 같은 소비자 서버: python3 -m stylemate_memory.cli serve --provider fake
+```
+
+기존 DB와 상품 DB는 서로 다른 파일이어야 한다. 실행 데이터 경로가 저장소 안으로 해석되면 거부한다. 공급 자료 갱신은 서버를 중지하고 `catalog-import --file /외부/상품.jsonl`과 `catalog-map`을 실행한 다음 다시 시작한다. 가져오기는 product_id별 추가/갱신이며 파일에 빠진 기존 상품을 삭제하지 않는다. 전체 데이터셋 교체 리허설은 새 외부 메모리 DB·상품 DB를 함께 지정한다. 서로 다른 상품 DB의 version 계보를 기존 요청과 혼용하는 운영은 검증하지 않았다. 상품 Map 생성은 공급 메타데이터/라벨의 근거를 사용하며 이 명령은 모델·키를 사용하지 않는다. 실행 중 별도 프로세스가 카탈로그를 쓰는 운영은 지원하지 않는다. 로컬 Python 호출자의 `import_catalog(path)`·`build_catalog_maps()`는 서비스의 동일 DB 실행 경계에서 직렬화되며 HTTP에는 노출하지 않는다.
+
+실행 흐름과 한계:
+
+- `start_request`의 실제 입력과 `submit_feedback`의 선택+텍스트는 최소 근거·feedback·pending을 원자 접수한다. 추출 실패는 접수 성공+`interpretation_pending`, 접수 자체 실패는 `outcome=rejected`다. 재시도는 같은 feedback_ref에 대한 `retry_extraction`이며 새 원문/batch를 복제하지 않는다. pending을 먼저 재처리한 뒤 새 피드백을 받는다.
+- 기본 fake는 빈 추출/제안을 반환하는 연결 fixture다. 자연어를 해석한 것처럼 기억이나 이유를 만들지 않는다. 통합 검사는 별도 fake transport가 제공한 명시적 합성 추출을 사용한다. 확인된 기억이 없는 C2 context는 `blocked`이며 먼저 내용을 확인해야 한다. 내용 확인은 binding 확인과 별도이고, 확인 후 `explore`로 재탐색한다. 모든 37개 항목을 채울 필요는 없다.
+- `prepare_review`가 서버 조회로 표시 snapshot을 만들고 `respond_review(accept)`만 trusted event를 발행한다. decline/skip·상품 최종 선택·종료는 동의가 아니다. 종료 뒤에도 이미 확인한 내용에 대한 별도 `future_reuse`가 가능하다. 요청 전용 slot은 자동 제거하지 않으므로 그 항목의 장기 활용은 새 범위 확인이 필요하다.
+- 수정 문장은 새 근거로 접수·추출해 다시 표시한다. 단기 항목은 `replace` 확인으로 교체한다. 장기 원본 수정은 새 단기 후보로 먼저 확인하며 이전 이후 활용 동의를 물려주지 않는다. 한 문장이 여러 후보로 해석되면 자동 교체하지 않고 보류한다.
+- 모델 계산은 DB 실행 경계 밖에서 진행하며 적용 직전에 요청/프로필·원본 객체·보관 시각·사전/색인·카탈로그 전체 revision을 재검사한다. 검색/발행은 같은 직렬 실행 경계에서 모든 카드의 raw/map/image 버전을 다시 검증한다. 수정·삭제·종료·새 요청·만료 뒤 늦은 응답은 적용하지 않는다. `blocked`·`no_results`·`stale`·provider `error`를 정상 완료와 구분하고 rule 성공으로 자동 대체하지 않는다.
+- A3에서 이미지 선택의 구조화 상품 Map에는 전체 JSON 256 KiB 한도를 적용하고, 사용자 발화·기억 문장의 4,000자 제한을 분리했다. unknown/conflict를 포함한 37개 상품 항목을 잘라내지 않는다. HTTP 입력 상한은 그대로 24,000 bytes다. 재탐색 중에는 오래된 카드를 숨기고 `running`을 유지해 정상 polling으로 완료한다. 재생성 전 상품 Map으로 검색이 보류되면 `blocked`이며 실제 0건인 `no_results`와 구분한다.
+- 요청·근거·후보·확인·동의는 SQLite에서 복원한다. 동일 요청 재개는 새 요청 생성과 구분하며 닫힌 요청을 자동 재개방하지 않는다. 서비스 journal은 명령 본문·대화·전체 화면을 복사하지 않고 salted fingerprint·참조·안전한 처리 상태만 저장한다. 원본 삭제 시 관련 사용자 journal을 비우며 삭제 재시도에는 24시간 내용 없는 nonce만 남긴다. 재시도 응답은 현재 화면을 새로 조회하므로 삭제 전 화면을 되살리지 않는다.
+
+고정 HTTP 경로는 `GET /api/state[?request_id=...]`, `POST /api/command`, `GET /api/images/{image_id}?version=N`다. Host/동일 Origin, JSON, 24,000-byte body 상한과 패키지 자산 allowlist를 적용한다. 이미지 ID/버전은 catalog에서 설정 root 안의 제한된 raster 파일로만 해석하며 traversal/symlink escape를 거부한다. 원격 이미지 참조를 서버가 가져오지 않는다. 현재 소비자 응답은 로컬 이미지 URL만 제공하고 없는/원격 이미지는 `image_url=null`로 둔다.
+
+서버는 제공하는 HTML 진입점에서 [consumer-http.js](../src/stylemate_memory/consumer-http.js)를 선택해 `mountConsumer`에 연결한다. E1 fixture는 별도로 유지된다. [실제 HTTP 브라우저 검사](../tests/check_consumer_http_browser.mjs)는 축소 옵션 없이 D2의 전체 상품 Map을 사용해 화면 조작·오류 회복·좁은 화면·키보드와 DB 상태를 함께 확인한다.
+
+로컬 개발자 관찰은 실제 서비스 상태와 내부 snapshot/context를 읽는 별도 CLI다. 기존 Codex 기반 17개 관찰 서버와 구분하며 모델을 호출하지 않는다.
+
+```sh
+PYTHONPATH=src python3 -m stylemate_memory.inspector --consumer-state
+# 특정 요청: 위 명령 뒤에 --request REQUEST_ID
+```
+
+향후 실제 호출을 사용하려면 사용자가 로컬 환경에서 `OPENAI_API_KEY`를 설정하고 `STYLEMATE_OPENAI_MODEL=gpt-6-luna`와 `--provider openai`를 명시한다. 소스 실행 명령은 `PYTHONPATH=src python3 -m stylemate_memory.consumer --provider openai --model gpt-6-luna`다. 키는 인자·파일 예제·로그로 전달하지 않는다. A3에서는 실제 키를 열람/설정하거나 실제 API smoke test를 실행하지 않았다. import/demo/기본 fake·상품 가져오기/Map 생성/읽기 관찰은 실제 키·로그인 파일에 의존하지 않는다. Responses의 strict schema·store=false·안전한 실패는 fake transport wire 검사로 확인하며 실제 계정의 모델 접근권한·응답 호환성은 별도다.
+
+실제 연결 뒤에는 공급 자료 가져오기/Map 생성의 오류·미확인 항목과 로컬 이미지 응답을 먼저 확인한다. 이후 명시적으로 openai 서버를 실행해 자유 표현→내용 확인→별도 binding 확인→이미지 선택+텍스트→재탐색→최종 선택/종료→별도 이후 활용을 시험한다. 같은 요청 재시작 복원, 새 요청의 일시 조건 비이월, 장기 원본 보존, 결과 없음·provider 오류·동의 거부·삭제도 확인한다. 실제 모델의 한국어 의미 해석·라벨/추천 품질은 이 smoke test와 별도 평가 대상이다.
+
+[서비스 통합 검사](../tests/test_consumer_service.py)와 [HTTP 검사](../tests/test_consumer_http.py)는 fake transport+합성 상품으로 접수/확인/재검색/종료/별도 저장, 재시작·새 요청·삭제와 늦은 응답, Host/Origin/입력/이미지 경계를 검증한다. 기존 CLI·가상 데모·관찰 경로·패키징과 함께 검사하며 실제 모델 의미 품질·상품 추천 품질·사용자 효과는 검증하지 않는다.
+
+**A3 판정(2026-10-30): 합성 로컬 실행 기준 연결 준비 통과.** 전체 unittest 386개, 전체 D2 상품 Map을 쓴 실제 HTTP 브라우저 12개 시나리오, 오프라인 기억 39회·상품 12개 사례와 별도 파일 교체 리허설, CLI 데모/두 사전 조회·저장소 검사를 통과했다. wheel을 외부 임시 경로에 설치해 사전·화면 자원 7개와 두 console 진입점, 설치된 소비자 서버의 HTTP 기동/명령, 가짜 키의 명시적 OpenAI 설정·wire도 확인했다. 검증용 DB·서버·브라우저·설치 산출물은 정리하며 실제 API 호출은 0회다.
+
+| A3 완료 조건 | 합성 코드·실행 근거 |
+|---|---|
+| 자유 표현 보존·같은 요청 재개·새 요청 격리 | [저장/이관](../tests/test_migration.py), 서비스 재시작·브라우저의 미매핑 표현과 초안 복원 |
+| 확인·binding·동의·최종 선택·종료 분리, 장기 원본/현재 예외 | [상태 전이](../tests/test_store_transitions.py), [목표값](../tests/test_inference.py), 서비스·브라우저 DB 대조 |
+| 직접 제약·미정·충돌·근거·최신성 유지 | [context](../tests/test_context.py)·목표값·늦은 추출/제안 적용 차단 |
+| 공급 파일→Map→검색→실제 이미지 참조→비교/선택+텍스트 재탐색 | catalog CLI, 로컬 합성 PNG 응답·복수/부분 선택 브라우저 완주. 전체 37항목 유지 |
+| stale·오류·없음·미확인 성능·삭제/만료/재색인·중복 batch | [정리](../tests/test_cleanup.py)·[피드백](../tests/test_feedback.py)·[상품 검색](../tests/test_product_search.py), provider/HTTP 오류·삭제·오래된 카드 브라우저 검사 |
+| 코드 변경 없이 외부 상품·명시적 API 설정 연결 | 별도 외부 JSONL의 10개 상품을 설치 CLI로 가져오기/Map 생성. `gpt-6-luna` 설정을 가짜 키·fake transport로 검사. 실제 계정 접근권한/응답/의미 품질은 미검증 |
+
 ### 메모리 실행 계약
+
+아래 메모리/context/목표값·가상 데모 설명은 기존 `consumer-17-v1` 실행 경로다. v1 서비스는 [A2 실행](#로컬-소비자-서비스-실행-a2)을 따른다.
 
 신뢰된 로컬 호출자가 요청·기억 확인·이후 활용 동의를 전달한다. SQLite가 항목별 상태와 버전을 저장하고, 현재 요청/대상에 유효한 기억만 context로 조립한다. rule 또는 OpenAI adapter가 목표값을 제안하면 시스템이 값·대상·근거·제약과 최신 상태를 검증한다. 모델 출력은 메모리를 자동으로 바꾸지 않는다.
 
@@ -663,7 +749,7 @@ PYTHONPATH=src python3 -m stylemate_memory.cli features --registry park-2025-sou
 
 ### 현재 실행 중인 17개 속성
 
-**현재 실행 코드는 여전히 `consumer-17-v1`을 사용한다.** 이는 [이전 전체 feature 계획](../archive/docs/target-feature-inference-plan.md)의 item65/outfit9를 축소한 로컬 실행 사전이며 위의 확정 사전과 다르다. 아래 표의 과거 대응과 `pdf` metadata를 중간보고서나 Park et al. 논문에서 정한 상품 스키마로 읽지 않는다. 기본 카테고리는 아이템 종류에서 파생하고 기장은 대상별로 통합했으며 근거 없는 값은 미정으로 남긴다.
+**기존 CLI·개발자 관찰 도구의 기본 사전은 `consumer-17-v1`이다.** 이는 [이전 전체 feature 계획](../archive/docs/target-feature-inference-plan.md)의 item65/outfit9를 축소한 로컬 실행 사전이며 위의 확정 사전과 다르다. 별도 v1 소비자 서비스는 Park 사전을 사용한다. 아래 표의 과거 대응과 `pdf` metadata를 중간보고서나 Park et al. 논문에서 정한 상품 스키마로 읽지 않는다. 기본 카테고리는 아이템 종류에서 파생하고 기장은 대상별로 통합했으며 근거 없는 값은 미정으로 남긴다.
 
 | key | 표시 | 과거 사전 대응·축소 |
 |---|---|---|
@@ -752,11 +838,15 @@ PYTHONPATH=src python3 -m stylemate_memory.cli features
 PYTHONPATH=src python3 -m stylemate_memory.cli features --registry park-2025-source-v1
 python3 scripts/sync_feature_registry.py --check
 PYTHONPATH=src python3 -m unittest discover -s tests -q
+node tests/check_consumer_http_browser.mjs
+PYTHONPATH=src python3 scripts/evaluate_offline.py --output /외부/평가결과.json
 python3 scripts/check_repository.py
 git diff --check
 ```
 
-실행 의존성은 Python 3.11+ 표준 라이브러리뿐이다. 저장소 루트에서 실행한다.
+서비스 실행 의존성은 Python 3.11+ 표준 라이브러리뿐이다. 저장소 루트에서 실행한다. 브라우저 개발 검사는 설치된 Node·Playwright·Chromium을 사용하며 의존성을 자동 설치하지 않는다.
+
+[오프라인 평가](../scripts/evaluate_offline.py)는 [합성 fixture](../tests/fixtures/evaluation/memory_cases.jsonl)를 기본 입력으로 쓰고, `--fixtures DIR`로 같은 형식의 입력 묶음을 지정한다. `--output FILE`을 생략하면 JSON을 표준 출력에 쓴다. 기억 조회의 recall·오탐·근거 완전성·필수 조건 보존과 상품 검색의 hard 위반·unknown 오인·후보 중복·없는 비교 조합을 별도로 기록한다. 구조 검색 기준선은 평가 안에서만 키워드 채널을 끄며, 키워드 경로는 실제 구조+키워드 결합이고 의미 검색은 각본 fake다. 동일 합성 입력의 개발 검증이며 실제 임베딩 모델 품질을 뜻하지 않는다. 외부 임시 파일의 CLI 가져오기→Map 생성→검색과 오류 위치·rollback도 검사한다. 조건 위반 시 종료 코드는 1이며 실제 API 토큰·비용은 관측하지 않아 null로 기록한다.
 
 가상 데모는 임시 DB로 기본 Relaxed/Navy → 이번 Slim → 다음 요청 Relaxed를 확인한다. rule adapter는 단순 연결 fixture이며 실제 LLM 품질·사용자 연구 효과를 검증하지 않는다.
 
@@ -789,13 +879,13 @@ create action 예시(현재 요청에만 적용, 장기 자동 저장 없음):
 
 CLI의 Responses adapter는 명시적 model/key로 연결하며 테스트는 fake transport를 사용한다. 코드 import, demo, 기본 rule 추론은 자격 증명을 읽거나 실제 모델을 호출하지 않는다. Codex CLI로 실제 추출·목표 추론을 실행하는 [개발자 관찰 도구](#개발자-관찰-도구)는 별도 실행 경로다.
 
-사용자가 로컬 환경에 `OPENAI_API_KEY`, `STYLEMATE_OPENAI_MODEL`을 설정하고 명시적으로 `infer --provider openai`를 실행할 때만 실제 연결을 사용한다. `--model`로 호출 모델을 지정할 수도 있다. 키를 CLI 인자·로그·오류·PR에 넣지 않는다. 모델 접근권한과 structured output 지원은 실제 호출 시 확인해야 한다.
+기존 CLI는 사용자가 로컬 환경에 `OPENAI_API_KEY`, `STYLEMATE_OPENAI_MODEL`을 설정하고 명시적으로 `infer --provider openai`를 실행할 때 실제 연결을 사용한다. 별도 v1 소비자 서버의 명시적 설정은 [A2 실행](#로컬-소비자-서비스-실행-a2)을 따른다. `--model`로 호출 모델을 지정할 수도 있다. 키를 CLI 인자·로그·오류·PR에 넣지 않는다. 모델 접근권한과 structured output 지원은 실제 호출 시 확인해야 한다.
 
 adapter는 OpenAI Responses API에 `text.format`의 strict JSON Schema·`store=false`·출력 상한·timeout을 전달한다. [공식 Structured Outputs 이동 안내](https://developers.openai.com/api/docs/guides/migrate-to-responses#6-update-structured-outputs-definitions)를 기준으로 wire 형식을 구현했다. 응답 거부·불완전·비정상 JSON·HTTP/timeout 오류는 안전한 오류 코드로 반환하고 자동 무한 재시도·부분 성공으로 처리하지 않는다. 구조 검증은 의미 품질/공급자 전체 보관 정책의 증명이 아니다.
 
 ### 개발자 관찰 도구
 
-텍스트 후보 → 내용 확인/별도 동의 → 기억 조회 → 목표값 변화를 확인하는 단일 로컬 테스터용 도구다. 실제 상품의 속성 추출·검색이나 보고서 3.7의 소비자 UI는 구현하지 않았다. 아래 조작은 실제 모델 호출을 포함하므로 해당 실행을 요청받았을 때만 수행한다.
+텍스트 후보 → 내용 확인/별도 동의 → 기억 조회 → 목표값 변화를 확인하는 단일 로컬 테스터용 도구다. 이 기존 개발자 도구 자체에는 실제 상품의 속성 추출·검색이나 보고서 3.7의 소비자 UI가 없으며, 별도 A2 소비자 서버와 구분한다. 아래 조작은 실제 모델 호출을 포함하므로 해당 실행을 요청받았을 때만 수행한다.
 
 #### 실행
 
@@ -856,7 +946,7 @@ PYTHONPATH=src python3 -m stylemate_memory.inspector \
 
 테스트는 실제 SQLite와 합성 사용자·가상 모델/HTTP 응답으로 저장·동의·요청 격리·대상/상황별 context·충돌·목표값·최신성·삭제 경계를 확인한다. 위 실행 명령으로 현재 결과를 확인한다. 과거 테스트 수와 PR/임시 설치 결과는 [2026-10-14 보관 기록](../archive/docs/shopping-memory-prototype-20261014.md)에 있으며 이번 실행 결과로 재사용하지 않는다.
 
-실제 모델의 자연어 해석 품질, 자유 표현·이미지 근거의 지속 보존, 상품 검색/매칭·추천 품질, 소비자 UI/로그인·사용자 연구는 이 오프라인 검증에 포함되지 않는다. 원격 CI도 실제 실행을 별도로 확인한다.
+자유 표현·이미지 선택 근거의 저장과 소비자 UI 연결은 v1 합성 통합·브라우저 검사에서 확인한다. 실제 모델의 자연어 해석 품질, 실제 상품 검색/추천 품질, 로그인·사용자 연구는 오프라인 검증에 포함되지 않는다. 원격 CI도 실제 실행을 별도로 확인한다.
 
 보관 기간·조회 예산·17개 사전은 현재 로컬 프로토타입의 설정이다. 이를 최종 서비스 정책으로 확정하거나 문서 정리만으로 변경하지 않는다. 관리 DB 삭제는 행·관련 내용/영수증·journal 정리 범위이며 사용자가 만든 사본·OS 백업·저장매체 소거는 포함하지 않는다.
 
@@ -876,20 +966,19 @@ PYTHONPATH=src python3 -m stylemate_memory.inspector \
 
 ## 다음 작업
 
-**A0의 공통 계약과 A1의 사전·실행 자원은 구현했고, 다음 작업은 B1/C1/D1이다.** 이번 실행은 A1까지만 수행하며 후속 TASK를 시작하지 않는다. 후속 순서는 B1/C1/D1 → B2/C2/D2 → B3/C3/D3 → B4/E1 → A2 → E2/D4 → A3이며 각 병렬 묶음 뒤 A가 GATE로 통합 확인한다. 담당·함수·필드는 [공통 인터페이스](#a0-공통-인터페이스와-담당-경계)와 contracts.py를 그대로 참조한다. 아래 기능 단계는 여전히 계획이다. 자유 표현을 잃지 않는 입력→메모리→조회 경로부터 연결한다.
+**A3의 합성 로컬 실행 기준으로 외부 자료/API 설정 연결 준비를 완료했다.** 아래 후속 작업은 실제 자료·명시적 호출·연구 준비이며 A3에서 실행하지 않았다. 담당·함수·필드는 [공통 인터페이스](#a0-공통-인터페이스와-담당-경계), 실행은 [로컬 소비자 서비스](#로컬-소비자-서비스-실행-a2)를 따른다.
 
-| 단계 | 핵심 변경 위치·책임 | 완료 기준 |
+| 후속 범위 | 필요한 작업 | 확인 기준 |
 |---|---|---|
-| 1. 표현·사전 이관 | `store.py`의 feature/values 필수 제약을 근거·자연어 항목·선택적 매핑으로 확장. `registry.py`는 승인 PI/FEA 사전 참조 | 매핑 없는 기억 보존, 저장/사전 버전 분리, 합성 기존 DB의 이관·재시작·실패 rollback 검증 |
-| 2. 쓰기·확인 | `codex_llm.py`·`inspector.py`의 후보/가설·확인·장기 활용 선택을 기존 `apply_batch()`에 연결 | 근거와 동의 snapshot 범위 일치, 명시적 동일 요청 재개와 새 요청 분리, 모델의 확정/동의 생성 차단 |
-| 3. 조회·목표 | `context.py`·`inference.py`·`app.py`의 유효성 필터·근거 묶음·사전 매핑·최신성 검사 | 직접 조건 보존, 자유 표현 검색 adapter 연결, 근거별 반영/제외 이유와 stale 응답 차단 |
-| 4. 검색·관리 검증 | 같은 합성 입력으로 구조 검색 기준선과 의미 검색 후보를 비교하고 철회/삭제·재색인 경계 확인 | 관련 근거 회수·오탐·근거 묶음 완전성·목표 조건 보존·호출/토큰/지연을 구분 측정. 실제 검색 모델은 비교 결과로 선택 |
-| 5. 상품 Map·비교 후보 | 보고서 3.5의 상품 속성·필수 필터·선호 랭킹에 비교할 미정 요소와 후보 묶음 연결 | 합성 상품부터 조건 준수·중복·라벨 미확인·비교 축·실제 조합 부재 검증. 실제 크롤링/이미지 품질은 별도 확인 |
-| 6. 이미지·텍스트 UI | [합의한 인터랙션](#이미지텍스트-인터랙션)에 따라 초기 자유 입력·이미지 비교·상시 텍스트·필요한 확인·재탐색 연결 | 선택과 텍스트 함께 반영, 하나/여러 개·부분 선택·없음/모르겠음·수정/종료 지원. 상품 확정과 장기 저장 분리 |
+| 공급 상품·이미지 | 출처가 있는 JSON/JSONL과 외부 로컬 이미지·검증 라벨 준비. 크롤러/수집은 미구현 | 가져오기/Map 진단, 실제 이미지 로딩, unknown 성능을 필수 조건 충족으로 보지 않는지 확인 |
+| 실제 모델 | 사용자가 명시적 API 설정·실행 후 위 smoke test와 한국어 입력/선택 이유 평가 | 실제 접근권한·응답 형식·의미 품질·실측 호출/토큰/지연. fixture 성공과 구분 |
+| 실제 의미 검색 | 현재 구조+키워드 포트에 연결할 모델 선정·평가 | 관련 근거 회수·오탐·근거 묶음 완전성·필수 조건 보존·삭제/재색인·비용 비교. 각본 순위를 실제 임베딩으로 보지 않음 |
+| 운영 자료 이관 | 실제 사용자 DB·동의 범위의 별도 검토와 재현 | 합성 이관 통과를 실제 자료 승인으로 대체하지 않음. 다른 상품 DB와 기존 요청 version 계보 혼용은 지원 검증 밖 |
+| 사용자 연구 | 보고서 기준 파일럿·동의/과제 안내·설문·분석 준비 | 통제감·적합성·표현 부담 등 RQ 효과는 실제 참여자 자료로 평가. 로컬 UI 통과와 구분 |
 
 이관은 원래 값·내용·근거·확인·동의·기간을 보존하고 실제 사용자 DB 대신 합성 DB부터 검증한다. 기존 `consumer-17-v1`과 확정 사전의 의미가 다르면 자동 치환하지 않는다. 특히 `Relaxed`→`Wide`, 원단 종류→소재 원료는 매핑 미정으로 보존하고 필요한 확인을 거친다. 새 의미·대상·범위로 넓어지면 기존 동의를 재사용하지 않는다. 없는 원문을 복원한 것처럼 만들지 않는다. Brand 전체 목록·Price 경계·타 품목 범위는 [확정 사전의 미정 규칙](#feature-map)을 따른다.
 
-| 대표 시나리오 | 구현 시 확인할 결과 |
+| 대표 회귀 시나리오 | 유지할 결과 |
 |---|---|
 | “빈티지한 느낌” → 재시작 → 사용자가 같은 요청 재개 | 최소 표현·근거·가설 상태 복원. 날짜/상황 재확인. 색·소재 임의 확정 없음 |
 | 평소 Navy/Wide 바지 + 이번 발표 Slim | 이번 목표 Navy/Slim, 장기 Navy/Wide 보존. 새 요청에 발표 전용 Slim·요약·가설 비이월 |
@@ -905,4 +994,4 @@ PYTHONPATH=src python3 -m stylemate_memory.inspector \
 | 요청 삭제와 별도 동의한 장기 기억 삭제 | 요청 삭제는 제한된 독립 장기 snapshot만 유지. 장기 기억 삭제는 promote 가족·사본·관련 근거 부분·파생 자료까지 제거 |
 | 저장/파생 자료 갱신 실패, 동일/충돌 batch 재시도 | 부분 확정·거짓 삭제 완료 없음. 원자성·버전·멱등 경계 유지 |
 
-위 Navy/Wide/Slim은 확정 사전의 바지 값으로 만든 **후속 시나리오**다. [현재 테스트](../tests)의 Navy/Relaxed→Slim은 기존 17개 사전 검증이며 새 사전 이관의 통과 근거가 아니다. 기존 단위·SQLite·통합 테스트와 가상 데모를 재사용하고 새 표현·근거·검색·삭제 전파의 위험에만 회귀 검증을 추가한다. 모든 새 목표/매핑의 source가 유효 근거까지 연결되는지 확인하며 기술 검증을 실제 모델 의미 품질·상품 검색·사용자 효과로 확대하지 않는다.
+Navy/Wide→이번 Slim→새 요청 Wide는 [v1 목표 테스트](../tests/test_inference.py)의 합성 시나리오다. CLI 가상 데모의 Navy/Relaxed→Slim은 기존 17개 사전 호환 검증으로 구분하며 실제 사용자 DB 이관 근거가 아니다. 기존 단위·SQLite·통합 테스트와 가상 데모를 재사용하고 새 표현·근거·검색·삭제 전파의 위험에만 회귀 검증을 추가한다. 모든 새 목표/매핑의 source가 유효 근거까지 연결되는지 확인하며 기술 검증을 실제 모델 의미 품질·상품 검색·사용자 효과로 확대하지 않는다.

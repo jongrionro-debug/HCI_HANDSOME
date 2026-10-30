@@ -1,11 +1,15 @@
 import json
 import os
 import unittest
+from unittest.mock import patch
 
 from stylemate_memory.errors import StyleMateError
 from stylemate_memory.llm import (
     DEFAULT_ENDPOINT,
+    DEFAULT_MODEL,
+    OpenAIResponsesGateway,
     OpenAIResponsesAdapter,
+    create_model_gateway,
     _ProviderHTTPError,
     _urllib_transport,
 )
@@ -362,8 +366,8 @@ class OpenAIResponsesAdapterTests(unittest.TestCase):
             def __exit__(self, *args):
                 return False
 
-            def read(self):
-                return json.dumps(response_with_output(proposal())).encode("utf-8")
+            def read(self, size=-1):
+                return json.dumps(response_with_output(proposal())).encode("utf-8")[:size]
 
         with unittest.mock.patch("stylemate_memory.llm.urllib.request.urlopen", return_value=FakeHTTPResponse()) as urlopen:
             adapter = OpenAIResponsesAdapter(model="model", api_key="dummy")
@@ -374,6 +378,152 @@ class OpenAIResponsesAdapterTests(unittest.TestCase):
             self.assertEqual(request.method, "POST")
             self.assertEqual(request.full_url, DEFAULT_ENDPOINT)
             self.assertEqual(request.headers["Authorization"], "Bearer dummy")
+
+
+class OpenAIResponsesGatewayTests(unittest.TestCase):
+    schema = {"type": "object", "properties": {"ok": {"type": "boolean"}},
+              "required": ["ok"], "additionalProperties": False}
+
+    def gateway(self, transport):
+        return OpenAIResponsesGateway(api_key="dummy-api-key", transport=transport)
+
+    def test_complete_is_a_domain_independent_strict_responses_request(self):
+        transport = FakeTransport(response=response_with_output({"ok": True}))
+        gateway = OpenAIResponsesGateway(api_key="dummy-api-key", transport=transport,
+                                         model="injected-model", timeout=9, max_output_tokens=2222)
+        self.assertEqual(gateway.complete("Convert only JSON.", {"title": "합성 상품"}, self.schema), {"ok": True})
+        url, headers, payload, timeout = transport.calls[0]
+        self.assertEqual((url, timeout), (DEFAULT_ENDPOINT, 9.0))
+        self.assertEqual(headers["Authorization"], "Bearer dummy-api-key")
+        self.assertEqual(payload["model"], "injected-model")
+        self.assertEqual(payload["max_output_tokens"], 2222)
+        self.assertFalse(payload["store"])
+        self.assertEqual(payload["instructions"], "Convert only JSON.")
+        self.assertEqual(json.loads(payload["input"]), {"title": "합성 상품"})
+        self.assertEqual(payload["text"]["format"], {
+            "type": "json_schema", "name": "lumi_json", "strict": True, "schema": self.schema})
+        self.assertNotIn("dummy-api-key", json.dumps(payload))
+        self.assertNotIn("tools", payload)
+        self.assertNotIn("previous_response_id", payload)
+        self.assertNotIn("last_metadata", vars(gateway))
+
+    def test_failures_do_not_retry_fallback_or_return_provider_text(self):
+        cases = [
+            (FakeTransport(error=TimeoutError("dummy-api-key raw body")), "provider_timeout"),
+            (FakeTransport(error=_ProviderHTTPError(429)), "provider_rate_limited"),
+            (FakeTransport(response={"http_status": 429, "error": "dummy-api-key"}), "provider_rate_limited"),
+            (FakeTransport(error=RuntimeError("dummy-api-key raw body")), "provider_unavailable"),
+            (FakeTransport(response={"status": "incomplete", "output_text": "{}"}), "provider_incomplete"),
+            (FakeTransport(response={"status": "completed", "output_text": "bad dummy-api-key"}), "invalid_output"),
+            (FakeTransport(response={"status": "completed", "output_text": []}), "provider_invalid_response"),
+            (FakeTransport(response={"status": "completed", "output_text": "{}", "refusal": "dummy-api-key"}), "provider_refusal"),
+            (FakeTransport(response={"status": "completed", "output_text": "{}", "output": [
+                {"type": "message", "content": [{"type": "refusal", "refusal": "dummy-api-key"}]}]}), "provider_refusal"),
+            (FakeTransport(response={"status": "completed", "output": [
+                {"type": "function_call", "arguments": "dummy-api-key"}]}), "provider_invalid_response"),
+            (FakeTransport(response={"status": "completed", "output": [
+                {"type": [], "content": []}]}), "provider_invalid_response"),
+            (FakeTransport(response={"status": "completed", "output": [
+                {"type": "message", "content": [{"type": [], "text": "{}"}]}]}), "provider_invalid_response"),
+        ]
+        for transport, code in cases:
+            with self.subTest(code=code):
+                with self.assertRaises(StyleMateError) as caught:
+                    self.gateway(transport).complete("JSON only", {}, self.schema)
+                self.assertEqual(caught.exception.code, code)
+                self.assertNotIn("dummy-api-key", json.dumps(caught.exception.as_dict()))
+                self.assertNotIn("raw body", str(caught.exception))
+                self.assertEqual(len(transport.calls), 1)
+
+    def test_malformed_json_duplicate_keys_nonfinite_and_echoed_key_are_rejected(self):
+        for output in ('{"ok":true,"ok":false}', '{"ok":NaN}', '[]',
+                       '{"question":"dummy-api-key"}', '{"question":"dummy-\\u0061pi-key"}'):
+            with self.subTest(output=output):
+                transport = FakeTransport(response={"status": "completed", "output_text": output})
+                with self.assertRaises(StyleMateError) as caught:
+                    self.gateway(transport).complete("", {}, self.schema)
+                self.assertEqual(caught.exception.code, "invalid_output")
+
+    def test_default_is_offline_and_openai_requires_explicit_configuration(self):
+        with patch("shutil.which", side_effect=AssertionError("CLI lookup")), \
+             patch("subprocess.run", side_effect=AssertionError("CLI execution")), \
+             patch("urllib.request.urlopen", side_effect=AssertionError("network")), \
+             patch("os.getenv", side_effect=AssertionError("credential lookup")):
+            fake = create_model_gateway()
+            self.assertEqual(fake.model, "fake")
+            gateway = create_model_gateway("openai", api_key="dummy-api-key", transport=FakeTransport())
+            self.assertEqual(gateway.model, DEFAULT_MODEL)
+            with self.assertRaises(StyleMateError) as caught:
+                create_model_gateway("openai")
+            self.assertEqual(caught.exception.code, "invalid_api_key")
+            for configuration in ({"provider": "unknown"}, {"api_key": "dummy-api-key"}):
+                with self.assertRaises(StyleMateError):
+                    create_model_gateway(**configuration)
+
+    def test_invalid_settings_and_payload_fail_before_transport(self):
+        for value in (True, 0, -1, float("nan"), float("inf")):
+            with self.subTest(timeout=value):
+                with self.assertRaises(StyleMateError):
+                    OpenAIResponsesGateway(api_key="dummy-api-key", timeout=value)
+        transport = FakeTransport()
+        for payload in ({"value": float("nan")}, {"text": "a" * (256 * 1024)}):
+            with self.assertRaises(StyleMateError) as caught:
+                self.gateway(transport).complete("", payload, self.schema)
+            self.assertEqual(caught.exception.code, "invalid_input")
+        self.assertEqual(transport.calls, [])
+
+    def test_urllib_posts_strict_json_and_rejects_invalid_http_bodies(self):
+        class FakeHTTPResponse:
+            status = 200
+
+            def __init__(self, body):
+                self.body = body
+
+            def __enter__(self):
+                return self
+
+            def __exit__(self, *args):
+                return False
+
+            def read(self, size=-1):
+                return self.body[:size]
+
+        valid = json.dumps(response_with_output({"ok": True})).encode("utf-8")
+        for body, code in ((valid, None), (b"private-provider-body", "provider_invalid_response"),
+                           (b"[1]", "provider_invalid_response"),
+                           (b"x" * 1_000_001, "provider_invalid_response")):
+            with self.subTest(code=code), patch("urllib.request.urlopen", return_value=FakeHTTPResponse(body)) as urlopen:
+                gateway = OpenAIResponsesGateway(api_key="dummy-api-key")
+                urlopen.assert_not_called()
+                if code is None:
+                    self.assertEqual(gateway.complete("JSON only", {"title": "합성"}, self.schema), {"ok": True})
+                else:
+                    with self.assertRaises(StyleMateError) as caught:
+                        gateway.complete("JSON only", {}, self.schema)
+                    self.assertEqual(caught.exception.code, code)
+                    self.assertNotIn("private-provider-body", str(caught.exception))
+                request, = urlopen.call_args.args
+                self.assertEqual(request.method, "POST")
+                posted = json.loads(request.data)
+                self.assertFalse(posted["store"])
+                self.assertTrue(posted["text"]["format"]["strict"])
+
+    def test_urllib_rate_limit_and_timeout_do_not_expose_http_error_details(self):
+        import io
+        import urllib.error
+
+        errors = [
+            (urllib.error.HTTPError(DEFAULT_ENDPOINT, 429, "dummy-api-key", {}, io.BytesIO(b"private-provider-body")),
+             "provider_rate_limited"),
+            (urllib.error.URLError(TimeoutError("dummy-api-key")), "provider_timeout"),
+        ]
+        for error, code in errors:
+            with self.subTest(code=code), patch("urllib.request.urlopen", side_effect=error):
+                with self.assertRaises(StyleMateError) as caught:
+                    OpenAIResponsesGateway(api_key="dummy-api-key").complete("", {}, self.schema)
+                self.assertEqual(caught.exception.code, code)
+                self.assertNotIn("dummy-api-key", str(caught.exception))
+                self.assertNotIn("private-provider-body", str(caught.exception))
 
 
 if __name__ == "__main__":

@@ -4,6 +4,9 @@
 That keeps ownership, request lifetime, expiration, and revision checks in the
 calling application while making the model-facing payload deterministic and
 small enough to inspect in tests.
+
+``build_context_v1`` is the opt-in evidence/consent-aware builder re-exported
+from retrieval; it does not change the legacy entry point or its output.
 """
 
 from __future__ import annotations
@@ -16,6 +19,7 @@ from typing import Any, Iterable
 
 from .errors import StyleMateError
 from .registry import FEATURES, REGISTRY_VERSION, category_for_garment_type, validate_values
+from .retrieval import build_context_v1  # opt-in v1; legacy build_context stays unchanged
 
 
 _SUPPORTED_FACTS = {"occasion", "activity", "goal"}

@@ -8,7 +8,7 @@ V1_ERROR_CODES = frozenset({
     "idempotency_conflict", "confirmation_required", "consent_required",
     "invalid_user_event", "unsupported_mapping", "registry_unavailable",
     "request_closed", "request_expired", "stale_context", "context_blocked",
-    "invalid_extraction", "invalid_output", "catalog_conflict", "cleanup_pending",
+    "invalid_extraction", "invalid_output", "catalog_conflict", "cleanup_pending", "storage_failed",
     "provider_timeout", "provider_unavailable", "provider_rate_limited",
     "provider_http_error", "provider_invalid_response", "provider_error",
     "provider_incomplete", "provider_refusal", "empty_response",
