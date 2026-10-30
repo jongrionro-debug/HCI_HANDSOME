@@ -7,6 +7,7 @@ from datetime import datetime, time, timedelta, timezone
 import json
 import os
 from pathlib import Path
+import sqlite3
 import tempfile
 from typing import Any
 from zoneinfo import ZoneInfo
@@ -14,7 +15,7 @@ from zoneinfo import ZoneInfo
 from .app import ShoppingApp
 from .errors import StyleMateError
 from .inference import RuleAdapter
-from .registry import FEATURES, registry_metadata
+from .registry import FEATURES, REGISTRY_VERSION, V1_REGISTRY_VERSION, registry_metadata
 from .store import MemoryStore
 
 
@@ -93,7 +94,8 @@ def _parser() -> argparse.ArgumentParser:
     sub = parser.add_subparsers(dest="command", required=True)
     demo = sub.add_parser("demo", help="가상 사용자로 오늘 예외와 다음 요청을 시연")
     demo.add_argument("--synthetic", action="store_true", required=True)
-    sub.add_parser("features", help="소비자용 feature 사전 출력")
+    features = sub.add_parser("features", help="feature 사전 출력 (기본값: 기존 17개)")
+    features.add_argument("--registry", choices=(REGISTRY_VERSION, V1_REGISTRY_VERSION), default=REGISTRY_VERSION)
     for name in ("request", "batch", "infer"):
         command = sub.add_parser(name)
         command.add_argument("--db", required=True, help="저장소 밖의 로컬 SQLite 경로")
@@ -111,6 +113,15 @@ def _parser() -> argparse.ArgumentParser:
             command.add_argument("--targets-file", required=True)
             command.add_argument("--provider", choices=("rule", "openai"), default="rule")
             command.add_argument("--model")
+    from .consumer import add_options
+    for name in ("serve", "catalog-import", "catalog-map"):
+        command = sub.add_parser(name, help={"serve": "LUMI v1 로컬 소비자 서버", "catalog-import": "표준 상품 JSON/JSONL 가져오기",
+                                             "catalog-map": "공급 근거로 상품 Map 생성"}[name])
+        add_options(command, provider=name == "serve")
+        if name == "catalog-import":
+            command.add_argument("--file", required=True)
+        if name == "serve":
+            command.add_argument("--port", type=int)
     return parser
 
 
@@ -125,9 +136,20 @@ def main(argv: list[str] | None = None) -> int:
     args = _parser().parse_args(argv)
     try:
         if args.command == "features":
-            result = registry_metadata()
+            result = registry_metadata(args.registry)
         elif args.command == "demo":
             result = synthetic_demo()
+        elif args.command in ("serve", "catalog-import", "catalog-map"):
+            from .settings import ConsumerSettings
+            settings = ConsumerSettings.from_options(args)
+            if args.command == "serve":
+                from .consumer import serve
+                return serve(settings)
+            # Importing/building supplied product facts is always offline,
+            # including when a shell happens to configure an OpenAI provider.
+            from .model_io import FakeModelGateway
+            with settings.open_service(gateway=FakeModelGateway()) as service:
+                result = (service.import_catalog(args.file) if args.command == "catalog-import" else service.build_catalog_maps())
         else:
             # Credentials are read only for an explicit future openai command,
             # never during imports, demos, rule inference, or ordinary tests.
@@ -152,7 +174,7 @@ def main(argv: list[str] | None = None) -> int:
     except StyleMateError as error:
         print(json.dumps({"error": error.as_dict()}, ensure_ascii=False))
         return 2
-    except (OSError, TypeError, ValueError):
+    except (OSError, TypeError, ValueError, sqlite3.Error):
         print(json.dumps({"error": {"code": "invalid_input", "message": "입력 또는 로컬 저장 경로를 확인해 주세요."}}, ensure_ascii=False))
         return 2
 

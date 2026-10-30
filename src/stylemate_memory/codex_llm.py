@@ -15,6 +15,7 @@ import time
 from typing import Any, Callable
 
 from .errors import StyleMateError
+from .model_io import ModelOperations
 from .llm import _INSTRUCTIONS, _output_schema, _sanitize_context, _schema_is_valid, _validate_target_semantics
 from .registry import FEATURES, validate_values
 
@@ -131,7 +132,7 @@ def validate_extraction(raw: Any, text: str, memories: list[dict[str, Any]]) -> 
     return deepcopy(raw)
 
 
-class CodexGateway:
+class CodexGateway(ModelOperations):
     """One isolated, ephemeral CLI run per extraction/inference stage."""
     def __init__(self, model: str = "gpt-6-luna", *, executable: str | None = None,
                  timeout: float = 120, runner: Callable[..., Any] = subprocess.run) -> None:
@@ -205,7 +206,9 @@ class CodexGateway:
             raise StyleMateError("invalid_output", "Codex 응답이 JSON 객체가 아닙니다.") from None
         if not isinstance(result, dict):
             raise StyleMateError("invalid_output", "Codex 응답이 JSON 객체가 아닙니다.")
-        self.last_metadata = {"provider": "codex-cli", "model": self.model, "seconds": round(time.monotonic() - started, 2), "usage": usage, "startup_notice_count": startup_notices}
+        safe_usage = {k: v for k, v in usage.items() if k in {"input_tokens", "cached_input_tokens", "output_tokens"}
+                      and isinstance(v, int) and not isinstance(v, bool) and v >= 0} if isinstance(usage, dict) else None
+        self.last_metadata = {"provider": "codex-cli", "model": self.model, "seconds": round(time.monotonic() - started, 2), "usage": safe_usage, "startup_notice_count": startup_notices}
         return result
 
 

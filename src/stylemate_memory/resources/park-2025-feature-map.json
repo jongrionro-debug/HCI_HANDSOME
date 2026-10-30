@@ -1,0 +1,312 @@
+{
+  "name": "Park et al. (2025) Product Information + FEA Vocabulary",
+  "version": "park-2025-source-v1",
+  "status": "Accepted",
+  "runtime_implemented": true,
+  "scope": "원문의 무신사 여성 바지 상품정보 사전과 FEA 소비자 요구 분류를 차용한 자료이다.",
+  "lumi_use": "사용자가 확정한 LUMI의 고정 feature-value 매핑 사전이다. 기존 연구 질문·평가 계획·이미지 선택·메모리 흐름은 변경하지 않는다.",
+  "source": {
+    "authors": "Hyeryeon Park; Suji Kim; Yerim Choi; Hyosun An",
+    "title": "Application of the FEA consumer needs model in e-commerce: a conversational recommendation system for fashion products",
+    "year": 2025,
+    "doi": "10.1186/s40691-025-00435-w",
+    "article_url": "https://link.springer.com/article/10.1186/s40691-025-00435-w",
+    "table_1_url": "https://link.springer.com/article/10.1186/s40691-025-00435-w/tables/1",
+    "pdf_url": "https://link.springer.com/content/pdf/10.1186/s40691-025-00435-w.pdf",
+    "locators": {
+      "consumer_needs": "Table 1, PDF pp. 8–10",
+      "product_information": "Table 2, PDF p. 10"
+    },
+    "license": "CC BY 4.0",
+    "license_url": "https://creativecommons.org/licenses/by/4.0/",
+    "transformation": "영문 category·subcategory·attribute·허용값은 원문을 보존하고 한국어 표시명과 기계가 읽을 수 있는 구조를 추가했다. 연구 결과와 구현 메타데이터는 사전에 섞지 않았다."
+  },
+  "product_information": {
+    "Type": {
+      "label_ko": "바지 종류",
+      "values": [
+        "Jeans",
+        "Leggings",
+        "Slacks",
+        "Overalls",
+        "Cargo pants",
+        "Chinos",
+        "Jogger"
+      ],
+      "reported_count": 7,
+      "enumeration_complete": true
+    },
+    "Brand": {
+      "label_ko": "브랜드",
+      "values": null,
+      "published_examples": [
+        "1989STANDARD",
+        "1993STUDIO",
+        "27Y",
+        "38COMEONCOMMON"
+      ],
+      "reported_count": 419,
+      "enumeration_complete": false,
+      "note": "Table 2는 전체 브랜드 목록을 공개하지 않는다. 예시 4개를 전체 허용값으로 취급하지 않는다."
+    },
+    "Price": {
+      "label_ko": "가격 구간",
+      "values": [
+        "0~43,900",
+        "43,900~54,360",
+        "54,360~69,000",
+        "69,000~89,000",
+        "89,000~"
+      ],
+      "reported_count": 5,
+      "enumeration_complete": true,
+      "note": "원문 구간 표기를 그대로 보존한다. 경계값 포함 규칙과 통화 코드는 Table 2에 명시되지 않았다."
+    },
+    "Color": {
+      "label_ko": "색상",
+      "values": [
+        "White",
+        "Gray",
+        "Charcoal",
+        "Black",
+        "Pink",
+        "Light blue",
+        "Blue",
+        "Navy",
+        "Beige",
+        "Brown",
+        "Green",
+        "Khaki",
+        "Red",
+        "Yellow",
+        "Purple"
+      ],
+      "reported_count": 15,
+      "enumeration_complete": true
+    },
+    "Fit": {
+      "label_ko": "바지 핏",
+      "values": [
+        "Baggy",
+        "Bootcut",
+        "Skinny",
+        "Straight",
+        "Slim",
+        "Wide"
+      ],
+      "reported_count": 6,
+      "enumeration_complete": true
+    },
+    "Fabric": {
+      "label_ko": "소재 원료",
+      "values": [
+        "Nylon",
+        "Rayon",
+        "Linen",
+        "Cotton",
+        "Wool",
+        "Polyurethane",
+        "Polyester"
+      ],
+      "reported_count": 7,
+      "enumeration_complete": true,
+      "note": "원문의 category 이름 Fabric을 보존한다. 허용값은 섬유 원료이며 기존 PDF의 Fabric Type(원단 구조)과 같은 축이 아니다."
+    },
+    "Detail": {
+      "label_ko": "디테일",
+      "values": [
+        "Roll-up",
+        "Banding",
+        "Washing",
+        "Pleats",
+        "Distressed"
+      ],
+      "reported_count": 5,
+      "enumeration_complete": true
+    }
+  },
+  "consumer_needs_taxonomy": {
+    "Functional": {
+      "Protection": [
+        {
+          "attribute": "Warmth",
+          "label_ko": "보온성"
+        },
+        {
+          "attribute": "Durability",
+          "label_ko": "내구성"
+        }
+      ],
+      "Mobility": [
+        {
+          "attribute": "Lightweight",
+          "label_ko": "가벼움"
+        },
+        {
+          "attribute": "Elasticity",
+          "label_ko": "신축성"
+        }
+      ],
+      "Comfort": [
+        {
+          "attribute": "Waterproof",
+          "label_ko": "방수"
+        },
+        {
+          "attribute": "Windproof",
+          "label_ko": "방풍"
+        }
+      ],
+      "Donning": [
+        {
+          "attribute": "Ease",
+          "label_ko": "착용 여유와 편안함"
+        },
+        {
+          "attribute": "Easy maintenance",
+          "label_ko": "관리 편의"
+        }
+      ]
+    },
+    "Expressive": {
+      "Role": [
+        {
+          "attribute": "Teen fashion",
+          "label_ko": "10대 패션 성향"
+        },
+        {
+          "attribute": "Young adult fashion",
+          "label_ko": "20대 패션 성향"
+        },
+        {
+          "attribute": "Mature fashion",
+          "label_ko": "30대 패션 성향"
+        },
+        {
+          "attribute": "Working professional",
+          "label_ko": "직장인 옷차림"
+        },
+        {
+          "attribute": "Student",
+          "label_ko": "학생 옷차림"
+        }
+      ],
+      "TPO": [
+        {
+          "attribute": "Business wear",
+          "label_ko": "업무복"
+        },
+        {
+          "attribute": "Wedding guest wear",
+          "label_ko": "하객복"
+        },
+        {
+          "attribute": "Sportswear",
+          "label_ko": "운동복"
+        },
+        {
+          "attribute": "Loungewear",
+          "label_ko": "실내 휴식복"
+        },
+        {
+          "attribute": "Travel wear",
+          "label_ko": "여행복"
+        }
+      ],
+      "Status": [
+        {
+          "attribute": "Good value for money",
+          "label_ko": "가격 대비 품질"
+        },
+        {
+          "attribute": "Luxury",
+          "label_ko": "고급성"
+        }
+      ],
+      "Self-esteem": [
+        {
+          "attribute": "Positive feedback",
+          "label_ko": "주변의 긍정적 반응"
+        }
+      ]
+    },
+    "Aesthetic": {
+      "Body/garment relationship": [
+        {
+          "attribute": "Opaque",
+          "label_ko": "비침 방지"
+        },
+        {
+          "attribute": "Groin coverage",
+          "label_ko": "가랑이 부위 강조 완화"
+        },
+        {
+          "attribute": "Waist contouring",
+          "label_ko": "허리선 보정"
+        },
+        {
+          "attribute": "Hip contouring",
+          "label_ko": "힙 라인 강조"
+        },
+        {
+          "attribute": "Leg contouring",
+          "label_ko": "길고 날씬한 다리선 연출"
+        }
+      ],
+      "Matching item": [
+        {
+          "attribute": "Sneakers",
+          "label_ko": "운동화와의 매칭"
+        },
+        {
+          "attribute": "Sandals",
+          "label_ko": "샌들과의 매칭"
+        },
+        {
+          "attribute": "Formal shoes",
+          "label_ko": "구두와의 매칭"
+        }
+      ],
+      "Design principle": [
+        {
+          "attribute": "Trends",
+          "label_ko": "유행 반영"
+        }
+      ]
+    }
+  },
+  "counts": {
+    "product_information_categories": 7,
+    "functional_attributes": 8,
+    "expressive_attributes": 13,
+    "aesthetic_attributes": 9,
+    "consumer_needs_attributes": 30,
+    "non_brand_product_values": 45
+  },
+  "source_boundaries": [
+    "상품정보 7개 항목과 FEA 태그 30개는 서로 다른 수준이다. 합쳐서 37개 동등한 상품 속성이라고 표현하지 않는다.",
+    "브랜드 419개 전체 목록은 원문에서 복원할 수 없다. 해당 값 집합을 임의로 만들지 않는다.",
+    "원문의 가격 구간 경계값 포함 방식과 통화 코드는 별도 실행 규칙을 정하기 전까지 미확정이다.",
+    "Type/Fit/Fabric/Detail의 허용값은 여성 바지 데이터 기준이다. 상의·아우터·드레스 값이 이 논문에 포함됐다고 보지 않는다.",
+    "논문 Fit은 Baggy/Bootcut/Skinny/Straight/Slim/Wide이다. 기존 LUMI 프로토타입의 전체 핏 사전과 자동 호환되지 않는다.",
+    "Mature fashion 등의 번역은 원문 정의를 따른 표시명이며 사용자 나이·직업을 자동 추정하는 규칙이 아니다.",
+    "FEA의 소비자 요구 태그는 상품 정보·리뷰에 연결되는 의미 분류다. 선호와 실제 상품 성능을 동일한 사실로 취급하지 않는다."
+  ],
+  "lumi_mapping_contract": {
+    "provenance": "아래는 원문의 속성 목록과 구분한 LUMI의 적용 규칙이다.",
+    "rules": [
+      "상품정보 7개 항목 및 FEA 30개 태그의 사전을 처음부터 고정한다. 대화 중 새 속성이나 허용값을 추가하지 않는다.",
+      "상품 Map과 목표 Map은 이 사전의 동일한 이름·값·의미를 참조한다.",
+      "기존 이미지 선택·부분 선택·텍스트 입력·관련 메모리는 같은 고정 사전으로 매핑하는 입력이다.",
+      "목표에 근거 없는 값은 미정으로, 상품에 근거 없는 값은 미확인으로 둔다. 모든 속성을 임의의 긍정값으로 채우지 않는다.",
+      "이미지 선택 사실만으로 모든 PI 값이나 FEA 태그의 선호를 확정하지 않는다.",
+      "방수·보온 등 성능 태그는 사진만으로 확인된 상품 성능이라고 판정하지 않는다."
+    ]
+  },
+  "approval": {
+    "date": "2026-10-29",
+    "basis": "현재 이 feature map으로 확정하니까 이제 이에 따라서 문서에 반영해줘",
+    "decision_record": "docs/decisions/0004-adopt-park-2025-feature-map.md",
+    "scope": "Feature Map 사전 확정과 문서 반영. 기존 RQ·평가 계획·이미지 선택·메모리 흐름 유지. 실행 코드·데이터 이관은 아직 미구현."
+  }
+}

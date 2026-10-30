@@ -1,0 +1,24 @@
+[
+  {
+    "format_version": "lumi-catalog-v1",
+    "product_id": "synthetic-mapping-direct",
+    "source": {"source_id": "synthetic-mapping", "url": "https://example.invalid/mapping/direct", "collected_at": "2026-10-29T12:00:00+09:00"},
+    "title": "정규화 검증용 합성 바지",
+    "description": "판매 상품이 아닌 합성 자료입니다.",
+    "garment_type": "Pants",
+    "raw_metadata": {"supplier_type": "Slacks", "supplier_color": "Navy", "supplier_fit": "Wide", "supplier_fabric": ["Cotton", "Polyester"], "supplier_price": 43900, "supplier_brand": "1989STANDARD", "review": "따뜻한 느낌", "consumer_needs": ["Waterproof"]},
+    "images": [{"image_id": "synthetic-mapping-image", "kind": "remote", "location": "https://images.example.invalid/synthetic.png", "source_revision": "synthetic-image-v1", "sha256": null, "regions": []}],
+    "labels": []
+  },
+  {
+    "format_version": "lumi-catalog-v1",
+    "product_id": "synthetic-mapping-raw",
+    "source": {"source_id": "synthetic-mapping", "url": "https://example.invalid/mapping/raw", "collected_at": "2026-10-29T12:00:00+09:00"},
+    "title": "합성 자유 표현 자료",
+    "description": "밑단에 주름이 잡힌 바지라는 공급자 설명",
+    "garment_type": "Pants",
+    "raw_metadata": {"supplier_color": " navy ", "supplier_fit": "Regular", "supplier_fabric": "Denim", "review": "따뜻한 느낌"},
+    "images": [],
+    "labels": []
+  }
+]

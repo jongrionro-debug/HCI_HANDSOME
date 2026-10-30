@@ -11,9 +11,10 @@ dependencies = []
 
 [project.scripts]
 stylemate-memory = "stylemate_memory.cli:main"
+lumi-consumer = "stylemate_memory.consumer:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]
 
 [tool.setuptools.package-data]
-stylemate_memory = ["inspector.html"]
+stylemate_memory = ["inspector.html", "consumer.html", "consumer.css", "consumer.js", "consumer-fixture.js", "consumer-http.js", "resources/park-2025-feature-map.json"]

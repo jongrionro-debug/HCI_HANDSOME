@@ -1,16 +1,19 @@
-"""Target feature inference and a network-free adapter contract.
+"""Read-only target inference for legacy consumer and opt-in lumi-memory-v1.
 
-The adapter boundary is intentionally small.  An external Responses adapter
-can implement ``propose`` later, while this module keeps vocabulary checks,
-target applicability, and user constraints in application code.
+Gateways propose soft interpretations. Code owns vocabulary, target scope,
+confirmed constraints, complete target fields and freshness validation.
 """
 
 from __future__ import annotations
 
 from copy import deepcopy
+from datetime import datetime
+import re
 from typing import Any, Protocol
 
+from . import contracts as c
 from .errors import StyleMateError
+from .model_io import validate_proposal_v1
 from .registry import FEATURES, REGISTRY_VERSION, category_for_garment_type, validate_values
 
 
@@ -452,4 +455,336 @@ def infer(context: dict[str, Any], adapter: ModelAdapter) -> dict[str, Any]:
     return profile
 
 
-__all__ = ["ModelAdapter", "RuleAdapter", "infer"]
+def _v1_fail(code: str = "invalid_input") -> None:
+    messages = {
+        "invalid_input": "목표 생성의 대상·제약·근거·버전 연결이 유효하지 않습니다.",
+        "invalid_output": "모델 목표 제안이 근거나 직접 제약을 벗어났습니다.",
+        "stale_context": "요청·기억·사전·색인 또는 유효 기간이 달라져 목표를 다시 만들어야 합니다.",
+        "context_blocked": "필수 근거를 확보하거나 상충을 확인할 때까지 목표 생성을 보류합니다.",
+    }
+    raise StyleMateError(code, messages[code])
+
+
+def _v1_text(value: Any, limit: int = 128) -> bool:
+    return isinstance(value, str) and 0 < len(value.strip()) <= limit
+
+
+def _v1_refs(refs: Any) -> list[c.ObjectRef]:
+    if not isinstance(refs, list):
+        _v1_fail()
+    versions: dict[tuple[str, str], int] = {}
+    for ref in refs:
+        c.validate_ref(ref)
+        key = (ref["type"], ref["id"])
+        if key in versions and versions[key] != ref["version"]:
+            _v1_fail()
+        versions[key] = ref["version"]
+    return [{"type": kind, "id": identifier, "version": version}
+            for (kind, identifier), version in sorted(versions.items())]
+
+
+def _v1_time(value: Any) -> datetime:
+    if not isinstance(value, str):
+        _v1_fail()
+    try:
+        result = datetime.fromisoformat(value.replace("Z", "+00:00"))
+        if result.tzinfo is None or result.utcoffset() is None:
+            raise ValueError
+    except ValueError:
+        _v1_fail()
+    return result
+
+
+def _v1_basis(basis: Any, registry: c.RegistryPort) -> c.Basis:
+    if not isinstance(basis, dict) or set(basis) != c.Basis.__required_keys__:
+        _v1_fail()
+    if (basis["contract_version"] != c.CONTRACT_VERSION
+            or basis["registry_version"] != registry.version or registry.version != c.V1_REGISTRY_VERSION):
+        raise StyleMateError("unsupported_contract", "목표 생성에는 명시적인 v1 계약과 Park 사전이 필요합니다.")
+    if (not _v1_text(basis["request_id"])
+            or any(type(basis[key]) is not int or basis[key] < minimum
+                   for key, minimum in (("request_revision", 1), ("profile_revision", 0)))
+            or basis["index_version"] is not None and not _v1_text(basis["index_version"], 256)):
+        _v1_fail()
+    result = deepcopy(basis)
+    result["object_versions"] = _v1_refs(basis["object_versions"])
+    if basis["valid_until"] is not None:
+        _v1_time(basis["valid_until"])
+    # C2 has no catalog dependency. A may attach one after product search;
+    # freshness then compares that complete dependency as well.
+    if basis["catalog"] is not None and not isinstance(basis["catalog"], dict):
+        _v1_fail()
+    return result
+
+
+def _v1_path(spec: c.BindingSpec) -> tuple[str, ...]:
+    return (("PI", spec["feature"]) if spec["domain"] == "PI" else
+            ("FEA", spec["category"], spec["subcategory"], spec["tag"]))
+
+
+def _v1_matches(selector: Any, target: c.TargetSpec) -> bool:
+    return (isinstance(selector, dict) and set(selector) == {"garment_type", "slot_id"}
+            and selector["garment_type"] in (None, target["garment_type"])
+            and selector["slot_id"] in (None, target["target_id"]))
+
+
+def _v1_context(context: c.MemoryContext, registry: c.RegistryPort) -> None:
+    """Check the C2 boundary; eligibility/confirmation proofs remain C2's job."""
+    if not isinstance(context, dict) or set(context) != c.MemoryContext.__required_keys__:
+        _v1_fail()
+    basis = _v1_basis(context["basis"], registry)
+    if (not _v1_text(context["context_id"]) or type(context["blocked"]) is not bool
+            or context["retrieval_status"] not in ("complete", "partial", "unavailable")
+            or not isinstance(context["questions"], list)
+            or any(not _v1_text(q, 16000) for q in context["questions"])):
+        _v1_fail()
+    if context["blocked"] or context["retrieval_status"] == "unavailable":
+        _v1_fail("context_blocked")
+    inputs = context["model_input"]
+    if (not isinstance(inputs, dict) or set(inputs) != c.ProposalInput.__required_keys__
+            or not isinstance(inputs["registry"], dict)
+            or inputs["registry"].get("version") != registry.version
+            or not isinstance(inputs["targets"], list) or not inputs["targets"]
+            or not isinstance(inputs["sources"], list) or not inputs["sources"]
+            or not isinstance(context["source_refs"], dict)):
+        _v1_fail()
+    targets: dict[str, c.TargetSpec] = {}
+    for target in inputs["targets"]:
+        if (not isinstance(target, dict) or set(target) != c.TargetSpec.__required_keys__
+                or any(not _v1_text(v) for v in target.values()) or target["target_id"] in targets):
+            _v1_fail()
+        targets[target["target_id"]] = target
+    for alias, bundle in context["source_refs"].items():
+        if (not _v1_text(alias) or not _v1_refs(bundle)
+                or any(ref not in basis["object_versions"] for ref in bundle)):
+            _v1_fail()
+    sources = {}
+    for source in inputs["sources"]:
+        if (not isinstance(source, dict) or set(source) != c.ModelSource.__required_keys__
+                or not _v1_text(source["source_id"]) or not _v1_text(source["content"], 4000)
+                or source["kind"] not in ("memory", "user_text", "image_selection")
+                or source["source_id"] in sources or source["source_id"] not in context["source_refs"]
+                or not any(_v1_matches(source["selector"], t) for t in targets.values())):
+            _v1_fail()
+        bundle = context["source_refs"][source["source_id"]]
+        required = {"evidence", "memory", "confirmation"} if source["kind"] == "memory" else {"evidence"}
+        if not required <= {ref["type"] for ref in bundle}:
+            _v1_fail()
+        sources[source["source_id"]] = source
+    if not isinstance(context["constraints"], list) or not isinstance(inputs["constraints"], list):
+        _v1_fail()
+    projected = {}
+    for claim in inputs["constraints"]:
+        if (not isinstance(claim, dict) or set(claim) != c.ModelConstraint.__required_keys__
+                or not _v1_text(claim["id"]) or claim["id"] in projected):
+            _v1_fail()
+        projected[claim["id"]] = claim
+    seen = set()
+    for constraint in context["constraints"]:
+        if (not isinstance(constraint, dict) or set(constraint) != c.Constraint.__required_keys__
+                or not _v1_text(constraint["id"]) or constraint["id"] in seen
+                or not isinstance(constraint["target_id"], str) or constraint["target_id"] not in targets
+                or type(constraint["confirmed"]) is not bool or constraint["origin"] not in ("explicit", "inferred")):
+            _v1_fail()
+        seen.add(constraint["id"])
+        target = targets[constraint["target_id"]]
+        if (not _v1_matches(constraint["selector"], target) or not isinstance(constraint["conditions"], dict)
+                or set(constraint["conditions"]) - c.Conditions.__optional_keys__
+                or any(not _v1_text(v, 4000) for v in constraint["conditions"].values())):
+            _v1_fail()
+        registry.validate_binding(constraint["binding"], target["garment_type"])
+        spec = constraint["binding"]
+        if (not constraint["confirmed"] and (spec["strength"] != "soft" or spec["polarity"] == "indifferent")):
+            _v1_fail()
+        refs = _v1_refs(constraint["source_refs"])
+        binding_ref = constraint["binding_ref"]
+        if binding_ref is not None:
+            c.validate_ref(binding_ref)
+            if binding_ref["type"] != "binding" or binding_ref not in refs:
+                _v1_fail()
+        if constraint["confirmed"] and (binding_ref is None or not any(r["type"] == "confirmation" for r in refs)):
+            _v1_fail()
+        claim = projected.get(constraint["id"])
+        if claim is None or any(claim[key] != constraint[key] for key in ("target_id", "binding", "selector", "conditions")):
+            _v1_fail()
+        aliases = claim["source_ids"]
+        if (not isinstance(aliases, list) or not aliases or any(not isinstance(a, str) or a not in sources for a in aliases)
+                or len(set(aliases)) != len(aliases)
+                or any(not _v1_matches(sources[a]["selector"], target) for a in aliases)
+                or not refs or refs != _v1_refs([ref for a in aliases for ref in context["source_refs"][a]])):
+            _v1_fail()
+    if seen != set(projected):
+        _v1_fail()
+    represented = [constraint["binding_ref"] for constraint in context["constraints"]]
+    for constraint in context["constraints"]:
+        if constraint["binding"]["polarity"] == "indifferent" and any(
+                ref["type"] == "binding" and ref not in represented for ref in constraint["source_refs"]):
+            # C2 can bundle a suppressed baseline with the current exception.
+            # Its DTO has no spec/strength for that suppressed binding. Do not
+            # assume it was soft, or reconstruct it from explanatory prose.
+            _v1_fail("context_blocked")
+
+
+def _v1_empty_targets(inputs: c.ProposalInput, registry: c.RegistryPort) -> list[c.Target]:
+    description = registry.describe()
+    supported = description["execution"]["supported_garment_types"]
+    return [{
+        **deepcopy(target),
+        "product_information": {
+            feature: {"status": "unspecified" if target["garment_type"] in supported and meta["values"] is not None else "unsupported",
+                      "values": None, "constraint_ids": [], "source_refs": []}
+            for feature, meta in description["product_information"].items()},
+        "consumer_needs": {
+            category: {subcategory: {
+                tag["attribute"]: {"status": "unspecified" if target["garment_type"] in supported else "unsupported",
+                                   "preference": None, "constraint_ids": [], "source_refs": []}
+                for tag in tags} for subcategory, tags in subcategories.items()}
+            for category, subcategories in description["consumer_needs_taxonomy"].items()},
+    } for target in inputs["targets"]]
+
+
+def _v1_conflict(left: c.BindingSpec, right: c.BindingSpec) -> bool:
+    if left["polarity"] == right["polarity"] == "indifferent":
+        return False
+    if "indifferent" in (left["polarity"], right["polarity"]):
+        # Explicit indifference only cancels a soft preference axis.
+        other = right if left["polarity"] == "indifferent" else left
+        return other["strength"] != "hard"
+    if left["polarity"] == right["polarity"] == "avoid":
+        return False
+    if left["domain"] == "FEA":
+        return (left["polarity"] == "avoid") != (right["polarity"] == "avoid")
+    lv, rv = set(left["values"]), set(right["values"])
+    if "avoid" in (left["polarity"], right["polarity"]):
+        avoided, positive = (left, right) if left["polarity"] == "avoid" else (right, left)
+        av, pv = set(avoided["values"]), set(positive["values"])
+        if avoided["match"] == "all":
+            return av <= pv if positive["match"] == "all" else pv <= av and len(av) == 1
+        return bool(pv & av) if positive["match"] == "all" else pv <= av
+    if left["match"] == right["match"] == "all":
+        return left["feature"] in ("Type", "Fit", "Price") and lv != rv
+    return not bool(lv & rv)
+
+
+def _v1_model_constraints(proposal: c.Proposal, context: c.MemoryContext) -> list[c.Constraint]:
+    inputs = context["model_input"]
+    sources = {source["source_id"]: source for source in inputs["sources"]}
+    targets = {target["target_id"]: target for target in inputs["targets"]}
+    direct = context["constraints"]
+    result: list[c.Constraint] = []
+    used_ids = {constraint["id"] for constraint in direct}
+    for suggestion in proposal["suggestions"]:
+        spec, aliases = suggestion["binding"], suggestion["source_ids"]
+        if spec["polarity"] == "indifferent" or all(sources[a]["kind"] == "image_selection" for a in aliases):
+            _v1_fail("invalid_output")
+        # Physical PI values must already occur literally in the evidence or
+        # its C2-validated mapping note. Affect/style alone cannot fill color,
+        # fiber, price, etc. Korean synonyms are extracted upstream, not guessed
+        # again here. FEA remains an explicitly soft interpretation.
+        if spec["domain"] == "PI" and any(not any(
+                re.search(r"(?<!\w)" + re.escape(value) + r"(?!\w)", sources[a]["content"], re.IGNORECASE)
+                for a in aliases) for value in spec["values"]):
+            _v1_fail("invalid_output")
+        matching = [constraint for constraint in direct
+                    if constraint["target_id"] == suggestion["target_id"] and _v1_path(constraint["binding"]) == _v1_path(spec)]
+        if any(_v1_conflict(spec, constraint["binding"]) for constraint in matching):
+            _v1_fail("invalid_output")
+        # Keep every original any/all clause. A model cannot add inferred
+        # values to a field displayed as a confirmed positive specification.
+        if any(constraint["confirmed"] and constraint["binding"]["polarity"] in ("prefer", "require", "indifferent")
+               for constraint in matching):
+            continue
+        refs = _v1_refs([ref for alias in aliases for ref in context["source_refs"][alias]])
+        if any(item["target_id"] == suggestion["target_id"] and item["binding"] == spec and item["source_refs"] == refs
+               for item in direct + result):
+            continue
+        identifier = f"suggestion-{len(result) + 1}"
+        while identifier in used_ids:
+            identifier = "model-" + identifier
+        used_ids.add(identifier)
+        target = targets[suggestion["target_id"]]
+        result.append({"id": identifier, "target_id": target["target_id"], "binding_ref": None,
+                       "binding": deepcopy(spec), "selector": {"garment_type": target["garment_type"], "slot_id": target["target_id"]},
+                       "conditions": {}, "origin": "inferred", "confirmed": False, "source_refs": refs})
+    return result
+
+
+def infer_v1(context: c.MemoryContext, adapter: c.ModelGateway, *, registry: c.RegistryPort) -> c.TargetMap:
+    """Build an opt-in, read-only TargetMap; send only ProposalInput to a model.
+
+    C2 resolves current-vs-baseline priority and supplies complete evidence
+    bundles (including temporary exceptions). context_id and source_refs link
+    the result back to those application/exclusion notes. Inferred clauses are
+    scoped to this request/target and its entire dependency basis. No text
+    confirmation here can confirm a binding; no TargetMap becomes new evidence.
+    """
+    context = deepcopy(context)
+    _v1_context(context, registry)
+    inputs = context["model_input"]
+    inputs["registry"] = registry.describe()
+    proposal = validate_proposal_v1(adapter.propose(deepcopy(inputs)), inputs, registry)
+    constraints = deepcopy(context["constraints"]) + _v1_model_constraints(proposal, context)
+    targets = _v1_empty_targets(inputs, registry)
+    questions = list(dict.fromkeys(context["questions"] + proposal["questions"]))
+    for target in targets:
+        paths: dict[tuple[str, ...], list[c.Constraint]] = {}
+        for constraint in constraints:
+            if constraint["target_id"] == target["target_id"]:
+                paths.setdefault(_v1_path(constraint["binding"]), []).append(constraint)
+        for path, clauses in paths.items():
+            field = (target["product_information"][path[1]] if path[0] == "PI" else
+                     target["consumer_needs"][path[1]][path[2]][path[3]])
+            field["constraint_ids"] = [clause["id"] for clause in clauses]
+            field["source_refs"] = _v1_refs([ref for clause in clauses for ref in clause["source_refs"]])
+            if any(_v1_conflict(left["binding"], right["binding"])
+                   for i, left in enumerate(clauses) for right in clauses[i + 1:]):
+                field["status"] = "conflict"
+                questions.append(f"same_priority_conflict: {target['target_id']}의 {'/'.join(path)} 조건을 확인해 주세요. "
+                                 f"근거 제약: {', '.join(field['constraint_ids'])}")
+                continue
+            indifferent = any(clause["binding"]["polarity"] == "indifferent" for clause in clauses)
+            effective = [clause for clause in clauses if clause["binding"]["polarity"] != "indifferent"
+                         and (not indifferent or clause["binding"]["strength"] == "hard")]
+            positive = [clause for clause in effective if clause["binding"]["polarity"] in ("prefer", "require")]
+            values_from = positive if path[0] == "PI" else effective
+            confirmed = [clause for clause in values_from if clause["confirmed"]]
+            values_from = confirmed or values_from
+            if values_from:
+                field["status"] = "specified" if confirmed else "inferred"
+                if path[0] == "PI":
+                    field["values"] = list(dict.fromkeys(v for clause in values_from for v in clause["binding"]["values"]))
+                else:
+                    polarities = {clause["binding"]["polarity"] for clause in values_from}
+                    field["preference"] = "require" if "require" in polarities else next(iter(polarities))
+            elif indifferent:
+                field["status"] = "indifferent"
+            # PI avoid-only stays null/unspecified; its executable constraints
+            # still carry polarity, strength and each original match operator.
+    return {"contract_version": c.CONTRACT_VERSION, "registry_version": registry.version,
+            "context_id": context["context_id"], "targets": targets, "constraints": constraints,
+            "questions": list(dict.fromkeys(questions)), "basis": deepcopy(context["basis"])}
+
+
+def validate_target_map_basis(target_map: c.TargetMap, current_context: c.MemoryContext, *,
+                              registry: c.RegistryPort, now: datetime) -> None:
+    """A2: rebuild C2 from a fresh store snapshot, then call just before use.
+
+    Compare the whole request/profile/object/registry/index/catalog basis and
+    context identity; check the clock even when no revision changed. This
+    helper does not fetch state and must never receive a UI-provided context.
+    """
+    if not isinstance(now, datetime) or now.tzinfo is None or now.utcoffset() is None:
+        _v1_fail()
+    try:
+        _v1_context(current_context, registry)
+        if (not isinstance(target_map, dict) or set(target_map) != c.TargetMap.__required_keys__
+                or target_map["contract_version"] != c.CONTRACT_VERSION or target_map["registry_version"] != registry.version
+                or target_map["context_id"] != current_context["context_id"]
+                or _v1_basis(target_map["basis"], registry) != _v1_basis(current_context["basis"], registry)
+                or target_map["basis"]["valid_until"] is not None and _v1_time(target_map["basis"]["valid_until"]) <= now):
+            _v1_fail("stale_context")
+    except StyleMateError:
+        _v1_fail("stale_context")
+
+
+__all__ = ["ModelAdapter", "RuleAdapter", "infer", "infer_v1", "validate_target_map_basis"]

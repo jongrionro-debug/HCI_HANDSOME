@@ -1,0 +1,402 @@
+[
+  {
+    "id": "hard_navy_soft_straight",
+    "constraints": [
+      {
+        "target_id": "pants",
+        "binding": {
+          "domain": "PI",
+          "feature": "Color",
+          "values": [
+            "Navy"
+          ],
+          "match": "any",
+          "polarity": "require",
+          "strength": "hard"
+        }
+      },
+      {
+        "target_id": "pants",
+        "binding": {
+          "domain": "PI",
+          "feature": "Fit",
+          "values": [
+            "Straight"
+          ],
+          "match": "any",
+          "polarity": "prefer",
+          "strength": "soft"
+        }
+      }
+    ],
+    "allowed": {
+      "pants": [
+        "alt-copy",
+        "alt-navy-straight",
+        "alt-navy-wide",
+        "alt-no-image"
+      ]
+    },
+    "unknown_for_hard": [
+      "alt-unknown",
+      "alt-inferred",
+      "alt-conflict"
+    ],
+    "first": "alt-navy-straight",
+    "duplicate_groups": [
+      [
+        "alt-copy",
+        "alt-navy-wide"
+      ]
+    ]
+  },
+  {
+    "id": "avoid_unknown_is_not_satisfaction",
+    "constraints": [
+      {
+        "target_id": "pants",
+        "binding": {
+          "domain": "PI",
+          "feature": "Color",
+          "values": [
+            "Navy"
+          ],
+          "match": "any",
+          "polarity": "avoid",
+          "strength": "hard"
+        }
+      }
+    ],
+    "allowed": {
+      "pants": [
+        "alt-beige-straight",
+        "alt-beige-wide"
+      ]
+    },
+    "unknown_for_hard": [
+      "alt-unknown",
+      "alt-inferred",
+      "alt-conflict"
+    ],
+    "duplicate_groups": [
+      [
+        "alt-copy",
+        "alt-navy-wide"
+      ]
+    ]
+  },
+  {
+    "id": "verified_warmth_only",
+    "constraints": [
+      {
+        "target_id": "pants",
+        "binding": {
+          "domain": "FEA",
+          "category": "Functional",
+          "subcategory": "Protection",
+          "tag": "Warmth",
+          "strength": "hard",
+          "polarity": "require"
+        }
+      }
+    ],
+    "allowed": {
+      "pants": [
+        "alt-copy",
+        "alt-navy-wide"
+      ]
+    },
+    "unknown_for_hard": [
+      "alt-beige-wide",
+      "alt-beige-straight",
+      "alt-unknown",
+      "alt-inferred",
+      "alt-conflict",
+      "alt-no-image"
+    ],
+    "duplicate_groups": [
+      [
+        "alt-copy",
+        "alt-navy-wide"
+      ]
+    ]
+  },
+  {
+    "id": "numeric_price_is_not_bucket",
+    "constraints": [
+      {
+        "target_id": "pants",
+        "binding": {
+          "domain": "PI",
+          "feature": "Price",
+          "values": [
+            "43,900~54,360"
+          ],
+          "match": "any",
+          "polarity": "require",
+          "strength": "hard"
+        }
+      }
+    ],
+    "allowed": {
+      "pants": [
+        "alt-navy-straight"
+      ]
+    },
+    "unknown_for_hard": [
+      "alt-navy-wide",
+      "alt-copy",
+      "alt-beige-wide",
+      "alt-beige-straight",
+      "alt-unknown",
+      "alt-inferred",
+      "alt-conflict",
+      "alt-no-image"
+    ],
+    "duplicate_groups": [
+      [
+        "alt-copy",
+        "alt-navy-wide"
+      ]
+    ]
+  },
+  {
+    "id": "all_fibers_preserved",
+    "constraints": [
+      {
+        "target_id": "pants",
+        "binding": {
+          "domain": "PI",
+          "feature": "Fabric",
+          "values": [
+            "Cotton",
+            "Polyester"
+          ],
+          "match": "all",
+          "polarity": "require",
+          "strength": "hard"
+        }
+      }
+    ],
+    "allowed": {
+      "pants": [
+        "alt-copy",
+        "alt-navy-wide"
+      ]
+    },
+    "duplicate_groups": [
+      [
+        "alt-copy",
+        "alt-navy-wide"
+      ]
+    ]
+  },
+  {
+    "id": "empty_without_relaxation",
+    "constraints": [
+      {
+        "target_id": "pants",
+        "binding": {
+          "domain": "PI",
+          "feature": "Color",
+          "values": [
+            "Green"
+          ],
+          "match": "any",
+          "polarity": "require",
+          "strength": "hard"
+        }
+      }
+    ],
+    "allowed": {
+      "pants": []
+    },
+    "status": "no_results",
+    "duplicate_groups": [
+      [
+        "alt-copy",
+        "alt-navy-wide"
+      ]
+    ]
+  },
+  {
+    "id": "unsupported_range_blocked",
+    "constraints": [
+      {
+        "target_id": "pants",
+        "binding": {
+          "domain": "PI",
+          "feature": "Price",
+          "values": [
+            "43,900~54,360"
+          ],
+          "match": "range",
+          "polarity": "require",
+          "strength": "hard"
+        }
+      }
+    ],
+    "allowed": {
+      "pants": []
+    },
+    "status": "blocked",
+    "duplicate_groups": [
+      [
+        "alt-copy",
+        "alt-navy-wide"
+      ]
+    ]
+  },
+  {
+    "id": "rectangle_exists",
+    "constraints": [],
+    "record_ids": [
+      "alt-navy-wide",
+      "alt-navy-straight",
+      "alt-beige-wide",
+      "alt-beige-straight"
+    ],
+    "allowed": {
+      "pants": [
+        "alt-navy-wide",
+        "alt-navy-straight",
+        "alt-beige-wide",
+        "alt-beige-straight"
+      ]
+    },
+    "mode": "two_axis",
+    "axis_count": 2,
+    "card_count": 4,
+    "duplicate_groups": [
+      [
+        "alt-copy",
+        "alt-navy-wide"
+      ]
+    ]
+  },
+  {
+    "id": "missing_rectangle",
+    "constraints": [],
+    "record_ids": [
+      "alt-navy-wide",
+      "alt-navy-straight",
+      "alt-beige-wide"
+    ],
+    "allowed": {
+      "pants": [
+        "alt-navy-wide",
+        "alt-navy-straight",
+        "alt-beige-wide"
+      ]
+    },
+    "mode": "two_axis",
+    "max_axis_count": 1,
+    "card_count": 3,
+    "duplicate_groups": [
+      [
+        "alt-copy",
+        "alt-navy-wide"
+      ]
+    ]
+  },
+  {
+    "id": "duplicate_photos",
+    "constraints": [],
+    "record_ids": [
+      "alt-copy",
+      "alt-navy-wide"
+    ],
+    "allowed": {
+      "pants": [
+        "alt-copy",
+        "alt-navy-wide"
+      ]
+    },
+    "duplicate_groups": [
+      [
+        "alt-copy",
+        "alt-navy-wide"
+      ]
+    ],
+    "card_count": 1
+  },
+  {
+    "id": "few_candidates",
+    "constraints": [],
+    "record_ids": [
+      "alt-navy-wide",
+      "alt-navy-straight"
+    ],
+    "allowed": {
+      "pants": [
+        "alt-navy-wide",
+        "alt-navy-straight"
+      ]
+    },
+    "card_count": 2,
+    "duplicate_groups": [
+      [
+        "alt-copy",
+        "alt-navy-wide"
+      ]
+    ]
+  },
+  {
+    "id": "multiple_targets",
+    "target_ids": [
+      "navy-pants",
+      "beige-pants"
+    ],
+    "constraints": [
+      {
+        "target_id": "navy-pants",
+        "binding": {
+          "domain": "PI",
+          "feature": "Color",
+          "values": [
+            "Navy"
+          ],
+          "match": "any",
+          "polarity": "require",
+          "strength": "hard"
+        }
+      },
+      {
+        "target_id": "beige-pants",
+        "binding": {
+          "domain": "PI",
+          "feature": "Color",
+          "values": [
+            "Beige"
+          ],
+          "match": "any",
+          "polarity": "require",
+          "strength": "hard"
+        }
+      }
+    ],
+    "allowed": {
+      "navy-pants": [
+        "alt-copy",
+        "alt-navy-straight",
+        "alt-navy-wide",
+        "alt-no-image"
+      ],
+      "beige-pants": [
+        "alt-beige-straight",
+        "alt-beige-wide"
+      ]
+    },
+    "unknown_for_hard": [
+      "alt-unknown",
+      "alt-inferred",
+      "alt-conflict"
+    ],
+    "duplicate_groups": [
+      [
+        "alt-copy",
+        "alt-navy-wide"
+      ]
+    ]
+  }
+]
