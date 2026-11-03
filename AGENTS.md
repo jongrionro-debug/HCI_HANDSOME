@@ -5,8 +5,9 @@
 ## 기준과 범위
 
 - 시스템 이름은 **LUMI**다. 시스템·연구 설계의 source of truth는 [Team4_mid-term_report.pdf](docs/sources/Team4_mid-term_report.pdf)다.
-- 보고서가 정하지 않은 Feature Map은 사용자 승인된 [ADR 0004](docs/decisions/0004-adopt-park-2025-feature-map.md)와 [master의 Feature Map](docs/master.md#feature-map)을 따른다. 현재 실행 코드와 확정 사전은 [현재 구현과 실행](docs/master.md#현재-구현과-실행)에서 구분한다.
+- 보고서가 정하지 않은 Feature Map 사전은 사용자 승인된 [ADR 0004](docs/decisions/0004-adopt-park-2025-feature-map.md)를 따른다. 후속 사용자 승인인 [ADR 0006](docs/decisions/0006-fea-to-pi-hypothesis-comparison.md)은 직접 PI 반영·FEA→PI 가설·상품 PI 비교·이미지로 가설 확인하는 설계를 정한다. 현재 설계는 [master의 Feature Map](docs/master.md#feature-map), 기존 실행 코드와의 차이는 [현재 구현과 실행](docs/master.md#현재-구현과-실행)에서 구분한다.
 - RQ·평가 계획·이미지 선택·메모리 흐름은 보고서 기준을 유지한다. 발표자료·Figma·archive는 보조·역사 자료이며 보고서와 승인된 결정의 요구사항을 덮어쓰지 않는다.
+- [ADR 0007](docs/decisions/0007-joint-feedback-and-end-consent.md)에 따라 소비자 이미지 응답은 선택 사항인 이유와 함께 접수하고, 장기 활용 동의는 세션 종료 후 요약에서만 받는다. 직접 선택과 이유 해석·내용 확인·이후 활용 동의를 구분한다.
 
 작업에 필요한 기준·실행 계약·검증 위치는 [master](docs/master.md#기준과-자료)에서 찾는다. 전체 레포 지도나 별도 계획 문서를 만들지 않는다.
 

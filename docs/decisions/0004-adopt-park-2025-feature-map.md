@@ -6,6 +6,7 @@
 - Approval: 사용자가 “현재 이 feature map으로 확정하니까 이제 이에 따라서 문서에 반영해줘”라고 승인했다. 앞선 요청에서 연구 주장을 바꾸지 않고 논문의 Feature Map만 차용한다고 범위를 정했다.
 - Applies to: LUMI의 고정 feature-value 사전과 후속 상품·목표 Map 매핑. 현재 `consumer-17-v1` 실행 코드에는 아직 미적용
 - Related Decisions: [0003](0003-consumer-shopping-prototype.md). 기존 17개 로컬 실행 계약의 기록은 보존하며 이번 결정으로 그 구현이 대체됐다고 보지 않는다.
+- Superseded in part by: [0006](0006-fea-to-pi-hypothesis-comparison.md) (2026-11-01). 상품 Map은 PI, 사용자 목표 Map은 PI·FEA와 연결 가설을 다루는 후속 설계로 Decision 3의 적용 범위를 부분 대체. 사전 이름·값·출처와 본문은 보존
 
 ## Context
 

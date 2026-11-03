@@ -275,7 +275,7 @@ def _model_assertions(record: CatalogRecord, assertions: list[ProductAssertion],
 
 
 def build_product_map(record: CatalogRecord, *, raw_version: int, registry: RegistryPort,
-                      gateway: ModelGateway | None = None) -> ProductMap:
+                      gateway: ModelGateway | None = None, pi_only: bool = False) -> ProductMap:
     """Validate supplied labels and optionally propose missing observations.
 
     A null gateway explicitly selects deterministic mapping; it is never used as
@@ -296,6 +296,8 @@ def build_product_map(record: CatalogRecord, *, raw_version: int, registry: Regi
     if gateway is not None:
         for incoming in _model_assertions(record, list(assertions.values()), registry, description, gateway):
             assertions[_path(incoming["observation"])] = incoming
+    if pi_only:
+        assertions = {path: assertion for path, assertion in assertions.items() if path[0] == "PI"}
     result = {"subject": "product", "product_id": record["product_id"], "raw_version": raw_version,
               "map_version": 1, "registry_version": registry.version, "assertions": list(assertions.values())}
     validate_assertions(result["assertions"], record, registry, "product_map.assertions")

@@ -311,8 +311,8 @@ class V1Storage:
         obj = self._resolve(request["user_id"], request["id"], ref, now)
         self._live(ref, obj, now, removing=action['op'] in ('withdraw', 'delete'))
         if (request["status"] != "open" and obj["scope"] == "short_term"
-            and action["op"] not in ("promote", "withdraw", "delete")):
-            raise _fail("request_closed", "closed requests only allow reuse of already confirmed short-term content")
+            and action["op"] not in ("confirm", "confirm_bindings", "promote", "withdraw", "delete")):
+            raise _fail("request_closed", "closed requests only allow review/reuse/removal of existing content")
         return obj
 
     def _check_basis(self, request: sqlite3.Row, basis: Any, now: datetime, *, catalog_freshness: Any = None,
@@ -386,8 +386,8 @@ class V1Storage:
                         raise _fail("invalid_user_event", "review meaning differs from its subject")
             if purpose == "future_reuse" and meaning["scope"] != "long_term":
                 raise _fail("consent_required", "future reuse requires a separate long-term snapshot")
-            if request["status"] != "open" and meaning["scope"] == "short_term" and purpose not in ("withdraw", "delete"):
-                raise _fail("request_closed", "content confirmation requires an open request")
+            if request["status"] != "open" and meaning["scope"] == "short_term" and purpose not in ("confirm_content", "confirm_bindings", "withdraw", "delete"):
+                raise _fail("request_closed", "closed content may only be reviewed or removed")
             for ref, obj in subjects:
                 if ref["type"] == "binding":
                     if self._spec(obj) not in snapshot["bindings"] or obj["memory_id"] not in {m["id"] for m in memories}:
@@ -762,7 +762,13 @@ class V1Storage:
         changed = [_ref("memory", obj)] + [_ref("binding", b) for b in bindings]
         if confirmation is not None:
             self._consume(confirmation)
-            _, confirmed_refs = self._confirmation(obj, bindings, confirmation, now, bump_memory=False, bump_bindings=False)
+            event, display = confirmation
+            # Creation reviews show exact binding specs before their IDs exist.
+            # Attach the IDs assigned in this transaction to the confirmation
+            # snapshot, keeping the issued display and reviewed specs immutable.
+            creation_display = display | {"snapshot": display["snapshot"] | {
+                "subject_refs": display["snapshot"]["subject_refs"] + [_ref("binding", b) for b in bindings]}}
+            _, confirmed_refs = self._confirmation(obj, bindings, (event, creation_display), now, bump_memory=False, bump_bindings=False)
             changed.extend(confirmed_refs)
         return changed
 
@@ -1125,6 +1131,33 @@ class V1Storage:
                     pass  # all deletion proofs were consumed before family erasure
                 elif action.get("op") == "record_extraction":
                     changed.extend(self.feedback.extract(request, action, now, catalog_freshness))
+                elif action.get("op") == "record_comparison":
+                    _shape(action, c.RecordComparisonAction.__required_keys__, "record_comparison")
+                    if len(actions) != 1 or request["status"] != "open":
+                        raise _fail("invalid_input", "comparison response requires its own open-request batch")
+                    response = action["feedback"]
+                    _shape(response, c.FeedbackAction.__required_keys__, "comparison feedback")
+                    if (response["reaction"] not in ("selected", "none", "unsure")
+                            or response["question_id"] is not None or response["round_id"] is None
+                            or (action["memory"] is not None) != (response["reaction"] == "selected" and response["text"] is None)):
+                        raise _fail("invalid_input", "comparison response must explicitly choose, reject or defer")
+                    response_refs, intake = self.feedback.submit(request, action["feedback"], expected, now, catalog_freshness)
+                    changed.extend(response_refs)
+                    evidence_refs = [ref for ref in response_refs if ref["type"] == "evidence"]
+                    interpretation_ref = next(ref for ref in response_refs if ref["type"] == "interpretation")
+                    if action["memory"] is not None:
+                        if action["feedback"]["reaction"] != "selected" or len(action["feedback"]["selections"]) != 1:
+                            raise _fail("invalid_input", "a confirmed interpretation needs one explicit comparison choice")
+                        changed.extend(self._create(request, {k: action[k] for k in ("memory", "source_refs", "bindings", "confirmation_event_ref")}
+                            | {"op": "create", "consent_event_ref": None}, now, events))
+                    elif action["confirmation_event_ref"] is not None or action["bindings"] or action["source_refs"]:
+                        raise _fail("invalid_input", "an unsure/rejected comparison cannot confirm an interpretation")
+                    feedback_ref = next(ref for ref in response_refs if ref["type"] == "feedback")
+                    if response["text"] is None:
+                        changed.extend(self.feedback.extract(request, {"op": "record_extraction", "feedback_ref": feedback_ref,
+                            "extraction_key": "comparison-response:" + batch_id, "result": {"candidates": [], "questions": []}, "error": None}, now, catalog_freshness))
+                    else:
+                        self._update("interpretation", intake | {"extraction_key": "comparison-response:" + batch_id}, bump=False)
                 elif action.get("op") == "select_final":
                     if request["status"] != "open":
                         raise _fail("request_closed", "final selection requires an open request")

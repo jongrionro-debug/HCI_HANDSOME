@@ -93,7 +93,8 @@ def extraction_schema_v1() -> dict[str, Any]:
 
 def proposal_schema_v1() -> dict[str, Any]:
     suggestion = _object({"target_id": _string(128), "binding": _binding_schema(proposal=True),
-                          "source_ids": _strings(64), "reason": _string()})
+                          "source_ids": _strings(64), "reason": _string(),
+                          "fea_constraint_ids": _strings(32)})
     return _object({"suggestions": {"type": "array", "items": suggestion},
                     "questions": {"type": "array", "items": _string(), "maxItems": 3}})
 
@@ -112,6 +113,12 @@ better than an unsupported Brand, numeric Price, garment mapping, or invented va
 Scope and origin are hints only. Never return confirmed, consent, status, ownership,
 versions, persistence commands or claims of saving. Null means no optional value;
 use null for absent condition keys. At most 16 candidates and 3 short questions.
+When choice and explanation arrive together, extract the user's stated reasons,
+wearing situations, avoidance and scope as separate minimal memory candidates.
+Preserve useful wording even without a PI/FEA binding. An unconfirmed_comparison
+inside selection data is a shown system interpretation, not the user's quote.
+If the explanation corrects the displayed PI, keep the correction and ask as needed;
+do not confirm the shown interpretation or invent a reason when text is absent.
 Never infer consent, preference or avoidance from none, unsure or skipped responses."""
 
 _PROPOSE_INSTRUCTIONS = """Propose only soft shopping target bindings using the supplied registry and sources.
@@ -122,9 +129,13 @@ must be soft. Direct constraints are combined by code, never rewritten by you. L
 uncertain mappings absent and ask at most 3 short questions when needed. Never return
 hard/specification/confirmation/consent states, database commands or invented evidence.
 Never infer indifferent; that requires an explicit confirmed binding combined by code.
-PI values must occur literally in the cited source content or its supplied mapping note.
-Do not invent colors, fibers, prices or garment details from vague style words such as
-빈티지/vintage. Leave those fields absent. FEA suggestions describe only soft user needs,
+For an ordinary PI suggestion, values must occur literally in the cited sources.
+For a FEA->PI HYPOTHESIS, cite nonempty fea_constraint_ids from supplied positive FEA
+constraints and their source_ids. Propose a single visible PI value (Type, Color, Fit,
+Detail) as one possible interpretation, explain why, and leave it soft/unconfirmed.
+Never override a directly specified PI. Use [] for fea_constraint_ids otherwise.
+Do not invent physical facts from vague style alone without a grounded FEA constraint.
+FEA suggestions describe only soft user needs,
 never verified product performance. Preserve every any/all clause independently.
 Selection facts alone are not stated preferences or reasons. No provider fallback."""
 
@@ -359,7 +370,8 @@ def validate_proposal_v1(raw: Any, inputs: ProposalInput, registry: Any) -> Prop
     targets = {t["target_id"]: t for t in inputs["targets"]}
     sources = {s["source_id"]: s for s in inputs["sources"]}
     for suggestion in raw["suggestions"]:
-        _shape(suggestion, {"target_id", "binding", "source_ids", "reason"}, code)
+        _shape(suggestion, {"target_id", "binding", "source_ids", "reason"}
+               | ({"fea_constraint_ids"} if "fea_constraint_ids" in suggestion else set()), code)
         _text(suggestion["target_id"], code, 128)
         if suggestion["target_id"] not in targets:
             _fail(code)
@@ -370,6 +382,21 @@ def validate_proposal_v1(raw: Any, inputs: ProposalInput, registry: Any) -> Prop
         _text(suggestion["reason"], code)
         selector = {"garment_type": garment, "slot_id": suggestion["target_id"]}
         _sources_for(suggestion["source_ids"], sources, selector, code)
+        fea_ids = suggestion.get("fea_constraint_ids", [])
+        if not isinstance(fea_ids, list) or len(fea_ids) > 32 or any(not isinstance(i, str) for i in fea_ids) or len(set(fea_ids)) != len(fea_ids):
+            _fail(code)
+        if fea_ids:
+            binding = suggestion["binding"]
+            if (binding["domain"] != "PI" or binding["feature"] not in ("Type", "Color", "Fit", "Detail")
+                    or len(binding["values"]) != 1 or binding["polarity"] != "prefer" or binding["match"] != "any"):
+                _fail(code)
+            constraints = {c["id"]: c for c in inputs["constraints"]}
+            for identifier in fea_ids:
+                c = constraints.get(identifier)
+                if (c is None or c["target_id"] != suggestion["target_id"] or c["binding"]["domain"] != "FEA"
+                        or c["binding"]["polarity"] not in ("prefer", "require")
+                        or not set(c["source_ids"]) <= set(suggestion["source_ids"])):
+                    _fail(code)
     return deepcopy(raw)
 
 

@@ -117,6 +117,8 @@ try {
   assert.equal(view.snapshot.bindings[0].confirmed, false);
   await confirm(onboardMemory, true);
   assert.equal((await inspect()).snapshot.bindings[0].confirmed, true);
+  assert.equal(await action("future").count(), 0);
+  await action("end").filter({hasText:"온보딩 마치기"}).click(); await settled();
   assert.equal(await page.locator("[data-save]:checked").count(), 0);
   assert.equal(await action("future").first().isDisabled(), true);
   await future(onboardMemory);

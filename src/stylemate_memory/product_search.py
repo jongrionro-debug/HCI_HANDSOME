@@ -195,8 +195,9 @@ def _validate_target_map(target_map: TargetMap):
     return registry, targets
 
 
-def _constraints(target_map: TargetMap, target_id: str) -> list[Constraint]:
-    return [c for c in target_map["constraints"] if c["target_id"] == target_id]
+def _constraints(target_map: TargetMap, target_id: str, *, pi_only: bool = False) -> list[Constraint]:
+    return [c for c in target_map["constraints"] if c["target_id"] == target_id
+            and (not pi_only or c["binding"]["domain"] == "PI")]
 
 
 def _blocked(constraints: list[Constraint], target: dict, registry) -> bool:
@@ -254,7 +255,7 @@ def _evaluate(product_map: ProductMap, constraints: list[Constraint], registry, 
             "score": score, "matched_constraint_ids": sorted(matched), "unknown_constraint_ids": sorted(unknown)}
 
 
-def search_products(target_map: TargetMap, target_id: str, catalog: CatalogPort) -> SearchResult:
+def search_products(target_map: TargetMap, target_id: str, catalog: CatalogPort, *, pi_only: bool = False) -> SearchResult:
     """Filter one target's confirmed hard requirements, then rank soft matches.
 
     Unsupported/unconfirmed hard conditions or unbuilt/stale maps block retrieval;
@@ -272,7 +273,7 @@ def search_products(target_map: TargetMap, target_id: str, catalog: CatalogPort)
         _check_catalog(catalog, basis["catalog"])
     initial = _current(catalog, [], [])
     target = targets[target_id]
-    constraints = _constraints(target_map, target_id)
+    constraints = _constraints(target_map, target_id, pi_only=pi_only)
     hits = []
     products, images = {}, set()
     status = "blocked" if _blocked(constraints, target, registry) else "no_results"

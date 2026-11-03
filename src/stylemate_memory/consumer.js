@@ -3,7 +3,7 @@
  */
 const esc = value => String(value ?? "").replace(/[&<>"']/g, ch => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[ch]));
 const clone = value => structuredClone(value);
-const blankDraft = () => ({ text: "", selections: [], reaction: "text_only", question: null, version: 0 });
+const blankDraft = () => ({ text: "", selections: [], reaction: "text_only", question: null, hypothesis: null, version: 0 });
 const purposeLabel = {
   confirm_content: "이번 내용이 맞는지 확인", confirm_bindings: "이 속성 해석이 맞는지 확인",
   future_reuse: "이후 요청에서도 활용할 내용", replace: "수정할 내용 확인",
@@ -93,8 +93,8 @@ export function mountConsumer(root, adapter, { fixture = false, scenarios = {} }
       <div class="memory-item"><p>${esc(m.content)}</p>
         ${!m.confirmed ? '<p class="hint">아직 확인하지 않은 내용이에요.</p>' : ""}
         <div class="actions">
-          ${!m.confirmed && isOpen() ? button("confirm", "내용 확인", `data-memory="${esc(m.ref.id)}"`) : ""}
-          ${m.confirmed && isOpen() ? button("bindings", "속성 해석 검토", `data-memory="${esc(m.ref.id)}"`) : ""}
+          ${!m.confirmed ? button("confirm", "내용 확인", `data-memory="${esc(m.ref.id)}"`) : ""}
+          ${m.confirmed && (isOpen() || m.scope === "short_term") ? button("bindings", "속성 해석 검토", `data-memory="${esc(m.ref.id)}"`) : ""}
           ${m.confirmed && isOpen() ? button("edit", m.scope === "long_term" ? "평소 취향 수정" : "내용 수정", `data-memory="${esc(m.ref.id)}"`) : ""}
         </div>
         ${editing?.id === m.ref.id ? `<form class="edit-form" data-form="edit"><label for="memory-edit">수정할 내용을 적어주세요</label>
@@ -173,7 +173,7 @@ export function mountConsumer(root, adapter, { fixture = false, scenarios = {} }
     const request = state.request;
     const final = request.final_selection;
     const selected = state.cards.find(c => c.candidate_id === final?.candidate_id);
-    const confirmed = state.memories.filter(m => m.scope === "short_term" && m.confirmed && m.status === "active");
+    const confirmed = state.memories.filter(m => m.scope === "short_term" && m.confirmed && m.status === "active" && m.reusable !== false);
     const show = request.status !== "open" || final || request.mode === "onboarding";
     if (!show && !finalPreview) return "";
     const previewCard = state.cards.find(c => c.candidate_id === finalPreview);
@@ -181,7 +181,7 @@ export function mountConsumer(root, adapter, { fixture = false, scenarios = {} }
       <p class="section-intro">${previewCard ? esc(previewCard.title) : final ? `${esc(selected?.title ?? "선택한 상품")} · ${request.status === "open" ? "탐색은 아직 열려 있어요." : "선택 내용은 요약에 남아요."}` : request.status === "closed" ? "상품 선택 없이 종료했어요." : "내용 확인과 이후 활용 선택을 각각 진행할 수 있어요."}</p>
       ${previewCard ? `<div class="actions">${button("confirm-final", "이 상품 확정", 'class="primary"', !canFeedback() || !comparison().set)}${button("cancel-final", "계속 탐색")}</div>` : ""}
       ${final && isOpen() ? button("explore", "계속 탐색") : ""}
-      ${confirmed.length ? `<h3>이후에도 활용할 내용이 있나요?</h3><p class="hint">원하는 항목을 고른 뒤 활용 범위와 동의를 따로 확인해요.</p>${confirmed.map(m => `<div class="save-item"><label class="check-label"><input type="checkbox" data-save="${esc(m.ref.id)}" ${saveItems.has(m.ref.id) ? "checked" : ""}>${esc(m.content)}</label>${button("future", "이 항목의 이후 활용 검토", `data-memory="${esc(m.ref.id)}"`, disabled() || !saveItems.has(m.ref.id))}</div>`).join("")}` : '<p class="hint">확인한 내용이 없으면 저장하지 않고 마칠 수 있어요.</p>'}
+      ${request.status === "closed" ? confirmed.length ? `<h3>이후에도 활용할 내용이 있나요?</h3><p class="hint">원하는 항목을 고른 뒤 활용 범위와 동의를 따로 확인해요.</p>${confirmed.map(m => `<div class="save-item"><label class="check-label"><input type="checkbox" data-save="${esc(m.ref.id)}" ${saveItems.has(m.ref.id) ? "checked" : ""}>${esc(m.content)}</label>${button("future", "이 항목의 이후 활용 검토", `data-memory="${esc(m.ref.id)}"`, disabled() || !saveItems.has(m.ref.id))}</div>`).join("")}` : '<p class="hint">다음에도 활용할 내용이 있다면 반영 내용에서 먼저 확인해 주세요. 저장하지 않고 새 요청을 시작해도 괜찮아요.</p>' : '<p class="hint">장기 활용 동의는 이 대화를 종료한 뒤 요약 화면에서 진행해요.</p>'}
       <div class="actions">${isOpen() ? button("end", request.mode === "onboarding" ? "온보딩 마치기" : "탐색 종료", 'class="primary"') : ""}
       ${request.mode === "onboarding" ? button("start-after-onboarding", "저장 없이 새 요청", 'class="quiet"') : ""}
       ${request.status === "closed" ? button("new", "새 요청 시작") : ""}</div>
@@ -194,20 +194,23 @@ export function mountConsumer(root, adapter, { fixture = false, scenarios = {} }
     const activeQuestion = state.questions.find(q => q.ref.id === d.question && q.status === "open");
     const cards = state.cards.map(card => {
       const selection = d.selections.find(s => s.candidate_id === card.candidate_id);
+      const interpretation = state.comparison?.options.find(o => o.candidate_id === card.candidate_id);
       return `<article class="card ${selection ? "selected" : ""}">${image(card, selection?.part_ref?.box)}<div class="card-body"><h3 class="card-title">${esc(card.title)}</h3>
-        ${selection ? `<p class="selected-label">${selection.part_ref ? "부분 선택 중" : "전체 선택 중"} · 반영 전</p>` : ""}
+        ${interpretation ? `<p>${esc(interpretation.label)}</p><p class="hint">${esc(interpretation.meaning)}</p>${button("comparison-choose", d.hypothesis?.candidate_id === card.candidate_id ? "이 조건 선택됨" : "이 조건 선택", `data-card="${esc(card.candidate_id)}" class="primary" aria-pressed="${d.hypothesis?.candidate_id === card.candidate_id}"`, !canFeedback())}` : ""}
+        ${selection ? `<p class="selected-label">${d.hypothesis?.candidate_id === card.candidate_id ? "조건 선택 중" : selection.part_ref ? "부분 선택 중" : "전체 선택 중"} · 반영 전</p>` : ""}
         ${button("select", selection ? "선택 해제" : "전체 선택", `data-card="${esc(card.candidate_id)}" aria-pressed="${Boolean(selection)}"`, !canFeedback() || !refs.set || !refs.round)}
         ${button("part", "부분 선택", `data-card="${esc(card.candidate_id)}"`, !canFeedback() || !safeImage(card) || !loadedImages.has(imageKey(card)) || !refs.set || !refs.round)}
         ${state.request.mode === "shopping" ? button("preview-final", "최종 상품으로 살펴보기", `data-card="${esc(card.candidate_id)}" class="quiet"`, !canFeedback() || !refs.set) : ""}</div></article>`;
     }).join("");
-    const noCards = `<div class="empty-state"><h2>${state.operation === "no_results" ? "조건에 맞는 상품이 없어요" : "아직 비교할 후보가 없어요"}</h2><p>조건을 그대로 두거나 글로 조정할 수 있어요. 상품을 고르지 않고 탐색을 마쳐도 괜찮아요.</p></div>`;
-    const questionItems = state.questions.filter(q => q.status === "open").map(q => `<section class="question"><h3>${esc(questionLabel(q.text))}</h3>
+    const noCards = !isOpen() ? "" : `<div class="empty-state"><h2>${state.operation === "no_results" ? "조건에 맞는 상품이 없어요" : "아직 비교할 후보가 없어요"}</h2><p>조건을 그대로 두거나 글로 조정할 수 있어요. 상품을 고르지 않고 탐색을 마쳐도 괜찮아요.</p></div>`;
+    const questionItems = (isOpen() ? state.questions : []).filter(q => q.status === "open").map(q => `<section class="question"><h3>${esc(questionLabel(q.text))}</h3>
       <p class="hint">답을 고르거나 자유롭게 적어주세요. 반영하기 전까지 바꿀 수 있어요.</p><div class="actions">${q.options.map((option, index) => button("answer", esc(option), `data-question="${esc(q.ref.id)}" data-option="${index}"`, !canFeedback())).join("")}
       ${button("skip-question", "질문 건너뛰기", `data-question="${esc(q.ref.id)}" class="quiet"`, !canFeedback())}</div></section>`);
     const questions = (questionItems[0] ?? "") + (questionItems.length > 1
       ? `<details><summary>다른 확인 질문 ${questionItems.length - 1}개</summary>${questionItems.slice(1).join("")}</details>` : "");
-    return `<div class="page-heading"><div><h1>${state.request.mode === "onboarding" ? "평소 취향을 찾아볼까요?" : state.request.status === "closed" ? "이번 요청의 탐색 요약" : "원하는 느낌에 가까운 쪽을 골라주세요"}</h1><p>하나만 골라도, 여러 장을 골라도 좋아요. 이유는 글로 덧붙일 수 있어요.</p></div></div>
-      <div class="workspace ${isOpen() ? "open" : "closed"}"><section aria-label="이미지 비교"><h2>나란히 보고 선택하기</h2><p class="section-intro">${fixture ? "색 영역으로 만든 합성 자료예요. 실제 상품이나 추천 결과가 아니에요." : "선택만으로 후보가 바뀌지 않아요. 글과 함께 반영할 수 있어요."}</p>
+    return `<div class="page-heading"><div><h1>${state.request.mode === "onboarding" ? "평소 취향을 찾아볼까요?" : state.request.status === "closed" ? "이번 요청의 탐색 요약" : "원하는 느낌에 가까운 쪽을 골라주세요"}</h1><p>${isOpen() ? "하나만 골라도, 여러 장을 골라도 좋아요. 이유는 글로 덧붙일 수 있어요." : "이번 대화의 내용을 확인하고, 다음에도 활용할 항목을 선택할 수 있어요."}</p></div></div>
+      <div class="workspace ${isOpen() ? "open" : "closed"} ${state.comparison ? "hypothesis-comparison" : ""}"><section aria-label="이미지 비교"><h2>${isOpen() ? "나란히 보고 선택하기" : "대화 종료 요약"}</h2><p class="section-intro">${!isOpen() ? "저장 없이 마치거나, 확인한 내용을 이후 요청에 활용할 수 있어요." : fixture ? "색 영역으로 만든 합성 자료예요. 실제 상품이나 추천 결과가 아니에요." : state.comparison ? "원하는 해석을 고르거나, 글로 수정할 수 있어요." : "선택만으로 후보가 바뀌지 않아요. 글과 함께 반영할 수 있어요."}</p>
+        ${state.comparison ? `<section class="question" aria-label="요구에 맞는 조건 비교"><h3>${esc(state.comparison.prompt)}</h3><p>조건을 고른 뒤 아래에서 한 번에 반영해 주세요. 좋은 이유를 함께 적어도 되고, 선택만 보내도 돼요.</p><div class="actions">${button("comparison-neither", "둘 다 원하는 해석이 아니에요", "", !canFeedback())}${button("comparison-unsure", "아직 잘 모르겠어요", "", !canFeedback())}</div><p class="hint">이유나 바꾸고 싶은 점은 선택 사항이에요. 선택과 설명이 다르면 함께 확인해요.</p></section>` : ""}
         <div class="candidates">${cards}</div>${cards ? "" : noCards}
         ${cards && (!refs.round || !refs.set) ? `<p class="selection-note">비교 회차 정보를 확인할 수 없어 이미지 응답을 보류했어요. 글로 계속하거나 최신 화면을 확인해 주세요.</p>${button("refresh", "최신 화면 확인")}` : ""}
         ${isOpen() ? `<div class="candidate-actions"><fieldset class="reactions"><legend>고르기 어려울 때</legend><div class="actions">
@@ -218,7 +221,7 @@ export function mountConsumer(root, adapter, { fixture = false, scenarios = {} }
         ${partMarkup()}${wrapMarkup()}</section>
         <aside class="conversation" aria-label="대화와 반영 내용">${reviewMarkup()}${questions}
           <section><details id="reflected-info" ${detailsOpen ? "open" : ""}><summary>반영 내용 보기</summary><p class="hint">이번 요청과 평소 취향은 구분해요. 평소 취향 수정은 별도 검토가 필요해요.</p>${memories()}</details></section>
-          <section class="composer"><form data-form="feedback"><label for="free-text">${activeQuestion ? "질문에 대한 답과 덧붙일 이야기" : "선택에 덧붙이거나, 글로 이야기해 주세요"}</label>
+          <section class="composer"><form data-form="feedback"><label for="free-text">${!isOpen() ? "종료 전에 작성하던 글" : state.comparison ? "좋은 이유나 바꾸고 싶은 점 (선택)" : activeQuestion ? "질문에 대한 답과 덧붙일 이야기" : "선택에 덧붙이거나, 글로 이야기해 주세요"}</label>
             <textarea id="free-text" maxlength="4000" placeholder="예: A의 색은 좋지만, 더 여유 있는 형태가 좋아요." ${isOpen() ? "" : "readonly"}>${esc(d.text)}</textarea>
             <div class="actions"><span class="hint">${d.reaction === "selected" ? "선택 + 글 함께 반영" : {none: "후보 없음으로 응답", unsure: "판단 보류로 응답", text_only: "글만 반영", question_skipped: "질문 건너뛰기"}[d.reaction]}</span>
               <button class="primary" ${canFeedback() && (d.selections.length || d.text.trim() || ["none", "unsure", "question_skipped"].includes(d.reaction)) ? "" : "disabled"}>선택과 글 반영</button></div>
@@ -290,7 +293,7 @@ export function mountConsumer(root, adapter, { fixture = false, scenarios = {} }
     if (!sameRef(previousSet, nextSet)) {
       const d = draft();
       if (d.selections.length) notice = "후보가 바뀌어 이미지 선택을 해제했어요. 작성하던 글은 그대로예요.";
-      d.selections = []; if (d.reaction === "selected") d.reaction = "text_only";
+      d.selections = []; d.hypothesis = null; if (d.reaction === "selected") d.reaction = "text_only";
       part = null; finalPreview = null;
     }
     const d = draft();
@@ -353,7 +356,7 @@ export function mountConsumer(root, adapter, { fixture = false, scenarios = {} }
           if (initialText[mode] === (outgoing.action.text ?? "")) initialText[mode] = "";
         }
         if (outgoing.action.op === "select_final") finalPreview = null;
-        if (outgoing.action.op === "submit_feedback") {
+        if (["submit_feedback", "respond_comparison"].includes(outgoing.action.op)) {
           const d = drafts.get(outgoing.request_id);
           if (d && submitted?.version === d.version) drafts.set(outgoing.request_id, blankDraft());
           lastReceipt = { requestId: outgoing.request_id, text: outgoing.action.text };
@@ -375,6 +378,8 @@ export function mountConsumer(root, adapter, { fixture = false, scenarios = {} }
   function feedbackAction() {
     const d = draft();
     const refs = comparison();
+    if (d.hypothesis && state.comparison) return { op: "respond_comparison",
+      candidate_set_ref: clone(state.comparison.candidate_set_ref), ...clone(d.hypothesis), text: d.text.trim() ? d.text : null };
     const needsComparison = d.selections.length || ["none", "unsure"].includes(d.reaction) || Boolean(d.question && state.cards.length);
     if (needsComparison && (!refs.round || !refs.set)) {
       localError = { local: true, message: "지금 비교 중인 후보를 확인할 수 없어요. 최신 화면을 확인해 주세요. 글은 보존했어요." }; render(); return null;
@@ -406,6 +411,17 @@ export function mountConsumer(root, adapter, { fixture = false, scenarios = {} }
     const d = draft();
     const card = state.cards.find(c => c.candidate_id === b.dataset.card);
     switch (b.dataset.action) {
+      case "comparison-choose":
+      case "comparison-neither":
+      case "comparison-unsure":
+        if (state.comparison) {
+          d.hypothesis = { candidate_id: b.dataset.action === "comparison-choose" ? card.candidate_id : null,
+            decision: b.dataset.action === "comparison-choose" ? "choose" : b.dataset.action === "comparison-neither" ? "neither" : "unsure" };
+          d.selections = d.hypothesis.decision === "choose" ? [{ target_id: card.target_id, candidate_id: card.candidate_id, part_ref: null }] : [];
+          d.reaction = d.hypothesis.decision === "choose" ? "selected" : d.hypothesis.decision === "neither" ? "none" : "unsure";
+          d.version += 1; render(); root.querySelector("#free-text")?.focus();
+        }
+        break;
       case "new": panel = "start"; startMode = "shopping"; part = null; render(); focusMain(); break;
       case "preferences":
         if (panel === "start" || !state.request) { announce(state.memories.filter(m => m.scope === "long_term").map(m => m.content).join(" / ") || "이후 활용하기로 한 평소 취향이 아직 없어요."); }
@@ -423,6 +439,7 @@ export function mountConsumer(root, adapter, { fixture = false, scenarios = {} }
       }
       case "select": {
         if (!card) return;
+        d.hypothesis = null;
         const selected = d.selections.findIndex(s => s.candidate_id === card.candidate_id);
         if (selected >= 0) d.selections.splice(selected, 1);
         else d.selections.push({ target_id: card.target_id, candidate_id: card.candidate_id, part_ref: null });
@@ -430,8 +447,8 @@ export function mountConsumer(root, adapter, { fixture = false, scenarios = {} }
         root.querySelectorAll('[data-action="select"]').forEach(button => { if (button.dataset.card === card.candidate_id) button.focus({ preventScroll: true }); });
         break;
       }
-      case "reaction": d.reaction = b.dataset.reaction; d.selections = []; d.question = null; d.version += 1; render(); root.querySelector("#free-text")?.focus(); break;
-      case "part": part = { cardId: card.candidate_id, imageId: card.image_id, imageVersion: card.image_version, box: [0.15, 0.4, 0.85, 0.9] }; render(); root.querySelector('[data-coordinate="0"]')?.focus(); break;
+      case "reaction": d.hypothesis = null; d.reaction = b.dataset.reaction; d.selections = []; d.question = null; d.version += 1; render(); root.querySelector("#free-text")?.focus(); break;
+      case "part": d.hypothesis = null; part = { cardId: card.candidate_id, imageId: card.image_id, imageVersion: card.image_version, box: [0.15, 0.4, 0.85, 0.9] }; render(); root.querySelector('[data-coordinate="0"]')?.focus(); break;
       case "cancel-part": part = null; render(); break;
       case "confirm": await prepare(b.dataset.memory, "confirm_content"); break;
       case "bindings": await prepare(b.dataset.memory, "confirm_bindings"); break;
@@ -444,6 +461,7 @@ export function mountConsumer(root, adapter, { fixture = false, scenarios = {} }
         await send({ op: "respond_review", display_ref: clone(review.ref), decision: b.dataset.decision }); break;
       }
       case "answer": {
+        d.hypothesis = null;
         const q = state.questions.find(q => q.ref.id === b.dataset.question);
         const answer = q?.options[Number(b.dataset.option)];
         if (!answer) return;
@@ -453,6 +471,7 @@ export function mountConsumer(root, adapter, { fixture = false, scenarios = {} }
         d.version += 1; render(); root.querySelector("#free-text")?.focus(); break;
       }
       case "skip-question":
+        d.hypothesis = null;
         d.question = b.dataset.question; d.reaction = "question_skipped"; d.selections = []; d.version += 1;
         announce("질문 건너뛰기를 골랐어요. 반영 버튼으로 보낼 수 있어요. 작성 중인 글은 별도 초안으로 남겨요."); break;
       case "preview-final": finalPreview = card.candidate_id; render(); root.querySelector('[data-action="confirm-final"]')?.focus(); break;
@@ -510,7 +529,7 @@ export function mountConsumer(root, adapter, { fixture = false, scenarios = {} }
     }
     if (form.dataset.form === "feedback" && canFeedback()) {
       const action = feedbackAction();
-      if (!action || (!action.text && !action.selections.length && action.reaction === "text_only")) return;
+      if (!action || (action.op === "submit_feedback" && !action.text && !action.selections.length && action.reaction === "text_only")) return;
       // A skipped question sends no text; preserve any separately drafted text.
       const version = draft().reaction === "question_skipped" && draft().text ? -1 : draft().version;
       await send(action, { submitted: { version } });

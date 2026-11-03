@@ -42,6 +42,10 @@ class ConsumerJournal:
             CREATE TABLE IF NOT EXISTS consumer_dismissals (
                 display_id TEXT PRIMARY KEY REFERENCES v1_objects(id) ON DELETE CASCADE
             );
+            CREATE TABLE IF NOT EXISTS consumer_comparisons (
+                set_id TEXT PRIMARY KEY REFERENCES v1_objects(id) ON DELETE CASCADE,
+                payload_json TEXT NOT NULL
+            );
             CREATE TABLE IF NOT EXISTS consumer_request_reviews (
                 id TEXT PRIMARY KEY, request_id TEXT NOT NULL REFERENCES requests(id) ON DELETE CASCADE,
                 user_id TEXT NOT NULL, request_revision INTEGER NOT NULL, profile_revision INTEGER NOT NULL

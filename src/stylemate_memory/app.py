@@ -14,7 +14,7 @@ from uuid import uuid4
 from . import contracts as c
 from .context import build_context, build_context_v1
 from .errors import StyleMateError, V1_ERROR_CODES
-from .inference import ModelAdapter, infer, infer_v1, validate_target_map_basis
+from .inference import ModelAdapter, infer, validate_target_map_basis
 
 
 class ShoppingApp:
@@ -273,13 +273,15 @@ class ConsumerService:
             "contract_version": c.CONTRACT_VERSION, "state_version": self._journal.next_version(),
             "request": None, "requests": requests, "expected": None, "phase": "onboarding", "operation": "idle",
             "memories": [], "cards": [], "reviews": [], "questions": [], "error": None,
+            "comparison": None,
         }
         if request_id is None:
             return result
         snapshot = self._snapshot(request_id)
         result["request"] = {k: snapshot["request"][k] for k in c.RequestState.__required_keys__}
         result["expected"] = self._ui_expected(snapshot)
-        result["memories"] = [{"ref": _ref("memory", m), **{k: m[k] for k in ("content", "scope", "confirmed", "status")}}
+        result["memories"] = [{"ref": _ref("memory", m), "reusable": m["scope"] == "short_term" and m["selector"]["slot_id"] is None,
+                               **{k: m[k] for k in ("content", "scope", "confirmed", "status")}}
                               for m in snapshot["memories"]]
         result["questions"] = [{"ref": _ref("question", q), **{k: q[k] for k in ("text", "target_id", "options", "status")}}
                                for q in snapshot["questions"] if q["status"] == "open"]
@@ -310,6 +312,13 @@ class ConsumerService:
                         if source is not None and source["kind"] == "local":
                             image_url = f"/api/images/{quote(card['image_id'], safe='')}?version={card['image_version']}"
                     result["cards"].append(deepcopy(card) | {"title": record["title"], "image_url": image_url})
+                from .hypotheses import load_comparison, public_comparison
+                comparison = load_comparison(self, candidate_set["id"])
+                if comparison and not comparison["answered"]:
+                    result["comparison"] = public_comparison(comparison)
+                    target_ids = {card["target_id"] for card in candidate_set["cards"]
+                                  if card["candidate_id"] in {o["candidate_id"] for o in comparison["options"]}}
+                    result["questions"] = [q for q in result["questions"] if q["target_id"] not in target_ids]
             except StyleMateError:
                 operation, error = "stale", _error(StyleMateError("stale_context"))
                 result["cards"] = []
@@ -333,6 +342,8 @@ class ConsumerService:
         reviews = []
         for row in rows:
             display = self._store._v1._object(row)
+            if display["purpose"] == "future_reuse" and snapshot["request"]["status"] != "closed":
+                continue
             try:
                 self._store._v1._check_basis(self._store._request_row(self.user_id, request_id), display["basis"],
                     self._store._now(), catalog_freshness=self._catalog, check_catalog=True,
@@ -396,6 +407,9 @@ class ConsumerService:
                     self._extract(request_id, self._feedback_ref(receipt), command_id)
                 elif op == "retry_extraction":
                     self._extract(request_id, action["feedback_ref"], command_id)
+                elif op == "respond_comparison":
+                    from .hypotheses import respond_comparison
+                    respond_comparison(self, snapshot, action, command, command_id)
                 elif op == "explore":
                     self._explore(request_id, command_id)
                 elif op == "prepare_review":
@@ -404,6 +418,11 @@ class ConsumerService:
                 elif op == "respond_review":
                     self._respond_review(snapshot, action, command, command_id)
                 elif op in ("select_final", "end_request"):
+                    if op == "select_final":
+                        context = self._context(snapshot)
+                        if any(item["binding"]["domain"] == "FEA" and item["binding"]["strength"] == "hard"
+                               for item in context["constraints"]):
+                            raise StyleMateError("context_blocked", "필수 기능 요구의 상품 근거를 먼저 확인하거나 조건을 조정해 주세요.")
                     self._apply(request_id, self._step(command_id, "apply"), [action], command["expected"])
                     self._jobs.pop(request_id, None)
                     self._journal.clear_operation(request_id)
@@ -449,9 +468,11 @@ class ConsumerService:
         shapes = {"start_request": c.StartRequestUI, "resume_request": c.SimpleUI, "explore": c.SimpleUI,
                   "end_request": c.SimpleUI, "submit_feedback": c.FeedbackAction, "retry_extraction": c.RetryExtractionUI,
                   "prepare_review": c.ReviewUI, "respond_review": c.RespondReviewUI, "select_final": c.SelectFinalAction}
+        shapes["respond_comparison"] = c.RespondComparisonUI
         if not isinstance(action.get("op"), str) or action["op"] not in shapes:
             raise StyleMateError("invalid_input")
-        _shape(action, shapes[action["op"]].__required_keys__)
+        optional = {"text"} if action["op"] == "respond_comparison" and "text" in action else set()
+        _shape(action, shapes[action["op"]].__required_keys__ | optional)
         if action["op"] == "start_request":
             if command["request_id"] is not None or command["expected"] is not None:
                 raise StyleMateError("invalid_input")
@@ -459,6 +480,8 @@ class ConsumerService:
             _text(command["request_id"])
             _shape(command["expected"], c.Expected.__required_keys__)
         if action["op"] == "respond_review" and action["decision"] not in ("accept", "decline", "skip"):
+            raise StyleMateError("invalid_input")
+        if action["op"] == "respond_comparison" and action["decision"] not in ("choose", "neither", "unsure"):
             raise StyleMateError("invalid_input")
 
     @staticmethod
@@ -520,12 +543,21 @@ class ConsumerService:
             content = evidence["quote"]
             if selection:
                 product = self._catalog.get_product_map(selection["product_id"])
-                content = canonical({"target_id": selection["target_id"], "product_assertions": product["assertions"],
-                                     "part_ref": selection["part_ref"], "reason": None})
+                selected_context = {"target_id": selection["target_id"], "product_assertions": product["assertions"],
+                                    "part_ref": selection["part_ref"], "reason": None}
+                if interpretation.get("extraction_key", "") and interpretation["extraction_key"].startswith("comparison-"):
+                    from .hypotheses import load_comparison
+                    comparison = load_comparison(self, selection["candidate_set_ref"]["id"])
+                    if comparison:
+                        selected_context["unconfirmed_comparison"] = {"prompt": comparison["prompt"],
+                            "shown_meaning": next(o["meaning"] for o in comparison["options"] if o["candidate_id"] == selection["candidate_id"])}
+                content = canonical(selected_context)
             sources.append({"source_id": alias, "kind": evidence["kind"], "content": content, "selector": evidence["selector"]})
         inputs = {"sources": sources, "targets": snapshot["request"]["targets"], "registry": self.registry.describe()}
         extraction_key = hashlib.sha256(canonical({"evidence": feedback["evidence_refs"], "registry": self.registry.version,
             "adapter": type(self.gateway).__name__, "model": getattr(self.gateway, "model", "injected"), "service": "a2-v1"}).encode()).hexdigest()
+        if (interpretation.get("extraction_key") or "").startswith("comparison-"):
+            extraction_key = "comparison-text:" + extraction_key
         catalog = self._catalog.current_versions([], [])
         if feedback["candidate_set_ref"]:
             candidate_set = next(s for s in snapshot["candidate_sets"] if s["id"] == feedback["candidate_set_ref"]["id"])
@@ -580,16 +612,34 @@ class ConsumerService:
         catalog = self._catalog.current_versions([], [])
 
         def calculate() -> Any:
-            return infer_v1(context, self.gateway, registry=self.registry)
+            from .hypotheses import infer_with_hypotheses
+            return infer_with_hypotheses(context, self.gateway, registry=self.registry)
 
         def apply_result(future: Any) -> None:
             from .comparison import build_candidate_cards
             from .product_search import search_products
             current = self._fresh(snapshot, catalog=catalog)
-            target_map = future.result()  # provider errors never fall back to a rule
+            target_map, hypotheses = future.result()  # provider errors never fall back to a rule
             validate_target_map_basis(target_map, self._context(current), registry=self.registry, now=self._store._now())
-            results = [search_products(target_map, t["target_id"], self._catalog) for t in snapshot["request"]["targets"]]
-            plan = build_candidate_cards(results, target_map, self._catalog)
+            results = [search_products(target_map, t["target_id"], self._catalog, pi_only=True) for t in snapshot["request"]["targets"]]
+            from .hypotheses import load_comparison
+            previous = [load_comparison(self, row[0]) for row in self._store.connection.execute(
+                "SELECT c.set_id FROM consumer_comparisons c JOIN v1_objects o ON o.id=c.set_id WHERE o.user_id=? AND o.request_id=?",
+                (self.user_id, request_id))]
+            answered = {item["hypothesis_id"] for item in previous if item["answered"]}
+            from .hypotheses import comparison_options
+            hypothesis = None
+            plan = build_candidate_cards(results, target_map, self._catalog, pi_only=True)
+            for candidate in hypotheses:
+                if candidate["id"] in answered:
+                    continue
+                trial = build_candidate_cards(results, target_map, self._catalog, pi_only=True, hypothesis=candidate)
+                if comparison_options(self, candidate, trial):
+                    plan, hypothesis = trial, candidate
+                    break
+            if any(item["binding"]["domain"] == "FEA" and item["binding"]["strength"] == "hard" for item in target_map["constraints"]):
+                plan["questions"] = [{"text": "필수 기능 요구는 상품 PI만으로 확인할 수 없어요. 비교는 계속할 수 있지만 최종 선택 전에 추가 근거나 조건 조정이 필요해요.",
+                    "target_id": None, "subject_refs": [], "options": []}] + plan["questions"][:2]
             # Search and publication share the catalog-owning executor. Rebuild
             # memory/index basis too immediately before the store validates it.
             validate_target_map_basis(target_map, self._context(self._snapshot(request_id)),
@@ -600,8 +650,11 @@ class ConsumerService:
                 else:
                     self._journal.set_operation(request_id, "no_results")
                 return
-            self._store.publish_candidates(self.user_id, request_id, batch_id=self._step(command_id, "candidates"),
-                                           plan=plan, catalog_freshness=self._catalog)
+            round_obj = self._store.publish_candidates(self.user_id, request_id, batch_id=self._step(command_id, "candidates"),
+                                                       plan=plan, catalog_freshness=self._catalog)
+            if hypothesis:
+                from .hypotheses import prepare_comparison
+                prepare_comparison(self, hypothesis, plan, round_obj)
             self._journal.set_operation(request_id, "idle")
 
         self._submit_model(request_id, calculate, apply_result)
@@ -637,6 +690,8 @@ class ConsumerService:
         memory = next((m for m in snapshot["memories"] if _ref("memory", m) == memory_refs[0]), None)
         if memory is None:
             raise StyleMateError("stale_context")
+        if purpose == "future_reuse" and snapshot["request"]["status"] != "closed":
+            raise StyleMateError("consent_required", "이후 활용 동의는 대화를 마친 뒤 진행해 주세요.")
         subjects = [memory_refs[0]]
         bindings = [b for b in snapshot["bindings"] if b["memory_id"] == memory["id"] and b["status"] in ("candidate", "active")]
         if purpose in ("confirm_bindings", "future_reuse"):
@@ -665,6 +720,25 @@ class ConsumerService:
             raise StyleMateError("invalid_input")
         basis = self._basis(snapshot)
         active = next((r for r in snapshot["rounds"] if r["status"] == "active"), None)
+        if not active and snapshot["request"]["status"] == "closed" and purpose in ("confirm_content", "confirm_bindings", "future_reuse"):
+            queue, seen, set_ids = list(memory["source_refs"]), set(), set()
+            while queue:
+                ref = queue.pop()
+                if (ref["type"], ref["id"]) in seen:
+                    continue
+                seen.add((ref["type"], ref["id"]))
+                source = self._store._v1._resolve(self.user_id, request_id, ref, self._store._now())
+                queue.extend(source.get("source_refs", []))
+                if ref["type"] == "evidence" and source.get("selection"):
+                    set_ids.add(source["selection"]["candidate_set_ref"]["id"])
+            if len(set_ids) > 1:
+                raise StyleMateError("context_blocked")
+            if set_ids:
+                historical = next((s for s in snapshot["candidate_sets"] if s["id"] in set_ids), None)
+                if historical is None:
+                    raise StyleMateError("stale_context")
+                basis["catalog"] = historical["basis"]["catalog"]
+                self._store._v1.feedback.check_catalog(basis["catalog"], self._catalog)
         if active and purpose not in ("withdraw", "delete"):
             candidate_set = next(s for s in snapshot["candidate_sets"] if s["id"] == active["candidate_set_ref"]["id"])
             basis["catalog"] = candidate_set["basis"]["catalog"]
@@ -711,6 +785,8 @@ class ConsumerService:
             self._journal.finish(command_id, "applied")
             return
         purpose = review["purpose"]
+        if purpose == "future_reuse" and snapshot["request"]["status"] != "closed":
+            raise StyleMateError("consent_required")
         if purpose == "delete_request":
             # Request erasure has its own trusted-store method, rather than a
             # fabricated MemoryMeaning or a made-up memory/evidence subject.
@@ -757,7 +833,7 @@ class ConsumerService:
             for record in self._catalog.export_records():
                 product_id = record["product_id"]
                 previous = self._catalog._product(product_id)["map_version"]
-                product_map = build_product_map(record, raw_version=self._catalog.raw_version(product_id), registry=self.registry)
+                product_map = build_product_map(record, raw_version=self._catalog.raw_version(product_id), registry=self.registry, pi_only=True)
                 output.append(self._catalog.save_product_map(product_map, expected_raw_version=product_map["raw_version"],
                                                             expected_map_version=previous))
             return output

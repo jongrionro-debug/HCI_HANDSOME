@@ -200,6 +200,7 @@ export function createFixtureAdapter({ delay = 180, scenario = "normal" } = {}) 
         applyScenario(session);
         return accept(session);
       case "prepare_review": {
+        if (action.purpose === "future_reuse" && session.state.request.status !== "closed") return rejected(session, "consent_required", "대화를 마친 뒤 이후 활용을 검토하세요.");
         const subject = action.subject_refs[0];
         const memory = [...session.state.memories, ...longMemories].find(m => m.ref.id === subject?.id && m.ref.version === subject.version);
         if (!memory) return rejected(session, "not_found", "확인할 내용을 찾을 수 없습니다.");

@@ -131,7 +131,8 @@ def _select(entries: list[dict], target: dict, count: int, mode: str):
 
 
 def build_candidate_cards(results: list[SearchResult], target_map: TargetMap, catalog: CatalogPort,
-                          *, mode: str = "default", size: int | None = None) -> CandidatePlan:
+                          *, mode: str = "default", size: int | None = None,
+                          pi_only: bool = False, hypothesis: dict | None = None) -> CandidatePlan:
     """Return the A0 CandidatePlan; do not publish sets or mutate user state.
 
     ``mode`` selects the 3/4/2 pilot policy and ``size`` overrides its card budget
@@ -176,7 +177,7 @@ def build_candidate_cards(results: list[SearchResult], target_map: TargetMap, ca
         if (status == "results") != bool(hits):
             _fail("Product-search status and hits disagree.")
         target = targets[tid]
-        constraints = _constraints(target_map, tid)
+        constraints = _constraints(target_map, tid, pi_only=pi_only)
         if status == "results" and _blocked(constraints, target, registry):
             _fail("Blocked target cannot have product hits.", "invalid_output")
         entries = []
@@ -217,10 +218,25 @@ def build_candidate_cards(results: list[SearchResult], target_map: TargetMap, ca
         _fail("Catalog changed during comparison planning.", "stale_context")
     basis["catalog"] = current
     available = [tid for tid in targets if pools[tid]]
+    pair = None
+    if hypothesis is not None:
+        tid, binding = hypothesis["target_id"], hypothesis["binding"]
+        registry.validate_binding(binding, targets[tid]["garment_type"])
+        feature, wanted = binding["feature"], binding["values"][0]
+        known = [e for e in pools[tid] if e["image"] is not None and _value(e, feature) is not None]
+        positive = [e for e in known if wanted in _value(e, feature)]
+        negative = [e for e in known if wanted not in _value(e, feature)]
+        if positive and negative and len(available) < 4:
+            def distance(a, b):
+                return sum(_value(a, f) != _value(b, f) for f in _VISUAL_FEATURES if f != feature)
+            pair = min(((a, b) for a in positive for b in negative), key=lambda p: distance(*p))
     if len(available) > 4:
         _fail("A candidate set cannot represent more than four targets.", "context_blocked")
     budget = max(count, len(available))
     allocations = {tid: 1 for tid in available}
+    if pair:
+        allocations[hypothesis["target_id"]] = 2
+        budget = max(budget, sum(allocations.values()))
     while sum(allocations.values()) < budget:
         advanced = False
         for tid in available:
@@ -241,7 +257,10 @@ def build_candidate_cards(results: list[SearchResult], target_map: TargetMap, ca
             "subject_refs": [], "options": list(_NO_RESULTS_OPTIONS),
         })
     for tid in available:
-        entries, axes, reduced = _select(pools[tid], targets[tid], allocations[tid], mode)
+        if pair and tid == hypothesis["target_id"]:
+            entries, axes, reduced = list(pair), [hypothesis["binding"]["feature"]], False
+        else:
+            entries, axes, reduced = _select(pools[tid], targets[tid], allocations[tid], mode)
         start = len(selected)
         selected.extend((tid, entry) for entry in entries)
         for feature in axes:

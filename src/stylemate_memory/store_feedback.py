@@ -120,10 +120,17 @@ class FeedbackStorage:
             if (_ref("round", round_obj) not in basis["object_versions"]
                 or selection["candidate_set_ref"] not in basis["object_versions"]):
                 raise _fail("stale_context", "image review is missing its comparison basis")
-            closed_reuse = request["status"] == "closed" and purpose == "future_reuse" and round_obj["status"] == "closed"
-            if (round_obj["status"] != "active" and not closed_reuse) or round_obj["candidate_set_ref"] != selection["candidate_set_ref"]:
+            closed_reuse = (request["status"] == "closed" and purpose in ("confirm_content", "confirm_bindings", "future_reuse")
+                            and round_obj["status"] == "closed")
+            # A closed session can review a past immutable set even when the
+            # mutable round later advanced to another set during exploration.
+            if not closed_reuse and (round_obj["status"] != "active" or round_obj["candidate_set_ref"] != selection["candidate_set_ref"]):
                 raise _fail("stale_context", "reviewed image comparison is no longer active")
             candidate_set = self.v1._resolve(request["user_id"], request["id"], selection["candidate_set_ref"], now)
+            if closed_reuse and not any(all(card[key] == selection[key] for key in (
+                "candidate_id", "target_id", "product_id", "product_map_version", "image_id", "image_version"))
+                for card in candidate_set["cards"]):
+                raise _fail("stale_context", "historical selection does not match its immutable card")
             versions = _catalog_versions(basis["catalog"])
             original = candidate_set["basis"]["catalog"]
             products = {p["product_id"]: p for p in versions["products"]}

@@ -133,6 +133,17 @@ class ServiceFixture(unittest.TestCase):
 
 class ConsumerServiceTests(ServiceFixture):
     def test_text_recommend_feedback_separate_confirmations_search_end_and_reuse(self):
+        # New consumer Maps are PI-only. Keep this regression on explicitly
+        # supplied legacy full Maps so >4,000-character structured image input
+        # remains covered independently of the new catalog generation policy.
+        def legacy_maps():
+            from stylemate_memory.catalog_mapping import build_product_map
+            for record in self.service._catalog.export_records():
+                pid = record["product_id"]
+                mapped = build_product_map(record, raw_version=self.service._catalog.raw_version(pid), registry=self.service.registry)
+                self.service._catalog.save_product_map(mapped, expected_raw_version=mapped["raw_version"],
+                    expected_map_version=self.service._catalog.get_product_map(pid)["map_version"])
+        self.service._run(legacy_maps)
         s, start_command = self.start()
         self.assertEqual(s["operation"], "blocked", s)
         self.assertFalse(s["cards"], s)  # C2 requires confirmed evidence first
@@ -224,6 +235,7 @@ class ConsumerServiceTests(ServiceFixture):
     def test_restart_resume_new_request_isolation_and_delete_replay(self):
         s, _ = self.start(mode="onboarding")
         self.review("confirm_content")
+        self.send({"op": "end_request"})
         self.review("future_reuse")
         old_id = self.state()["request"]["id"]
         self.service.close()

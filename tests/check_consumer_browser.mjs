@@ -101,6 +101,8 @@ try {
   await page.locator('.review [data-decision="accept"]').click();
   await idle();
   assert.equal((await state()).memories.filter(m => m.scope === "long_term").length, 0);
+  assert.equal(await action("future").count(), 0);
+  await action("end").filter({hasText:"온보딩 마치기"}).click(); await idle();
   assert.equal(await page.locator("[data-save]:checked").count(), 0);
   assert.equal(await action("future").first().isDisabled(), true);
   await page.locator("[data-save]").first().check();

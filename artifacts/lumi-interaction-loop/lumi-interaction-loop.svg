@@ -1,0 +1,139 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="2160" height="1470" viewBox="0 0 2160 1470" role="img" aria-labelledby="title desc">
+<title id="title">LUMI: 사용자 입력, 추천과 메모리 갱신의 전체 흐름</title>
+<desc id="desc">입력과 관련 장단기 기억으로 사용자 목표 PI와 FEA를 정리한다. FEA에서 PI 가설을 만들고 상품 PI를 비교해 이미지를 추천한다. 이미지 선택과 선택 사항인 이유를 해석해 단기 기억과 목표 Map을 갱신한다. 대화 종료 후 내용 확인과 별도 동의를 거친 내용만 장기 기억으로 저장한다.</desc>
+<rect width="2160" height="1470" fill="white"/>
+<text x="60" y="38" font-family="Apple SD Gothic Neo, Noto Sans CJK KR, sans-serif" font-size="40" font-weight="600" fill="#253540" text-anchor="start" dominant-baseline="text-before-edge">LUMI · 입력에서 추천과 기억 갱신까지</text>
+<text x="60" y="94" font-family="Apple SD Gothic Neo, Noto Sans CJK KR, sans-serif" font-size="24" font-weight="400" fill="#60717C" text-anchor="start" dominant-baseline="text-before-edge">텍스트와 이미지 선택으로 원하는 상품을 구체화하는 반복 흐름</text>
+<rect x="1470" y="54" width="18" height="18" rx="3" fill="#F3EFF9" stroke="#806799" stroke-width="1.5"/>
+<text x="1499" y="48" font-family="Apple SD Gothic Neo, Noto Sans CJK KR, sans-serif" font-size="23" font-weight="400" fill="#253540" text-anchor="start" dominant-baseline="text-before-edge">기억</text>
+<rect x="1615" y="54" width="18" height="18" rx="3" fill="#EEF5FA" stroke="#4D7D9E" stroke-width="1.5"/>
+<text x="1644" y="48" font-family="Apple SD Gothic Neo, Noto Sans CJK KR, sans-serif" font-size="23" font-weight="400" fill="#253540" text-anchor="start" dominant-baseline="text-before-edge">상품 조건</text>
+<rect x="1795" y="54" width="18" height="18" rx="3" fill="#FFF5E2" stroke="#AD8138" stroke-width="1.5"/>
+<text x="1824" y="48" font-family="Apple SD Gothic Neo, Noto Sans CJK KR, sans-serif" font-size="23" font-weight="400" fill="#253540" text-anchor="start" dominant-baseline="text-before-edge">연결 가설</text>
+<rect x="1975" y="54" width="18" height="18" rx="3" fill="#EDF5F1" stroke="#467E67" stroke-width="1.5"/>
+<text x="2004" y="48" font-family="Apple SD Gothic Neo, Noto Sans CJK KR, sans-serif" font-size="23" font-weight="400" fill="#253540" text-anchor="start" dominant-baseline="text-before-edge">사용자</text>
+<path d="M 330 280 L 420 280" fill="none" stroke="#6B7D88" stroke-width="2.8" stroke-linejoin="round"/>
+<polygon points="420,280 408.1834452542265,285.41932043157976 408.1834452542265,274.58067956842024" fill="#6B7D88"/>
+<path d="M 770 270 L 840 270" fill="none" stroke="#6B7D88" stroke-width="2.8" stroke-linejoin="round"/>
+<polygon points="840,270 828.1834452542265,275.41932043157976 828.1834452542265,264.58067956842024" fill="#6B7D88"/>
+<path d="M 770 505 L 820 505 L 820 310 L 840 310" fill="none" stroke="#806799" stroke-width="2.8" stroke-linejoin="round"/>
+<polygon points="840,310 828.1834452542265,315.41932043157976 828.1834452542265,304.58067956842024" fill="#806799"/>
+<path d="M 1040 295 L 1110 295" fill="none" stroke="#6B7D88" stroke-width="2.8" stroke-linejoin="round"/>
+<polygon points="1110,295 1098.1834452542264,300.41932043157976 1098.1834452542264,289.58067956842024" fill="#6B7D88"/>
+<path d="M 1580 280 L 1660 280" fill="none" stroke="#AD8138" stroke-width="2.8" stroke-linejoin="round"/>
+<polygon points="1660,280 1648.1834452542264,285.41932043157976 1648.1834452542264,274.58067956842024" fill="#AD8138"/>
+<path d="M 1235 420 L 1235 530" fill="none" stroke="#4D7D9E" stroke-width="2.8" stroke-linejoin="round"/>
+<polygon points="1235,530 1229.5806795684202,518.1834452542265 1240.4193204315798,518.1834452542265" fill="#4D7D9E"/>
+<path d="M 1700 545 L 1640 545 L 1640 600 L 1580 600" fill="none" stroke="#4D7D9E" stroke-width="2.8" stroke-linejoin="round"/>
+<polygon points="1580,600 1591.8165547457736,594.5806795684202 1591.8165547457736,605.4193204315798" fill="#4D7D9E"/>
+<path d="M 1345 670 L 1345 770" fill="none" stroke="#6B7D88" stroke-width="2.8" stroke-linejoin="round"/>
+<polygon points="1345,770 1339.5806795684202,758.1834452542265 1350.4193204315798,758.1834452542265" fill="#6B7D88"/>
+<path d="M 2080 275 L 2130 275 L 2130 720 L 1500 720 L 1500 770" fill="none" stroke="#AD8138" stroke-width="2.8" stroke-linejoin="round"/>
+<polygon points="1500,770 1494.5806795684202,758.1834452542265 1505.4193204315798,758.1834452542265" fill="#AD8138"/>
+<path d="M 1110 855 L 1010 855" fill="none" stroke="#6B7D88" stroke-width="2.8" stroke-linejoin="round"/>
+<polygon points="1010,855 1021.8165547457735,849.5806795684202 1021.8165547457735,860.4193204315798" fill="#6B7D88"/>
+<path d="M 630 855 L 530 855" fill="none" stroke="#467E67" stroke-width="2.8" stroke-linejoin="round"/>
+<polygon points="530,855 541.8165547457735,849.5806795684202 541.8165547457735,860.4193204315798" fill="#467E67"/>
+<path d="M 130 860 L 50 860 L 50 150 L 595 150 L 595 180" fill="none" stroke="#467E67" stroke-width="3.3" stroke-linejoin="round"/>
+<polygon points="595,180 589.5806795684202,168.18344525422648 600.4193204315798,168.18344525422648" fill="#467E67"/>
+<path d="M 820 940 L 820 1090" fill="none" stroke="#93836B" stroke-width="2.8" stroke-linejoin="round"/>
+<polygon points="820,1090 814.5806795684202,1078.1834452542264 825.4193204315798,1078.1834452542264" fill="#93836B"/>
+<path d="M 970 1150 L 1060 1150" fill="none" stroke="#93836B" stroke-width="2.8" stroke-linejoin="round"/>
+<polygon points="1060,1150 1048.1834452542264,1155.4193204315798 1048.1834452542264,1144.5806795684202" fill="#93836B"/>
+<path d="M 1420 1150 L 1490 1150" fill="none" stroke="#93836B" stroke-width="2.8" stroke-linejoin="round"/>
+<polygon points="1490,1150 1478.1834452542264,1155.4193204315798 1478.1834452542264,1144.5806795684202" fill="#93836B"/>
+<path d="M 1720 1150 L 1800 1150" fill="none" stroke="#806799" stroke-width="2.8" stroke-linejoin="round"/>
+<polygon points="1800,1150 1788.1834452542264,1155.4193204315798 1788.1834452542264,1144.5806795684202" fill="#806799"/>
+<path d="M 1605 1235 L 1605 1280" fill="none" stroke="#93836B" stroke-width="2.8" stroke-linejoin="round"/>
+<polygon points="1605,1280 1599.5806795684202,1268.1834452542264 1610.4193204315798,1268.1834452542264" fill="#93836B"/>
+<path d="M 1945 1215 L 1945 1390 L 80 1390 L 80 505 L 420 505" fill="none" stroke="white" stroke-width="9"/>
+<path d="M 1945 1215 L 1945 1390 L 80 1390 L 80 505 L 420 505" fill="none" stroke="#806799" stroke-width="2.7" stroke-linejoin="round" stroke-dasharray="10 8"/>
+<polygon points="420,505 408.1834452542265,510.41932043157976 408.1834452542265,499.58067956842024" fill="#806799"/>
+<rect x="186" y="130" width="198.046875" height="32" rx="3" fill="white" stroke="white" stroke-width="0"/>
+<text x="195" y="132" font-family="Apple SD Gothic Neo, Noto Sans CJK KR, sans-serif" font-size="21" font-weight="400" fill="#467E67" text-anchor="start" dominant-baseline="text-before-edge">이번 요청의 기억 갱신</text>
+<rect x="1241" y="468" width="138.03125" height="32" rx="3" fill="white" stroke="white" stroke-width="0"/>
+<text x="1250" y="470" font-family="Apple SD Gothic Neo, Noto Sans CJK KR, sans-serif" font-size="21" font-weight="400" fill="#4D7D9E" text-anchor="start" dominant-baseline="text-before-edge">찾을 상품 조건</text>
+<rect x="1656" y="686" width="216.2109375" height="32" rx="3" fill="white" stroke="white" stroke-width="0"/>
+<text x="1665" y="688" font-family="Apple SD Gothic Neo, Noto Sans CJK KR, sans-serif" font-size="21" font-weight="400" fill="#AD8138" text-anchor="start" dominant-baseline="text-before-edge">가설의 조건 유무를 비교</text>
+<rect x="828" y="998" width="114.34375" height="32" rx="3" fill="white" stroke="white" stroke-width="0"/>
+<text x="837" y="1000" font-family="Apple SD Gothic Neo, Noto Sans CJK KR, sans-serif" font-size="21" font-weight="400" fill="#93836B" text-anchor="start" dominant-baseline="text-before-edge">마무리할 때</text>
+<rect x="1723" y="1108" width="54.328125" height="32" rx="3" fill="white" stroke="white" stroke-width="0"/>
+<text x="1732" y="1110" font-family="Apple SD Gothic Neo, Noto Sans CJK KR, sans-serif" font-size="21" font-weight="400" fill="#806799" text-anchor="start" dominant-baseline="text-before-edge">동의</text>
+<rect x="1616" y="1241" width="69.890625" height="31" rx="3" fill="white" stroke="white" stroke-width="0"/>
+<text x="1625" y="1243" font-family="Apple SD Gothic Neo, Noto Sans CJK KR, sans-serif" font-size="20" font-weight="400" fill="#93836B" text-anchor="start" dominant-baseline="text-before-edge">미동의</text>
+<rect x="601" y="1351" width="366.609375" height="34" rx="3" fill="white" stroke="white" stroke-width="0"/>
+<text x="610" y="1353" font-family="Apple SD Gothic Neo, Noto Sans CJK KR, sans-serif" font-size="23" font-weight="400" fill="#806799" text-anchor="start" dominant-baseline="text-before-edge">동의한 기억은 다음 요청에서 다시 참고</text>
+<rect x="60" y="210" width="270" height="140" rx="16" fill="#EDF5F1" stroke="#467E67" stroke-width="2"/>
+<text x="84" y="230" font-family="Apple SD Gothic Neo, Noto Sans CJK KR, sans-serif" font-size="28" font-weight="600" fill="#253540" text-anchor="start" dominant-baseline="text-before-edge">사용자 첫 요청</text>
+<text x="84" y="276" font-family="Apple SD Gothic Neo, Noto Sans CJK KR, sans-serif" font-size="22" font-weight="400" fill="#60717C" text-anchor="start" dominant-baseline="text-before-edge">네이비 슬랙스를</text>
+<text x="84" y="308" font-family="Apple SD Gothic Neo, Noto Sans CJK KR, sans-serif" font-size="22" font-weight="400" fill="#60717C" text-anchor="start" dominant-baseline="text-before-edge">편하게 입고 싶어요</text>
+<rect x="420" y="180" width="350" height="180" rx="16" fill="#F3EFF9" stroke="#806799" stroke-width="2"/>
+<text x="444" y="200" font-family="Apple SD Gothic Neo, Noto Sans CJK KR, sans-serif" font-size="26" font-weight="600" fill="#253540" text-anchor="start" dominant-baseline="text-before-edge">입력 해석 · 단기 메모리</text>
+<text x="444" y="246" font-family="Apple SD Gothic Neo, Noto Sans CJK KR, sans-serif" font-size="22" font-weight="400" fill="#60717C" text-anchor="start" dominant-baseline="text-before-edge">이번 요청의 요구·상황</text>
+<text x="444" y="278" font-family="Apple SD Gothic Neo, Noto Sans CJK KR, sans-serif" font-size="22" font-weight="400" fill="#60717C" text-anchor="start" dominant-baseline="text-before-edge">선택·수정·확인 중인 내용</text>
+<text x="444" y="310" font-family="Apple SD Gothic Neo, Noto Sans CJK KR, sans-serif" font-size="22" font-weight="400" fill="#60717C" text-anchor="start" dominant-baseline="text-before-edge">입력 근거와 함께 보존</text>
+<rect x="420" y="430" width="350" height="150" rx="16" fill="#F3EFF9" stroke="#806799" stroke-width="2"/>
+<text x="444" y="450" font-family="Apple SD Gothic Neo, Noto Sans CJK KR, sans-serif" font-size="28" font-weight="600" fill="#253540" text-anchor="start" dominant-baseline="text-before-edge">장기 메모리</text>
+<text x="444" y="496" font-family="Apple SD Gothic Neo, Noto Sans CJK KR, sans-serif" font-size="22" font-weight="400" fill="#60717C" text-anchor="start" dominant-baseline="text-before-edge">이전 세션에서 확인하고</text>
+<text x="444" y="528" font-family="Apple SD Gothic Neo, Noto Sans CJK KR, sans-serif" font-size="22" font-weight="400" fill="#60717C" text-anchor="start" dominant-baseline="text-before-edge">다음 활용에 동의한 취향</text>
+<rect x="840" y="245" width="200" height="100" rx="16" fill="#F8FAFB" stroke="#7A8992" stroke-width="2"/>
+<text x="940" y="265" font-family="Apple SD Gothic Neo, Noto Sans CJK KR, sans-serif" font-size="24" font-weight="600" fill="#253540" text-anchor="middle" dominant-baseline="text-before-edge">관련 기억 선택</text>
+<text x="940" y="300" font-family="Apple SD Gothic Neo, Noto Sans CJK KR, sans-serif" font-size="22" font-weight="400" fill="#253540" text-anchor="middle" dominant-baseline="text-before-edge">확인한 내용 반영</text>
+<rect x="1110" y="150" width="470" height="270" rx="16" fill="#EEF5FA" stroke="#4D7D9E" stroke-width="2"/>
+<text x="1134" y="169" font-family="Apple SD Gothic Neo, Noto Sans CJK KR, sans-serif" font-size="29" font-weight="600" fill="#253540" text-anchor="start" dominant-baseline="text-before-edge">사용자 목표 Feature Map</text>
+<rect x="1130" y="223" width="205" height="130" rx="10" fill="white" stroke="#C1D6E5" stroke-width="1.5"/>
+<rect x="1355" y="223" width="205" height="130" rx="10" fill="white" stroke="#C1D6E5" stroke-width="1.5"/>
+<text x="1150" y="241" font-family="Apple SD Gothic Neo, Noto Sans CJK KR, sans-serif" font-size="25" font-weight="600" fill="#253540" text-anchor="start" dominant-baseline="text-before-edge">상품 조건 (PI)</text>
+<text x="1150" y="284" font-family="Apple SD Gothic Neo, Noto Sans CJK KR, sans-serif" font-size="23" font-weight="400" fill="#253540" text-anchor="start" dominant-baseline="text-before-edge">종류 · 색 · 핏</text>
+<text x="1150" y="318" font-family="Apple SD Gothic Neo, Noto Sans CJK KR, sans-serif" font-size="21" font-weight="400" fill="#60717C" text-anchor="start" dominant-baseline="text-before-edge">직접 말한 조건</text>
+<text x="1373" y="241" font-family="Apple SD Gothic Neo, Noto Sans CJK KR, sans-serif" font-size="24" font-weight="600" fill="#253540" text-anchor="start" dominant-baseline="text-before-edge">이유·맥락 (FEA)</text>
+<text x="1373" y="284" font-family="Apple SD Gothic Neo, Noto Sans CJK KR, sans-serif" font-size="23" font-weight="400" fill="#253540" text-anchor="start" dominant-baseline="text-before-edge">편안함 · 용도</text>
+<text x="1373" y="318" font-family="Apple SD Gothic Neo, Noto Sans CJK KR, sans-serif" font-size="21" font-weight="400" fill="#60717C" text-anchor="start" dominant-baseline="text-before-edge">원하는 이유·필요</text>
+<text x="1134" y="375" font-family="Apple SD Gothic Neo, Noto Sans CJK KR, sans-serif" font-size="22" font-weight="400" fill="#60717C" text-anchor="start" dominant-baseline="text-before-edge">현재 요구 우선 · 모르는 값은 미정</text>
+<rect x="1660" y="180" width="420" height="190" rx="16" fill="#FFF5E2" stroke="#AD8138" stroke-width="2"/>
+<text x="1684" y="200" font-family="Apple SD Gothic Neo, Noto Sans CJK KR, sans-serif" font-size="28" font-weight="600" fill="#253540" text-anchor="start" dominant-baseline="text-before-edge">FEA → PI 연결 가설</text>
+<text x="1684" y="246" font-family="Apple SD Gothic Neo, Noto Sans CJK KR, sans-serif" font-size="23" font-weight="400" fill="#60717C" text-anchor="start" dominant-baseline="text-before-edge">편안함을 와이드핏으로</text>
+<text x="1684" y="278" font-family="Apple SD Gothic Neo, Noto Sans CJK KR, sans-serif" font-size="23" font-weight="400" fill="#60717C" text-anchor="start" dominant-baseline="text-before-edge">구체화해도 될까?</text>
+<text x="1684" y="310" font-family="Apple SD Gothic Neo, Noto Sans CJK KR, sans-serif" font-size="23" font-weight="400" fill="#60717C" text-anchor="start" dominant-baseline="text-before-edge">아직 확정하지 않은 해석</text>
+<rect x="1700" y="470" width="380" height="150" rx="16" fill="#EEF5FA" stroke="#4D7D9E" stroke-width="2"/>
+<text x="1724" y="490" font-family="Apple SD Gothic Neo, Noto Sans CJK KR, sans-serif" font-size="28" font-weight="600" fill="#253540" text-anchor="start" dominant-baseline="text-before-edge">상품별 Feature Map</text>
+<text x="1724" y="536" font-family="Apple SD Gothic Neo, Noto Sans CJK KR, sans-serif" font-size="23" font-weight="400" fill="#60717C" text-anchor="start" dominant-baseline="text-before-edge">확인된 상품 조건 (PI)</text>
+<text x="1724" y="568" font-family="Apple SD Gothic Neo, Noto Sans CJK KR, sans-serif" font-size="23" font-weight="400" fill="#60717C" text-anchor="start" dominant-baseline="text-before-edge">종류 · 색 · 핏 · 소재 등</text>
+<rect x="1110" y="530" width="470" height="140" rx="16" fill="#F8FAFB" stroke="#7A8992" stroke-width="2"/>
+<text x="1134" y="550" font-family="Apple SD Gothic Neo, Noto Sans CJK KR, sans-serif" font-size="28" font-weight="600" fill="#253540" text-anchor="start" dominant-baseline="text-before-edge">상품 조건 비교·검색</text>
+<text x="1134" y="596" font-family="Apple SD Gothic Neo, Noto Sans CJK KR, sans-serif" font-size="23" font-weight="400" fill="#60717C" text-anchor="start" dominant-baseline="text-before-edge">사용자 목표 PI ↔ 상품 PI</text>
+<text x="1134" y="628" font-family="Apple SD Gothic Neo, Noto Sans CJK KR, sans-serif" font-size="23" font-weight="400" fill="#60717C" text-anchor="start" dominant-baseline="text-before-edge">알려진 필수 조건부터 유지</text>
+<rect x="1110" y="770" width="470" height="170" rx="16" fill="#F8FAFB" stroke="#7A8992" stroke-width="2"/>
+<text x="1134" y="790" font-family="Apple SD Gothic Neo, Noto Sans CJK KR, sans-serif" font-size="28" font-weight="600" fill="#253540" text-anchor="start" dominant-baseline="text-before-edge">추천·비교 아이템 제시</text>
+<text x="1134" y="836" font-family="Apple SD Gothic Neo, Noto Sans CJK KR, sans-serif" font-size="23" font-weight="400" fill="#60717C" text-anchor="start" dominant-baseline="text-before-edge">가설의 PI 값이 있는 상품과</text>
+<text x="1134" y="868" font-family="Apple SD Gothic Neo, Noto Sans CJK KR, sans-serif" font-size="23" font-weight="400" fill="#60717C" text-anchor="start" dominant-baseline="text-before-edge">없는 것으로 확인된 상품 비교</text>
+<rect x="630" y="770" width="380" height="170" rx="16" fill="#EDF5F1" stroke="#467E67" stroke-width="2"/>
+<text x="654" y="790" font-family="Apple SD Gothic Neo, Noto Sans CJK KR, sans-serif" font-size="28" font-weight="600" fill="#253540" text-anchor="start" dominant-baseline="text-before-edge">사용자 응답</text>
+<text x="654" y="836" font-family="Apple SD Gothic Neo, Noto Sans CJK KR, sans-serif" font-size="23" font-weight="400" fill="#60717C" text-anchor="start" dominant-baseline="text-before-edge">이미지 선택 + 이유·수정</text>
+<text x="654" y="868" font-family="Apple SD Gothic Neo, Noto Sans CJK KR, sans-serif" font-size="23" font-weight="400" fill="#60717C" text-anchor="start" dominant-baseline="text-before-edge">텍스트는 선택 사항</text>
+<rect x="130" y="730" width="400" height="274" rx="16" fill="#EDF5F1" stroke="#467E67" stroke-width="2"/>
+<text x="154" y="751" font-family="Apple SD Gothic Neo, Noto Sans CJK KR, sans-serif" font-size="29" font-weight="600" fill="#253540" text-anchor="start" dominant-baseline="text-before-edge">선택·설명 해석</text>
+<text x="154" y="804" font-family="Apple SD Gothic Neo, Noto Sans CJK KR, sans-serif" font-size="21" font-weight="600" fill="#253540" text-anchor="start" dominant-baseline="text-before-edge">가설의 조건을 명확히 선택</text>
+<text x="154" y="832" font-family="Apple SD Gothic Neo, Noto Sans CJK KR, sans-serif" font-size="21" font-weight="400" fill="#60717C" text-anchor="start" dominant-baseline="text-before-edge">→ 해당 PI 해석 확인</text>
+<text x="154" y="866" font-family="Apple SD Gothic Neo, Noto Sans CJK KR, sans-serif" font-size="21" font-weight="600" fill="#253540" text-anchor="start" dominant-baseline="text-before-edge">이유·수정을 함께 보냄</text>
+<text x="154" y="894" font-family="Apple SD Gothic Neo, Noto Sans CJK KR, sans-serif" font-size="21" font-weight="400" fill="#60717C" text-anchor="start" dominant-baseline="text-before-edge">→ 기억 후보 정리 · 내용 확인</text>
+<text x="154" y="928" font-family="Apple SD Gothic Neo, Noto Sans CJK KR, sans-serif" font-size="21" font-weight="600" fill="#253540" text-anchor="start" dominant-baseline="text-before-edge">없음·모르겠음·이유 불명확</text>
+<text x="154" y="956" font-family="Apple SD Gothic Neo, Noto Sans CJK KR, sans-serif" font-size="21" font-weight="400" fill="#60717C" text-anchor="start" dominant-baseline="text-before-edge">→ 확인 전까지 미확인 유지</text>
+<text x="130" y="1023" font-family="Apple SD Gothic Neo, Noto Sans CJK KR, sans-serif" font-size="21" font-weight="400" fill="#60717C" text-anchor="start" dominant-baseline="text-before-edge">선택 사실·이유·상황·확인 상태를 보존</text>
+<rect x="630" y="1090" width="340" height="120" rx="16" fill="#F8F5EF" stroke="#93836B" stroke-width="2"/>
+<text x="654" y="1110" font-family="Apple SD Gothic Neo, Noto Sans CJK KR, sans-serif" font-size="26" font-weight="600" fill="#253540" text-anchor="start" dominant-baseline="text-before-edge">아이템 선택(선택 사항)</text>
+<text x="654" y="1156" font-family="Apple SD Gothic Neo, Noto Sans CJK KR, sans-serif" font-size="25" font-weight="400" fill="#60717C" text-anchor="start" dominant-baseline="text-before-edge">+ 대화 종료</text>
+<rect x="1060" y="1080" width="360" height="140" rx="16" fill="#F8F5EF" stroke="#93836B" stroke-width="2"/>
+<text x="1084" y="1100" font-family="Apple SD Gothic Neo, Noto Sans CJK KR, sans-serif" font-size="27" font-weight="600" fill="#253540" text-anchor="start" dominant-baseline="text-before-edge">종료 요약·내용 확인</text>
+<text x="1084" y="1146" font-family="Apple SD Gothic Neo, Noto Sans CJK KR, sans-serif" font-size="22" font-weight="400" fill="#60717C" text-anchor="start" dominant-baseline="text-before-edge">기존 기억 후보를 검토</text>
+<text x="1084" y="1178" font-family="Apple SD Gothic Neo, Noto Sans CJK KR, sans-serif" font-size="22" font-weight="400" fill="#60717C" text-anchor="start" dominant-baseline="text-before-edge">다음에 활용할 내용 선택</text>
+<polygon points="1605,1065 1720,1150 1605,1235 1490,1150" fill="#F8F5EF" stroke="#93836B" stroke-width="2"/>
+<text x="1605" y="1115" font-family="Apple SD Gothic Neo, Noto Sans CJK KR, sans-serif" font-size="24" font-weight="600" fill="#253540" text-anchor="middle" dominant-baseline="text-before-edge">이후 활용에</text>
+<text x="1605" y="1148" font-family="Apple SD Gothic Neo, Noto Sans CJK KR, sans-serif" font-size="24" font-weight="600" fill="#253540" text-anchor="middle" dominant-baseline="text-before-edge">동의하나요?</text>
+<rect x="1800" y="1085" width="290" height="130" rx="16" fill="#F3EFF9" stroke="#806799" stroke-width="2"/>
+<text x="1945" y="1111" font-family="Apple SD Gothic Neo, Noto Sans CJK KR, sans-serif" font-size="26" font-weight="600" fill="#253540" text-anchor="middle" dominant-baseline="text-before-edge">동의한 내용만</text>
+<text x="1945" y="1152" font-family="Apple SD Gothic Neo, Noto Sans CJK KR, sans-serif" font-size="25" font-weight="600" fill="#253540" text-anchor="middle" dominant-baseline="text-before-edge">장기 메모리로 저장</text>
+<rect x="1490" y="1280" width="230" height="70" rx="16" fill="#F8F5EF" stroke="#93836B" stroke-width="2"/>
+<text x="1605" y="1300" font-family="Apple SD Gothic Neo, Noto Sans CJK KR, sans-serif" font-size="24" font-weight="400" fill="#253540" text-anchor="middle" dominant-baseline="text-before-edge">저장 없이 마침</text>
+<text x="100" y="1430" font-family="Apple SD Gothic Neo, Noto Sans CJK KR, sans-serif" font-size="21" font-weight="400" fill="#60717C" text-anchor="start" dominant-baseline="text-before-edge">실선: 이번 요청의 처리 흐름     점선: 이후 요청에서의 기억 활용</text>
+</svg>

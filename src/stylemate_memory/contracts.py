@@ -315,6 +315,7 @@ class Suggestion(TypedDict):
     binding: BindingSpec  # soft only; never specified/confirmed/consented
     source_ids: list[str]
     reason: str
+    fea_constraint_ids: NotRequired[list[str]]  # FEA->PI hypothesis, never a direct PI claim
 
 
 class Proposal(TypedDict):
@@ -599,9 +600,18 @@ class EndRequestAction(TypedDict):
     op: Literal["end_request"]
 
 
+class RecordComparisonAction(TypedDict):
+    op: Literal["record_comparison"]  # trusted service, atomic response + confirmed interpretation
+    feedback: FeedbackAction
+    memory: MemoryContent | None
+    source_refs: list[ObjectRef]
+    bindings: list[BindingSpec]
+    confirmation_event_ref: ObjectRef | None
+
+
 StoreAction = (
     FeedbackAction | CreateAction | ConfirmAction | ProposeBindingsAction | PromoteAction
-    | ReplaceAction | RemoveAction | RecordExtractionAction | SelectFinalAction | EndRequestAction
+    | ReplaceAction | RemoveAction | RecordExtractionAction | SelectFinalAction | EndRequestAction | RecordComparisonAction
 )
 
 
@@ -703,7 +713,15 @@ class RespondReviewUI(TypedDict):
     decision: Literal["accept", "decline", "skip"]
 
 
-UIAction = StartRequestUI | SimpleUI | RetryExtractionUI | ReviewUI | RespondReviewUI | FeedbackAction | SelectFinalAction
+class RespondComparisonUI(TypedDict):
+    op: Literal["respond_comparison"]
+    candidate_set_ref: ObjectRef
+    candidate_id: str | None
+    decision: Literal["choose", "neither", "unsure"]
+    text: NotRequired[str | None]  # optional reason/correction, accepted with the image choice
+
+
+UIAction = StartRequestUI | SimpleUI | RetryExtractionUI | ReviewUI | RespondReviewUI | RespondComparisonUI | FeedbackAction | SelectFinalAction
 
 
 class ConsumerCommand(TypedDict):
@@ -742,6 +760,7 @@ class QuestionView(TypedDict):
 
 
 class ConsumerState(TypedDict):
+    comparison: NotRequired[dict[str, JSONValue] | None]
     contract_version: str
     state_version: int
     request: RequestState | None

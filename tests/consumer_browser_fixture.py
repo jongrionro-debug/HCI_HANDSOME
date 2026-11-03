@@ -36,14 +36,15 @@ class BrowserTransport(FakeTransport):
         return response
 
 
-def synthetic_image(rgb):
+def synthetic_image(rgb, fit="Wide"):
     """Small, reproducible raster; no image download or provider invocation."""
     width, height = 120, 160
     rows = []
     for y in range(height):
         row = bytearray()
         for x in range(width):
-            pants = 18 <= y < 145 and 30 <= x < 90 and (y < 65 or x < 55 or x >= 65)
+            left, right = (30, 90) if fit == "Wide" else (40, 80)
+            pants = 18 <= y < 145 and left <= x < right and (y < 65 or x < 55 or x >= 65)
             row.extend(rgb if pants else (241, 240, 235))
         rows.append(b"\0" + row)
     def chunk(kind, data):
@@ -73,6 +74,16 @@ def main():
         service.import_catalog(data)
         def map_products():
             service.build_catalog_maps()
+            # Preserve the legacy full-map input regression independently of
+            # the new consumer's PI-only catalog-generation policy.
+            def legacy_maps():
+                from stylemate_memory.catalog_mapping import build_product_map
+                for record in service._catalog.export_records():
+                    pid = record["product_id"]
+                    mapped = build_product_map(record, raw_version=service._catalog.raw_version(pid), registry=service.registry)
+                    service._catalog.save_product_map(mapped, expected_raw_version=mapped["raw_version"],
+                        expected_map_version=service._catalog.get_product_map(pid)["map_version"])
+            service._run(legacy_maps)
             if "--sparse-maps" in sys.argv:
                 # An explicitly selected small synthetic ProductMap fixture.
                 # The default tests D2's entire 37-assertion output, including

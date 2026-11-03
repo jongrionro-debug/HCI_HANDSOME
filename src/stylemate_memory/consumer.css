@@ -149,6 +149,8 @@ details > summary { cursor: pointer; min-height: 44px; padding: .5rem 0; font-we
   .workspace.open .composer label { font-size: .85rem; margin-bottom: .4rem; }
   .workspace.open .composer textarea { min-height: 64px; height: 72px; max-height: 140px; resize: none; }
   .workspace.open .composer .hint { font-size: .75rem; }
+  .workspace.hypothesis-comparison.open { padding-bottom: 0; }
+  .workspace.hypothesis-comparison.open .composer { position: static; padding: 0; box-shadow: none; }
 }
 @media (prefers-reduced-motion: no-preference) {
   .crop-box { transition: background-color 180ms ease-out; }
