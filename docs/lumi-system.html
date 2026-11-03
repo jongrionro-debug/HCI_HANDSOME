@@ -1,0 +1,440 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="LUMI의 기획, 사용자 경험, 메모리, Feature Map, 상품 검색, 현재 구현과 연구 계획을 설명하는 단일 파일 안내서">
+  <title>LUMI · 전체 시스템 이해하기</title>
+  <style>
+    :root { color-scheme: light; --bg:#f8f7f3; --paper:#fff; --ink:#252f35; --muted:#5d6467; --line:#d9dcd7; --accent:#285e51; --tint:#eaf1ec; --warm:#805123; --warm-tint:#f7efdf; --danger:#9c3835; --radius:14px; font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Noto Sans KR",sans-serif; color:var(--ink); background:var(--bg); }
+    * { box-sizing:border-box; }
+    html { scroll-padding-top:28px; }
+    body { margin:0; line-height:1.8; word-break:keep-all; overflow-wrap:anywhere; }
+    a { color:var(--accent); text-underline-offset:.23em; }
+    a:hover { text-decoration-thickness:2px; }
+    button { font:inherit; color:inherit; cursor:pointer; min-height:44px; }
+    :focus-visible { outline:3px solid var(--accent); outline-offset:4px; }
+    ::selection { background:#c9dfd2; color:#172c23; }
+    h1,h2,h3,p,figure { margin:0; }
+    h1,h2,h3 { line-height:1.4; letter-spacing:-.025em; text-wrap:balance; }
+    h1 { font-size:2.75rem; max-width:18ch; }
+    h2 { font-size:1.8rem; margin-bottom:1rem; }
+    h3 { font-size:1.12rem; margin:1.8rem 0 .65rem; }
+    p + p { margin-top:.85rem; }
+    p { max-width:74ch; }
+    strong { font-weight:700; }
+    small,.small { font-size:.82rem; }
+    code,pre { font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; font-size:.85em; }
+    code { background:#eeeee8; padding:.12em .3em; border-radius:3px; overflow-wrap:anywhere; }
+    pre { padding:1.35rem; background:#edf0eb; border:1px solid var(--line); border-radius:8px; line-height:1.75; white-space:pre-wrap; overflow-wrap:anywhere; word-break:break-word; }
+    pre code { padding:0; background:none; }
+    ul,ol { padding-left:1.3rem; margin:.7rem 0; }
+    li + li { margin-top:.45rem; }
+    .skip { position:absolute; top:-100px; left:1rem; z-index:10; background:var(--paper); padding:.7rem; }
+    .skip:focus { top:1rem; }
+    .sidebar { position:fixed; inset:0 auto 0 0; width:244px; padding:32px 27px; border-right:1px solid var(--line); display:flex; flex-direction:column; background:var(--bg); overflow-y:auto; }
+    .wordmark { font-family:Georgia,serif; font-size:2.5rem; line-height:1.1; letter-spacing:.06em; text-decoration:none; color:var(--ink); }
+    .side-intro { font-size:.8rem; color:var(--muted); margin:12px 0 26px; }
+    .sidebar nav { display:grid; gap:3px; }
+    .sidebar nav a { padding:7px 9px; margin-left:-9px; border-radius:5px; color:var(--muted); text-decoration:none; font-size:.87rem; }
+    .sidebar nav a:hover,.sidebar nav a[aria-current="location"] { background:var(--tint); color:var(--accent); }
+    .side-foot { margin-top:auto; padding-top:32px; font-size:.74rem; color:var(--muted); line-height:1.7; }
+    main { margin-left:244px; max-width:1280px; padding:52px 64px 0; }
+    .meta { display:flex; justify-content:space-between; gap:12px; flex-wrap:wrap; font-size:.78rem; color:var(--muted); border-bottom:1px solid var(--line); padding-bottom:18px; margin-bottom:36px; }
+    .print { border:0; background:none; padding:0; min-height:28px; color:var(--accent); font-size:.8rem; text-decoration:underline; text-underline-offset:.2em; }
+    .lead { font-size:1.1rem; margin-top:22px; color:#47544e; max-width:60ch; }
+    .opening { margin-top:30px; display:grid; grid-template-columns:1fr 1fr; gap:24px; border-block:1px solid var(--line); padding:22px 0; }
+    .opening strong { display:block; margin-bottom:6px; }
+    .opening p { color:var(--muted); font-size:.9rem; }
+    .tag { display:inline-block; vertical-align:baseline; font-size:.72rem; font-weight:650; line-height:1.6; padding:3px 8px; border-radius:4px; color:var(--accent); background:var(--tint); white-space:nowrap; }
+    .tag.pending { color:var(--warm); background:var(--warm-tint); }
+    section { padding-top:64px; padding-bottom:52px; border-bottom:1px solid var(--line); scroll-margin-top:26px; }
+    section:first-of-type { padding-top:50px; }
+    .section-intro { color:var(--muted); margin-bottom:24px; }
+    .note { background:var(--tint); border-radius:8px; padding:18px 22px; margin-top:22px; font-size:.92rem; }
+    .note.warm { background:var(--warm-tint); color:#68441e; }
+    .note strong { color:inherit; }
+    .terms { display:grid; grid-template-columns:150px minmax(0,1fr); margin:24px 0 0; }
+    .terms dt,.terms dd { margin:0; padding:13px 0; border-bottom:1px solid var(--line); }
+    .terms dt { font-weight:650; padding-right:18px; }
+    .terms dd { color:var(--muted); }
+    .flow { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:0; list-style:none; padding:0; margin:26px 0 0; border:1px solid var(--line); border-radius:var(--radius); overflow:hidden; }
+    .flow li { padding:22px; margin:0; border-right:1px solid var(--line); border-bottom:1px solid var(--line); background:var(--paper); }
+    .flow li:nth-child(3n) { border-right:0; }
+    .flow li:nth-last-child(-n+3) { border-bottom:0; }
+    .flow .order { display:block; color:var(--accent); font-size:.78rem; margin-bottom:7px; font-variant-numeric:tabular-nums; }
+    .flow strong { display:block; margin-bottom:6px; }
+    .flow p { color:var(--muted); font-size:.87rem; }
+    .demo { border:1px solid var(--line); border-radius:var(--radius); overflow:hidden; background:var(--paper); margin-top:24px; }
+    .demo-caption { padding:16px 24px; background:var(--tint); font-size:.84rem; color:var(--accent); }
+    .demo-steps { display:flex; gap:6px; padding:20px 24px 0; flex-wrap:wrap; }
+    .step { border:1px solid var(--line); border-radius:5px; background:var(--paper); padding:7px 10px; font-size:.8rem; }
+    .step:hover { background:var(--tint); border-color:var(--accent); }
+    .step[aria-pressed="true"] { background:var(--accent); color:#fff; border-color:var(--accent); }
+    .demo-body { padding:24px; }
+    .demo-body h3 { margin:0 0 16px; font-size:1.25rem; }
+    .demo-body dl { display:grid; grid-template-columns:105px minmax(0,1fr); gap:14px 16px; margin:0; font-size:.92rem; }
+    .demo-body dt { color:var(--muted); }
+    .demo-body dd { margin:0; }
+    .demo-result { margin-top:22px; padding-top:18px; border-top:1px solid var(--line); color:var(--accent); font-size:.9rem; }
+    .branch { display:flex; flex-wrap:wrap; gap:8px; margin-top:16px; }
+    .branch button { border:1px solid var(--line); border-radius:5px; background:var(--paper); padding:7px 12px; font-size:.85rem; }
+    .branch button[aria-pressed="true"] { border-color:var(--accent); background:var(--tint); color:var(--accent); }
+    [hidden] { display:none!important; }
+    .table-wrap { max-width:100%; overflow-x:auto; margin-top:22px; }
+    table { width:100%; border-collapse:collapse; font-size:.89rem; text-align:left; }
+    caption { text-align:left; color:var(--muted); font-size:.8rem; padding-bottom:12px; }
+    th,td { padding:14px 13px; vertical-align:top; border-bottom:1px solid var(--line); }
+    thead th { background:#eceee8; font-weight:650; }
+    tbody th { font-weight:650; width:22%; }
+    td p + p { margin-top:7px; }
+    .two-col { display:grid; grid-template-columns:1fr 1fr; gap:30px; }
+    .two-col > * { min-width:0; }
+    .memory-example { margin:26px 0; padding:0; list-style:none; }
+    .memory-example li { display:grid; grid-template-columns:125px minmax(0,1fr); gap:20px; border-bottom:1px solid var(--line); padding:18px 0; margin:0; }
+    .memory-example strong { color:var(--accent); }
+    .memory-example span { color:var(--muted); font-size:.92rem; }
+    .architecture { padding:0; list-style:none; margin:26px 0 0; }
+    .architecture li { display:grid; grid-template-columns:36px 175px minmax(0,1fr); gap:18px; margin:0; padding:20px 0; border-top:1px solid var(--line); }
+    .architecture .n { width:30px; height:30px; display:grid; place-items:center; border:1px solid var(--line); border-radius:50%; font-size:.8rem; color:var(--accent); }
+    .architecture p { font-size:.92rem; color:var(--muted); }
+    .architecture code { display:inline; font-size:.75rem; background:none; padding:0; }
+    details { border-block:1px solid var(--line); margin-top:24px; }
+    details + details { border-top:0; margin-top:0; }
+    summary { padding:16px 0; cursor:pointer; font-size:.92rem; font-weight:650; }
+    details > :not(summary) { margin-bottom:20px; }
+    .status-table td:last-child { color:var(--muted); }
+    .sources { list-style:none; padding:0; margin:20px 0 0; }
+    .sources li { display:grid; grid-template-columns:160px minmax(0,1fr); gap:20px; padding:14px 0; margin:0; border-bottom:1px solid var(--line); font-size:.88rem; }
+    footer { padding:30px 0 46px; display:flex; justify-content:space-between; flex-wrap:wrap; gap:18px; color:var(--muted); font-size:.78rem; }
+    @media (min-width:1600px) { main { margin-inline:auto; padding-left:100px; } }
+    @media (max-width:1150px) { .sidebar { width:210px; padding-inline:22px; } main { margin-left:210px; padding-inline:36px; } .architecture li { grid-template-columns:32px 150px minmax(0,1fr); gap:12px; } }
+    @media (max-width:850px) { .sidebar { position:static; width:auto; padding:20px 24px 0; border-right:0; border-bottom:1px solid var(--line); display:block; } .wordmark { font-size:2rem; } .side-intro { display:inline; margin-left:14px; } .sidebar nav { display:flex; overflow-x:auto; gap:16px; padding:15px 0 12px; } .sidebar nav a { white-space:nowrap; margin:0; padding:4px 0; } .side-foot { display:none; } main { margin:0; padding:30px 26px 0; max-width:none; } h1 { font-size:2.35rem; } .meta { margin-bottom:28px; } section { padding-top:48px; padding-bottom:38px; } }
+    @media (max-width:560px) { h1 { font-size:2rem; } h2 { font-size:1.5rem; } h3 { font-size:1.05rem; } main { padding-inline:20px; } .sidebar { padding-inline:20px; } .opening,.two-col { grid-template-columns:1fr; gap:20px; } .flow { grid-template-columns:1fr; } .flow li { border-right:0; border-bottom:1px solid var(--line)!important; padding:18px 20px; } .flow li:last-child { border-bottom:0!important; } .flow .order { display:inline; margin-right:10px; } .flow strong { display:inline; } .flow p { margin-top:5px; } .terms { grid-template-columns:95px minmax(0,1fr); font-size:.9rem; } .demo-caption { padding:14px 18px; } .demo-steps { padding:18px 18px 0; } .demo-body { padding:20px 18px; } .demo-body dl { grid-template-columns:1fr; gap:4px; } .demo-body dd { margin-bottom:14px; } .architecture li { grid-template-columns:30px minmax(0,1fr); } .architecture li > div:last-child { grid-column:2; } .memory-example li { grid-template-columns:1fr; gap:6px; } .sources li { grid-template-columns:1fr; gap:4px; } table { min-width:570px; } .note { padding:16px 18px; } .meta { gap:6px 14px; } }
+    @media (prefers-reduced-motion:no-preference) { html { scroll-behavior:smooth; } }
+    @media print { :root { --bg:#fff; } .sidebar,.print,.demo-steps,.branch,.skip { display:none!important; } main { margin:0; max-width:none; padding:0; } body { font-size:10pt; line-height:1.65; } h1 { font-size:25pt; max-width:none; } h2 { font-size:17pt; } section { padding:24px 0; } h2,h3,summary { break-after:avoid; } tr,.note,.flow li,.architecture li { break-inside:avoid; } .table-wrap { overflow:visible; } table { min-width:0; font-size:9pt; } .demo { break-inside:avoid; } .opening { grid-template-columns:1fr 1fr; } a { color:inherit; } }
+  </style>
+</head>
+<body>
+  <a class="skip" href="#overview">본문으로 건너뛰기</a>
+  <aside class="sidebar" aria-label="문서 안내">
+    <a class="wordmark" href="#top" aria-label="LUMI 설명 처음으로">LUMI</a>
+    <p class="side-intro">전체 시스템 이해하기</p>
+    <nav aria-label="목차">
+      <a href="#overview">어떤 문제를 푸는가</a>
+      <a href="#experience">사용 흐름 따라가기</a>
+      <a href="#maps">조건을 이해하는 방식</a>
+      <a href="#memory">기억과 동의의 경계</a>
+      <a href="#architecture">내부 처리와 코드</a>
+      <a href="#search">상품을 찾는 방식</a>
+      <a href="#reliability">실패·수정·삭제 처리</a>
+      <a href="#status">현재 구현과 남은 일</a>
+      <a href="#research">연구에서 확인할 것</a>
+      <a href="#run">실행과 검증 방법</a>
+      <a href="#sources">근거와 용어</a>
+    </nav>
+    <div class="side-foot">기준일 2026.11.03<br>코드 기준 <code>bf87b0f</code><br>설명용 단일 파일 · 오프라인 열람</div>
+  </aside>
+  <main id="top">
+    <header>
+      <div class="meta"><span>HCI_HANDSOME · 기획 + 현재 구현</span><span>2026.11.03 기준 <button class="print" type="button" id="print-button">인쇄 / PDF로 저장</button></span></div>
+      <h1>취향은 기억하고,<br>이번 요구는 구분합니다.</h1>
+      <p class="lead"><strong>LUMI</strong>는 평소 취향과 지금 필요한 옷의 조건을 함께 반영하는 패션 추천 에이전트 연구 프로젝트입니다. 사용자는 처음부터 모든 조건을 설명하지 않아도, 대화와 이미지 비교로 원하는 스타일을 구체화합니다.</p>
+      <div class="opening">
+        <div><strong><span class="tag">구현됨 · 로컬 프로토타입</span></strong><p>입력 접수 → 기억 확인 → 목표 생성 → 상품 검색·비교 → 피드백 → 종료 후 장기 활용 동의까지 코드가 연결되어 있습니다.</p></div>
+        <div><strong><span class="tag pending">실제 품질·효과는 별도 검증</span></strong><p>현재 근거는 합성 입력·가상 모델·SQLite·브라우저 검사입니다. 실제 상품 수집, 한국어 해석 품질, 추천 품질과 사용자 연구는 남아 있습니다.</p></div>
+      </div>
+    </header>
+
+    <section id="overview" aria-labelledby="overview-title">
+      <h2 id="overview-title">어떤 문제를 푸는가</h2>
+      <p>마음에 드는 옷을 알아보는 것과, 그 옷을 찾을 조건을 말하는 것은 다릅니다. “편한데 단정한 바지”처럼 느낌으로 시작할 수도 있고, 평소 와이드핏을 좋아해도 발표 날에는 슬림핏이 필요할 수 있습니다.</p>
+      <p>LUMI는 <strong>대화로 조건을 받고, 이미지로 해석을 확인하며, 기억의 적용 범위를 나누는</strong> 방식으로 이 과정을 돕습니다. 시스템이 추정한 이유를 사용자 취향으로 바로 확정하지 않고, 최종 선택과 기억의 이후 활용은 사용자가 결정합니다.</p>
+      <dl class="terms">
+        <dt>대화</dt><dd>필요한 아이템, 상황, 가격 조건, 선택 이유, 수정할 부분을 전달합니다.</dd>
+        <dt>이미지 비교</dt><dd>“내가 말한 느낌이 이 핏에 가까운가?”를 상품의 보이는 차이로 확인합니다.</dd>
+        <dt>단기 기억</dt><dd>이번 요청의 조건·상황·선택·수정과 확인 중인 해석입니다.</dd>
+        <dt>장기 기억</dt><dd>내용을 확인하고 다음 요청에도 활용하도록 별도로 동의한 취향입니다.</dd>
+      </dl>
+      <div class="note"><strong>시스템 이름:</strong> LUMI는 보고서의 <em>Long&amp;Short-time User Memory with Image-selection</em>에서 온 이름입니다. 코드의 <code>stylemate_memory</code>와 <code>STYLEMATE_</code>는 호환을 위해 남긴 이전 명칭입니다.</div>
+    </section>
+
+    <section id="experience" aria-labelledby="experience-title">
+      <h2 id="experience-title">사용 흐름 따라가기</h2>
+      <p class="section-intro">한 요청은 아래 순서로 이어집니다. 이미지 선택과 재탐색은 반복할 수 있고, 모든 속성을 채우지 않아도 종료할 수 있습니다.</p>
+      <ol class="flow" aria-label="LUMI의 기본 사용 순서">
+        <li><span class="order">1</span><strong>원하는 옷 이야기하기</strong><p>새 요청에 아이템과 상황을 입력합니다. 온보딩에서 평소 취향을 먼저 말하거나 바로 시작할 수도 있습니다.</p></li>
+        <li><span class="order">2</span><strong>이해한 내용 확인하기</strong><p>기억할 문장과 적용 대상을 확인합니다. 문장의 의미와 사전 속성 연결은 구분해 검토합니다.</p></li>
+        <li><span class="order">3</span><strong>상품 이미지 비교하기</strong><p>직접 말한 조건은 유지하고, 추상적인 요구를 어떤 PI 값으로 구현할지 비교합니다.</p></li>
+        <li><span class="order">4</span><strong>선택과 수정 반영하기</strong><p>선택과 선택 사항인 이유를 함께 제출합니다. 글만 보내거나 없음·모르겠음으로 답할 수도 있습니다.</p></li>
+        <li><span class="order">5</span><strong>결정하거나 탐색 끝내기</strong><p>조건을 고쳐 더 보거나 상품을 결정합니다. 상품을 고르지 않고 종료할 수도 있습니다.</p></li>
+        <li><span class="order">6</span><strong>다음 활용을 따로 정하기</strong><p>종료 요약에서 기존 후보를 확인하고, 재사용할 항목과 동의를 직접 선택합니다. 저장 없이 끝낼 수 있습니다.</p></li>
+      </ol>
+      <div class="demo" aria-label="합성 사례로 보는 내부 상태 변화">
+        <div class="demo-caption">설명용 합성 사례 · 단계 버튼으로 내부 상태를 확인하세요. 이 페이지는 모델·DB·상품 검색을 실행하지 않습니다.</div>
+        <div class="demo-steps" role="group" aria-label="사례 단계 선택">
+          <button class="step" type="button" data-step="0" aria-pressed="true" aria-controls="demo-panel">1 입력</button>
+          <button class="step" type="button" data-step="1" aria-pressed="false" aria-controls="demo-panel">2 내용 확인</button>
+          <button class="step" type="button" data-step="2" aria-pressed="false" aria-controls="demo-panel">3 검색·비교</button>
+          <button class="step" type="button" data-step="3" aria-pressed="false" aria-controls="demo-panel">4 응답 반영</button>
+          <button class="step" type="button" data-step="4" aria-pressed="false" aria-controls="demo-panel">5 종료·동의</button>
+          <button class="step" type="button" data-step="5" aria-pressed="false" aria-controls="demo-panel">6 새 요청</button>
+        </div>
+        <div class="demo-body" id="demo-panel" aria-live="polite" aria-atomic="true">
+          <h3 id="demo-title">“네이비 슬랙스를 편하게 입고 싶어요.”</h3>
+          <dl><dt>사용자 행동</dt><dd id="demo-user">필요한 옷과 원하는 느낌을 한 문장으로 입력합니다.</dd><dt>내부 처리</dt><dd id="demo-process">발화 근거를 접수하고 기억 후보를 만듭니다. 네이비·슬랙스는 직접 PI, 편안함은 FEA 연결 후보로 구분합니다.</dd><dt>기억 상태</dt><dd id="demo-memory">아직 확인하지 않은 단기 후보입니다. 장기 기억은 생성되지 않습니다.</dd></dl>
+          <div class="branch" id="response-branch" role="group" aria-label="응답 방식 비교" hidden><button type="button" data-branch="choice" aria-pressed="true">선택만 보낸 경우</button><button type="button" data-branch="reason" aria-pressed="false">선택 + 이유를 보낸 경우</button></div>
+          <p class="demo-result" id="demo-result">“편안함 = Wide”는 아직 사실도, 확정된 사용자 조건도 아닙니다.</p>
+        </div>
+      </div>
+      <noscript><p class="note">단계 전환은 JavaScript가 필요합니다. 아래 각 절에 동일한 처리 원리와 선택·이유의 차이를 모두 설명했습니다.</p></noscript>
+      <p class="small" style="margin-top:16px;color:var(--muted)">실제 탐색 화면은 큰 화면에서 왼쪽에 상품·이미지, 오른쪽에 대화를 배치합니다. 반영 정보 상세에는 이번 요청·참고한 평소 취향·확인 중인 해석을 구분하며, 내부 Feature Map 전체를 기본 화면에 펼치지 않습니다.</p>
+    </section>
+
+    <section id="maps" aria-labelledby="maps-title">
+      <h2 id="maps-title">조건을 이해하는 방식: PI, FEA, 연결 가설</h2>
+      <p><strong>Feature Map</strong>은 원하는 옷과 공급된 상품을 같은 속성 이름으로 비교하기 위한 표현입니다. 사용자의 목표와 실제 상품은 역할이 다릅니다.</p>
+      <div class="two-col">
+        <div><h3>사용자 목표 Map</h3><p>원하는 상품의 <strong>PI + FEA 요구</strong>를 담습니다. FEA를 어떤 PI로 구현할지에 대한 연결 가설은 별도로 관리합니다. 각 값에는 대상·조건·근거와 지정/추론 상태가 붙습니다.</p></div>
+        <div><h3>상품 Map</h3><p>공급 자료에서 확인한 <strong>PI</strong>를 담습니다. 사용자의 바람이 아닌 상품의 관찰 정보입니다. 현재 소비자 경로는 상품별 FEA 30개를 채워 비교하는 구조가 아닙니다.</p></div>
+      </div>
+      <div class="table-wrap" role="region" aria-label="PI의 일곱 항목" tabindex="0"><table>
+        <caption>PI · Product Information · 상품정보 7항목. 아래 값은 예시이며 전체 허용값은 사전 JSON이 기준입니다.</caption>
+        <thead><tr><th scope="col">항목</th><th scope="col">뜻과 예시</th><th scope="col">현재 실행 범위</th></tr></thead>
+        <tbody>
+          <tr><th scope="row">Type · 종류</th><td>Slacks, Jeans 등 바지 종류</td><td>현재 대상 <code>Pants</code> 안에서 비교</td></tr>
+          <tr><th scope="row">Brand · 브랜드</th><td>브랜드의 식별</td><td>전체 목록이 미공개라 값 검증 미지원</td></tr>
+          <tr><th scope="row">Price · 가격</th><td><code>43,900~54,360</code> 같은 원문 구간</td><td>구간 문자열 일치만 지원. 수치 예산·경계·통화 계산 미지원</td></tr>
+          <tr><th scope="row">Color · 색상</th><td>Navy, Black 등</td><td>허용값 검증·직접 조건·이미지 비교</td></tr>
+          <tr><th scope="row">Fit · 핏</th><td>Wide, Straight, Slim 등</td><td>바지 핏 기준. 이전 사전의 Relaxed와 자동 치환하지 않음</td></tr>
+          <tr><th scope="row">Fabric · 소재</th><td>Cotton, Wool 등 섬유 원료</td><td>Denim 같은 원단 종류와 구분</td></tr>
+          <tr><th scope="row">Detail · 디테일</th><td>Pleats, Banding 등</td><td>허용값 검증·직접 조건·이미지 비교</td></tr>
+        </tbody>
+      </table></div>
+      <h3>FEA는 “어떤 옷인가”보다 “왜 원하는가”를 정리합니다</h3>
+      <p><strong>Functional</strong> 8개는 보온·신축성·편안함 같은 기능 요구, <strong>Expressive</strong> 13개는 업무복·하객복 같은 표현·상황 요구, <strong>Aesthetic</strong> 9개는 실루엣 연출·다른 아이템과의 매칭 같은 미적 요구입니다. 합계 30개 태그이며 PI와 합쳐 37개의 동등한 상품 속성으로 취급하지 않습니다.</p>
+      <div class="note"><strong>직접 조건과 가설의 차이</strong><br>“네이비 슬랙스를 편하게” → <code>Color=Navy</code>·<code>Type=Slacks</code>는 직접 PI입니다. “편안함(Ease)을 <code>Fit=Wide</code>로 구현하면 좋을까?”는 확인할 가설입니다. 가설은 확정 필터에 넣지 않고, Navy/Wide와 Navy/Straight의 비교로 이번 해석을 확인합니다.</div>
+      <p style="margin-top:20px">현 가설 구현은 <strong>Type·Color·Fit·Detail 중 한 값</strong>을 선호하는 soft 제안입니다. 같은 축에 직접 PI 조건이 있으면 그 축의 가설은 제외합니다. “편안함”과 Wide는 일대일 정답 관계가 아니며, 사진에서 Wide를 골랐어도 실제 착용 편안함이 입증되지는 않습니다.</p>
+      <p>모르는 목표 값은 미정으로 남깁니다. 미정, 추론, 지정, 상관없음, 비적용, 미지원, 상충을 구분하며, 값과 상태를 임의로 채우지 않습니다. “빈티지한 느낌”처럼 사전에 정확히 연결되지 않는 표현도 원래 문장과 근거로 보존할 수 있습니다.</p>
+      <div class="note warm"><strong>현재 지원 범위는 여성 바지 자료를 바탕으로 한 Pants 매핑입니다.</strong> 프로젝트의 연구 목표는 패션 아이템·코디 탐색이지만, 현재 사전 실행이 상의·아우터·드레스나 완성 코디 추천까지 지원한다는 뜻은 아닙니다.</div>
+    </section>
+
+    <section id="memory" aria-labelledby="memory-title">
+      <h2 id="memory-title">기억은 내용·적용 범위·동의를 함께 저장합니다</h2>
+      <p>기억의 정본은 속성값 하나가 아닌 <strong>최소 자연어 내용 + 원래 근거 + 대상·상황 + 확인·동의 상태</strong>입니다. PI/FEA 연결은 그 위에 붙는 선택적 해석입니다. “이 문장이 맞다”와 “이 문장을 이 속성으로 해석해도 된다”는 구분합니다.</p>
+      <div class="table-wrap" role="region" aria-label="단기와 장기 기억의 차이" tabindex="0"><table>
+        <thead><tr><th scope="col">구분</th><th scope="col">단기 기억</th><th scope="col">장기 기억</th></tr></thead>
+        <tbody>
+          <tr><th scope="row">무엇을 담나</th><td>이번 요청의 요구·상황·선택·수정·해석 후보</td><td>내용 확인과 별도 재사용 동의를 받은 취향</td></tr>
+          <tr><th scope="row">어디에 쓰나</th><td>같은 요청 안에서만. 미확인 후보는 확정 조건에서 제외</td><td>대상·상황·기간이 맞는 다음 요청에서 참고</td></tr>
+          <tr><th scope="row">언제 생기나</th><td>입력·피드백을 접수하고 후보를 만들 때</td><td>소비자 서비스의 세션 종료 후 요약에서 동의할 때</td></tr>
+          <tr><th scope="row">무엇이 아닌가</th><td>새 요청으로 자동 복사되는 임시 취향</td><td>반복 선택·상품 확정·내용 확인만으로 자동 생성되는 취향</td></tr>
+        </tbody>
+      </table></div>
+      <h3>평소 취향과 이번 예외가 충돌하면</h3>
+      <ol class="memory-example" aria-label="이번 예외와 새 요청의 기억 적용 예시">
+        <li><strong>평소 취향</strong><span>이미 확인·동의한 장기 기억: “바지는 Navy와 Wide를 선호한다.”</span></li>
+        <li><strong>이번 발표 요청</strong><span>“이번 발표에는 Slim으로.” → 이번 목표는 Navy + Slim. 충돌하는 Wide만 이번 검색에서 제외하고 장기 원본은 보존합니다.</span></li>
+        <li><strong>새 일상 요청</strong><span>발표 전용 Slim은 넘어오지 않습니다. 유효한 평소 Navy + Wide를 다시 참고합니다. 같은 요청을 재개하는 경우와 구분합니다.</span></li>
+      </ol>
+      <h3>네 가지 결정을 분리합니다</h3>
+      <p><strong>내용 확인</strong>은 시스템이 정리한 문장이 맞다는 결정, <strong>속성 연결 확인(binding)</strong>은 그 문장을 어떤 PI/FEA로 해석할지에 대한 결정입니다. <strong>상품의 최종 선택</strong>은 이번 탐색 결과의 결정이고, <strong>이후 활용 동의</strong>는 확인한 내용을 다음에도 사용할 수 있다는 별도 결정입니다.</p>
+      <p>장기 활용 항목과 동의 체크는 기본 해제입니다. 종료 전에 접수·해석된 후보는 종료 요약에서 확인할 수 있지만, 종료 후 새 입력이나 늦은 모델 추출 결과를 더하지 않습니다. 요청 전용 slot이 붙은 항목을 자동으로 일반 취향으로 넓히지 않으며, 현 재사용 목록에서도 제외합니다.</p>
+      <details><summary>기억 항목과 근거에는 구체적으로 무엇이 남나요?</summary><p>항목·사용자·요청 ID, 버전, 문장, 대상 옷과 slot, 상황 조건, 긍정/회피·필수/선호, 적용·보관 시한, 직접 발화/추론의 출처, 근거 참조, 확인 이벤트, 동의한 내용·범위 snapshot, 교체·파생 관계가 연결됩니다. 전체 채팅을 그대로 장기 취향으로 저장하는 방식이 아닙니다.</p></details>
+    </section>
+
+    <section id="architecture" aria-labelledby="architecture-title">
+      <h2 id="architecture-title">화면 뒤에서는 이렇게 처리합니다</h2>
+      <p class="section-intro">브라우저 → 로컬 HTTP 서버 → ConsumerService가 한 요청을 조율합니다. 모델은 후보를 제안하고, Python 코드가 근거·상태·범위를 검증하며 SQLite가 저장을 맡습니다. 아래 단계는 별도 AI 에이전트 일곱 개를 뜻하지 않습니다.</p>
+      <ol class="architecture">
+        <li><span class="n">1</span><strong>화면에서 명령 전송</strong><div><p>시작·선택·수정·확인·종료를 명령으로 보냅니다. 서버는 현재 화면에 제시한 내용과 버전을 확인합니다. 브라우저가 임의의 동의·저장 명령을 직접 만들게 하지 않습니다.</p><code>consumer.html / consumer.js / consumer-http.js → consumer.py</code></div></li>
+        <li><span class="n">2</span><strong>근거 접수·후보 추출</strong><div><p>실제 발화·선택을 먼저 접수합니다. 모델은 기억 문장·대상·상황과 선택적 PI/FEA 연결을 제안하고, 코드는 인용·허용값·참조를 검사해 미확인 후보로 저장합니다.</p><code>app.py: ConsumerService._extract → model_io.py / llm.py</code></div></li>
+        <li><span class="n">3</span><strong>확인·저장 상태 관리</strong><div><p>사용자에게 보여준 내용의 확인 이벤트를 받아 활성화합니다. 근거·기억·binding·가설·관계·동의 snapshot을 버전과 함께 관리합니다.</p><code>store.py / store_v1.py / store_feedback.py → 메모리 SQLite</code></div></li>
+        <li><span class="n">4</span><strong>관련 기억 조회</strong><div><p>현재 요청에 쓸 수 있는 기억을 먼저 가립니다. 사용자·확인·동의·기간·대상·상황을 검사한 뒤 구조와 키워드로 관련 후보와 근거를 묶습니다. 관련성이 높아도 동의·범위를 넘어갈 수 없습니다.</p><code>retrieval.py: build_context_v1</code></div></li>
+        <li><span class="n">5</span><strong>목표·연결 가설 생성</strong><div><p>직접 PI와 확인한 조건을 보존해 목표를 만들고 FEA→PI 가설을 분리합니다. 출처 없는 값, 사전 밖 값, 추론을 필수 조건으로 바꾸는 제안은 적용하지 않습니다.</p><code>inference.py: infer_v1 / hypotheses.py: infer_with_hypotheses</code></div></li>
+        <li><span class="n">6</span><strong>검색·비교 발행</strong><div><p>공급 상품 PI로 필수 조건을 먼저 검사한 뒤 선호에 따라 순서를 정합니다. 확인된 대안이 있으면 가설 비교를 구성하고 상품·이미지·후보 묶음 버전을 고정해 발행합니다.</p><code>catalog.py / product_search.py / comparison.py / hypotheses.py</code></div></li>
+        <li><span class="n">7</span><strong>피드백·재탐색</strong><div><p>선택과 선택 사항인 이유를 같은 근거 묶음으로 접수합니다. 필요한 확인을 거친 뒤 이번 조건을 갱신해 4~6단계를 반복합니다. 종료 후에만 별도 장기 활용 동의를 받습니다.</p><code>app.py: command / hypotheses.py: respond_comparison</code></div></li>
+      </ol>
+      <div class="note"><strong>핵심 경계:</strong> 모델이 “이 사용자는 Wide를 좋아한다”고 출력해도 그것만으로 DB의 확정 상태나 장기 동의가 생기지 않습니다. 모델 출력·사용자 확인·저장 권한을 코드에서 분리합니다.</div>
+      <details><summary>실행 구성과 인터페이스 보기</summary>
+        <p>실행 의존성은 Python 3.11+ 표준 라이브러리입니다. 화면은 HTML/CSS/JavaScript이며, 메모리 DB와 상품 DB는 서로 다른 SQLite 파일로 저장소 밖에 둡니다. 로컬 이미지는 별도 외부 디렉터리에서 제공합니다.</p>
+        <ul><li><code>ConsumerService.state()</code>는 화면 상태, <code>command()</code>는 사용자 명령의 진입점입니다.</li><li>HTTP: <code>GET /api/state</code>, <code>POST /api/command</code>, <code>GET /api/images/{image_id}?version=N</code>.</li><li><code>contracts.py</code>가 객체·명령 계약을, <code>registry.py</code>가 속성 사전을 정의합니다.</li><li>저장 계약 <code>lumi-memory-v1</code>과 속성 사전 <code>park-2025-source-v1</code>의 버전은 별개입니다.</li><li>현재 서비스는 <code>127.0.0.1:8766</code>의 단일 신뢰 테스터용입니다. 공개 로그인·다중 사용자 서비스·구매 결제는 구현 범위 밖입니다.</li></ul>
+      </details>
+    </section>
+
+    <section id="search" aria-labelledby="search-title">
+      <h2 id="search-title">상품 검색과 이미지 비교는 어떻게 다른가</h2>
+      <h3>먼저 실제로 공급된 상품을 검색합니다</h3>
+      <p>상품은 출처·수집 시각·제목·설명·메타데이터·이미지 참조·라벨이 있는 JSON/JSONL로 가져옵니다. <strong>현재 크롤러는 없고</strong>, 공급 메타데이터의 정확한 사전 값을 정규화해 상품 PI를 만듭니다. 이미지에서 모든 속성을 자동 추출하는 완성된 비전 파이프라인도 아닙니다.</p>
+      <p>검색은 <strong>필수 조건 필터 → 선호 일치에 따른 정렬</strong> 순서입니다. 미확인·추정·상충한 상품 값은 확인된 필수 조건 충족으로 보지 않습니다. 초기 정렬은 soft 조건의 일치를 사용하는 기준 구현이며 학습된 추천 정확도를 뜻하지 않습니다. 적합 상품이 없으면 조건 유지·조정·종료를 제시하고 자동으로 조건을 풀지 않습니다.</p>
+      <h3>그다음, 확인할 가설에 맞는 비교를 구성합니다</h3>
+      <p>“편안함에는 Wide가 맞을까?”를 묻기 위해 확인된 Wide 상품과 확인된 다른 핏 상품을 찾습니다. 핏을 모르는 상품은 “Wide가 아닌 상품”이 아닙니다. 직접 조건은 그대로 지키고, 상품·이미지 중복을 줄이며, 가능한 범위에서 다른 속성의 차이를 줄입니다.</p>
+      <p>대안을 확보하지 못하면 가설을 확정하지 않고 일반 탐색을 유지합니다. 코드의 기본 3개·세밀 비교 2개·두 축 비교 4개는 파일럿 가정이며, 없는 상품 조합을 만들거나 숫자를 맞추려고 부적합 상품을 채우지 않습니다.</p>
+      <div class="table-wrap" role="region" aria-label="이미지 응답의 처리 차이" tabindex="0"><table>
+        <thead><tr><th scope="col">응답</th><th scope="col">시스템이 반영하는 것</th><th scope="col">자동 확정하지 않는 것</th></tr></thead>
+        <tbody>
+          <tr><th scope="row">명확한 가설 비교에서 선택만</th><td>서버가 미리 표시한 해당 PI 해석을 확인. 추론 출처와 soft 강도는 유지</td><td>실제 편안함·모든 상품 속성·지속 취향·장기 동의</td></tr>
+          <tr><th scope="row">선택 + 이유·수정 텍스트</th><td>선택·텍스트를 함께 해석해 독립 기억 후보 생성 → 내용·속성 연결 확인</td><td>텍스트와 충돌할 수 있는 원래 PI 가설의 즉시 확정</td></tr>
+          <tr><th scope="row">일반 이미지·부분 선택</th><td>선택한 대상과 실제 텍스트의 근거를 보존하고 필요한 해석을 확인</td><td>이미지의 모든 속성 선호·미선택 상품의 비선호</td></tr>
+          <tr><th scope="row">없음 / 모르겠음 / 건너뛰기</th><td>각 반응을 구분하고 해당 해석을 미확인으로 유지</td><td>전 속성 비선호·질문에 대한 동의</td></tr>
+        </tbody>
+      </table></div>
+      <div class="note warm"><strong>이미지는 성능 검증이 아닙니다.</strong> 필수 보온·방수·편안함을 현재 PI만으로 확인할 수 없으면 미해결로 남깁니다. 비교는 계속할 수 있지만, 현재 소비자 서비스는 필수 FEA가 해결·조정되기 전 최종 상품 선택을 보류합니다.</div>
+      <p class="small" style="margin-top:18px;color:var(--muted)">소비자 화면은 준비된 로컬 이미지 파일을 제공합니다. 원격 URL 참조를 가져와도 서버가 자동 다운로드·표시하지 않으며, 없거나 원격인 이미지는 미제공으로 표시합니다.</p>
+    </section>
+
+    <section id="reliability" aria-labelledby="reliability-title">
+      <h2 id="reliability-title">실패하거나 정보가 바뀌면</h2>
+      <p>비동기로 모델을 기다리는 동안 사용자가 수정·삭제·종료할 수 있습니다. 그래서 모델 응답을 받았다는 이유만으로 반영하지 않고, <strong>적용 직전 요청·기억·프로필·사전·색인·상품·이미지 버전을 다시 검사</strong>합니다.</p>
+      <div class="table-wrap" role="region" aria-label="오류와 상태 변화의 처리" tabindex="0"><table>
+        <thead><tr><th scope="col">상황</th><th scope="col">현재 처리</th></tr></thead>
+        <tbody>
+          <tr><th scope="row">입력은 받았지만 해석 실패</th><td>근거는 보존하고 <code>interpretation_pending</code>으로 표시합니다. 같은 피드백을 재처리하며 원문·선택을 중복 생성하지 않습니다.</td></tr>
+          <tr><th scope="row">오래된 응답·카드</th><td>수정·철회·삭제·만료·종료 뒤의 늦은 응답은 반영하지 않습니다. <code>stale</code> 상태와 재탐색을 사용합니다.</td></tr>
+          <tr><th scope="row">조회·필수 근거 부족</th><td><code>blocked</code>로 보류합니다. 실제 검색 결과가 0건인 <code>no_results</code>와 구분하고 필수 조건을 잘라내지 않습니다.</td></tr>
+          <tr><th scope="row">모델 오류·시간 초과</th><td>오류를 표시합니다. 다른 모델이나 규칙 엔진의 성공으로 자동 대체하지 않습니다.</td></tr>
+          <tr><th scope="row">같은 명령 재전송</th><td>동일 batch·본문은 최초 처리 결과를 재사용하고, 같은 ID의 다른 본문은 충돌로 거부합니다. 한 batch는 전체 성공 또는 rollback입니다.</td></tr>
+          <tr><th scope="row">철회·삭제</th><td>철회는 즉시 조회 제외. 삭제는 관련 근거 부분·복제/파생 항목·비교 자료·색인 등을 정리하며 실패를 완료로 표시하지 않습니다.</td></tr>
+          <tr><th scope="row">재시작·새 요청</th><td>같은 요청의 최소 근거·상태를 DB에서 복원합니다. 새 요청에는 이전 단기 기억·가설을 자동 이월하지 않습니다.</td></tr>
+        </tbody>
+      </table></div>
+      <h3>요청 삭제와 장기 기억 삭제도 구분합니다</h3>
+      <p>요청을 삭제해도 별도로 동의한 장기 항목은 동의한 범위의 독립 최소 snapshot으로 남을 수 있습니다. 그 장기 기억 자체를 삭제하면 관련 승격·복제·파생 자료에도 전파합니다. 관리 DB의 삭제는 사용자가 만든 사본·OS 백업·저장매체 전체 소거를 뜻하지 않습니다.</p>
+      <details><summary>현재 보관 설정과 로컬 HTTP 경계</summary><p>로컬 프로토타입의 요청 보관은 비활동 30일·생성 90일 중 이른 시한, 활성 장기는 동의 후 365일입니다. 철회·교체 내용은 기존 시한과 비활성 30일 중 이른 시한을 씁니다. 정리는 명시적 <code>prune_expired()</code> 호출이며 예약 실행을 설치하지 않습니다. 이는 최종 서비스 보관 정책을 확정한 것이 아닙니다.</p><p>HTTP는 루프백·Host/동일 Origin·JSON·24,000바이트 입력 상한과 패키지 자산 allowlist를 검사합니다. 이미지 경로는 설정한 외부 root 안의 파일로 제한합니다. 소비자 화면에서 사용자 ID·provider·임의 파일 경로·StoreAction을 받지 않습니다.</p></details>
+    </section>
+
+    <section id="status" aria-labelledby="status-title">
+      <h2 id="status-title">현재 어디까지 구현되어 있나</h2>
+      <p class="section-intro">“코드 경로가 있다”, “실제 서비스와 연결했다”, “품질과 효과를 입증했다”는 다른 상태입니다. 현재 저장소에서 확인한 범위는 아래와 같습니다.</p>
+      <div class="table-wrap" role="region" aria-label="시스템별 구현 상태" tabindex="0"><table class="status-table">
+        <thead><tr><th scope="col">영역</th><th scope="col">현재 구현</th><th scope="col">남은 범위</th></tr></thead>
+        <tbody>
+          <tr><th scope="row">입력·메모리</th><td><span class="tag">로컬 구현</span><p>발화·선택 근거, 후보 추출, 내용/binding 확인, 별도 동의, 교체·철회·삭제</p></td><td>실제 한국어 의미·선택 이유 해석, 실제 사용자 DB 이관</td></tr>
+          <tr><th scope="row">기억 조회</th><td><span class="tag">로컬 구현</span><p>유효성·대상·상황 필터, 구조·키워드 조회, 근거 묶음, 의미 검색 교체 포트</p></td><td>실제 임베딩·의미 검색 모델 선정과 평가. 현재 각본 fake 검증을 의미 품질로 보지 않음</td></tr>
+          <tr><th scope="row">목표·가설</th><td><span class="tag">로컬 구현</span><p>직접 PI 보존, FEA→PI 가설 분리, 포함/비포함 비교, 응답에 따른 확인</p></td><td>실제 요구와 PI 연결의 타당성, 비교 이미지의 시각적 통제</td></tr>
+          <tr><th scope="row">상품·검색</th><td><span class="tag">로컬 구현</span><p>외부 파일 가져오기, PI Map, 필수 필터·선호 정렬, 후보 발행·결과 없음</p></td><td>실제 크롤러·상품/이미지 확보·라벨 검토·추천 품질</td></tr>
+          <tr><th scope="row">소비자 UI</th><td><span class="tag">로컬 구현</span><p>온보딩·신규/재개·복수/부분 선택·이유 동시 접수·오류 복구·종료 후 동의</p></td><td>실제 참여자 사용성, 다른 브라우저·기기, 공개 인증·배포</td></tr>
+          <tr><th scope="row">외부 모델</th><td><span class="tag pending">연결 코드·가상 검증</span><p>명시적 OpenAI provider와 구조화 응답 검증</p></td><td>실제 계정 접근·응답 호환·호출 지연·비용·의미 품질</td></tr>
+          <tr><th scope="row">연구 효과</th><td><span class="tag pending">평가 계획</span><p>보고서의 비교 조건·과제·설문·분석 기준</p></td><td>파일럿·참여자 연구·실측 결과</td></tr>
+        </tbody>
+      </table></div>
+      <h3>현재 실행 경로는 두 종류입니다</h3>
+      <p><strong>지금 설명한 소비자 서비스</strong>는 <code>park-2025-source-v1</code> 사전과 <code>lumi-memory-v1</code> 계약을 사용합니다. <strong>기존 CLI·개발자 관찰 서버</strong>는 기본적으로 이전 <code>consumer-17-v1</code> 사전을 사용합니다. 이전 Relaxed를 Wide로 자동 바꾸거나 두 경로의 기능을 동일하게 설명하지 않습니다.</p>
+      <p>기존 개발자 관찰 화면은 Chat·Memory·Feature Map/trace로 내부 변화를 보는 도구이며 소비자 상품 탐색 화면과 별개입니다. 기존 관찰 서버는 Codex CLI 기반 실제 모델 호출을 포함할 수 있으므로, 오프라인 설명 확인을 위해 무심코 실행하는 경로가 아닙니다.</p>
+      <div class="note"><strong>기본 fake provider는 연결 확인용입니다.</strong> 기본 fake는 빈 추출·제안을 반환합니다. 자연어를 이해한 것처럼 취향을 만들지 않으며, 내용 확인 전 context가 막힐 수 있습니다. 풍부한 합성 사례는 별도 scripted fake를 제공하는 통합·브라우저 검사에서 확인합니다.</div>
+    </section>
+
+    <section id="research" aria-labelledby="research-title">
+      <h2 id="research-title">연구에서는 무엇을 확인하나</h2>
+      <p>LUMI는 구현 자체보다 <strong>사용자가 취향을 표현하고 추천을 통제하는 경험</strong>을 평가하려는 HCI 프로젝트입니다. 아래는 중간보고서의 계획이며 수행 결과가 아닙니다.</p>
+      <dl class="terms">
+        <dt>RQ1</dt><dd>장·단기 기억과 확인·수정을 제공할 때, 한 세션의 두 요청에서 통제감과 최종 코디 적합성(취향 반영·상황 적합성)이 Baseline보다 나아지는가? 기억 충실도는 LUMI 전용 평가입니다.</dd>
+        <dt>RQ2</dt><dd>이미지 선택·선택적 확인 질문·자유 입력을 통해 표현 부담을 줄이고, 스타일 구체화와 이해받는 느낌을 높일 수 있는가?</dd>
+        <dt>참여자·조건</dt><dd>온라인 패션 구매 경험이 있는 성인 20~24명의 참가자 내 비교. LUMI와 ChatGPT + Musinsa Baseline의 순서·상황을 교차 균형화합니다.</dd>
+        <dt>과제</dt><dd>조건마다 같은 세션에서 자유 요청 1회 + 상황 요청 1회. LUMI는 평소 취향 등록과 이후 활용할 항목 선택을 포함합니다.</dd>
+        <dt>측정·분석</dt><dd>조건 간 대응 문항, LUMI 전용 문항, 두 조건의 Raw NASA-TLX, LUMI의 SUS, 개방형 응답. 대응 비교·중립점 비교·RQ별 Holm 보정과 효과크기를 구분합니다.</dd>
+      </dl>
+      <p style="margin-top:22px">Baseline은 계획상 ChatGPT 메모리·개인화·이미지 생성·웹 검색을 끄고, Musinsa는 비로그인 검색·필터만 사용합니다. 이는 현재 외부 서비스 설정을 검증했다는 뜻이 아닙니다.</p>
+      <div class="note warm">이 설계는 메모리·이미지·질문의 <strong>개별 효과를 각각 분리하는 실험이 아닙니다.</strong> 일시 요구가 다음 요청에 넘어가지 않는 동작은 코드로 검사하지만, 추가 요청이 필요한 해당 항목은 보고서의 현 사용자 연구 측정에서 제외되어 있습니다. 아직 사용자 효과나 추천 정확도 향상을 주장할 수 없습니다.</div>
+    </section>
+
+    <section id="run" aria-labelledby="run-title">
+      <h2 id="run-title">실행과 검증 방법</h2>
+      <p>이 HTML은 파일을 바로 열어 읽습니다. CSS·JavaScript가 모두 안에 들어 있어 설명과 사례 전환에 인터넷·서버·계정이 필요하지 않습니다. 아래는 프로젝트 코드를 실행하려는 개발자를 위한 별도 안내입니다.</p>
+      <h3>로컬 소비자 서버의 최소 실행</h3>
+      <p>저장소 루트에서 Python 3.11+로 실행합니다. 아래 경로는 실행 데이터용 예시이며, DB 두 개는 서로 달라야 하고 저장소 밖에 있어야 합니다. 합성 fixture에 실제 상품 사진은 포함되어 있지 않습니다.</p>
+      <pre><code>export STYLEMATE_DB=/private/tmp/lumi-local/memory.sqlite3
+export STYLEMATE_CATALOG_DB=/private/tmp/lumi-local/catalog.sqlite3
+
+PYTHONPATH=src python3 -m stylemate_memory.cli catalog-import --file tests/fixtures/catalog/valid.jsonl
+PYTHONPATH=src python3 -m stylemate_memory.cli catalog-map
+PYTHONPATH=src python3 -m stylemate_memory.consumer --provider fake
+
+# 브라우저: http://127.0.0.1:8766
+# 종료: Ctrl+C</code></pre>
+      <p class="small" style="color:var(--muted)">기본 fake는 자연어 의미 처리를 보여주는 데모가 아닙니다. 실제 로컬 사진은 외부 이미지 디렉터리와 공급 레코드의 상대 경로를 준비해야 합니다. 상품 갱신은 서버를 멈추고 가져오기·Map 생성을 다시 수행합니다.</p>
+      <h3>검증은 목적별로 구분합니다</h3>
+      <pre><code># 저장·조회·가설·동의·HTTP 등의 오프라인 코드 검사
+PYTHONPATH=src python3 -m unittest discover -s tests -q
+
+# 실제 로컬 HTTP + 브라우저 조작 + 합성 SQLite 상태 검사
+node tests/check_consumer_http_browser.mjs
+node tests/check_hypothesis_browser.mjs
+
+# 사전 동기화·문서/링크·공백 검사
+python3 scripts/sync_feature_registry.py --check
+python3 scripts/check_repository.py
+git diff --check</code></pre>
+      <p>브라우저 검사에는 설치된 Node·Playwright·Chromium이 필요합니다. 오프라인 평가는 기억 회수·오탐·근거 완전성·필수 조건 보존과 상품 조건 위반·미확인 오인·후보 중복 등을 다룹니다. 실제 API 호출·토큰·비용·한국어 의미 품질·사용자 효과를 측정한 결과로 확대하지 않습니다.</p>
+      <details><summary>실제 모델 연결은 어디까지 준비되어 있나요?</summary><p>별도 승인된 실행에서 <code>--provider openai</code>와 모델을 명시하면 Responses adapter를 사용하도록 구현되어 있습니다. 코드상 소비자 기본 모델 설정은 <code>gpt-6-luna</code>입니다. 실제 이용 가능 여부를 보장하는 표시는 아닙니다.</p><p>adapter는 strict JSON Schema, <code>store=false</code>, 출력 상한·timeout과 안전한 오류 처리를 갖습니다. 기본 fake·상품 가져오기·Map 생성·읽기 관찰은 키를 사용하지 않습니다. 이 HTML 작성 과정에서 자격 증명을 읽거나 실제 모델을 호출하지 않았습니다. 실제 연결과 한국어 추출·선택 이유·추천 품질 평가는 별도 작업입니다.</p></details>
+    </section>
+
+    <section id="sources" aria-labelledby="sources-title">
+      <h2 id="sources-title">근거와 용어</h2>
+      <p>이 페이지는 <strong>2026.11.03, 코드 <code>bf87b0f</code></strong>를 기준으로 처음 읽는 사람을 위해 정리한 설명용 보기입니다. 시스템·연구의 기준은 보고서, 이후 승인된 변경은 ADR, 현재 실행 계약은 통합 문서와 코드입니다. 아래 링크는 저장소 안에서 열 때 확인할 수 있으며, HTML만 따로 전달해도 설명 본문과 사례는 작동합니다.</p>
+      <ul class="sources">
+        <li><strong>시스템·연구 원문</strong><span><a href="sources/Team4_mid-term_report.pdf">Team4 중간보고서</a> · 목표/RQ pp.3–4, 시스템 pp.5–9, 연구·분석 pp.10–16, 설문 pp.17–20</span></li>
+        <li><strong>현재 실행 계약</strong><span><a href="master.md">프로젝트 통합 문서</a> · 구현 상태, 저장·입출력 계약, 실행 명령과 미구현 범위</span></li>
+        <li><strong>속성 사전</strong><span><a href="decisions/0004-adopt-park-2025-feature-map.md">ADR 0004</a> · <a href="../output/feature-map/park-2025-feature-map.json">사전 JSON 정본</a> · <a href="../output/feature-map/park-2025-feature-map.csv">전체 값 CSV 보기</a>. Park et al. (2025)의 PI/FEA 사전 차용이며 LUMI의 효과를 입증한 자료는 아닙니다.</span></li>
+        <li><strong>기억·근거 경계</strong><span><a href="decisions/0001-memory-boundaries.md">ADR 0001</a> · <a href="decisions/0005-evidence-linked-memory.md">ADR 0005</a> · 문장·근거·확인·동의·삭제와 1차 로컬 구현 기준</span></li>
+        <li><strong>현재 비교·동의</strong><span><a href="decisions/0006-fea-to-pi-hypothesis-comparison.md">ADR 0006</a> · 직접 PI·FEA→PI 가설·상품 PI 비교. <a href="decisions/0007-joint-feedback-and-end-consent.md">ADR 0007</a> · 선택+선택적 이유, 종료 후 동의</span></li>
+        <li><strong>실행 진입점</strong><span><a href="../src/stylemate_memory/app.py">app.py</a> · <a href="../src/stylemate_memory/consumer.py">consumer.py</a> · <a href="../src/stylemate_memory/contracts.py">contracts.py</a></span></li>
+        <li><strong>핵심 처리</strong><span><a href="../src/stylemate_memory/retrieval.py">기억 조회</a> · <a href="../src/stylemate_memory/inference.py">목표 생성</a> · <a href="../src/stylemate_memory/hypotheses.py">가설·응답</a> · <a href="../src/stylemate_memory/catalog_mapping.py">상품 PI</a> · <a href="../src/stylemate_memory/product_search.py">상품 검색</a> · <a href="../src/stylemate_memory/comparison.py">비교 후보</a></span></li>
+        <li><strong>합성 검증 근거</strong><span><a href="../tests/test_consumer_service.py">서비스 통합 검사</a> · <a href="../tests/test_hypotheses.py">가설 검사</a> · <a href="../tests/check_consumer_http_browser.mjs">소비자 브라우저 검사</a> · <a href="../tests/check_hypothesis_browser.mjs">가설 브라우저 검사</a></span></li>
+      </ul>
+      <details><summary>헷갈리기 쉬운 용어 짧게 보기</summary><dl class="terms"><dt>요청</dt><dd>필요한 옷을 찾기 시작해 종료할 때까지의 탐색 단위입니다. 같은 요청 재개와 새 요청 생성을 구분합니다.</dd><dt>target / product</dt><dd>target은 이번에 찾는 아이템의 자리, product는 공급된 실제 상품입니다. 화면 카드 candidate도 별도 식별자를 가집니다.</dd><dt>binding</dt><dd>기억 문장을 PI/FEA 사전의 특정 값·태그에 연결한 해석입니다.</dd><dt>hard / soft</dt><dd>hard는 반드시 지킬 제약, soft는 선호·순위 판단입니다. 가설의 soft 선호를 자동으로 hard로 승격하지 않습니다.</dd><dt>snapshot</dt><dd>특정 시점에 확인한 내용·대상·조건·버전의 묶음입니다. 나중에 내용이 바뀌었는지 검사하는 기준이 됩니다.</dd><dt>fixture / fake</dt><dd>검증을 위해 준비한 합성 입력·가상 응답입니다. 실제 모델 이해력이나 상품 추천 품질을 대신하지 않습니다.</dd></dl></details>
+    </section>
+    <footer><span>LUMI · 기획과 실행을 구분하는 시스템 안내</span><a href="#top">처음으로 돌아가기</a></footer>
+  </main>
+  <script>
+    (() => {
+      'use strict';
+      const stages = [
+        { title:'“네이비 슬랙스를 편하게 입고 싶어요.”', user:'필요한 옷과 원하는 느낌을 한 문장으로 입력합니다.', process:'발화 근거를 접수하고 기억 후보를 만듭니다. 네이비·슬랙스는 직접 PI, 편안함은 FEA 연결 후보로 구분합니다.', memory:'아직 확인하지 않은 단기 후보입니다. 장기 기억은 생성되지 않습니다.', result:'“편안함 = Wide”는 아직 사실도, 확정된 사용자 조건도 아닙니다.' },
+        { title:'시스템이 이해한 문장과 속성 연결을 확인합니다.', user:'정리된 내용과 대상이 맞는지 확인하고, PI·FEA 연결을 검토합니다.', process:'내용 확인과 binding 확인을 구분합니다. 유효한 직접 PI와 Ease 요구를 이번 목표의 근거로 사용하고, Wide는 별도의 soft 가설로 제안할 수 있습니다.', memory:'확인된 단기 기억과 아직 확인하지 않은 연결 가설이 구분됩니다.', result:'모든 속성을 답할 필요가 없습니다. 근거가 없는 값은 미정입니다.' },
+        { title:'확인된 상품 PI를 바탕으로 가설을 비교합니다.', user:'“원하는 편안함에는 어느 쪽 핏이 더 가까운가요?”라는 비교를 봅니다.', process:'Type=Slacks·Color=Navy를 유지합니다. 공급 자료에 확인된 Navy/Wide와 Navy/Straight 상품·이미지가 있는 경우에만 비교를 발행합니다.', memory:'FEA 근거 → Wide 가설 → 비교 회차 → 상품·이미지 버전이 연결됩니다.', result:'핏 미확인은 “Wide가 아님”이 아닙니다. 실제 대안이 없으면 가설 비교를 보류합니다.' },
+        { title:'이미지를 고른 다음 한 번에 반영합니다.', user:'Wide 후보를 선택하고 이유는 비워 둔 채 제출합니다.', process:'명확하게 표시된 비교라면 “이번 편안함 요구에는 Wide를 선호한다”는 해석만 확인합니다. 다른 상품 속성이나 실제 편안함까지 확인하지 않습니다.', memory:'해당 PI 연결은 확인되지만 origin=inferred·strength=soft는 유지합니다. 장기 동의는 생기지 않습니다.', result:'선택과 이유를 함께 보낸 경우는 처리 방식이 다릅니다. 아래 버튼으로 비교하세요.' },
+        { title:'탐색을 종료한 뒤 다음 활용을 정합니다.', user:'상품을 결정하거나 선택 없이 종료합니다. 종료 요약에서 기존 후보를 확인하고 재사용할 항목·동의를 선택합니다.', process:'요청이 closed일 때만 future_reuse를 허용합니다. 요청 전용 slot 항목은 재사용 목록에서 제외하고 일반 취향으로 자동 확장하지 않습니다.', memory:'확인된 재사용 가능 항목 중 명시적으로 동의한 범위만 장기 저장합니다. 저장 없이 종료할 수 있습니다.', result:'이 사례의 “이번 편안함에는 Wide”는 요청 전용이므로, 그 선택만으로 전역 Wide 취향이 생기지 않습니다.' },
+        { title:'새 요청에서는 유효한 장기 기억만 다시 참고합니다.', user:'다른 옷이나 새로운 상황의 탐색을 시작합니다.', process:'이전 요청의 단기 조건·가설을 자동 이월하지 않습니다. 장기 항목도 대상·상황·동의·보관 기간이 맞아야 사용합니다.', memory:'별도 장기 저장이 없었다면 이 사례의 Wide 선택은 새 요청의 확정 조건이 아닙니다.', result:'이전 요청을 다시 여는 “같은 요청 재개”와 새로운 탐색을 만드는 “새 요청”은 다릅니다.' }
+      ];
+      const reason = { title:'선택과 이유·수정을 같은 응답으로 받습니다.', user:'Wide 후보를 고르고 “오래 앉아 있어요. 허벅지가 조이는 건 싫어요.”를 함께 제출합니다.', process:'선택·실제 텍스트를 원자적으로 접수하고 함께 해석합니다. 수정 가능성이 있으므로 원래 Wide 가설을 바로 확정하지 않고 상황·회피·취향의 독립 후보를 만듭니다.', memory:'후보는 내용·binding 확인을 기다립니다. 해석이 실패해도 같은 선택·텍스트 근거로 재시도합니다.', result:'사용자가 말하지 않은 이유를 만들어 저장하지 않습니다. 이유 텍스트는 필수가 아닙니다.' };
+      let current = 0;
+      let branch = 'choice';
+      const show = () => {
+        const data = current === 3 && branch === 'reason' ? reason : stages[current];
+        ['title','user','process','memory','result'].forEach(key => { document.getElementById('demo-' + key).textContent = data[key]; });
+        document.querySelectorAll('[data-step]').forEach(button => { button.setAttribute('aria-pressed', String(Number(button.dataset.step) === current)); });
+        document.querySelectorAll('[data-branch]').forEach(button => { button.setAttribute('aria-pressed', String(button.dataset.branch === branch)); });
+        document.getElementById('response-branch').hidden = current !== 3;
+      };
+      document.querySelectorAll('[data-step]').forEach(button => button.addEventListener('click', () => { current = Number(button.dataset.step); show(); }));
+      document.querySelectorAll('[data-branch]').forEach(button => button.addEventListener('click', () => { branch = button.dataset.branch; show(); }));
+      let collapsedBeforePrint = null;
+      window.addEventListener('beforeprint', () => {
+        if (collapsedBeforePrint !== null) return;
+        collapsedBeforePrint = Array.from(document.querySelectorAll('details:not([open])'));
+        collapsedBeforePrint.forEach(detail => { detail.open = true; });
+      });
+      window.addEventListener('afterprint', () => {
+        if (collapsedBeforePrint === null) return;
+        collapsedBeforePrint.forEach(detail => { detail.open = false; });
+        collapsedBeforePrint = null;
+      });
+      document.getElementById('print-button').addEventListener('click', () => window.print());
+      const links = Array.from(document.querySelectorAll('.sidebar nav a'));
+      const sections = Array.from(document.querySelectorAll('main section'));
+      let navigationScheduled = false;
+      const markLocation = () => {
+        const active = sections.filter(section => section.getBoundingClientRect().top <= innerHeight * .3).pop() || sections[0];
+        links.forEach(link => { if (link.hash === '#' + active.id) link.setAttribute('aria-current','location'); else link.removeAttribute('aria-current'); });
+        navigationScheduled = false;
+      };
+      window.addEventListener('scroll', () => {
+        if (!navigationScheduled) { navigationScheduled = true; requestAnimationFrame(markLocation); }
+      }, {passive:true});
+      window.addEventListener('resize', markLocation);
+      markLocation();
+    })();
+  </script>
+</body>
+</html>
