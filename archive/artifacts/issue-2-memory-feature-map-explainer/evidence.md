@@ -2,7 +2,7 @@
 
 확인일: **2026-10-14**. 사용자 요청으로 `answer-me-with-html 0.5.2`의 `3b1b` 테마를 사용한 한국어 설명 영상을 만들었다. 이 문서는 영상의 근거와 세부 계약을 찾기 위한 안내다. 현재 실행 계약의 정본은 [프로토타입 문서](../../docs/shopping-memory-prototype.md)와 코드다.
 
-- [영상 플레이어](stylemate-memory-feature-map.html) · [MP4](stylemate-memory-feature-map.mp4)
+- [영상 플레이어](https://github.com/jongrionro-debug/HCI_HANDSOME/blob/1287063a442023c55e09c87c9299c991534c7424/archive/artifacts/issue-2-memory-feature-map-explainer/stylemate-memory-feature-map.html) · [MP4](stylemate-memory-feature-map.mp4)
 - [원고](stylemate-memory-feature-map.md) · [시간표와 대사](narration-ko.md) · [SRT](narration-ko.srt)
 - [로컬 근거 파일의 해시](sources/source-manifest.json) · [전체 GitHub 조회 사본](sources/github-issues-and-prs.json)
 

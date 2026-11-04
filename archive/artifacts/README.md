@@ -1,14 +1,11 @@
-# 설명·실험 산출물
+# 실험·영상 재현 자료
 
-이 폴더는 이전 설계·구현을 설명한 페이지·영상과 합성 사전 실험을 보존한다. **현재 시스템 설계는 [LUMI 보고서](../LUMI_시스템_설계_보고서_수정본.html), 현재 구현은 [실행 계약](../docs/shopping-memory-prototype.md)**을 따른다. 산출물의 StyleMate 이름과 시점별 구현 설명은 당시 기록이다.
+현재 구현은 [master](../../docs/master.md), 과거 결정은 [ADR](../../docs/adr/)을 따른다. 이 폴더의 StyleMate 명칭·구현 설명·검증 결과는 작성 당시의 기록이다.
 
-| 자료 | 역할·한계 |
+| 자료 | 유지 이유·범위 |
 |---|---|
-| [현재 메모리/목표값 설명](current-memory-feature-map.html) | 작성 당시의 17개 속성·SQLite·context 설명. 이후 개발자 도구와 LUMI 추천 루프의 구현 상태는 최신 문서 확인 |
-| [목표 feature 계획 설명](target-feature-memory-explainer.html) | 당시 메모리→context→목표값 연결의 설명 |
-| [입력 UX 아이디어](feature-map-input-ideas.html) | 미승인 UX 제안 비교. 현재 LUMI의 Image-first 정책을 대체하지 않음 |
-| [Issue #1 영상](issue-1-memory-explainer/stylemate-memory.html) | v0.2 기억 단위·확인/동의·보관/삭제 설계 설명 |
-| [Issue #2 영상](issue-2-memory-feature-map-explainer/stylemate-memory-feature-map.html) · [근거](issue-2-memory-feature-map-explainer/evidence.md) | 당시 17개 속성·메모리/context 실행 범위와 미구현 경계 설명 |
-| [Luna 사전 실험](luna-memory-preflight/README.md) | 합성 후보8/목표context10 사례의 별도 실험. 일반 사용자 정확도·추천 품질·연구 효과 검증이 아님 |
+| [Luna 합성 실험](luna-memory-preflight/README.md) | 입력·정답·모델 출력·평가 결과와 재평가 코드 보존. 실제 사용자·추천 품질 검증이 아님 |
+| [Issue #1 영상](issue-1-memory-explainer/stylemate-memory.mp4)·[원고](issue-1-memory-explainer/narration-ko.md) | 기존 영상과 Markdown 원문·내레이션·자막의 대응 확인 |
+| [Issue #2 영상](issue-2-memory-feature-map-explainer/stylemate-memory-feature-map.mp4)·[근거](issue-2-memory-feature-map-explainer/evidence.md) | 영상의 원문·자막·합성 데모·출처/검증 자료 보존 |
 
-원고·자막·영상·실험 JSON과 검증 자료는 관련 설명의 재현 근거로 유지한다. 최신 제품 설계로 일괄 고치지 않는다.
+중복 설명 페이지와 사용하지 않는 HTML 플레이어는 삭제했다. 이전 페이지는 커밋 `1287063a442023c55e09c87c9299c991534c7424`에서 복구할 수 있다. 영상·실험의 기존 결과를 이번 실행 결과나 현재 구현 완료의 근거로 재사용하지 않는다.

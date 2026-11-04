@@ -6,7 +6,7 @@
 
 이 영상은 **승인된 메모리 설계의 설명 산출물**이다. 현재 제품 동작이나 연구 효과를 입증하는 자료가 아니다. 예시는 설명용이며 실제 참여자 데이터가 아니다.
 
-[HTML 영상 플레이어](stylemate-memory.html) · [MP4](stylemate-memory.mp4) · [자막 SRT](narration-ko.srt) · [장면·도식 원고](stylemate-memory.md)
+[HTML 영상 플레이어](https://github.com/jongrionro-debug/HCI_HANDSOME/blob/1287063a442023c55e09c87c9299c991534c7424/archive/artifacts/issue-1-memory-explainer/stylemate-memory.html) · [MP4](stylemate-memory.mp4) · [자막 SRT](narration-ko.srt) · [장면·도식 원고](stylemate-memory.md)
 
 기준: [Issue #1](https://github.com/jongrionro-debug/HCI_HANDSOME/issues/1), [메모리 설계 v0.2](../../docs/memory-design.md), [구현 계획](../../docs/memory-implementation-plan.md), [연구 기준](../../docs/master.md). 로컬 HEAD `77f38f28a1e0c43bde96f9f46b961cbc4b737a7b`와 2026-10-13의 미커밋 Accepted 설계 자료를 읽었다. 원격 Issue의 미완료 체크박스와 로컬 승인 기록을 구분한다.
 
