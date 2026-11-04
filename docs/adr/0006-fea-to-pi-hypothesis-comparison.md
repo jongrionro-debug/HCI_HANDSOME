@@ -1,5 +1,6 @@
 # 0006 · FEA→PI 가설을 이미지 비교로 구체화
 
+- 후속 결정: [ADR 0010](0010-derive-pi-values-from-collected-products.md)이 PI value의 확정 근거를 수집 데이터로 변경한다. 이 ADR의 직접 PI·FEA→PI 가설·상품 비교 역할과 확인 경계는 유지한다.
 - Status: Accepted
 - Date: 2026-11-01
 - Related Work: 현재 대화의 사용자 목표 Feature Map·상품 Map 역할과 이미지 비교 흐름 재정의
@@ -39,8 +40,8 @@
 
 ## Consequences
 
-현재 설계는 [master의 가설 흐름](../master.md#직접-pi와-feapi-가설)과 [이미지·텍스트 인터랙션](../master.md#이미지텍스트-인터랙션)에 반영한다. 승인된 기존 ADR 본문·보고서·사전의 값과 출처·기존 실행 데이터는 보존한다.
+현재 설계는 [master의 가설 흐름](../project.md#직접-pi와-feapi-가설)과 [이미지·텍스트 인터랙션](../project.md#이미지텍스트-인터랙션)에 반영한다. 승인된 기존 ADR 본문·보고서·사전의 값과 출처·기존 실행 데이터는 보존한다.
 
-`hypotheses.py`와 소비자 서비스는 FEA 근거→PI 대안→비교 회차·상품/이미지 버전→응답을 연결한다. 미확인 가설은 확정 PI 제약과 분리하고, `consumer_comparisons`는 기존 CandidateSet에 FK로 연결한다. 응답은 서버가 미리 발행한 의미·binding snapshot을 사용하며 내부 `record_comparison` 한 batch로 선택 근거와 확인된 단기 해석을 저장한다. 소비자 상품 Map 생성·검색은 PI만 사용하고 기존 범용 PI·FEA 함수와 저장 자료는 자동 변환하지 않는다. 구체 필드·명령·제약은 [현재 실행 확장](../master.md#가설-비교-실행-확장)을 따른다.
+`hypotheses.py`와 소비자 서비스는 FEA 근거→PI 대안→비교 회차·상품/이미지 버전→응답을 연결한다. 미확인 가설은 확정 PI 제약과 분리하고, `consumer_comparisons`는 기존 CandidateSet에 FK로 연결한다. 응답은 서버가 미리 발행한 의미·binding snapshot을 사용하며 내부 `record_comparison` 한 batch로 선택 근거와 확인된 단기 해석을 저장한다. 소비자 상품 Map 생성·검색은 PI만 사용하고 기존 범용 PI·FEA 함수와 저장 자료는 자동 변환하지 않는다. 구체 필드·명령·제약은 [현재 실행 확장](../project.md#가설-비교-실행-확장)을 따른다.
 
 검증은 직접 PI 보존, 가설 PI의 비확정·비필수 상태, 실제 포함/비포함 상품의 근거, 명확한 응답의 연결 확인, 모호한 선택·없음·모르겠음의 미확인 유지, 수정·삭제 후 오래된 비교 차단을 포함한다. 기존 단위·통합·브라우저 검증을 확장하되 합성 통과와 실제 모델·상품·사용자 효과를 구분한다.

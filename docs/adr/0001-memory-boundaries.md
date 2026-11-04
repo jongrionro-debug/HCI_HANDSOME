@@ -1,7 +1,7 @@
 # 0001 · 요청 범위·사용자 동의와 삭제 경계
 
 - Status: Accepted
-- Applies to: 기존 로컬 메모리 프로토타입. 현재 동작은 [실행 계약](../master.md#메모리-실행-계약), 보고서와의 차이는 [구현 대응](../master.md#현재-구현과-실행)을 따른다. 이 ADR을 최종 시스템 전체의 확정 요구사항으로 확대하지 않는다.
+- Applies to: 기존 로컬 메모리 프로토타입. 현재 동작은 [실행 계약](../project.md#메모리-실행-계약), 보고서와의 차이는 [구현 대응](../project.md#현재-구현과-실행)을 따른다. 이 ADR을 최종 시스템 전체의 확정 요구사항으로 확대하지 않는다.
 - Date: 2026-10-13
 - Historical context: 본문의 연구 기준·제품 흐름은 당시 [master](../../archive/docs/lumi-master-20261014.md)·[workflow](../../archive/docs/lumi-workflow-20261014.md)의 논의를 가리킨다.
 - Related Issue: [#1](https://github.com/jongrionro-debug/HCI_HANDSOME/issues/1)

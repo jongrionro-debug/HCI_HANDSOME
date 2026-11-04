@@ -3,7 +3,7 @@
 TypedDict keys are required unless total=False or marked NotRequired. Nullable
 fields must be sent as null. These definitions are NOT runtime validators: each owning
 module must reject unknown keys, invalid references and unauthorized transitions.
-No registry values are duplicated here. See docs/master.md for policy/ownership.
+No registry values are duplicated here. See docs/project.md for policy/ownership.
 """
 
 import hashlib

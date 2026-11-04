@@ -16,6 +16,7 @@ from __future__ import annotations
 import argparse
 import html
 import re
+import subprocess
 import sys
 import unicodedata
 from dataclasses import dataclass
@@ -46,7 +47,7 @@ EXCLUDED_PATH_PREFIXES = {
     ("archive",),
 }
 ISSUE_FORMS = {
-    "feature_request.yml": (
+    "task.yml": (
         "Background",
         "Goal",
         "Requirements",
@@ -318,6 +319,12 @@ def main() -> int:
     markdown_links = check_markdown_links(root, problems)
     html_pairs = check_html_sources(root, problems)
     forms_checked, pr_checked = check_templates(root, problems)
+    context = subprocess.run(
+        [sys.executable, str(Path(__file__).with_name("check_context.py")), "--root", str(root)],
+        check=False,
+    )
+    if context.returncode:
+        problems.append(Problem(root / "docs/README.md", "context layout check failed"))
 
     if problems:
         print("repository-checks: FAILED")

@@ -1,12 +1,13 @@
 # 0004 · Park et al. (2025) Feature Map 차용
 
-- Status: Accepted
+- Status: Accepted (PI value 확정 방식은 ADR 0010에서 부분 대체)
 - Date: 2026-10-29
 - Related Work: 현재 대화의 Feature Map 확정 및 문서 반영 요청
 - Approval: 사용자가 “현재 이 feature map으로 확정하니까 이제 이에 따라서 문서에 반영해줘”라고 승인했다. 앞선 요청에서 연구 주장을 바꾸지 않고 논문의 Feature Map만 차용한다고 범위를 정했다.
 - Applies to: LUMI의 고정 feature-value 사전과 후속 상품·목표 Map 매핑. 현재 `consumer-17-v1` 실행 코드에는 아직 미적용
 - Related Decisions: [0003](0003-consumer-shopping-prototype.md). 기존 17개 로컬 실행 계약의 기록은 보존하며 이번 결정으로 그 구현이 대체됐다고 보지 않는다.
 - Superseded in part by: [0006](0006-fea-to-pi-hypothesis-comparison.md) (2026-11-01). 상품 Map은 PI, 사용자 목표 Map은 PI·FEA와 연결 가설을 다루는 후속 설계로 Decision 3의 적용 범위를 부분 대체. 사전 이름·값·출처와 본문은 보존
+- Superseded in part by: [0010](0010-derive-pi-values-from-collected-products.md) (2026-11-04). PI value를 논문 목록으로 고정하는 범위를 수집 데이터 기반 확정으로 대체. PI 7개 feature 축·FEA 분류와 당시 본문·출처는 보존
 
 ## Context
 
@@ -17,7 +18,7 @@
 ## Decision
 
 1. 상품정보(PI)는 **Type·Brand·Price·Color·Fit·Fabric·Detail의 7항목**, 소비자 요구(FEA)는 **Functional 8·Expressive 13·Aesthetic 9의 30개 태그**로 고정한다. 두 수준을 합쳐 37개의 동등한 상품 속성으로 취급하지 않는다.
-2. 이름·허용값·분류와 승인 메타데이터의 정본은 [JSON 사전](../../output/feature-map/park-2025-feature-map.json)이다. [CSV](../../output/feature-map/park-2025-feature-map.csv)는 같은 목록의 표 형식이며, 사람이 읽는 적용 계약은 [확정 Feature Map](../master.md#feature-map)에 둔다. 영문 원문은 보존하고 한국어 표시명은 구분한다.
+2. 이름·허용값·분류와 승인 메타데이터의 정본은 [JSON 사전](../../output/feature-map/park-2025-feature-map.json)이다. [CSV](../../output/feature-map/park-2025-feature-map.csv)는 같은 목록의 표 형식이며, 사람이 읽는 적용 계약은 [확정 Feature Map](../project.md#feature-map)에 둔다. 영문 원문은 보존하고 한국어 표시명은 구분한다.
 3. 상품 Map과 목표 Map은 같은 사전을 참조한다. 기존 대화·이미지 선택·부분 선택·관련 메모리를 여기에 매핑하고 대화 중 새 속성·허용값을 추가하지 않는다. 근거 부족은 미정/미확인으로 남긴다. 사용자 확인·별도 장기 활용 동의·현재 요청 우선 원칙을 유지한다.
 4. 이 결정은 보고서가 정하지 않은 사전을 구체화한다. **기존 RQ·평가 계획·비교 조건·과제·설문·이미지 선택·메모리 흐름은 변경하지 않는다.** 이미지 효과를 분리하는 추가 실험이나 턴 감소 주장을 도입하지 않는다.
 5. 원문 PI 값은 무신사 여성 바지 기준이다. 다른 의류 값이 원문에 포함됐다고 보거나 기존 연구 과제를 바지로 변경하지 않는다. 다른 품목의 실행 매핑은 아직 제공하지 않으며, 대화 중 허용값을 만들어 보완하지 않는다.

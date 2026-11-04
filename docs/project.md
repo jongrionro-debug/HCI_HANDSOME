@@ -1,6 +1,6 @@
 # LUMI 현재 시스템 구현과 실행
 
-현재 시스템의 구현 범위·동작·실행·검증을 설명하는 **유일한 문서 정본**이다. 과거 선택의 이유·승인·대체 관계는 [ADR](adr/), 개발 작업 규칙은 [AGENTS.md](../AGENTS.md)에서 관리한다. 다른 설명 문서나 HTML 사본을 함께 유지하지 않는다. 문서 관리 기준은 [ADR 0008](adr/0008-current-implementation-source-of-truth.md)을 따른다.
+현재 시스템의 구현 범위·동작·실행·검증을 설명하는 **유일한 문서 정본**이다. 과거 선택의 이유·승인·대체 관계는 [ADR](adr), 개발 작업 규칙은 [AGENTS.md](../AGENTS.md)에서 관리한다. 다른 설명 문서나 HTML 사본을 함께 유지하지 않는다. 문서 관리 기준은 [ADR 0009](adr/0009-common-context-layout.md)을 따른다.
 
 - [기준과 자료](#기준과-자료)
 - [현재 구현과 실행](#현재-구현과-실행)
@@ -21,10 +21,11 @@
 |---|---|
 | [Team4_mid-term_report.pdf](sources/Team4_mid-term_report.pdf) | 시스템·연구 설계 원문. 3.2~3.6: 메모리·조회·목표 Map·상품 검색·피드백, 3.7: UI, 2장·4~5장: RQ·평가 |
 | [Team4_mid-term_presentation.pdf](sources/Team4_mid-term_presentation.pdf) | 발표용 보조 자료. 보고서와 승인된 결정을 덮어쓰지 않음 |
-| [Feature Map JSON](../output/feature-map/park-2025-feature-map.json) | 허용값·분류·출처·라이선스의 기계 판독 정본. [CSV](../output/feature-map/park-2025-feature-map.csv)는 보기용 |
+| [Feature Map JSON](../output/feature-map/park-2025-feature-map.json) | 논문에서 차용한 값·FEA 분류·출처·라이선스와 현재 실행 사전의 기계 판독 정본. 수집 후 확정할 PI value 사전과 구분. [CSV](../output/feature-map/park-2025-feature-map.csv)는 보기용 |
 | [ADR 0001](adr/0001-memory-boundaries.md)·[0002](adr/0002-memory-prototype-storage.md)·[0003](adr/0003-consumer-shopping-prototype.md) | 로컬 메모리·저장·기존 17개 사전의 결정 기록 |
 | [ADR 0004](adr/0004-adopt-park-2025-feature-map.md)·[0005](adr/0005-evidence-linked-memory.md) | Park 사전 차용, 자연어 기억·근거·확인/동의 분리의 결정 기록 |
 | [ADR 0006](adr/0006-fea-to-pi-hypothesis-comparison.md)·[0007](adr/0007-joint-feedback-and-end-consent.md) | PI 중심 상품 비교·FEA→PI 가설, 선택 사항인 이유와 종료 후 장기 동의의 결정 기록 |
+| [ADR 0010](adr/0010-derive-pi-values-from-collected-products.md) | PI 7개 feature 축을 유지하고 value를 상·하의 수집 데이터에서 정하는 후속 결정 |
 
 두 PDF는 인계된 원본을 보존한다. 중간보고서는 20쪽·737,007 bytes·SHA-256 `97cdd6791d4aed737d3faae93d46e26ef112d06346ecef34b3a3c3af4b8a69f5`, 발표자료는 14쪽·41,281,335 bytes·SHA-256 `5b708cbef817a999fec1b1ee5ba0c2119ed7d07e9d08164b53146521bf1d2248`다.
 
@@ -51,7 +52,7 @@
 | 입력 해석 | [model_io.py](../src/stylemate_memory/model_io.py)·[llm.py](../src/stylemate_memory/llm.py): complete/extract/propose, 인용·출처 alias 검사, pending 재처리 | 실제 한국어·선택 이유 해석 품질, 실제 provider 검증 |
 | 메모리 저장 | [store.py](../src/stylemate_memory/store.py)·[store_v1.py](../src/stylemate_memory/store_v1.py)·[store_feedback.py](../src/stylemate_memory/store_feedback.py)·[store_cleanup.py](../src/stylemate_memory/store_cleanup.py): 근거·문장·선택적 binding, 확인·동의·교체·철회·삭제 | 실제 사용자 DB 이관·운영 자료 검증 |
 | 조회·목표 생성 | [retrieval.py](../src/stylemate_memory/retrieval.py)·[inference.py](../src/stylemate_memory/inference.py): 유효성/대상/요청 필터, 구조+키워드 검색, PI/FEA 목표·최신성 검사 | 실제 의미 검색 모델 선정·관련성 평가 |
-| 상품·이미지 비교 | [catalog.py](../src/stylemate_memory/catalog.py)·[catalog_mapping.py](../src/stylemate_memory/catalog_mapping.py)·[product_search.py](../src/stylemate_memory/product_search.py)·[comparison.py](../src/stylemate_memory/comparison.py)·[hypotheses.py](../src/stylemate_memory/hypotheses.py): 가져오기·PI Map·필수 조건 필터·가설 비교 | 실제 상품 수집·검증·추천 품질 |
+| 상품·이미지 비교 | [catalog.py](../src/stylemate_memory/catalog.py)·[catalog_mapping.py](../src/stylemate_memory/catalog_mapping.py)·[product_search.py](../src/stylemate_memory/product_search.py)·[comparison.py](../src/stylemate_memory/comparison.py)·[hypotheses.py](../src/stylemate_memory/hypotheses.py): 가져오기·PI Map·필수 조건 필터·가설 비교 | 실제 상·하의 수집, 수집 기반 value 사전 확정·실행 연결, 검증·추천 품질 |
 | 서비스·소비자 UI | [app.py](../src/stylemate_memory/app.py)의 `ConsumerService`, [consumer.py](../src/stylemate_memory/consumer.py)·[consumer.js](../src/stylemate_memory/consumer.js)·[consumer-http.js](../src/stylemate_memory/consumer-http.js): 온보딩·피드백·확인·재탐색·종료·별도 장기 동의·삭제 | 공개 인증/배포, 실제 참가자 사용성·기기 검증 |
 
 ### 이미지·텍스트 인터랙션
@@ -81,7 +82,7 @@
 
 ### 저장·입출력 계약 v1
 
-저장 계약은 `lumi-memory-v1`, 사전 버전은 `park-2025-source-v1`, 상품 공급 형식은 `lumi-catalog-v1`이다. 정확한 Python/JSON 필드·포트·action은 [contracts.py](../src/stylemate_memory/contracts.py), 오류 이름은 [errors.py](../src/stylemate_memory/errors.py)가 정의한다. TypedDict는 런타임 검증기가 아니며 각 담당 모듈이 형식·소유권·권한을 검사한다.
+현재 실행의 저장 계약은 `lumi-memory-v1`, 사전 버전은 `park-2025-source-v1`, 상품 공급 형식은 `lumi-catalog-v1`이다. 수집 기반 PI value 사전의 버전·실행 연결은 아직 확정하지 않았다. 정확한 Python/JSON 필드·포트·action은 [contracts.py](../src/stylemate_memory/contracts.py), 오류 이름은 [errors.py](../src/stylemate_memory/errors.py)가 정의한다. TypedDict는 런타임 검증기가 아니며 각 담당 모듈이 형식·소유권·권한을 검사한다.
 
 - 참조는 `{type, id, version}`, 시각은 timezone이 있는 ISO 8601이다. nullable 필드는 `null`, 매핑 없음은 `[]`로 표현한다. version/revision은 bool을 제외한 정수다.
 - `MemoryStore.apply_batch(..., contract_version=..., expected=...)`가 쓰기 경계다. expected의 request/profile revision과 객체 version, action별 기대 version을 검사하고 batch 전체를 적용하거나 rollback한다.
@@ -121,13 +122,23 @@
 
 ## Feature Map
 
-허용값은 [JSON](../output/feature-map/park-2025-feature-map.json)의 PI 7항목(Type·Brand·Price·Color·Fit·Fabric·Detail)과 FEA 30태그(Functional 8·Expressive 13·Aesthetic 9)다. 두 영역을 37개의 동등한 상품 속성으로 합치지 않는다. 전체 enum은 이 문서에 복제하지 않는다.
+PI는 **Type·Brand·Price·Color·Fit·Fabric·Detail의 7개 feature 축을 유지하고, 각 value는 실제 수집한 상품 데이터를 바탕으로 확정한다.** [ADR 0010](adr/0010-derive-pi-values-from-collected-products.md)이 기존 논문 목록을 최종 PI 허용값으로 고정한 결정을 부분 대체한다. FEA의 Functional 8·Expressive 13·Aesthetic 9, 총 30개 태그와 PI/FEA 역할은 유지한다. 두 영역을 37개의 동등한 상품 속성으로 합치지 않는다.
 
-출처는 Park, H., Kim, S., Choi, Y., & An, H. (2025), *Application of the FEA consumer needs model in e-commerce: a conversational recommendation system for fashion products*, Fashion and Textiles, 12, 24의 Table 1·2다. [논문 원문](https://doi.org/10.1186/s40691-025-00435-w), 출처·CC BY 4.0·변환/승인 메타데이터는 JSON에 기록한다.
+PI 7개 축과 FEA 분류를 차용한 출처는 Park, H., Kim, S., Choi, Y., & An, H. (2025), *Application of the FEA consumer needs model in e-commerce: a conversational recommendation system for fashion products*, Fashion and Textiles, 12, 24의 Table 1·2다. [논문 원문](https://doi.org/10.1186/s40691-025-00435-w), 출처·CC BY 4.0·변환/승인 메타데이터는 JSON에 기록한다.
+
+### 수집 데이터 기반 PI value 확정
+
+네이버 쇼핑의 **상의·하의**에서 원본 속성명·값·출처를 수집하고, 품목별 분포·누락 확인→동의어 정규화→PI value·사전 버전 확정 순서로 진행한다. 기존 논문 enum 밖의 값도 보존하고 미기재·추론값·직접 근거를 구분한다. 가격은 숫자 원값과 조건을 확보한 뒤 구간화 여부를 정한다.
+
+수집 경로·PI별 필드·중간 레코드·정규화·파일럿 검증의 상세 계약은 [crawling.md](specs/crawling.md)에서 관리한다. 현재는 설계 단계이며 크롤러·실제 상품 데이터셋·수집 기반 실행 사전은 미구현이다. 실제 접근 경로·수량·품질 기준과 최종 value 목록은 아직 확정하지 않았다.
+
+### 현재 실행 사전
+
+[JSON](../output/feature-map/park-2025-feature-map.json)의 PI 값은 논문 차용 및 현재 코드의 실행 기준이며, 수집 후 확정할 최종 PI value 목록은 아직 없다. 기존 JSON·CSV와 출처·라이선스는 보존하고 전체 enum을 이 문서에 복제하지 않는다.
 
 [registry.py](../src/stylemate_memory/registry.py)의 `load_registry("park-2025-source-v1")`가 실행 사전을 공급한다. [패키지 JSON](../src/stylemate_memory/resources/park-2025-feature-map.json)은 정본의 생성 사본이다. `python3 scripts/sync_feature_registry.py`로 동기화하며 수동 편집하지 않는다.
 
-현재 값 있는 매핑은 **Pants만 지원**한다. 원문의 값은 무신사 여성 바지 기준이며 이 범위가 연구 과제를 바꾸지는 않는다. Brand의 전체 419개 값은 미공개이므로 예시도 실행 enum으로 승인하지 않는다. Price는 원문 구간 문자열 일치만 지원하고 수치 변환·통화·경계 포함·range는 미정이다. 다른 품목, `Relaxed→Wide`, 원단 종류→섬유 원료 같은 자동 치환은 지원하지 않는다.
+현재 코드의 값 있는 매핑은 **Pants만 지원**한다. 원문의 값은 무신사 여성 바지 기준이며 이 실행 한계가 수집 대상을 바지로 제한하지는 않는다. Brand는 원문의 전체 419개 값이 미공개여서 현재 실행 enum을 지원하지 않는다. Price는 원문 구간 문자열 일치만 지원하고 수치 변환·통화·경계 포함·range는 미정이다. 다른 품목, `Relaxed→Wide`, 원단 종류→섬유 원료 같은 자동 치환은 지원하지 않는다. 수집 기반 사전·상의 매핑·한국어 값 정규화는 아직 실행 코드에 반영하지 않았다.
 
 ### 직접 PI와 FEA→PI 가설
 
@@ -333,13 +344,14 @@ node tests/check_hypothesis_browser.mjs
 
 | 미구현·미검증 범위 | 필요한 확인 |
 |---|---|
-| 실제 상품·로컬 이미지 | 출처가 있는 JSON/JSONL·이미지·검증 라벨 준비, 가져오기/Map 진단·실제 이미지 표시. 크롤러·원격 수집은 미구현 |
+| 실제 상·하의 상품·로컬 이미지 | [수집 계약](specs/crawling.md)에 따라 네이버 쇼핑 접근 경로·표본 확보 후 원문·이미지·근거 수집. 크롤러·원격 수집은 미구현 |
+| 수집 기반 PI value 사전 | [value 정리·확정](specs/crawling.md#6-value-정리와-확정) 후 registry·상품/목표 Map·모델 입출력·검증 연결. 기존 사전 버전과 자료 보존 |
 | 실제 모델·가설 비교 | 명시적 실행 후 한국어 표현·선택 이유·실제 비교 축과 대안·FEA 성능 판단 경계 평가 |
 | 실제 의미 검색 | 모델 선정 후 관련 근거 회수·오탐·근거 완전성·삭제/재색인·비용 비교 |
 | 운영 자료 이관 | 원래 의미·대상·동의·기간 보존, 합성 이관/rollback과 실제 자료 승인을 구분 |
 | 사용자 연구 | 보고서 기준 파일럿·동의/과제 안내·설문·분석 준비. 참여자 자료는 저장소 밖 관리 |
 
-[2026-10-30 네이버 데이터 수집 제안](proposals/naver-shopping-data-collection.md)은 **미승인 당시 검토안**이다. 수량·품질·수집 경로를 현재 구현이나 확정 요구사항으로 사용하지 않는다. 당시 상품 FEA 라벨 제안은 현재 PI 중심 소비자 검색의 전제가 아니다.
+수집 대상은 상·하의이며 PI value를 수집 데이터에서 정하는 방향은 확정했다. 구체적인 상품 수집 경로·수량·품질 기준과 최종 value 목록은 미확정이다. 실제 수집·실행 코드 변경은 후속 작업 범위로 정한다.
 
 ### 선행연구에서 가져오는 범위
 
