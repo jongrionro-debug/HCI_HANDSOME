@@ -118,9 +118,43 @@ class FillTests(unittest.TestCase):
             report = fill.export(data, data / "out.jsonl")
             lines = (data / "out.jsonl").read_text(encoding="utf-8").splitlines()
         self.assertEqual(len(lines), 1)
-        self.assertEqual(report["fill_rate"]["all"]["Color"], {"before": 0.0, "after": 1.0, "model_added": 1})
+        self.assertEqual(report["fill_rate"]["all"]["Color"], {"before": 0.0, "after_text": 1.0, "after": 1.0, "model_added": {"text": 1}})
         self.assertEqual(report["fill_rate"]["all"]["Fabric"]["before"], 1.0)
         self.assertEqual(report["rejections"], {"no_evidence": 1})
+
+    def test_image_fill_validation_by_evidence_type(self):
+        text = fill.source_text(RECORD)
+        labels = {"main0", "detail1-t2"}
+        result = {
+            "Color": {"value": "차콜", "evidence_type": "image_visual", "evidence": "어두운 회색 반바지", "image": "main0", "confidence": 0.8},
+            "Fit": {"value": "와이드", "evidence_type": "image_text", "evidence": "FIT: WIDE", "image": "detail9", "confidence": 0.8},
+            "Fabric": {"value": "울", "evidence_type": "image_visual", "evidence": "울처럼 보임", "image": "main0", "confidence": 0.5},
+            "Detail": {"value": "투턱", "evidence_type": "text", "evidence": "투턱 디테일 적용", "image": "main0", "confidence": 0.9},
+        }
+        accepted, rejected = fill.validate_image_fill(result, ["Color", "Fit", "Fabric", "Detail"], text, labels)
+        self.assertEqual(rejected, {"Fit": "unknown_image", "Fabric": "fabric_needs_written_evidence"})
+        self.assertEqual(accepted["Color"]["image"], "main0")
+        self.assertIsNone(accepted["Detail"]["image"])
+        _, rejected = fill.validate_image_fill({"Detail": {**result["Detail"], "evidence": "없는 문장"}}, ["Detail"], text, labels)
+        self.assertEqual(rejected, {"Detail": "quote_not_in_input"})
+
+    def test_remaining_features_skip_text_pass_fills_and_tiles_cover_tall_images(self):
+        self.assertEqual(fill.remaining_features(RECORD, {"fills": {"Color": {}}}), ["Fit", "Detail"])
+        self.assertEqual(fill.tile_plan(900, 5000), [(0, 1800), (1800, 3600), (3600, 5000)])
+        self.assertEqual(fill.tile_plan(500, 1000), [(0, 1000)])
+        self.assertEqual(fill.tile_plan(0, 10), [])
+
+    def test_export_merges_image_fills_without_overriding_text_fills(self):
+        text_fill = {"model": "m", "fills": {"Detail": {"value": "투턱", "evidence_quote": "투턱 디테일 적용", "confidence": 0.9}}}
+        image_fill = {"model": "m", "fills": {
+            "Detail": {"value": "핀턱", "evidence_type": "image_visual", "evidence": "앞 주름", "image": "main0", "confidence": 0.6},
+            "Fit": {"value": "와이드", "evidence_type": "image_visual", "evidence": "넓은 통", "image": "main0", "confidence": 0.7}}}
+        record = fill.catalog_record(RECORD, text_fill, image_fill)
+        validate_record(record, ParkRegistry(), "record")
+        model = record["raw_metadata"]["pi_model_interpretation"]
+        self.assertEqual((model["Detail"]["value"], model["Detail"]["evidence_type"]), ("투턱", "text"))
+        self.assertEqual(model["Fit"]["evidence_type"], "image_visual")
+        self.assertNotIn("fit", record["raw_metadata"])
 
     def test_missing_key_stops_without_other_provider(self):
         with TemporaryDirectory() as tmp, unittest.mock.patch.dict("os.environ", {"OPENCODE_API_KEY": ""}):

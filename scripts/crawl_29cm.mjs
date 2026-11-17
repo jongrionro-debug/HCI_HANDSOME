@@ -142,6 +142,22 @@ export function mainImages(ld, max = 3) {
   return urls;
 }
 
+/**
+ * Pick up to `max` description images spread across the page (first and last included),
+ * dropping tiny icons/banners and duplicates. Inputs are {url, width, height} from the 상품설명 section.
+ */
+export function pickDetailImages(images, max = 8, minWidth = 300, minHeight = 200) {
+  const seen = new Set(); const pool = [];
+  for (const image of images) {
+    let u; try { u = new URL(image.url); } catch { continue; }
+    if (u.protocol !== 'https:' || u.username || u.password || !(image.width >= minWidth) || !(image.height >= minHeight) || seen.has(u.href)) continue;
+    seen.add(u.href); pool.push({ url: u.href, width: image.width, height: image.height });
+  }
+  if (pool.length <= max) return pool;
+  const picks = new Set(Array.from({ length: max }, (_, i) => Math.round(i * (pool.length - 1) / (max - 1))));
+  return [...picks].sort((a, b) => a - b).map(i => pool[i]);
+}
+
 export function imageExt(bytes) {
   if (bytes.length >= 8 && bytes[0] === 0x89 && bytes[1] === 0x50 && bytes[2] === 0x4e && bytes[3] === 0x47) return 'png';
   if (bytes.length >= 3 && bytes[0] === 0xff && bytes[1] === 0xd8 && bytes[2] === 0xff) return 'jpg';
@@ -149,9 +165,9 @@ export function imageExt(bytes) {
   return null;
 }
 
-export async function fetchImage(url, { fetchImpl = fetch, maxBytes = MAX_IMAGE_BYTES } = {}) {
+export async function fetchImage(url, { fetchImpl = fetch, maxBytes = MAX_IMAGE_BYTES, anyHttpsHost = false } = {}) {
   const u = new URL(url);
-  if (u.protocol !== 'https:' || u.hostname !== 'img.29cm.co.kr') throw failure('unsupported_image_host');
+  if (u.protocol !== 'https:' || u.username || u.password || (!anyHttpsHost && u.hostname !== 'img.29cm.co.kr')) throw failure('unsupported_image_host');
   const response = await fetchImpl(u.href, { redirect: 'error', headers: { Accept: 'image/png,image/jpeg,image/webp' } });
   if (!response.ok) { await response.body?.cancel?.(); throw failure(`image_http_${response.status}`); }
   if (!String(response.headers.get('content-type') || '').startsWith('image/')) { await response.body?.cancel?.(); throw failure('image_mime'); }
@@ -264,6 +280,65 @@ async function downloadImages(root, record, intervalMs, state, fetchImpl) {
   }
 }
 
+async function readDetailImages(page) {
+  return await page.evaluate(() => {
+    const heading = [...document.querySelectorAll('*')].find(e => e.childElementCount === 0 && e.textContent.trim() === '상품설명');
+    let section = heading;
+    for (let i = 0; i < 6 && section; i++) { if (section.querySelectorAll('img').length) break; section = section.parentElement; }
+    return section ? [...section.querySelectorAll('img')].map(i => ({ url: i.currentSrc || i.src, width: i.naturalWidth, height: i.naturalHeight })) : [];
+  });
+}
+
+/** Second pass: description (상세) images for already-saved products, saved to images/<id>/detail/. */
+async function collectDetails(page, root, { intervalMs, maxDetail, limit, state }) {
+  const { readdir } = await import('node:fs/promises');
+  const files = (await readdir(join(root, 'products'))).filter(f => /^\d+\.json$/.test(f)).sort();
+  let visits = 0; let done = 0;
+  for (const file of files) {
+    if (state.stopped || visits >= limit) break;
+    const path = join(root, 'products', file);
+    const record = JSON.parse(await readFile(path, 'utf8'));
+    if (record.detail_images_status === 'collected') { done += 1; continue; }
+    await pause(intervalMs); visits += 1;
+    const url = `${BASE}/products/${record.product_id}`;
+    try {
+      const status = await gotoChecked(page, url, state);
+      if (state.stopped) break;
+      await pause(1500);
+      const snap = await readSnapshot(page);
+      if (snap.blocked) { state.stopped = snap.blocked; state.log.push({ url, status, event: 'stopped' }); break; }
+      await clickIfPresent(page, /^상품설명 더보기$/);
+      for (let i = 0; i < 8; i++) { await page.mouse.wheel(0, 2500); await pause(400); }
+      const picked = pickDetailImages(await readDetailImages(page), maxDetail);
+      const dir = join(root, 'images', record.product_id, 'detail');
+      await mkdir(dir, { recursive: true });
+      record.detail_images = [];
+      for (const [index, image] of picked.entries()) {
+        if (state.stopped) break;
+        await pause(Math.min(intervalMs, 1000));
+        const entry = { index, source_url: image.url, width: image.width, height: image.height };
+        try {
+          const result = await fetchImage(image.url, { anyHttpsHost: true });
+          const rel = `images/${record.product_id}/detail/${index}.${result.ext}`;
+          await writeFile(join(root, rel), result.buffer);
+          Object.assign(entry, { download_status: 'downloaded', local_path: rel, sha256: result.sha256, bytes: result.buffer.length });
+        } catch (error) {
+          Object.assign(entry, { download_status: 'failed', error: error.code || 'image_download_failed' });
+          if (/^image_http_(401|403|418|429)$/.test(error.code || '') && new URL(image.url).hostname.endsWith('29cm.co.kr')) {
+            state.stopped = error.code; state.log.push({ url: image.url, event: 'stopped', error: error.code });
+          }
+        }
+        record.detail_images.push(entry);
+      }
+      record.detail_images_status = state.stopped ? 'partial' : 'collected';
+      record.detail_collected_at = new Date().toISOString();
+      await writeJson(path, record); done += 1;
+    } catch (error) { state.log.push({ url, error: String(error.message || error).slice(0, 160) }); }
+    if (visits % 10 === 0) console.error(`detail visits=${visits} done=${done}`);
+  }
+  return { visits, done };
+}
+
 export function summarizeRecords(records) {
   const by = key => Object.fromEntries(Object.entries(records.reduce((m, r) => { const k = key(r) || '?'; m[k] = (m[k] || 0) + 1; return m; }, {})).sort((a, b) => b[1] - a[1]));
   const groups = {};
@@ -280,7 +355,7 @@ export async function main(args = process.argv.slice(2)) {
   const get = (flag, fallback) => { const i = args.indexOf(flag); return i >= 0 ? args[i + 1] : fallback; };
   const outArg = get('--out');
   if (!outArg) {
-    console.log('node scripts/crawl_29cm.mjs --out <저장소 밖 경로> [--per-group 110] [--limit <상품 방문 상한>] [--interval-ms 2000] [--no-images] [--headed] [--browser-path <chromium>]');
+    console.log('node scripts/crawl_29cm.mjs --out <저장소 밖 경로> [--per-group 110] [--limit <상품 방문 상한>] [--interval-ms 2000] [--no-images] [--details [--max-detail 8]] [--headed] [--browser-path <chromium>]');
     return 2;
   }
   const perGroup = Number(get('--per-group', 110));
@@ -289,6 +364,20 @@ export async function main(args = process.argv.slice(2)) {
   const browserPath = get('--browser-path', process.env.LUMI_CHROMIUM_PATH || undefined);
   const root = await prepareOutputRoot(outArg);
   await mkdir(join(root, 'products'), { recursive: true });
+  if (args.includes('--details')) {
+    const state = { stopped: null, log: [] }; const started = Date.now();
+    const { chromium } = await import('playwright');
+    const browser = await chromium.launch({ headless: !args.includes('--headed'), executablePath: browserPath });
+    let result;
+    try {
+      const page = await (await browser.newContext({ locale: 'ko-KR' })).newPage();
+      result = await collectDetails(page, root, { intervalMs, maxDetail: Number(get('--max-detail', 8)), limit, state });
+    } finally { await browser.close(); }
+    const report = { mode: 'details', ...result, stopped: state.stopped, wall_ms: Date.now() - started, log: state.log };
+    await writeJson(join(root, 'details_run.json'), report);
+    console.log(JSON.stringify({ ...report, log: report.log.length }, null, 1));
+    return state.stopped ? 1 : 0;
+  }
   const state = { stopped: null, log: [] };
   const started = Date.now(); const startedAt = new Date().toISOString();
   const { chromium } = await import('playwright');
