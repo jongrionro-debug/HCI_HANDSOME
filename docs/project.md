@@ -130,7 +130,7 @@ PI 7개 축과 FEA 분류를 차용한 출처는 Park, H., Kim, S., Choi, Y., & 
 
 네이버 쇼핑의 **상의·하의**에서 원본 속성명·값·출처를 수집하고, 품목별 분포·누락 확인→동의어 정규화→PI value·사전 버전 확정 순서로 진행한다. 기존 논문 enum 밖의 값도 보존하고 미기재·추론값·직접 근거를 구분한다. 가격은 숫자 원값과 조건을 확보한 뒤 구간화 여부를 정한다.
 
-수집 경로·PI별 필드·중간 레코드·정규화·파일럿 검증의 상세 계약은 [crawling.md](specs/crawling.md)에서 관리한다. 현재는 설계 단계이며 크롤러·실제 상품 데이터셋·수집 기반 실행 사전은 미구현이다. 실제 접근 경로·수량·품질 기준과 최종 value 목록은 아직 확정하지 않았다.
+수집 경로·PI별 필드·실행법·중간 레코드·정규화·파일럿 검증의 상세 계약은 [crawling.md](specs/crawling.md)에서 관리한다. [Playwright 수집 스크립트](../scripts/crawl_naver.mjs)는 SmartStore URL 목록과 사용자가 연 Chromium 상품 탭의 PI 원문·옵션·이미지 저장, 완료 상품 skip·이미지 재개·접근 제한 중단을 지원한다. 합성 자동 수집과 앞선 실제 상품 1건 추출은 확인했으나 새 스크립트의 실제 URL 접근은 429였다. 실제 사이트 전체 실행·다른 품목/스토어·상의/하의 파일럿·수집 기반 실행 사전은 미검증 또는 미구현이다.
 
 ### 현재 실행 사전
 
@@ -218,12 +218,15 @@ PYTHONPATH=src python3 -m stylemate_memory.consumer --provider fake
 | STYLEMATE_CATALOG_DB | `--catalog-db`, 필수 상품 SQLite 경로 |
 | STYLEMATE_IMAGE_ROOT | `--image-root`, 선택적 로컬 이미지 root |
 | STYLEMATE_USER_ID | `--user`, 기본 local-tester; 서버 생성 시 고정 |
-| STYLEMATE_PROVIDER | `--provider fake / openai`, 기본 fake |
-| STYLEMATE_OPENAI_MODEL | `--model`, 소비자 기본 gpt-6-luna |
+| STYLEMATE_PROVIDER | `--provider fake / openai / opencode-go`, 기본 fake. 실제 평가 provider는 [ADR 0011](adr/0011-use-deepseek-api-for-real-model.md)의 `opencode-go`(OpenCode Go 경유 DeepSeek) |
+| STYLEMATE_MODEL | opencode-go의 `--model`, 기본 `deepseek-v4.1-flash`(공식 목록으로 확인 필요) |
+| STYLEMATE_OPENCODE_ENDPOINT | opencode-go의 `--endpoint`. **기본값 없음**. 실호출로 확인한 주소는 `https://opencode.ai/inference/go/openai/v1/chat/completions` |
+| OPENCODE_API_KEY | opencode-go를 명시적으로 선택할 때만 조회 |
+| STYLEMATE_OPENAI_MODEL | openai 경로의 `--model`, 기본 gpt-6-luna. 새 실제 평가에는 사용하지 않음 |
 | STYLEMATE_PORT | `--port`, 기본 8766 |
 | OPENAI_API_KEY | openai를 명시적으로 선택할 때만 조회 |
 
-[settings.py](../src/stylemate_memory/settings.py)가 경로·설정·gateway를 구성한다. 실제 API 실행이 요청된 경우에만 사용자가 로컬 환경에 키를 설정하고 `PYTHONPATH=src python3 -m stylemate_memory.consumer --provider openai --model gpt-6-luna`로 시작한다. 키를 CLI 인자·예제 파일·로그에 넣지 않는다. import·기본 fake·상품 가져오기/Map 생성·읽기 관찰에는 키가 필요 없다.
+[settings.py](../src/stylemate_memory/settings.py)가 경로·설정·gateway를 구성한다. 실제 API 실행이 요청된 경우에만 사용자가 로컬 환경에 `OPENCODE_API_KEY`를 설정하고 `PYTHONPATH=src python3 -m stylemate_memory.consumer --provider opencode-go --endpoint <확인한 https 주소>`로 시작한다. 기존 `--provider openai`는 호환 경로다. 키를 CLI 인자·예제 파일·로그에 넣지 않는다. import·기본 fake·상품 가져오기/Map 생성·읽기 관찰에는 키가 필요 없다.
 
 ### 서비스·HTTP 경계
 
@@ -326,9 +329,12 @@ PYTHONPATH=src python3 -m stylemate_memory.cli demo --synthetic
 PYTHONPATH=src python3 scripts/evaluate_offline.py
 node tests/check_consumer_http_browser.mjs
 node tests/check_hypothesis_browser.mjs
+node --test tests/test_naver_crawler.mjs
 ```
 
 브라우저 검사는 설치된 Node·Playwright·Chromium을 사용하며 의존성을 자동 설치하지 않는다. [서비스 검사](../tests/test_consumer_service.py)·[HTTP 검사](../tests/test_consumer_http.py)·[가설 검사](../tests/test_hypotheses.py)와 두 브라우저 검사는 접수·후보 확인·PI 비교·선택+이유·종료 후 동의·재시작·새 요청·삭제·늦은 응답을 검사한다. 브라우저 그림과 상품은 합성 자료다.
+
+[수집기 검사](../tests/test_naver_crawler.mjs)는 합성 SmartStore DOM·옵션·이미지와 차단 응답으로 수집·출력·재개를 검증한다. 실제 네이버 접근 성공·상품 정보 정확도·60건 수집을 보장하지 않는다.
 
 [오프라인 평가](../scripts/evaluate_offline.py)는 [기억 fixture](../tests/fixtures/evaluation/memory_cases.jsonl)와 상품 fixture의 회수·오탐·근거 완전성·필수 조건·unknown 오인·중복/없는 비교를 검사한다. `--fixtures DIR`로 입력, `--output FILE`로 저장소 밖 출력 파일을 지정할 수 있다. 의미 검색은 각본 fake이며 실제 API 토큰·비용은 관측하지 않는다. CLI 데모의 Relaxed/Navy→이번 Slim→새 요청 Relaxed는 기존 17개 사전 호환 검증이다. v1의 Navy/Wide→이번 Slim→새 요청 Wide는 [목표 테스트](../tests/test_inference.py)의 별도 합성 사례다.
 
@@ -344,14 +350,41 @@ node tests/check_hypothesis_browser.mjs
 
 | 미구현·미검증 범위 | 필요한 확인 |
 |---|---|
-| 실제 상·하의 상품·로컬 이미지 | [수집 계약](specs/crawling.md)에 따라 네이버 쇼핑 접근 경로·표본 확보 후 원문·이미지·근거 수집. 크롤러·원격 수집은 미구현 |
+| 실제 상·하의 상품·로컬 이미지 | [수집 스크립트 실행](specs/crawling.md#실행)의 실제 접근·다른 스토어/상의 DOM 호환성 확인 후 표본 확대. 검색 목록 자동 탐색·판매자 API는 미구현 |
 | 수집 기반 PI value 사전 | [value 정리·확정](specs/crawling.md#6-value-정리와-확정) 후 registry·상품/목표 Map·모델 입출력·검증 연결. 기존 사전 버전과 자료 보존 |
-| 실제 모델·가설 비교 | 명시적 실행 후 한국어 표현·선택 이유·실제 비교 축과 대안·FEA 성능 판단 경계 평가 |
+| DeepSeek(OpenCode Go) 품질·한도 평가 | 합성 한국어 추출 16개×2회: 검증 통과 31/32, 중앙 지연 약 3초([ADR 0011](adr/0011-use-deepseek-api-for-real-model.md)). 새 발화·참가자 말투 재평가, 선택 이유·FEA→PI 가설 품질, 참가자 규모의 사용량 한도는 미평가 |
+| 실제 모델·가설 비교 | DeepSeek로 명시적 실행 후 한국어 표현·선택 이유·실제 비교 축과 대안·FEA 성능 판단 경계 평가 |
 | 실제 의미 검색 | 모델 선정 후 관련 근거 회수·오탐·근거 완전성·삭제/재색인·비용 비교 |
 | 운영 자료 이관 | 원래 의미·대상·동의·기간 보존, 합성 이관/rollback과 실제 자료 승인을 구분 |
 | 사용자 연구 | 보고서 기준 파일럿·동의/과제 안내·설문·분석 준비. 참여자 자료는 저장소 밖 관리 |
 
-수집 대상은 상·하의이며 PI value를 수집 데이터에서 정하는 방향은 확정했다. 구체적인 상품 수집 경로·수량·품질 기준과 최종 value 목록은 미확정이다. 실제 수집·실행 코드 변경은 후속 작업 범위로 정한다.
+### user study 전 진행 현황 (2026-11-12 추정)
+
+아래 비율은 위 구현 상태 표와 코드·검증 범위를 보고 잡은 **추정치**이며 측정값이 아니다. 합성 테스트 통과를 실제 품질로 읽지 않는다.
+
+| 영역 | 완료율 | 상태 |
+|---|---|---|
+| 메모리 저장·계약 | 약 90% | 합성 검증까지 완료 |
+| 조회·목표 Map | 약 80% | 의미 검색은 포트만 있음 |
+| 상품·이미지 비교 | 약 75% | 값 있는 매핑은 Pants만 지원 |
+| 소비자 서비스·UI | 약 85% | 실제 참가자·기기 검증 전 |
+| 상품 수집 | 약 25% | 수집기·합성 테스트만 있음. 실제 수집 0건 |
+| 실제 모델 검증 | 약 40% | adapter 구현·합성 추출 평가 통과 31/32. 가설·실제 발화 평가 전 |
+| 사용자 연구 준비 | 약 10% | 설계만 있음. 시스템 약 55%, 연구 포함 약 40% |
+
+남은 작업 순서는 다음과 같다. 1번의 수집 경로 결정이 전체 일정을 좌우한다.
+
+1. **상품 데이터 확보:** 수집 경로(수동 시작 Playwright·판매자 API·판매자 파일)와 이용 범위를 정하고 상의 30·하의 30개 파일럿과 로컬 이미지를 확보한다.
+2. **PI value 사전 확정:** 분포 집계·정규화·가격 구간 규칙·사전 버전을 정하고 registry·catalog_mapping을 상의·한국어 값으로 확장한다.
+3. **DeepSeek 품질 평가:** 연결 확인 후 한국어 추출·선택 이유·가설 품질을 명시적 실행으로 평가한다.
+4. **실제 상품 전체 흐름 검증:** 가져오기→Map→검색→이미지 비교→종료 후 동의와 실제 기기·브라우저 사용성을 확인한다.
+5. **의미 검색(선택):** 키워드 검색으로 충분하면 user study 이후로 미룬다.
+6. **연구 운영 준비:** Baseline 환경, 시나리오·과제 안내, 설문(대응 문항·LUMI 전용·NASA-TLX·SUS), 동의서(외부 모델 API 전송 안내 포함), 파일럿 2~3명, 순서·시나리오 교차 균형화.
+7. **정리:** 미커밋 크롤링 변경 커밋, 원격 CI 활성화 확인.
+
+미결정: 수집 경로, 참가자 20~24명 모집 시점.
+
+수집 대상은 상·하의이며 PI value를 수집 데이터에서 정하는 방향은 확정했다. URL/열린 탭 수집기 이후의 확대 접근 경로·수량·품질 기준과 최종 value 목록은 미확정이다. 파일럿 확대와 앱 실행 사전 연결은 후속 작업 범위로 정한다.
 
 ### 선행연구에서 가져오는 범위
 
