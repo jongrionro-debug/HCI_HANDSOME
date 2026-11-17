@@ -2,7 +2,58 @@
 
 상의·하의 상품과 상품별 **Type·Brand·Price·Color·Fit·Fabric·Detail** 값을 확보하기 위한 수집 설계다. feature 축은 유지하고 value 목록은 실제 수집 결과로 정한다는 [ADR 0010](../adr/0010-derive-pi-values-from-collected-products.md)을 따른다. 이후 수집 경로·필드·정규화·품질 기준은 이 문서를 직접 갱신한다.
 
-**현재 상태:** 수집 설계 단계. 크롤러·판매자 API 연동·실제 상품 데이터셋은 아직 준비하지 않았다. 아래 레코드와 파일럿 규모는 구현을 위한 초안이며 실행 결과가 아니다. 현재 앱 구현은 [project.md](../project.md#상품과-이미지)를 따른다.
+**현재 상태:** [수집 스크립트](../../scripts/crawl_naver.mjs)는 SmartStore 상품 URL 목록 또는 사용자가 연 Chromium 상품 탭에서 PI 원문·옵션·이미지를 저장한다. 앞선 상품 1건 추출과 합성 페이지의 자동 수집은 확인했지만, 새 스크립트의 실제 URL 직접 접근은 HTTP 429로 종료했다. 새 스크립트의 실제 상품 전체 수집·수동 시작의 사용자 탐색·다른 스토어/상의·60건 파일럿은 미검증이다. 판매자 API·앱 사전 연결·검색 목록 자동 탐색은 아직 구현하지 않았다. 현재 앱 구현은 [project.md](../project.md#상품과-이미지)를 따른다.
+
+## 실행
+
+Node.js 22+와 기존 설치된 `playwright`·Chromium을 사용한다. 앱의 Python 의존성은 늘리지 않는다. 설치가 없는 환경에서는 [공식 설치 안내](https://playwright.dev/docs/library)를 따라 Node 작업 환경에 Playwright와 Chromium을 준비한다. 스크립트가 패키지·브라우저를 자동 설치하지는 않는다.
+
+Chromium에서 상품을 직접 연 뒤 나머지 수집을 자동으로 진행하려면 저장소 루트에서 다음을 실행한다.
+
+```sh
+node scripts/crawl_naver.mjs \
+  --manual-start \
+  --out "$HOME/Documents/LUMI-data/naver-crawl"
+```
+
+화면이 보이는 Chromium의 네이버 홈이 열리면 그 창에서 상품을 탐색한다. 정상적인 상품 탭을 하나 이상 연 뒤 **실행 중인 터미널에서 Enter**를 누르면 열린 SmartStore 상품 URL을 수집한다. 로그인이 필요할 때는 사용자가 Chromium 창에서 직접 진행한다. 개인 브라우저 프로필·인증 파일은 재사용하거나 저장하지 않는다. 이 명령은 이전 수동 테스트 창에 연결하는 것이 아니라 새 Chromium을 연다.
+
+상품 URL을 이미 가지고 있다면 직접 순회할 수 있다. `--url`은 반복 가능하며 추적 인자는 자동 제거한다.
+
+```sh
+node scripts/crawl_naver.mjs \
+  --url 'https://smartstore.naver.com/3_9seconds/products/5089022523' \
+  --out "$HOME/Documents/LUMI-data/naver-crawl"
+
+node scripts/crawl_naver.mjs \
+  --urls-file "$HOME/Documents/LUMI-data/product-urls.txt" \
+  --out "$HOME/Documents/LUMI-data/naver-crawl" \
+  --limit 60
+```
+
+URL 파일은 한 줄에 상품 URL 하나이며 빈 줄·`#`로 시작하는 줄은 무시한다. 네이버 검색 URL·다른 쇼핑몰·상품 목록 URL은 지원하지 않는다. `--manual-start`와 URL 목록을 함께 주면, 그 Chromium에서 이미 열린 동일 상품 탭은 새로 이동하지 않고 읽는다.
+
+| 옵션 | 기본값·동작 |
+|---|---|
+| `--out` | 필수. 저장소 밖 디렉터리. 심볼릭 링크가 저장소 안을 가리키는 경우도 거부 |
+| `--manual-start` | 사용자가 Chromium에서 상품을 연 뒤 터미널 Enter로 수집 시작. 입력 가능한 터미널 필요 |
+| `--limit` | 최대 20개 상품. 목록을 늘릴 때 명시적으로 변경 |
+| `--interval-ms` | 2,000ms. 옵션 선택·이미지 이동·이미지 다운로드·상품 간 간격, 최소 2,000ms |
+| `--max-option-states` | 100개. 이전 옵션 선택과 다음 그룹의 원문 목록을 한 상태로 계산. 초과하면 `truncated=true` |
+| `--max-images` | 상품당 최대 32개. 썸네일·리뷰 이미지를 제외하고 확대 상품 이미지를 읽음 |
+| `--no-images` | 이미지 URL만 보관. 나중에 같은 출력 경로로 이미지 다운로드를 재개 가능 |
+| `--headless` | 화면 없이 실행. `--manual-start`와 함께 사용 불가 |
+| `--timeout-ms` | 개별 탐색·요소 대기 10,000ms |
+
+출력은 `<out>/<store>-<product-id>/product.json`과 `images/<sha256>.<확장자>`, 최근 실행 결과인 `<out>/run.json`이다. 같은 출력 폴더에는 수집기 프로세스 하나만 실행한다. 데이터는 **앱 importer와 별개인 수집용 JSON**이며 기존 앱에 바로 넣지 않는다. `run.json`은 재실행하면 최신 결과로 갱신한다.
+
+- 완료 상품은 저장 파일과 이미지 해시를 확인한 뒤 `skipped`로 건너뛴다. 수집값을 갱신하려면 별도 출력 폴더를 지정한다.
+- 이미지 다운로드 실패는 `partial`로 기록하며 같은 명령을 다시 실행하면 브라우저 상품 재추출 없이 이미지 다운로드를 재개한다. 다운로드 전 원문을 먼저 저장한다.
+- 옵션·고시·갤러리 추출 오류는 `validation.warnings`와 `extraction_status=partial`로 남긴다. 이 부분을 다시 추출하려면 페이지/파서를 확인한 뒤 새 출력 폴더로 실행한다. 기존 데이터를 조용히 덮어쓰지 않는다.
+- 401·403·418·429 또는 접속 제한·CAPTCHA·로그인 화면이면 배치를 중단하고 남은 URL은 `not_attempted`로 기록한다. 이미지 호스트의 동일 상태 코드는 나머지 이미지 다운로드를 중단하고 `partial`로 기록한다. 현재 스크립트는 차단·timeout·5xx에 자동 재시도하지 않으며, 문서 후반의 재시도 설계와 구분한다.
+- 종료 코드는 전부 완료/skip이면 0, 실패·부분 실패가 있으면 1이다. `truncated`는 설정한 탐색 상한으로서 별도 표시하며 전체 옵션·재고 확인을 뜻하지 않는다. 선택 가능한 마지막 옵션 그룹은 목록만 읽고 선택하지 않는다.
+
+검증 명령은 `node --test tests/test_naver_crawler.mjs`다. 외부 네트워크 대신 합성 페이지·이미지로 PI 보존·옵션 분기·상한·차단 중단·재개·기존 파일 보호를 검사한다. 실제 사이트의 DOM 호환성·접근 성공과 구분한다.
 
 ## 1. 목표와 대상
 
@@ -19,7 +70,7 @@
 | 경로 | 현재 근거 | 진행 방식 |
 |---|---|---|
 | 기존 쇼핑 검색 API | 2026-07-31 종료. NAVER API HUB를 포함한 공식 대체 API도 제공되지 않음 | `/v1/search/shop.json`을 수집 진입점으로 사용하지 않음. [공식 종료·이관 공지](https://developers.naver.com/notice/article/32530) |
-| 공개 네이버 쇼핑·스마트스토어 페이지 | 아래 세 호스트의 robots.txt에서 일반 크롤러 접근을 차단 | 수집 허용 범위가 확보된 경우에 웹 수집 경로를 적용. 현재 자동 수집 가능 경로로 확정하지 않음 |
+| 공개 네이버 쇼핑·스마트스토어 페이지 | 아래 세 호스트의 robots.txt에서 일반 크롤러 접근을 차단. 최초 검색 418·새 브라우저의 상품 접근 429와, 기존 상품 탭의 DOM 추출 성공을 각각 확인 | Playwright로 렌더링된 목록·상세를 읽는 수집 방안은 4.4절을 따름. 실제 상품 표시·접근 조건을 확인한 경로에 적용 |
 | 커머스API | 본인 또는 관련 판매자 리소스에 대한 인증이 필요 | 접근 권한·이용 목적이 맞는 판매자의 상품 목록·상세 수집 경로로 검토. 네이버 전체 상품 검색 권한과 구분. [인증 명세](https://apicenter.commerce.naver.com/docs/commerce-api/current/exchange-sellers-auth) |
 | 판매자 제공 상품 파일·이미지 | 제공 자료의 필드·이용 범위를 확인해야 함 | 원본 필드와 옵션 정보를 받아 같은 수집 레코드로 변환하는 대안 |
 
@@ -29,17 +80,17 @@
 
 ## 3. PI별 수집 위치
 
-API 필드는 커머스API의 상품 구조를 기준으로 한 후보이며, 공개 HTML에 같은 필드가 노출된다는 보장은 없다. 실제 응답의 버전·경로와 판매자 입력 여부를 표본에서 확인한다. 상세 필드 경로는 응답의 `originProduct` 내부 기준이다.
+웹 위치는 [3.9세컨즈 상품 5089022523](https://smartstore.naver.com/3_9seconds/products/5089022523)에서 확인한 항목을 포함한다. 다른 스토어·품목에서도 같은 구조와 값이 제공되는지는 추가 표본으로 검증해야 한다. API 필드는 별도의 연결 후보이며 상세 경로는 응답의 `originProduct` 내부 기준이다.
 
-| PI | 우선 확보할 원자료 | 보완 자료·처리 기준 |
+| PI | Playwright에서 읽을 원자료 | API 후보·처리 기준 |
 |---|---|---|
-| Type | 목록의 `categoryId`·`wholeCategoryName`, 상세의 `leafCategoryId`, 종류에 해당하는 상품 속성 | 카테고리가 넓으면 세부 종류를 확정하지 않는다. 상품명의 종류 표현은 별도 해석 근거로 보존 |
-| Brand | 목록의 `brandName`, 상세의 `detailAttribute.naverShoppingSearchInfo.brandName`·`brandId` | 쇼핑몰명·제조사·브랜드를 분리. 브랜드가 없으면 제목에서 추정한 값과 구분 |
-| Price | 목록의 `salePrice`·`discountedPrice`, 옵션 추가금, 배송비·할인 조건 | 숫자 원값·통화·가격 기준·시각을 보존. 개인별 쿠폰가나 옵션 추가금을 기본 판매가와 합쳐 기록하지 않음 |
-| Color | `detailAttribute.productInfoProvidedNotice.wear.color`, 색상 옵션명·값 | 전체 판매 색상과 선택 옵션·이미지의 색상을 연결. 이미지에서 추정한 색은 별도 상태 |
-| Fit | `detailAttribute.productAttributes[]` 중 해당 품목의 핏 속성 | 카테고리에 핏 속성이 있고 판매자가 입력한 경우에 직접 확보. 상세 설명·상품명·이미지 해석은 별도 상태 |
-| Fabric | `detailAttribute.productInfoProvidedNotice.wear.material`, 소재 관련 상품 속성 | 원료·혼용률·겉감/안감 구분을 보존. 데님·니트·기모 같은 원단 구조·가공 표현도 원문으로 유지 |
-| Detail | `detailAttribute.productAttributes[]` 중 디테일 관련 속성 | 상세 설명·이미지의 명시 표현을 보완 근거로 사용. 미기재를 ‘디테일 없음’으로 확정하지 않음 |
+| Type | 페이지 내 Product JSON-LD의 `category`, 카테고리 표시·종류 속성 | API는 `categoryId`·`wholeCategoryName`·`leafCategoryId`. 넓은 분류와 상품명에서 해석한 세부 종류를 구분 |
+| Brand | 상품정보의 ‘브랜드’ 값 | API는 `brandName`, `detailAttribute.naverShoppingSearchInfo.brandName`·`brandId`. 쇼핑몰명·제조사와 분리 |
+| Price | Product JSON-LD의 `offers.price`·`priceCurrency`, 화면 가격·묶음 수량·옵션 추가금 | API는 `salePrice`·`discountedPrice` 등. 숫자·통화·조건·시각을 보존하고 묶음 가격을 한 벌 가격으로 바꾸지 않음 |
+| Color | 상품 고시의 색상, 색상/디자인 옵션 원문 | API는 `detailAttribute.productInfoProvidedNotice.wear.color` 등. 고시가 ‘상세페이지참고’면 그 값을 색상으로 사용하지 않음. 디자인명에서 색을 분리하면 해석 후보로 표시 |
+| Fit | 상품정보를 펼친 뒤 ‘하의핏’ 등 해당 품목의 핏 값 | API는 `detailAttribute.productAttributes[]`의 해당 속성. 상품명·이미지 해석은 별도 상태 |
+| Fabric | 상품정보의 ‘주요소재’, 고시의 제품소재 | API는 `detailAttribute.productInfoProvidedNotice.wear.material`·관련 속성. 원문 원료명·혼용률·겉감/안감을 구분하고 미기재 비율을 추정하지 않음 |
+| Detail | 상품정보를 펼친 뒤 ‘디테일’ 값 | API는 `detailAttribute.productAttributes[]`의 해당 속성. 상품명·이미지 해석과 구분하고 미기재를 ‘없음’으로 확정하지 않음 |
 
 필드 근거: [상품 목록](https://apicenter.commerce.naver.com/docs/commerce-api/current/search-product), [원상품 조회](https://apicenter.commerce.naver.com/docs/commerce-api/current/read-origin-product-product), [채널 상품 조회의 고시·옵션 구조](https://apicenter.commerce.naver.com/docs/commerce-api/current/read-channel-product-1-product). 속성 ID의 의미는 [카테고리별 속성](https://apicenter.commerce.naver.com/docs/commerce-api/current/get-attribute-list-product)과 [속성값](https://apicenter.commerce.naver.com/docs/commerce-api/current/get-attribute-value-list-product)을 연결해 해석한다. 모든 품목에 동일한 핏·디테일 속성이 있다고 가정하지 않는다.
 
@@ -65,13 +116,34 @@ API 필드는 커머스API의 상품 구조를 기준으로 한 후보이며, �
 
 판매자 API는 목록의 원상품 ID로 `GET /v2/products/origin-products/{originProductNo}`를 조회하고, 카테고리별 속성 사전을 연결한다. API별 응답 구조 차이는 경로별 adapter에서 처리한다.
 
-허용된 웹 수집은 HTML의 구조화된 상품 데이터와 명시된 속성표·옵션·상품정보제공고시를 우선 읽는다. JavaScript 렌더링이 필요한 경우 브라우저로 표시된 내용을 읽는 경로를 검토한다. 실제 표본을 보기 전에는 특정 CSS 선택자·초기 상태 객체·비공개 내부 요청을 안정적인 인터페이스로 확정하지 않는다.
+허용된 웹 수집은 **Playwright + Chromium**을 구현 후보로 삼아 JavaScript가 렌더링한 구조화된 상품 데이터·속성표·옵션·상품정보제공고시를 읽는다. 실제 표본을 보기 전에는 특정 CSS 선택자·초기 상태 객체·비공개 내부 요청을 안정적인 인터페이스로 확정하지 않는다.
 
 옵션은 옵션 ID·원본 옵션명/값·추가금·판매 상태와 이미지 연결을 보존한다. 상품 대표 사진에 다른 옷이 함께 보여도 판매 대상 품목에만 연결한다. 이미지에는 원본 URL, 연결 상품·색상 옵션, 로컬 상대 경로, SHA-256과 revision을 둔다. 연결을 확인하지 못한 옵션·이미지는 미확인으로 남긴다.
 
-웹 수집의 초기 운영값은 허용 조건을 우선하여 **호스트별 동시 요청 1개·요청 간 최소 2초**를 제안한다. timeout·5xx는 최대 3회 재시도하고, 429는 `Retry-After` 또는 별도 대기 정책에 따라 재개한다. 403·418·CAPTCHA·로그인 요구가 발생하면 해당 호스트를 중단하고 차단 원인을 기록한다. 우회용 프록시·크롤러 신원 위장·인증 우회는 수집 설계에 포함하지 않는다. API는 해당 API의 호출 제한을 따른다.
+웹 수집의 초기 운영값은 허용 조건을 우선하여 **호스트별 동시 요청 1개·요청 간 최소 2초**를 제안한다. timeout·5xx는 최대 3회 재시도하고, 429는 `Retry-After` 또는 별도 대기 정책에 따라 재개한다. 403·418·CAPTCHA가 발생하면 해당 호스트의 자동 수집을 중단하고 원인을 기록한다. 로그인 화면은 사용자에게 직접 진행하도록 맡기며, 로그인만으로 접근 제한이 풀린다고 가정하지 않는다. 우회용 프록시·크롤러 신원 위장·인증 우회는 수집 설계에 포함하지 않는다. API는 해당 API의 호출 제한을 따른다.
 
 처리 결과와 마지막 성공 지점을 저장해 재시작 시 이어간다. 요청 성공 코드뿐 아니라 최종 URL·콘텐츠 유형·상품 ID·필수 상품 영역을 확인하여 점검/차단 페이지를 상품으로 저장하지 않는다. 새 스키마·파서 오류는 성공 레코드와 분리한다.
+
+### 4.4 Playwright로 수집하는 방식
+
+Playwright는 실제 브라우저에서 페이지를 열고 렌더링된 요소를 읽거나 클릭할 수 있다. 상품 목록의 페이지 이동·추가 로딩, 상세 탭 열기, 옵션 펼치기처럼 JavaScript 상호작용이 필요한 수집에 사용할 수 있다. [브라우저 실행](https://playwright.dev/python/docs/library)과 [locator](https://playwright.dev/python/docs/locators)를 사용하며, 고정 시간 대기만으로 로딩 완료를 판단하지 않는다.
+
+1. **접근 확인:** Playwright가 띄운 화면 있는 독립 Chromium에서 상품 표시를 확인한다. 사용자가 그 창에서 직접 탐색해 정상적으로 연 상품 탭이 있으면 같은 탭을 유지해 읽는다. 개인 브라우저 프로필·쿠키 파일을 복사하지 않는다. 새 탐색은 응답 상태·최종 URL·차단 문구를 검사하고 검색 접근과 상세 접근을 구분한다. 열린 탭의 기존 DOM을 읽을 때는 최초 HTTP 상태를 새로 확인했다고 기록하지 않는다.
+2. **목록 추출:** 상품 카드·URL·출처 ID·제목·가격·이미지 참조를 읽고 중복 URL/ID를 제거한다. 페이지 이동·스크롤 후 새 상품 수와 종료 조건을 확인한다.
+3. **상세 추출:** 상품별 페이지에서 판매 대상·카테고리·브랜드·가격을 읽고, ‘상품정보’·‘상세정보’·고시 등 실제 표시된 영역을 펼쳐 원본 속성명·값을 확보한다.
+4. **옵션 연결:** 색상·사이즈 옵션을 펼쳐 값·추가금·판매 상태·이미지 대응을 수집한다. 옵션 조작 전후의 선택 상태를 기록한다. 장바구니·구매·리뷰 작성은 수행하지 않는다.
+5. **근거 추출:** DOM의 속성표와, 존재하는 경우 JSON-LD·페이지 내 구조화 데이터의 값을 수집 레코드에 연결한다. 정상 페이지가 자체 요청한 상품 응답은 [네트워크 관찰](https://playwright.dev/python/docs/network)로 구조를 확인할 수 있지만, 쿠키·인증 헤더를 저장하거나 비공개 요청의 직접 재호출을 전제로 설계하지 않는다. 상세 이미지 안의 텍스트는 DOM에서 바로 확보되는 값과 분리하여 OCR/해석 보완 대상으로 남긴다.
+6. **저장·재개:** PI 7개 수집 상태·원문 근거·옵션/이미지 연결을 보관하고 처리 위치를 기록한다. 현재 스크립트는 상품별 `product.json`과 `run.json`을 사용한다. 요청 속도·오류 처리의 구현 범위는 실행 절을 따른다. 다른 품목·페이지 유형의 parser는 추가 표본으로 검증한다.
+
+2026-11-04에 로그인 없는 독립 Playwright 브라우저로 [‘셔츠’ 검색 페이지](https://search.shopping.naver.com/search/all?query=%EC%85%94%EC%B8%A0)를 한 번 열었다. 응답은 **HTTP 418**, 표시 내용은 **‘쇼핑 서비스 접속이 일시적으로 제한되었습니다’**였으며 상품을 추출하지 못했다. 이 결과는 현재 연결된 브라우저 환경의 관측이다. 다른 이용 환경의 접속 가능 여부나 모든 상품 상세의 상태까지 확정하지 않는다. Playwright의 렌더링·클릭 기능만으로 서버의 접근 제한이 해소되지는 않는다.
+
+현재 직접 검증한 웹 구조와 범위는 다음과 같다.
+
+- 사용자가 같은 Chromium에서 연 상품 `5089022523`은 로그인 링크가 표시된 상태에서도 읽을 수 있었다. 상품정보는 `li`의 속성명·값 두 영역, 옵션은 `role="button"`·`role="option"`과 옵션 그룹명, 상품 분류·가격은 Product JSON-LD에서 추출했다. 변하는 CSS 클래스와 전체 페이지 텍스트를 수집 기준으로 삼지 않았다.
+- 사이즈 30·32·34·36·38별 첫 번째 바지의 선택 가능 디자인을 읽었고, 두 번째 바지는 한 조건만 확인했다. 모든 조합의 재고·추가금은 미검증이다. 제목의 ‘10종’과 실제 선택 가능 디자인 수가 같다고 가정하지 않는다.
+- 표본의 49,600원은 1+1 두 벌 묶음 기본 표시 가격이다. 일부 두 번째 바지 옵션은 4,000원 추가금이 있었다. 색상은 옵션명에서 분리한 해석값이며 소재 혼용률·이미지별 색상 대응은 미확인이다.
+- 이미지 확대 보기의 상품 이미지 10개를 추출·다운로드했다. 상품 캐러셀에는 리뷰 항목도 함께 있으므로 리뷰 이미지와 상품 이미지, 같은 이미지의 썸네일·확대본을 구분해야 한다.
+- 별도 새 Chromium에서 같은 상품 URL을 연 시도는 HTTP 429로 종료했다. 기존 탭의 단일 상품 추출 성공을 새 세션·상품 목록 순회·대량 수집의 성공으로 확대하지 않는다.
 
 ## 5. 상품별 수집 레코드 초안
 
