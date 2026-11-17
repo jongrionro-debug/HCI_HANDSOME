@@ -149,8 +149,9 @@ def add_options(parser: argparse.ArgumentParser, *, provider: bool = True) -> No
     parser.add_argument("--image-root", help="외부 로컬 이미지 root (STYLEMATE_IMAGE_ROOT)")
     parser.add_argument("--user", help="서버에 고정할 trusted user (STYLEMATE_USER_ID)")
     if provider:
-        parser.add_argument("--provider", choices=("fake", "openai"), help="기본 fake; openai는 명시적 설정")
-        parser.add_argument("--model", help="STYLEMATE_OPENAI_MODEL; 기본 gpt-6-luna")
+        parser.add_argument("--provider", choices=("fake", "openai", "opencode-go"), help="기본 fake; 실제 provider는 명시적 설정")
+        parser.add_argument("--model", help="STYLEMATE_MODEL(opencode-go) / STYLEMATE_OPENAI_MODEL(openai)")
+        parser.add_argument("--endpoint", help="opencode-go 전용 https chat/completions 주소 (STYLEMATE_OPENCODE_ENDPOINT)")
 
 
 def main(argv: list[str] | None = None) -> int:

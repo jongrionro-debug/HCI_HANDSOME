@@ -7,6 +7,7 @@
 - Applies to: 기존 Python·SQLite·로컬 HTTP, 별도 소비자 HTML/CSS/JavaScript, 표준 로컬 상품 가져오기, 교체 가능한 모델 adapter의 실험용 구현 기준. A0는 공통 인터페이스만 정의하며 v1 저장·모델·검색·UI 및 DB 이관은 미연결
 - Supersedes: 없음. ADR 0001/0002의 기존 프로토타입 확인·동의·저장·삭제 경계와 ADR 0004의 확정 사전은 유지
 - Superseded in part by: [0006](0006-fea-to-pi-hypothesis-comparison.md) (2026-11-01). 목표 해석·상품 비교·가설 확인의 후속 설계를 구체화. 기존 메모리 정본·확인·이후 활용 동의·삭제 경계와 실행 계약은 보존
+- Superseded in part by: [0011](0011-use-deepseek-api-for-real-model.md) (2026-11-12). 결정 8의 실제 모델 provider·기본 모델 후보만 DeepSeek API로 변경
 
 ## Context
 
