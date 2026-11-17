@@ -10,6 +10,9 @@ from typing import Any, Mapping
 from .errors import StyleMateError
 
 
+DEEPSEEK_DEFAULT_MODEL = "deepseek-v4.1-flash"  # ADR 0011; confirm against the official model list
+
+
 @dataclass(frozen=True)
 class ConsumerSettings:
     db: Path
@@ -19,6 +22,7 @@ class ConsumerSettings:
     provider: str = "fake"
     model: str = "gpt-6-luna"
     port: int = 8766
+    endpoint: str | None = None
 
     @classmethod
     def from_options(cls, options: Any, settings: Mapping[str, str] | None = None) -> ConsumerSettings:
@@ -31,8 +35,8 @@ class ConsumerSettings:
             raise StyleMateError("invalid_input", "--db/STYLEMATE_DB와 --catalog-db/STYLEMATE_CATALOG_DB가 필요합니다.")
         image = pick("image_root", "STYLEMATE_IMAGE_ROOT")
         provider = pick("provider", "STYLEMATE_PROVIDER", "fake")
-        if provider not in ("fake", "openai"):
-            raise StyleMateError("invalid_input", "provider는 fake 또는 openai로 지정해 주세요.")
+        if provider not in ("fake", "openai", "opencode-go"):
+            raise StyleMateError("invalid_input", "provider는 fake, openai 또는 opencode-go로 지정해 주세요.")
         try:
             port = int(pick("port", "STYLEMATE_PORT", 8766))
             db_path, catalog_path = Path(db).expanduser().resolve(), Path(catalog).expanduser().resolve()
@@ -47,14 +51,22 @@ class ConsumerSettings:
         if (checkout / "pyproject.toml").is_file():
             if any(path is not None and path.is_relative_to(checkout) for path in (db_path, catalog_path, image_path)):
                 raise StyleMateError("invalid_input", "실행 DB와 이미지 root는 저장소 밖에 두어 주세요.")
+        if provider == "opencode-go":
+            model = pick("model", "STYLEMATE_MODEL", DEEPSEEK_DEFAULT_MODEL)
+        else:
+            model = pick("model", "STYLEMATE_OPENAI_MODEL", "gpt-6-luna")
+        endpoint = pick("endpoint", "STYLEMATE_OPENCODE_ENDPOINT") if provider == "opencode-go" else None
         return cls(db_path, catalog_path, image_path, pick("user", "STYLEMATE_USER_ID", "local-tester"),
-                   provider, pick("model", "STYLEMATE_OPENAI_MODEL", "gpt-6-luna"), port)
+                   provider, model, port, endpoint)
 
     def gateway(self, *, settings: Mapping[str, str] | None = None, transport: Any = None) -> Any:
         from .llm import create_model_gateway
         if self.provider == "fake":
             return create_model_gateway("fake")
         values = settings if settings is not None else os.environ
+        if self.provider == "opencode-go":
+            return create_model_gateway("opencode-go", model=self.model, endpoint=self.endpoint,
+                                        api_key=values.get("OPENCODE_API_KEY", ""), transport=transport)
         return create_model_gateway("openai", model=self.model, api_key=values.get("OPENAI_API_KEY", ""), transport=transport)
 
     def open_service(self, *, gateway: Any = None) -> Any:

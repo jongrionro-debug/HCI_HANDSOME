@@ -46,3 +46,4 @@ ADR은 구조·계약·운영·연구 방향에 오래 영향을 주는 선택�
 - [0008 · 현재 구현 문서 단일화와 결정 기록 분리](0008-current-implementation-source-of-truth.md)
 - [0009 · 세 저장소의 맥락 문서 경로와 역할을 통일한다](0009-common-context-layout.md)
 - [0010 · PI value를 수집한 상품 데이터에서 확정한다](0010-derive-pi-values-from-collected-products.md)
+- [0011 · 실제 모델 provider로 DeepSeek API를 사용한다](0011-use-deepseek-api-for-real-model.md)

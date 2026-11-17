@@ -15,6 +15,7 @@ import math
 import socket
 import urllib.error
 import urllib.request
+import uuid
 from collections.abc import Callable, Mapping
 from typing import Any
 
@@ -27,6 +28,9 @@ DEFAULT_ENDPOINT = "https://api.openai.com/v1/responses"
 DEFAULT_MODEL = "gpt-6-luna"
 DEFAULT_TIMEOUT = 30
 DEFAULT_MAX_OUTPUT_TOKENS = 1200
+# Reasoning tokens count toward the limit on the DeepSeek/OpenCode Go path (ADR 0011).
+OPENCODE_MAX_OUTPUT_TOKENS = 8000
+OPENCODE_TIMEOUT = 120  # observed 7-65 s per extraction
 _MAX_RESPONSE_BYTES = 1_000_000
 
 _SAFE_TRANSPORT_MESSAGES = {
@@ -709,25 +713,8 @@ class OpenAIResponsesGateway(ModelOperations):
         except (TypeError, ValueError, OverflowError, UnicodeError, RecursionError):
             raise StyleMateError("invalid_input", "JSON conversion input is invalid or too large.") from None
 
-        payload: dict[str, Any] = {
-            "model": self.model,
-            "instructions": instructions,
-            "input": user_input,
-            "text": {
-                "format": {
-                    "type": "json_schema",
-                    "name": name,
-                    "strict": True,
-                    "schema": schema,
-                }
-            },
-            "max_output_tokens": self.max_output_tokens,
-            "store": False,
-        }
-        headers = {
-            "Authorization": f"Bearer {self._api_key}",
-            "Content-Type": "application/json",
-        }
+        payload = self._build_payload(instructions, user_input, schema, name)
+        headers = self._build_headers()
         try:
             response = self._transport(self.endpoint, headers, payload, self.timeout)
         except StyleMateError as error:
@@ -747,6 +734,43 @@ class OpenAIResponsesGateway(ModelOperations):
 
         if not isinstance(response, Mapping):
             raise StyleMateError("provider_invalid_response", "The provider returned an invalid response.")
+        output_text = self._response_text(response)
+        try:
+            if len(output_text.encode("utf-8")) > _MAX_RESPONSE_BYTES or self._api_key in output_text:
+                raise ValueError("unsafe response")
+            result = _decode_json(output_text)
+            if self._api_key in json.dumps(result, ensure_ascii=False):
+                raise ValueError("unsafe response")
+        except (TypeError, ValueError, UnicodeError, RecursionError):
+            raise StyleMateError("invalid_output", "The provider returned invalid feature JSON.") from None
+        if not isinstance(result, dict):
+            raise StyleMateError("invalid_output", "The provider returned invalid feature JSON.")
+        return result
+
+    def _build_payload(self, instructions: str, user_input: str, schema: dict[str, Any], name: str) -> dict[str, Any]:
+        return {
+            "model": self.model,
+            "instructions": instructions,
+            "input": user_input,
+            "text": {
+                "format": {
+                    "type": "json_schema",
+                    "name": name,
+                    "strict": True,
+                    "schema": schema,
+                }
+            },
+            "max_output_tokens": self.max_output_tokens,
+            "store": False,
+        }
+
+    def _build_headers(self) -> dict[str, str]:
+        return {
+            "Authorization": f"Bearer {self._api_key}",
+            "Content-Type": "application/json",
+        }
+
+    def _response_text(self, response: Mapping[str, Any]) -> str:
         response_status = response.get("status_code", response.get("http_status"))
         if isinstance(response_status, int) and response_status >= 400:
             code = "provider_rate_limited" if response_status == 429 else "provider_http_error"
@@ -771,17 +795,7 @@ class OpenAIResponsesGateway(ModelOperations):
             raise StyleMateError("provider_invalid_response", "The provider returned an invalid response.")
         if output_text is None or not output_text.strip():
             raise StyleMateError("empty_response", "The provider returned no feature proposal.")
-        try:
-            if len(output_text.encode("utf-8")) > _MAX_RESPONSE_BYTES or self._api_key in output_text:
-                raise ValueError("unsafe response")
-            result = _decode_json(output_text)
-            if self._api_key in json.dumps(result, ensure_ascii=False):
-                raise ValueError("unsafe response")
-        except (TypeError, ValueError, UnicodeError, RecursionError):
-            raise StyleMateError("invalid_output", "The provider returned invalid feature JSON.") from None
-        if not isinstance(result, dict):
-            raise StyleMateError("invalid_output", "The provider returned invalid feature JSON.")
-        return result
+        return output_text
 
     @staticmethod
     def _extract_output_text(output: Any) -> str | None:
@@ -834,20 +848,106 @@ class OpenAIResponsesAdapter(OpenAIResponsesGateway):
         return result
 
 
+class OpenCodeGoChatGateway(OpenAIResponsesGateway):
+    """DeepSeek through OpenCode Go's OpenAI-compatible chat/completions API.
+
+    ADR 0011. The endpoint has no default: it must be given explicitly after
+    checking the official documentation. JSON mode does not enforce a schema,
+    so the schema is stated in the system message and every result still goes
+    through the same JSON, shape and domain validation as the Responses path.
+    """
+
+    user_agent = "lumi-memory-prototype/1"
+
+    def __init__(self, *, endpoint: str, session_id: str | None = None, thinking: bool = False,
+                 **options: Any) -> None:
+        if (not isinstance(endpoint, str) or not endpoint.startswith("https://")
+                or any(ch.isspace() for ch in endpoint)):
+            raise StyleMateError("invalid_endpoint", "An https endpoint is required.")
+        super().__init__(**options)
+        self.endpoint = endpoint
+        self.thinking = bool(thinking)
+        self._session_id = session_id or uuid.uuid4().hex
+
+    def _build_payload(self, instructions: str, user_input: str, schema: dict[str, Any], name: str) -> dict[str, Any]:
+        system = (
+            f"{instructions}\n\nRespond with a single JSON object only, no prose or code fence. "
+            f"It must satisfy this JSON Schema ({name}):\n"
+            + json.dumps(schema, ensure_ascii=False, sort_keys=True)
+        )
+        payload: dict[str, Any] = {
+            "model": self.model,
+            "messages": [
+                {"role": "system", "content": system},
+                {"role": "user", "content": user_input},
+            ],
+            "response_format": {"type": "json_object"},
+            "max_tokens": self.max_output_tokens,
+            "stream": False,
+        }
+        if not self.thinking:
+            # Measured 2026-11-12: with reasoning on, ~37% of replies were cut off
+            # mid-body by the gateway and took 20-60 s; disabled took ~7 s, 0 cuts.
+            payload["thinking"] = {"type": "disabled"}
+        return payload
+
+    def _build_headers(self) -> dict[str, str]:
+        headers = super()._build_headers()
+        headers["User-Agent"] = self.user_agent
+        headers["x-opencode-session"] = self._session_id
+        return headers
+
+    def _response_text(self, response: Mapping[str, Any]) -> str:
+        status = response.get("status_code", response.get("http_status"))
+        if isinstance(status, int) and status >= 400:
+            code = "provider_rate_limited" if status == 429 else "provider_http_error"
+            raise StyleMateError(code, "The feature proposal provider returned an error.")
+        if response.get("error") is not None:
+            raise StyleMateError("provider_error", "The feature proposal provider returned an error.")
+        choices = response.get("choices")
+        if not isinstance(choices, list) or len(choices) != 1 or not isinstance(choices[0], Mapping):
+            raise StyleMateError("provider_invalid_response", "The provider returned an invalid response.")
+        choice = choices[0]
+        message = choice.get("message")
+        if not isinstance(message, Mapping) or message.get("role") not in (None, "assistant"):
+            raise StyleMateError("provider_invalid_response", "The provider returned an invalid response.")
+        if message.get("refusal") is not None or choice.get("finish_reason") == "content_filter":
+            raise StyleMateError("provider_refusal", "The feature proposal provider declined the request.")
+        if choice.get("finish_reason") != "stop":
+            raise StyleMateError("provider_incomplete", "The feature proposal response was incomplete.")
+        content = message.get("content")
+        if content is not None and not isinstance(content, str):
+            raise StyleMateError("provider_invalid_response", "The provider returned an invalid response.")
+        if content is None or not content.strip():
+            raise StyleMateError("empty_response", "The provider returned no feature proposal.")
+        return content
+
+
+class OpenCodeGoChatAdapter(OpenCodeGoChatGateway):
+    """Legacy consumer-17-v1 propose(context) boundary for the chat gateway."""
+
+    propose = OpenAIResponsesAdapter.propose
+
+
 def create_model_gateway(
     provider: str = "fake", *, model: str = DEFAULT_MODEL, api_key: str | None = None,
-    transport: Transport | None = None, timeout: float = DEFAULT_TIMEOUT,
-    max_output_tokens: int = DEFAULT_MAX_OUTPUT_TOKENS,
+    transport: Transport | None = None, timeout: float | None = None,
+    max_output_tokens: int | None = None, endpoint: str | None = None,
 ) -> FakeModelGateway | OpenAIResponsesGateway:
     """No environment lookup or automatic provider fallback. A owns CLI wiring."""
     if provider == "fake":
-        if api_key is not None or transport is not None:
-            raise StyleMateError("invalid_input", "OpenAI configuration requires provider=openai.")
+        if api_key is not None or transport is not None or endpoint is not None:
+            raise StyleMateError("invalid_input", "Provider configuration requires an explicit real provider.")
         return FakeModelGateway()
     if provider == "openai":
         return OpenAIResponsesGateway(model=model, api_key=api_key, transport=transport,
-                                      timeout=timeout, max_output_tokens=max_output_tokens)
+                                      timeout=timeout or DEFAULT_TIMEOUT,
+                                      max_output_tokens=max_output_tokens or DEFAULT_MAX_OUTPUT_TOKENS)
+    if provider == "opencode-go":
+        return OpenCodeGoChatGateway(endpoint=endpoint or "", model=model, api_key=api_key, transport=transport,
+                                     timeout=timeout or OPENCODE_TIMEOUT,
+                                     max_output_tokens=max_output_tokens or OPENCODE_MAX_OUTPUT_TOKENS)
     raise StyleMateError("invalid_input", "Unknown model provider.")
 
 
-__all__ = ["OpenAIResponsesGateway", "OpenAIResponsesAdapter", "FakeModelGateway", "create_model_gateway", "Transport"]
+__all__ = ["OpenAIResponsesGateway", "OpenAIResponsesAdapter", "OpenCodeGoChatGateway", "OpenCodeGoChatAdapter", "FakeModelGateway", "create_model_gateway", "Transport"]
