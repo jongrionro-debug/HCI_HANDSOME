@@ -1,0 +1,23 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git status:*)",
+      "Bash(git diff:*)",
+      "Bash(git log:*)",
+      "Bash(git show:*)",
+      "Bash(git branch:*)",
+      "Bash(PYTHONPATH=src python3 -m unittest:*)",
+      "Bash(PYTHONPATH=src python3 -m stylemate_memory.cli demo:*)",
+      "Bash(PYTHONPATH=src python3 -m stylemate_memory.cli features:*)",
+      "Bash(PYTHONPATH=src python3 scripts/evaluate_offline.py:*)",
+      "Bash(python3 scripts/check_repository.py:*)",
+      "Bash(python3 scripts/check_context.py:*)",
+      "Bash(python3 scripts/sync_feature_registry.py --check:*)",
+      "Bash(node --test tests/:*)",
+      "Bash(node tests/check_:*)"
+    ],
+    "deny": [
+      "Read(./.env)"
+    ]
+  }
+}
