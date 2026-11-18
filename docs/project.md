@@ -235,6 +235,8 @@ PYTHONPATH=src python3 -m stylemate_memory.consumer --provider opencode-go --end
 
 시작 화면은 사전이 지원하는 품목을 고르게 하고, 상품 카드는 현재 Map의 PI 값을 보여준다. 이 흐름은 실제 86개 상품과 각본 모델 응답으로 적재→Map→검색→FEA→Fit 가설 비교→선택→종료→장기 동의까지 확인했다. 실제 DeepSeek 응답 품질은 별도 평가 대상이다.
 
+고정 한국어 요청 8개(바지 3·니트·티셔츠·스커트·셔츠·후디)를 새 요청→내용·조건 확인 수락→탐색→종료로 돌려 해석 문구·조건·카드·비교를 JSON으로 남기는 점검은 `PYTHONPATH=src python3 scripts/smoke_real_flow.py --catalog "$DATA/lumi-catalog-complete-v1.jsonl" --image-root "$DATA/images" --output <저장소 밖 경로>.json`이다. 기본 `--provider fake`는 호출 없이 배선만 확인하고, `--provider opencode-go`는 실제 호출이다. 품질 벤치마크가 아니라 끝까지 도는지 보는 점검이다.
+
 ### 설정
 
 | 환경변수 | CLI / 기본값 |
