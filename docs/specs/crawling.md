@@ -72,6 +72,22 @@ OPENCODE_API_KEY=... python3 scripts/fill_pi_deepseek.py \
 - [PI 보완](../../scripts/fill_pi_deepseek.py)은 출처가 `none`·`referred`인 축만, 상품당 1회 DeepSeek([ADR 0011](../adr/0011-use-deepseek-api-for-real-model.md))에 상품명·설명·고시표 텍스트만 보낸다. 근거 문장(`evidence_quote`)이 입력에 그대로 없거나 ‘상세 페이지 참고’류이면 버린다. 결과는 `pi_fills/<id>.json`에 `model_interpretation`·모델명과 함께 따로 두고 원문 값을 덮어쓰지 않는다.
 - 내보낸 `lumi-catalog-v1`은 원문 PI를 `raw_metadata`의 `color`·`fit`·`fabric`·`detail`(출처가 structured/text일 때만)에, 모델 값을 `raw_metadata.pi_model_interpretation`에 둔다. `labels`는 비운다(value 사전 확정 전). 이미지는 `STYLEMATE_IMAGE_ROOT=<out>/images` 기준 상대 경로다.
 
+## 유니클로·자라 원문 PI 파일럿
+
+2026-11-18에 한국 공식몰별 여성 셔츠·블라우스 10개와 팬츠 10개의 공개 상세 페이지를 확인했다. 공개 카테고리의 기본 표시 순서에서 품목이 맞는 상품을 골랐고 유니클로는 같은 스타일의 색상·기장 변형을 제외했다. 각 품번에 페이지가 선택한 색상 한 건을 기록했다. 40개 상세 페이지 모두 HTTP 200이었다. 상품 식별자·URL·선택 색상·표시 판매가·축별 근거 위치와 누락을 표본 CSV에 남겼다. [유니클로 상의](https://www.uniqlo.com/kr/ko/women/shirts-and-blouses) · [유니클로 하의](https://www.uniqlo.com/kr/ko/women/bottoms) · [유니클로 슬랙스](https://www.uniqlo.com/kr/ko/women/bottoms/trousers) · [자라 상의](https://www.zara.com/kr/ko/woman-shirts-l1217.html) · [자라 하의](https://www.zara.com/kr/ko/woman-trousers-l1335.html?v1=2025899)
+
+| 공식몰·품목 | Fit | Fabric | Detail | PI 7축 확보 |
+|---|---:|---:|---:|---:|
+| 유니클로 셔츠·블라우스 | 9/10 | 10/10 | 9/10 | 8/10 |
+| 유니클로 팬츠 | 10/10 | 10/10 | 10/10 | 10/10 |
+| 자라 셔츠·블라우스 | 0/10 | 10/10 | 10/10 | 0/10 |
+| 자라 팬츠 | 6/10 | 10/10 | 10/10 | 6/10 |
+
+- Type·Brand·Price·Color는 각 그룹에서 10/10이었다. 상품명에 명시된 품목과 구조화 브랜드, 상세 화면의 선택 색상과 판매가를 사용했다. 자라의 구조화 KRW 가격은 표본에서 화면 금액의 1/100이었다. 자라 소재는 JSON-LD 혼용률을 우선하고 혼용률 값이 빈 하의 2개는 화면의 겉감 주요·부소재를 읽었다.
+- Fit은 항목 또는 상품명·설명에 명시된 핏이나 레그 실루엣을 인정했다. 조거처럼 품목을 가리키는 표현과 핏 조절 문구는 Fit에서 제외했다. 유니클로의 `핏`과 `팬츠 실루엣`을 별도로 보존했다. Detail은 여밈·포켓·턱·칼라 등 직접 명시된 구조나 장식이 하나 이상일 때 집계했다. 모델 호출과 이미지 판독 없이 확인했다.
+- 이 표본에서는 유니클로가 7축이 필요한 수집 실험의 우선 후보다. 자라는 소재·디테일의 직접 표기가 풍부하며 상의 핏 확보는 추가 표본으로 확인할 필요가 있다. 표본은 여성 셔츠·블라우스와 팬츠에 한정된다. 지속 수집과 상품 이미지 재사용 범위, 실행 사전 연결은 후속 검증 대상이다. [유니클로 이용약관](https://faq-kr.uniqlo.com/pkb_Home_UQ_KR?id=kA0Ie000000TO0f) · [자라 이용약관](https://static.zara.net/static/pdfs/KR/terms-and-conditions/terms-and-conditions-en_KR-20240311.pdf)
+- 같은 날 유니클로 상·하의 추가 수집을 시작했으나 첫 카테고리가 HTTP 403(`Access Denied`)을 반환해 해당 실행을 종료했다. 신규 상세 페이지 조회와 신규 수집은 각각 0건이었다. [여성 상의 카테고리](https://www.uniqlo.com/kr/ko/women/tops)
+
 ## 1. 목표와 대상
 
 - 상품의 식별자·URL·상품명·분류·이미지와 PI 7개 항목의 원본 값·근거를 함께 확보한다.
