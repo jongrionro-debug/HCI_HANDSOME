@@ -48,3 +48,4 @@ ADR은 구조·계약·운영·연구 방향에 오래 영향을 주는 선택�
 - [0010 · PI value를 수집한 상품 데이터에서 확정한다](0010-derive-pi-values-from-collected-products.md)
 - [0011 · 실제 모델 provider로 DeepSeek API를 사용한다](0011-use-deepseek-api-for-real-model.md)
 - [0012 · 29CM 완전 채움 상품으로 수집 기반 실행 사전(lumi-29cm-v1)을 만든다](0012-collected-29cm-value-dictionary.md)
+- [0013 · LangGraph 기반 의도 순환 추천으로 흐름 제어를 재구성한다](0013-langgraph-intent-loop.md)
