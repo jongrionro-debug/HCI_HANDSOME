@@ -1,9 +1,9 @@
 # 0012 · 29CM 완전 채움 상품으로 수집 기반 실행 사전(lumi-29cm-v1)을 만든다
 
-- Status: Proposed
+- Status: Accepted
 - Date: 2026-11-18
 - Related Work: 현재 대화의 “feature 맵에 채워야 하는 값들이 다 채워져있는 데이터만 가지고 전체 시스템을 개발” 요청, PR #11(29CM 수집·DeepSeek 보완)
-- Approval: 완전 채움 상품으로 전체 시스템을 만드는 방향은 사용자 요청. 아래 결정 3(모델 보완값을 상품 비교에 사용)은 구현 중 정한 선택이며 사용자 승인 전
+- Approval: 완전 채움 상품으로 전체 시스템을 만드는 방향은 사용자 요청. 결정 3(모델 보완값을 상품 비교에 사용)은 2026-11-18 사용자가 “그냥 계속 넣으면 될거 같은데”라고 승인
 - Supersedes: 없음. [ADR 0010](0010-derive-pi-values-from-collected-products.md)의 수집 기반 value 확정을 처음 실행 코드에 연결한다. Park 사전과 그 규칙은 그대로 둔다
 
 ## 맥락
