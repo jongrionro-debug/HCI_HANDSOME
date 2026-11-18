@@ -10,6 +10,7 @@ from __future__ import annotations
 
 from copy import deepcopy
 import hashlib
+import re
 from itertools import combinations, product
 import math
 
@@ -27,6 +28,9 @@ from .product_search import (
 _VISUAL_FEATURES = ("Color", "Fit", "Detail", "Type")
 _SIZES = {"default": 3, "two_axis": 4, "detail": 2}
 _NO_RESULTS_OPTIONS = ["조건 유지", "조건 조정", "탐색 종료"]
+
+
+_INTERNAL_QUESTION = re.compile(r"\[q\d{3}\] |[a-z][a-z_]*(?::| \[)")
 
 
 def _value(entry: dict, feature: str) -> tuple[str, ...] | None:
@@ -120,6 +124,11 @@ def _select(entries: list[dict], target: dict, count: int, mode: str):
         known = [entry for entry in entries if entry["image"] is not None and _value(entry, focus[0]) is not None]
     if len(known) < 2:
         return entries[:count], [], reduced
+    # Diversity is sought only among candidates at least as relevant as the
+    # count-th best one: a less matching product never displaces a better one.
+    scores = sorted((entry["hit"]["score"] for entry in known), reverse=True)
+    floor = scores[min(count, len(scores)) - 1]
+    known = [entry for entry in known if entry["hit"]["score"] >= floor]
     selected = [known.pop(0)]
     while known and len(selected) < count:
         seen = {axis: {_value(entry, axis) for entry in selected} for axis in focus}
@@ -278,6 +287,11 @@ def build_candidate_cards(results: list[SearchResult], target_map: TargetMap, ca
             questions.append({"text": prefix + "; ".join(differences) + ". 가까운 후보나 원하는 차이를 알려주세요.",
                               "target_id": tid, "subject_refs": [], "options": ["후보 선택", "텍스트로 보완", "모르겠음"]})
     for question in target_map["questions"]:
+        # Context notes ("[q001] ..." re-quotes of an already open question,
+        # snake_case status codes) are internal; showing them duplicates the
+        # stored question or leaks a code to the user.
+        if _INTERNAL_QUESTION.match(question):
+            continue
         if len(questions) < 3:
             questions.append({"text": question, "target_id": None, "subject_refs": [], "options": []})
     # Bind identity to the generation basis as well as the product/image. A retry

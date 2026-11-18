@@ -305,6 +305,18 @@ class V1InferenceTests(unittest.TestCase):
         self.assertEqual((result["constraints"], hypotheses), ([], []))
         self.assertEqual(self.pi(result, "Color")["status"], "unspecified")
 
+    def test_misfiled_hypothesis_is_dropped_and_missing_questions_mean_none(self):
+        self.fixture.add("vintage", "빈티지한 느낌")
+        context = self.context()
+        raw = self.proposal(context, self.fea_spec())
+        raw["suggestions"][0]["fea_constraint_ids"] = ["unknown"]
+        del raw["questions"]
+        result = self.infer(context, raw)
+        self.assertEqual(result["constraints"], [])
+        raw["suggestions"][0]["binding"]["strength"] = "hard"  # authority slips still reject everything
+        raw["suggestions"][0]["fea_constraint_ids"] = []
+        self.assert_error("invalid_output", lambda: self.infer(context, raw))
+
     def test_content_confirmation_keeps_mapping_inferred_until_binding_confirmation(self):
         m = self.fixture.add("unmapped", "빈티지한 느낌")
         binding = self.fixture.bind(m, "Brown", feature="Color", confirmed=False, origin="inferred")

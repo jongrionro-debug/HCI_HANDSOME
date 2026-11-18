@@ -320,6 +320,22 @@ class ComparisonTests(CatalogFixture):
         self.assertEqual({c["product_id"] for c in plan["cards"]}, {"p1", "p2", "p3"})
         self.assertIn("비교 축을 줄였습니다", plan["questions"][0]["text"])
 
+    def test_diversity_never_displaces_a_better_matching_product(self):
+        self.use_records([synthetic_product("n1", "Navy", "Wide"), synthetic_product("n2", "Navy", "Straight"),
+                          synthetic_product("n3", "Navy", "Wide", ["Wool"]), synthetic_product("b1", "Beige", "Straight")])
+        goal = self.target_map()
+        self.add_constraint(goal, polarity="prefer", strength="soft")
+        plan = self.plan(goal)
+        self.assertEqual({c["product_id"] for c in plan["cards"]}, {"n1", "n2", "n3"})
+
+    def test_internal_context_notes_are_not_shown_as_new_questions(self):
+        self.use_records(self.rectangle[:3])
+        goal = self.target_map()
+        goal["questions"] = ["[q002] 원하는 핏이 있나요?", "context_budget_partial: 예산", "어떤 소재를 원하세요?"]
+        texts = [q["text"] for q in self.plan(goal)["questions"]]
+        self.assertIn("어떤 소재를 원하세요?", texts)
+        self.assertFalse(any("q002" in t or "context_budget" in t for t in texts))
+
     def test_few_eligible_candidates_are_not_filled_with_hard_violations(self):
         goal = self.target_map()
         self.add_constraint(goal)

@@ -122,6 +122,11 @@ def run_scenario(runner: Runner, garment: str, text: str, trace: list[dict[str, 
         row["memories"] = [m["content"] for m in state["memories"]]
         for memory in list(state["memories"]):
             for purpose in ("confirm_content", "confirm_bindings"):
+                if purpose == "confirm_bindings" and not any(
+                        b["memory_id"] == memory["ref"]["id"] and b["status"] in ("candidate", "active")
+                        for b in runner.service.inspect_request(state["request"]["id"])["snapshot"]["bindings"]):
+                    row["steps"].append([purpose, "no_bindings"])
+                    continue
                 try:
                     runner.review(purpose, next(m for m in runner.service.state()["memories"]
                                                 if m["ref"]["id"] == memory["ref"]["id"]))
