@@ -55,6 +55,23 @@ URL 파일은 한 줄에 상품 URL 하나이며 빈 줄·`#`로 시작하는 �
 
 검증 명령은 `node --test tests/test_naver_crawler.mjs`다. 외부 네트워크 대신 합성 페이지·이미지로 PI 보존·옵션 분기·상한·차단 중단·재개·기존 파일 보호를 검사한다. 실제 사이트의 DOM 호환성·접근 성공과 구분한다.
 
+## 29CM 카테고리 수집과 PI 보완
+
+29CM은 robots.txt가 일반 크롤러에 상품·카테고리 경로를 허용한다(2026-11-17 확인, `/order/`·`/auth/` 등만 차단). [29CM 수집기](../../scripts/crawl_29cm.mjs)는 무작위 sitemap 대신 공개 카테고리 목록(여성 상의·니트웨어·바지·스커트, 남성 상의·니트웨어·하의의 세부 품목 1페이지)에서 상품을 찾고, 세부 품목을 번갈아 골라 상품 페이지를 하나씩 읽는다. 카디건·베스트 세부 품목은 제외한다. 로그인·프로필 재사용·모델 호출은 없다.
+
+```sh
+node scripts/crawl_29cm.mjs --out "$HOME/Documents/LUMI-data/29cm-catalog" --per-group 115
+OPENCODE_API_KEY=... python3 scripts/fill_pi_deepseek.py \
+  --data "$HOME/Documents/LUMI-data/29cm-catalog" --max-calls 300 \
+  --export "$HOME/Documents/LUMI-data/29cm-catalog/lumi-catalog-v1.jsonl"
+```
+
+- 요청 간격 최소 2초, 동시 요청 1개. 401·403·418·429·CAPTCHA·접속 제한 화면에서 즉시 멈추며 재시도·우회하지 않는다. 같은 `--out`으로 다시 실행하면 저장된 상품을 건너뛴다(`discovery.json`의 목록을 재사용).
+- 설치된 Playwright와 Chromium 버전이 다르면 `--browser-path` 또는 `LUMI_CHROMIUM_PATH`로 Chromium 실행 파일을 지정한다.
+- 상품별 `products/<id>.json`: URL·ID·그룹·breadcrumb·상품명·브랜드·가격(숫자·통화·정가)·PI 7축 원문과 출처(`structured`/`text`/`referred`/`none`)·상품정보 고시표·상품설명 텍스트·수집 시각. 고시표의 판매자정보(사업자번호·대표자·주소)와 리뷰는 저장하지 않는다. 대표 이미지 최대 3장(JSON-LD, `img.29cm.co.kr`, PNG/JPEG/WebP, 10 MiB 이하)은 `images/<id>/`에 둔다.
+- [PI 보완](../../scripts/fill_pi_deepseek.py)은 출처가 `none`·`referred`인 축만, 상품당 1회 DeepSeek([ADR 0011](../adr/0011-use-deepseek-api-for-real-model.md))에 상품명·설명·고시표 텍스트만 보낸다. 근거 문장(`evidence_quote`)이 입력에 그대로 없거나 ‘상세 페이지 참고’류이면 버린다. 결과는 `pi_fills/<id>.json`에 `model_interpretation`·모델명과 함께 따로 두고 원문 값을 덮어쓰지 않는다.
+- 내보낸 `lumi-catalog-v1`은 원문 PI를 `raw_metadata`의 `color`·`fit`·`fabric`·`detail`(출처가 structured/text일 때만)에, 모델 값을 `raw_metadata.pi_model_interpretation`에 둔다. `labels`는 비운다(value 사전 확정 전). 이미지는 `STYLEMATE_IMAGE_ROOT=<out>/images` 기준 상대 경로다.
+
 ## 1. 목표와 대상
 
 - 상품의 식별자·URL·상품명·분류·이미지와 PI 7개 항목의 원본 값·근거를 함께 확보한다.
