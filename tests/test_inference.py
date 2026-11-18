@@ -294,6 +294,17 @@ class V1InferenceTests(unittest.TestCase):
                         "polarity": "prefer", "strength": "soft"}
                 self.assert_error("invalid_output", lambda: self.infer(context, self.proposal(context, spec)))
 
+    def test_service_path_drops_one_ungrounded_suggestion_instead_of_failing(self):
+        from stylemate_memory.hypotheses import infer_with_hypotheses
+        self.fixture.add("vintage", "빈티지한 느낌")
+        context = self.context()
+        spec = {"domain": "PI", "feature": "Color", "values": ["Navy"], "match": "any",
+                "polarity": "prefer", "strength": "soft"}
+        result, hypotheses = infer_with_hypotheses(context, FakeModelGateway(self.proposal(context, spec)),
+                                                   registry=self.registry)
+        self.assertEqual((result["constraints"], hypotheses), ([], []))
+        self.assertEqual(self.pi(result, "Color")["status"], "unspecified")
+
     def test_content_confirmation_keeps_mapping_inferred_until_binding_confirmation(self):
         m = self.fixture.add("unmapped", "빈티지한 느낌")
         binding = self.fixture.bind(m, "Brown", feature="Color", confirmed=False, origin="inferred")

@@ -666,6 +666,25 @@ def _v1_conflict(left: c.BindingSpec, right: c.BindingSpec) -> bool:
     return not bool(lv & rv)
 
 
+def unsupported_suggestion(suggestion: dict[str, Any], sources: list[dict[str, Any]],
+                           direct: list[c.Constraint]) -> bool:
+    """True when an ordinary model suggestion lacks grounding or contradicts a direct constraint."""
+    by_alias = {source["source_id"]: source for source in sources}
+    spec, aliases = suggestion["binding"], suggestion["source_ids"]
+    if spec["polarity"] == "indifferent" or all(by_alias[a]["kind"] == "image_selection" for a in aliases):
+        return True
+    # Physical PI values must already occur literally in the evidence or
+    # its C2-validated mapping note. Affect/style alone cannot fill color,
+    # fiber, price, etc. Korean synonyms are extracted upstream, not guessed
+    # again here. FEA remains an explicitly soft interpretation.
+    if spec["domain"] == "PI" and any(not any(
+            re.search(r"(?<!\w)" + re.escape(value) + r"(?!\w)", by_alias[a]["content"], re.IGNORECASE)
+            for a in aliases) for value in spec["values"]):
+        return True
+    return any(_v1_conflict(spec, constraint["binding"]) for constraint in direct
+               if constraint["target_id"] == suggestion["target_id"] and _v1_path(constraint["binding"]) == _v1_path(spec))
+
+
 def _v1_model_constraints(proposal: c.Proposal, context: c.MemoryContext) -> list[c.Constraint]:
     inputs = context["model_input"]
     sources = {source["source_id"]: source for source in inputs["sources"]}
@@ -675,20 +694,10 @@ def _v1_model_constraints(proposal: c.Proposal, context: c.MemoryContext) -> lis
     used_ids = {constraint["id"] for constraint in direct}
     for suggestion in proposal["suggestions"]:
         spec, aliases = suggestion["binding"], suggestion["source_ids"]
-        if spec["polarity"] == "indifferent" or all(sources[a]["kind"] == "image_selection" for a in aliases):
-            _v1_fail("invalid_output")
-        # Physical PI values must already occur literally in the evidence or
-        # its C2-validated mapping note. Affect/style alone cannot fill color,
-        # fiber, price, etc. Korean synonyms are extracted upstream, not guessed
-        # again here. FEA remains an explicitly soft interpretation.
-        if spec["domain"] == "PI" and any(not any(
-                re.search(r"(?<!\w)" + re.escape(value) + r"(?!\w)", sources[a]["content"], re.IGNORECASE)
-                for a in aliases) for value in spec["values"]):
+        if unsupported_suggestion(suggestion, inputs["sources"], direct):
             _v1_fail("invalid_output")
         matching = [constraint for constraint in direct
                     if constraint["target_id"] == suggestion["target_id"] and _v1_path(constraint["binding"]) == _v1_path(spec)]
-        if any(_v1_conflict(spec, constraint["binding"]) for constraint in matching):
-            _v1_fail("invalid_output")
         # Keep every original any/all clause. A model cannot add inferred
         # values to a field displayed as a confirmed positive specification.
         if any(constraint["confirmed"] and constraint["binding"]["polarity"] in ("prefer", "require", "indifferent")

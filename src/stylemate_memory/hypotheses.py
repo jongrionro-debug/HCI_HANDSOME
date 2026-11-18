@@ -7,7 +7,7 @@ import json
 from .catalog_validation import canonical
 from . import contracts as c
 from .errors import StyleMateError
-from .inference import infer_v1
+from .inference import infer_v1, unsupported_suggestion
 from .model_io import validate_proposal_v1
 from .registry import product_fact_statuses
 
@@ -22,7 +22,11 @@ def infer_with_hypotheses(context, gateway, *, registry):
             for suggestion in proposal["suggestions"]:
                 ids = suggestion.get("fea_constraint_ids", [])
                 if not ids:
-                    ordinary.append(suggestion)
+                    # One ungrounded or contradicting suggestion is discarded
+                    # instead of failing the whole turn; it never becomes a
+                    # constraint either way (infer_v1 still rejects it).
+                    if not unsupported_suggestion(suggestion, inputs["sources"], context["constraints"]):
+                        ordinary.append(suggestion)
                     continue
                 binding = suggestion["binding"]
                 # Explicit/confirmed PI wins even when soft. No hypothesis can

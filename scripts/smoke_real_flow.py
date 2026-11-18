@@ -46,6 +46,36 @@ SCENARIOS = [
 ]
 
 
+def trace_gateway(gateway: Any, log: list[dict[str, Any]]) -> None:
+    """Record raw model JSON and validation errors per call (``--trace``; output stays outside the repo)."""
+    complete = gateway.complete
+
+    def traced_complete(instructions: str, payload: dict[str, Any], schema: dict[str, Any]) -> dict[str, Any]:
+        entry = {"call": instructions.split(" ", 1)[0], "started": round(time.monotonic(), 1)}
+        log.append(entry)
+        try:
+            entry["output"] = complete(instructions, payload, schema)
+            return entry["output"]
+        except Exception as error:  # noqa: BLE001 - diagnostic record only
+            entry["error"] = [getattr(error, "code", type(error).__name__), str(error)[:300]]
+            raise
+
+    def wrap(name: str) -> None:
+        original = getattr(gateway, name)
+
+        def traced(inputs: Any) -> Any:
+            try:
+                return original(inputs)
+            except Exception as error:  # noqa: BLE001
+                log.append({"call": name, "validation_error": [getattr(error, "code", type(error).__name__), str(error)[:300]]})
+                raise
+        setattr(gateway, name, traced)
+
+    gateway.complete = traced_complete
+    for name in ("extract", "propose"):
+        wrap(name)
+
+
 class Runner:
     def __init__(self, service: ConsumerService, wait_s: float) -> None:
         self.service, self.wait_s, self.serial = service, wait_s, 0
@@ -80,8 +110,10 @@ def _bindings(snapshot: dict[str, Any]) -> list[dict[str, Any]]:
     return out
 
 
-def run_scenario(runner: Runner, garment: str, text: str) -> dict[str, Any]:
+def run_scenario(runner: Runner, garment: str, text: str, trace: list[dict[str, Any]] | None = None) -> dict[str, Any]:
     row: dict[str, Any] = {"garment_type": garment, "text": text, "steps": []}
+    if trace is not None:
+        trace.clear()
     started = time.monotonic()
     try:
         state = runner.send({"op": "start_request", "mode": "shopping", "timezone": "Asia/Seoul",
@@ -102,6 +134,9 @@ def run_scenario(runner: Runner, garment: str, text: str) -> dict[str, Any]:
         state = runner.send({"op": "explore"})
         row["steps"].append(["explore", state["operation"]])
         row["error"] = state["error"]
+        if state["operation"] == "blocked":
+            context = runner.service.inspect_request(state["request"]["id"])["context"]
+            row["blocked_reasons"] = context["questions"] if context else None
         row["cards"] = [{"title": card["title"], "image": bool(card["image_url"]),
                          "facts": {f["feature"]: f["values"] for f in card.get("facts", [])}} for card in state["cards"]]
         comparison = state.get("comparison")
@@ -112,6 +147,8 @@ def run_scenario(runner: Runner, garment: str, text: str) -> dict[str, Any]:
     except (StyleMateError, TimeoutError) as error:
         row["failure"] = getattr(error, "code", type(error).__name__)
     row["elapsed_s"] = round(time.monotonic() - started, 1)
+    if trace is not None:
+        row["trace"] = list(trace)
     return row
 
 
@@ -125,6 +162,7 @@ def main() -> int:
     parser.add_argument("--output", required=True, help="result JSON (outside the repository)")
     parser.add_argument("--wait-s", type=float, default=120)
     parser.add_argument("--only", type=int, nargs="*", help="scenario indexes to run")
+    parser.add_argument("--trace", action="store_true", help="record raw model JSON and validation errors per scenario")
     args = parser.parse_args()
     repo = Path(__file__).resolve().parents[1]
     paths = [Path(p).expanduser().resolve() for p in (args.catalog, args.image_root, args.output)]
@@ -139,6 +177,9 @@ def main() -> int:
         gateway = create_model_gateway("opencode-go", model=args.model, api_key=key, endpoint=ENDPOINT)
     else:
         gateway = create_model_gateway("fake")
+    trace: list[dict[str, Any]] | None = [] if args.trace else None
+    if trace is not None:
+        trace_gateway(gateway, trace)
     scenarios = [s for i, s in enumerate(SCENARIOS) if not args.only or i in args.only]
     with tempfile.TemporaryDirectory(prefix="lumi-smoke-") as temp:
         service = ConsumerService(Path(temp) / "memory.sqlite3", Path(temp) / "catalog.sqlite3", gateway,
@@ -149,7 +190,7 @@ def main() -> int:
             runner = Runner(service, args.wait_s)
             rows = []
             for garment, text in scenarios:
-                rows.append(run_scenario(runner, garment, text))
+                rows.append(run_scenario(runner, garment, text, trace))
                 print(json.dumps({k: rows[-1].get(k) for k in ("garment_type", "steps", "failure", "elapsed_s")},
                                  ensure_ascii=False), file=sys.stderr)
         finally:
