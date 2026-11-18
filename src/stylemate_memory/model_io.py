@@ -440,12 +440,13 @@ def validate_proposal_v1(raw: Any, inputs: ProposalInput, registry: Any) -> Prop
 
 
 def _tolerate_shape_slips(raw: Any, inputs: Any, *, proposal: bool) -> Any:
-    """Repair two harmless slips seen from real models before strict validation.
+    """Repair harmless slips seen from real models before strict validation.
 
     A missing ``questions`` list means no questions. In a proposal, a
     suggestion whose ``fea_constraint_ids`` does not point at supplied FEA
     constraints of its own target is a mis-filed hypothesis: it is dropped,
-    never re-labelled. Every other rule (authority claims, hard states, quotes,
+    never re-labelled; a multi-value "any" hypothesis is split into one
+    suggestion per value. Every other rule (authority claims, hard states, quotes,
     sources) still rejects the whole answer.
     """
     if not isinstance(raw, dict):
@@ -458,6 +459,17 @@ def _tolerate_shape_slips(raw: Any, inputs: Any, *, proposal: bool) -> Any:
             isinstance(s, dict) and isinstance(s.get("fea_constraint_ids"), list) and s["fea_constraint_ids"]
             and (not isinstance(s.get("binding"), dict) or s["binding"].get("domain") != "PI"
                  or any(not isinstance(i, str) or fea.get(i) != s.get("target_id") for i in s["fea_constraint_ids"])))]
+        # A hypothesis offering several "any" values is several single-value
+        # interpretations; each is compared on its own, none is merged.
+        split = []
+        for s in raw["suggestions"]:
+            binding = s.get("binding") if isinstance(s, dict) else None
+            if (s is not None and isinstance(binding, dict) and s.get("fea_constraint_ids") and binding.get("match") == "any"
+                    and isinstance(binding.get("values"), list) and len(binding["values"]) > 1):
+                split.extend(s | {"binding": binding | {"values": [value]}} for value in binding["values"])
+            else:
+                split.append(s)
+        raw["suggestions"] = split
     return raw
 
 

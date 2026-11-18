@@ -317,6 +317,17 @@ class V1InferenceTests(unittest.TestCase):
         raw["suggestions"][0]["fea_constraint_ids"] = []
         self.assert_error("invalid_output", lambda: self.infer(context, raw))
 
+    def test_multi_value_hypothesis_is_split_into_single_value_suggestions(self):
+        from stylemate_memory.model_io import _tolerate_shape_slips
+        inputs = {"constraints": [{"id": "c001", "target_id": "pants-1", "binding": self.fea_spec("Ease")}]}
+        fit = {"domain": "PI", "feature": "Fit", "values": ["Wide", "Relaxed"], "match": "any",
+               "polarity": "prefer", "strength": "soft"}
+        raw = {"suggestions": [{"target_id": "pants-1", "binding": fit, "source_ids": ["s001"], "reason": "편안함",
+                                "fea_constraint_ids": ["c001"]}], "questions": []}
+        split = _tolerate_shape_slips(raw, inputs, proposal=True)["suggestions"]
+        self.assertEqual([s["binding"]["values"] for s in split], [["Wide"], ["Relaxed"]])
+        self.assertEqual(raw["suggestions"][0]["binding"]["values"], ["Wide", "Relaxed"])  # input untouched
+
     def test_content_confirmation_keeps_mapping_inferred_until_binding_confirmation(self):
         m = self.fixture.add("unmapped", "빈티지한 느낌")
         binding = self.fixture.bind(m, "Brown", feature="Color", confirmed=False, origin="inferred")
