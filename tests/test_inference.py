@@ -294,6 +294,40 @@ class V1InferenceTests(unittest.TestCase):
                         "polarity": "prefer", "strength": "soft"}
                 self.assert_error("invalid_output", lambda: self.infer(context, self.proposal(context, spec)))
 
+    def test_service_path_drops_one_ungrounded_suggestion_instead_of_failing(self):
+        from stylemate_memory.hypotheses import infer_with_hypotheses
+        self.fixture.add("vintage", "빈티지한 느낌")
+        context = self.context()
+        spec = {"domain": "PI", "feature": "Color", "values": ["Navy"], "match": "any",
+                "polarity": "prefer", "strength": "soft"}
+        result, hypotheses = infer_with_hypotheses(context, FakeModelGateway(self.proposal(context, spec)),
+                                                   registry=self.registry)
+        self.assertEqual((result["constraints"], hypotheses), ([], []))
+        self.assertEqual(self.pi(result, "Color")["status"], "unspecified")
+
+    def test_misfiled_hypothesis_is_dropped_and_missing_questions_mean_none(self):
+        self.fixture.add("vintage", "빈티지한 느낌")
+        context = self.context()
+        raw = self.proposal(context, self.fea_spec())
+        raw["suggestions"][0]["fea_constraint_ids"] = ["unknown"]
+        del raw["questions"]
+        result = self.infer(context, raw)
+        self.assertEqual(result["constraints"], [])
+        raw["suggestions"][0]["binding"]["strength"] = "hard"  # authority slips still reject everything
+        raw["suggestions"][0]["fea_constraint_ids"] = []
+        self.assert_error("invalid_output", lambda: self.infer(context, raw))
+
+    def test_multi_value_hypothesis_is_split_into_single_value_suggestions(self):
+        from stylemate_memory.model_io import _tolerate_shape_slips
+        inputs = {"constraints": [{"id": "c001", "target_id": "pants-1", "binding": self.fea_spec("Ease")}]}
+        fit = {"domain": "PI", "feature": "Fit", "values": ["Wide", "Relaxed"], "match": "any",
+               "polarity": "prefer", "strength": "soft"}
+        raw = {"suggestions": [{"target_id": "pants-1", "binding": fit, "source_ids": ["s001"], "reason": "편안함",
+                                "fea_constraint_ids": ["c001"]}], "questions": []}
+        split = _tolerate_shape_slips(raw, inputs, proposal=True)["suggestions"]
+        self.assertEqual([s["binding"]["values"] for s in split], [["Wide"], ["Relaxed"]])
+        self.assertEqual(raw["suggestions"][0]["binding"]["values"], ["Wide", "Relaxed"])  # input untouched
+
     def test_content_confirmation_keeps_mapping_inferred_until_binding_confirmation(self):
         m = self.fixture.add("unmapped", "빈티지한 느낌")
         binding = self.fixture.bind(m, "Brown", feature="Color", confirmed=False, origin="inferred")

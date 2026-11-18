@@ -107,7 +107,7 @@ export function mountConsumer(root, adapter, { fixture = false, scenarios = {} }
       const meaning = review.snapshot.meaning;
       const future = review.purpose === "future_reuse";
       const fields = meaning ? `<p><strong>${esc(meaning.content)}</strong></p><dl>
-        <dt>적용 범위 · 대상</dt><dd>${meaning.scope === "long_term" ? "이후 요청에서 참고할 평소 취향" : "이번 요청만"} · ${esc(meaning.selector.garment_type === "Pants" ? "바지" : meaning.selector.garment_type ?? "전체 대상")}${meaning.selector.slot_id ? " · 지정한 아이템" : ""}</dd>
+        <dt>적용 범위 · 대상</dt><dd>${meaning.scope === "long_term" ? "이후 요청에서 참고할 평소 취향" : "이번 요청만"} · ${esc(meaning.selector.garment_type ? garmentLabel(meaning.selector.garment_type) : "전체 대상")}${meaning.selector.slot_id ? " · 지정한 아이템" : ""}</dd>
         <dt>조건</dt><dd>${Object.entries(meaning.conditions).map(([key, value]) => `${esc({occasion: "상황", activity: "활동", goal: "목적"}[key] ?? key)}: ${esc(value)}`).join(" / ") || "추가 조건 없음"}</dd>
         <dt>방향 · 강도</dt><dd>${esc({ prefer: "선호", avoid: "피하고 싶음", require: "필요함", indifferent: "상관없음" }[meaning.polarity])} · ${meaning.strength === "hard" ? "필수" : "선호 조건"}</dd>
         <dt>기간</dt><dd>${esc(meaning.valid_from ?? "시작일 지정 없음")} / ${esc(meaning.valid_until ?? "종료일 지정 없음")}</dd>
@@ -143,12 +143,18 @@ export function mountConsumer(root, adapter, { fixture = false, scenarios = {} }
        ${["stale", "error", "blocked"].includes(state?.operation) || error ? button("refresh", "최신 화면 확인", "", busy) : ""}`;
     return `<div id="operation-status" class="status" data-tone="${tone}" role="status" aria-live="polite" aria-atomic="true">${esc(text)}${controls.trim() ? `<div class="actions">${controls}</div>` : ""}</div>`;
   }
+  function garmentOptions() {
+    return state?.garment_types?.length ? state.garment_types : [{ value: "Pants", label_ko: "바지" }];
+  }
+  function garmentLabel(value) {
+    return garmentOptions().find(g => g.value === value)?.label_ko ?? value;
+  }
   function startMarkup() {
     const onboarding = startMode === "onboarding";
     const requests = state.requests.filter(r => r.mode === "shopping" && r.status !== "expired");
     return `<section class="start"><h1>${onboarding ? "평소 어떤 옷을 좋아하세요?" : "이번에는 어떤 옷이 필요하세요?"}</h1>
       <p>${onboarding ? "짧게 적거나, 이미지부터 살펴봐도 좋아요. 내용을 확인한 뒤 이후 활용 여부를 따로 선택할 수 있어요." : "아이템과 입을 상황을 짧게 알려주세요. 이전 요청의 조건은 자동으로 이어지지 않아요."}</p>
-      <form class="start-form" data-form="start"><div><label for="target">찾을 아이템</label><select id="target" name="target"><option value="Pants">바지${fixture ? " · 화면 연습 대상" : ""}</option></select></div>
+      <form class="start-form" data-form="start"><div><label for="target">찾을 아이템</label><select id="target" name="target">${garmentOptions().map(g => `<option value="${esc(g.value)}">${esc(g.label_ko)}${fixture ? " · 화면 연습 대상" : ""}</option>`).join("")}</select></div>
         <div><label for="initial-text">${onboarding ? "평소 취향 한마디 (선택)" : "입을 상황과 원하는 느낌 (선택)"}</label>
           <textarea id="initial-text" maxlength="4000" placeholder="${onboarding ? "예: 평소에는 여유 있는 바지를 자주 입어요." : "예: 이번 회사 발표에 입을 단정한 바지를 찾고 있어요."}">${esc(initialText[startMode])}</textarea></div>
         <div class="actions"><button class="primary" ${disabled() ? "disabled" : ""}>${onboarding ? "취향 살펴보기" : "새 요청 시작"}</button>
@@ -156,7 +162,7 @@ export function mountConsumer(root, adapter, { fixture = false, scenarios = {} }
           ${state.request ? button("cancel-start", "기존 요청으로 돌아가기", 'class="quiet"') : ""}</div>
         <p class="hint">${fixture ? "합성 이미지와 문장으로 조작을 연습합니다. 실제 상품 검색이나 저장은 하지 않아요." : "처음부터 모든 조건을 정할 필요는 없어요."}</p>
       </form>
-      ${requests.length ? `<section class="request-list"><h2>기존 요청 다시 보기</h2><p class="hint">열린 요청은 이어서 탐색하고, 종료한 요청은 요약을 볼 수 있어요.</p>${requests.map((r, index) => button("resume", `바지 요청 ${index + 1} · ${r.status === "open" ? "탐색 이어하기" : "종료 요약"}`, `data-request="${esc(r.id)}"`)).join("")}</section>` : ""}
+      ${requests.length ? `<section class="request-list"><h2>기존 요청 다시 보기</h2><p class="hint">열린 요청은 이어서 탐색하고, 종료한 요청은 요약을 볼 수 있어요.</p>${requests.map((r, index) => button("resume", `${esc(garmentLabel(r.targets?.[0]?.garment_type ?? "Pants"))} 요청 ${index + 1} · ${r.status === "open" ? "탐색 이어하기" : "종료 요약"}`, `data-request="${esc(r.id)}"`)).join("")}</section>` : ""}
     </section>`;
   }
   function partMarkup() {
@@ -196,6 +202,7 @@ export function mountConsumer(root, adapter, { fixture = false, scenarios = {} }
       const selection = d.selections.find(s => s.candidate_id === card.candidate_id);
       const interpretation = state.comparison?.options.find(o => o.candidate_id === card.candidate_id);
       return `<article class="card ${selection ? "selected" : ""}">${image(card, selection?.part_ref?.box)}<div class="card-body"><h3 class="card-title">${esc(card.title)}</h3>
+        ${card.facts?.length ? `<dl class="card-facts">${card.facts.map(f => `<div><dt>${esc(f.label_ko)}</dt><dd>${esc(f.values.join(", "))}${f.origin === "model" ? ' <span class="fact-origin" title="상품 사진·문구에서 모델이 보완한 값">추정</span>' : ""}</dd></div>`).join("")}</dl>` : ""}
         ${interpretation ? `<p>${esc(interpretation.label)}</p><p class="hint">${esc(interpretation.meaning)}</p>${button("comparison-choose", d.hypothesis?.candidate_id === card.candidate_id ? "이 조건 선택됨" : "이 조건 선택", `data-card="${esc(card.candidate_id)}" class="primary" aria-pressed="${d.hypothesis?.candidate_id === card.candidate_id}"`, !canFeedback())}` : ""}
         ${selection ? `<p class="selected-label">${d.hypothesis?.candidate_id === card.candidate_id ? "조건 선택 중" : selection.part_ref ? "부분 선택 중" : "전체 선택 중"} · 반영 전</p>` : ""}
         ${button("select", selection ? "선택 해제" : "전체 선택", `data-card="${esc(card.candidate_id)}" aria-pressed="${Boolean(selection)}"`, !canFeedback() || !refs.set || !refs.round)}

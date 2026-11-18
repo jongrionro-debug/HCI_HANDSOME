@@ -15,6 +15,9 @@ from .errors import StyleMateError
 
 CONTRACT_VERSION = "lumi-memory-v1"
 V1_REGISTRY_VERSION = "park-2025-source-v1"
+# ADR 0010: 29CM 수집 상품에서 정한 PI value 사전. 축·FEA 분류는 Park 사전과 같다.
+COLLECTED_29CM_REGISTRY_VERSION = "lumi-29cm-v1"
+V1_REGISTRY_VERSIONS = (V1_REGISTRY_VERSION, COLLECTED_29CM_REGISTRY_VERSION)
 LEGACY_REGISTRY_VERSION = "consumer-17-v1"
 CATALOG_FORMAT_VERSION = "lumi-catalog-v1"
 
@@ -740,9 +743,17 @@ class MemoryView(TypedDict):
     status: Lifecycle
 
 
+class CardFact(TypedDict):
+    feature: str
+    label_ko: str
+    values: list[str]
+    origin: Literal["supplier", "model"]  # model = inferred model_interpretation, not a verified label
+
+
 class CardView(CandidateCard):
     title: str
     image_url: str | None  # server-resolved ID route or permitted supplier reference
+    facts: NotRequired[list[CardFact]]  # display-only product PI values from the current Map
 
 
 class ReviewView(TypedDict):
@@ -759,8 +770,14 @@ class QuestionView(TypedDict):
     status: Literal["open", "answered", "skipped"]
 
 
+class GarmentOption(TypedDict):
+    value: str
+    label_ko: str
+
+
 class ConsumerState(TypedDict):
     comparison: NotRequired[dict[str, JSONValue] | None]
+    garment_types: NotRequired[list[GarmentOption]]  # registry-supported start targets
     contract_version: str
     state_version: int
     request: RequestState | None

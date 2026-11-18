@@ -6,6 +6,7 @@
 - Related Issue: [#1](https://github.com/jongrionro-debug/HCI_HANDSOME/issues/1)
 - Approval: 2026-10-13 · 현재 채팅의 승인 질문(D01–D12·ADR 0001/0002·보관 기간·Python+SQLite 최소안)에 사용자가 **“권고안 전체 승인”**으로 응답했다.
 - Related Decision: [0001](0001-memory-boundaries.md)
+- Superseded in part by (Proposed): [0013](0013-langgraph-intent-loop.md) (2026-11-18). 6,000자 근거 예산은 사용자 문장과 근거 원문만 센다. 예산 수치와 다른 결정은 유지
 
 ## Context
 

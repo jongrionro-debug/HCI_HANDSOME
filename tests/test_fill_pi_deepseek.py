@@ -163,3 +163,27 @@ class FillTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class GapFillTests(unittest.TestCase):
+    GAP = {"garment_type": "Pants", "features": ["Color", "Fit"],
+           "allowed_values": {"Color": ["블랙", "네이비"], "Fit": ["와이드", "슬림"]}}
+
+    def test_gap_values_must_come_from_allowed_values(self):
+        text = fill.source_text(RECORD)
+        result = {"Color": {"value": "블랙, 네이비", "evidence_type": "image_visual", "evidence": "black and navy options",
+                            "image": "main0", "confidence": 0.8},
+                  "Fit": {"value": "릴랙스드", "evidence_type": "image_visual", "evidence": "loose legs",
+                          "image": "main0", "confidence": 0.7}}
+        accepted, rejected = fill.validate_gap_fill(result, self.GAP, text, {"main0"})
+        self.assertEqual(accepted["Color"]["value"], "블랙, 네이비")
+        self.assertEqual(rejected, {"Fit": "not_allowed_value"})
+
+    def test_gap_fill_takes_precedence_in_export(self):
+        gap = {"model": "m", "fills": {"Color": {"value": "블랙", "evidence_type": "image_visual", "evidence": "black",
+                                                 "image": "main0", "confidence": 0.9}}}
+        image = {"model": "m", "fills": {"Color": {"value": "차콜그레이 톤", "evidence_type": "image_visual",
+                                                   "evidence": "dark", "image": "main0", "confidence": 0.5}}}
+        out = fill.catalog_record(RECORD, None, image, gap)
+        color = out["raw_metadata"]["pi_model_interpretation"]["Color"]
+        self.assertEqual((color["value"], color["fill_version"]), ("블랙", fill.GAP_FILL_VERSION))

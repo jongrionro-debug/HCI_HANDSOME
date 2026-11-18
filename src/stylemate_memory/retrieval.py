@@ -90,7 +90,7 @@ class _Snapshot:
         self.request = snapshot.get("request", {})
         if not isinstance(self.request, dict):
             raise StyleMateError("invalid_input", "snapshot의 request가 유효하지 않습니다.")
-        if (registry.version != c.V1_REGISTRY_VERSION or snapshot.get("registry_version") != registry.version
+        if (registry.version not in c.V1_REGISTRY_VERSIONS or snapshot.get("registry_version") != registry.version
                 or self.request.get("contract_version") != c.CONTRACT_VERSION
                 or self.request.get("registry_version") != registry.version):
             raise StyleMateError("unsupported_contract", "snapshot과 사전 계약이 다릅니다.")

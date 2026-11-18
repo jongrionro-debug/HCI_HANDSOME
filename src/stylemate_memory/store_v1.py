@@ -171,7 +171,7 @@ class V1Storage:
     def check_contract(row: sqlite3.Row, contract_version: str | None) -> None:
         if contract_version not in (None, c.CONTRACT_VERSION) or row["contract_version"] != contract_version:
             raise _fail("unsupported_contract", "request and operation contracts do not match")
-        if contract_version == c.CONTRACT_VERSION and row["registry_version"] != c.V1_REGISTRY_VERSION:
+        if contract_version == c.CONTRACT_VERSION and row["registry_version"] not in c.V1_REGISTRY_VERSIONS:
             raise _fail("unsupported_contract", "unsupported request registry version")
 
     @staticmethod
@@ -534,7 +534,7 @@ class V1Storage:
         self, user_id: str, *, input_id: str, text: str | None, timezone: str,
         contract_version: str, registry_version: str | None, mode: str, targets: Any,
     ) -> dict[str, Any]:
-        if contract_version != c.CONTRACT_VERSION or registry_version != c.V1_REGISTRY_VERSION:
+        if contract_version != c.CONTRACT_VERSION or registry_version not in c.V1_REGISTRY_VERSIONS:
             raise _fail("unsupported_contract", "v1 requires explicit storage and registry contracts")
         _text(user_id, "user_id")
         _text(input_id, "input_id")
@@ -1328,7 +1328,7 @@ class V1Storage:
         """
         _text(user_id, "user_id")
         _text(request_id, "request_id")
-        if registry_version != c.V1_REGISTRY_VERSION:
+        if registry_version not in c.V1_REGISTRY_VERSIONS:
             raise _fail("unsupported_contract", "unsupported migration registry")
         try:
             self.conn.execute("BEGIN IMMEDIATE")

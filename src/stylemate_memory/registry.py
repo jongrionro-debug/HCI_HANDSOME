@@ -17,7 +17,7 @@ from typing import Any, get_args
 from .contracts import (
     BindingSpec, FEAObservation, FEAValue, FeaturePath, LEGACY_REGISTRY_VERSION,
     MapStatus, PIObservation, PIValue, Polarity, Strength, Target,
-    V1_REGISTRY_VERSION, validate_ref,
+    COLLECTED_29CM_REGISTRY_VERSION, V1_REGISTRY_VERSION, V1_REGISTRY_VERSIONS, validate_ref,
 )
 from .errors import StyleMateError
 
@@ -682,6 +682,36 @@ def _validate_resource(document: Any) -> None:
         raise ValueError("FEA count")
 
 
+def _validate_collected_resource(document: Any) -> None:
+    """Structure of a value dictionary generated from collected products (ADR 0010)."""
+    if not isinstance(document, dict) or document.get("version") != COLLECTED_29CM_REGISTRY_VERSION:
+        raise ValueError("registry version")
+    pi = document["product_information"]
+    if not isinstance(pi, dict) or list(pi) != ["Type", "Brand", "Price", "Color", "Fit", "Fabric", "Detail"]:
+        raise ValueError("PI axes")
+    for entry in pi.values():
+        if (not isinstance(entry["label_ko"], str) or entry["enumeration_complete"] is not True
+                or not _string_list(entry["values"]) or entry["reported_count"] != len(entry["values"])):
+            raise ValueError("PI enumeration")
+    supported = document["execution"]["supported_garment_types"]
+    by_type = pi["Type"]["values_by_garment_type"]
+    if not _string_list(supported) or set(by_type) != set(supported):
+        raise ValueError("garment types")
+    for values in by_type.values():
+        if not _string_list(values) or not set(values) <= set(pi["Type"]["values"]):
+            raise ValueError("Type by garment")
+    tags = [entry["attribute"] for subcategories in document["consumer_needs_taxonomy"].values()
+            for entries in subcategories.values() for entry in entries]
+    if not _string_list(tags) or len(tags) != 30:
+        raise ValueError("FEA count")
+
+
+_RESOURCES = {
+    V1_REGISTRY_VERSION: ("park-2025-feature-map.json", _validate_resource),
+    COLLECTED_29CM_REGISTRY_VERSION: ("lumi-29cm-v1.json", _validate_collected_resource),
+}
+
+
 class ParkRegistry:
     """A1 RegistryPort. Checks vocabulary/shape, never evidence or authority.
 
@@ -691,13 +721,20 @@ class ParkRegistry:
     remain the responsibility of the store/inference/catalog modules.
     """
 
-    def __init__(self) -> None:
+    def __init__(self, version: str = V1_REGISTRY_VERSION) -> None:
+        # The same port serves the Park source dictionary and value dictionaries
+        # generated from collected products. Only the vocabulary and the
+        # execution limits differ; PI axes and the FEA taxonomy are shared.
         try:
-            raw = resources.files(__package__).joinpath("resources/park-2025-feature-map.json").read_text(encoding="utf-8")
+            name, validate = _RESOURCES[version]
+            raw = resources.files(__package__).joinpath(f"resources/{name}").read_text(encoding="utf-8")
             self._document = json.loads(raw)
-            _validate_resource(self._document)
+            validate(self._document)
         except (OSError, UnicodeError, ValueError, KeyError, TypeError, AttributeError):
             raise StyleMateError("registry_unavailable", "고정 사전 자원을 읽거나 검증할 수 없습니다.") from None
+        self._collected = version != V1_REGISTRY_VERSION
+        self._supported = (list(self._document["execution"]["supported_garment_types"])
+                           if self._collected else ["Pants"])
         self._pi = self._document["product_information"]
         self._taxonomy = self._document["consumer_needs_taxonomy"]
         self._fea_paths = {
@@ -713,6 +750,22 @@ class ParkRegistry:
     def describe(self) -> dict[str, Any]:
         """Preserve the source document and separate local execution limits."""
         result = deepcopy(self._document)
+        if self._collected:
+            source = result["execution"]
+            result["execution"] = {
+                "supported_garment_types": list(self._supported),
+                "pi_matches": ["any", "all"],
+                "range_supported": False,
+                "brand_enumeration_supported": True,
+                "price_mapping": "canonical_labels_only",
+                "price_numeric_mapping_supported": False,
+                "price_currency": source["price_currency"],
+                "price_boundary_inclusion": source["price_boundary_inclusion"],
+                "target_statuses": list(get_args(MapStatus)),
+                "runtime_integration": True,
+                "accept_inferred_product_pi": source["accept_inferred_product_pi"] is True,
+            }
+            return result
         result["execution"] = {
             "supported_garment_types": ["Pants"],
             "pi_matches": ["any", "all"],
@@ -740,13 +793,12 @@ class ParkRegistry:
             return keys
         _error("domain은 PI 또는 FEA여야 합니다.", code="invalid_input")
 
-    @staticmethod
-    def _supported_target(garment_type: str | None) -> None:
+    def _supported_target(self, garment_type: str | None) -> None:
         # Selector classification is NOT the PI Type (e.g. Jeans/Slacks).
-        if garment_type != "Pants":
+        if garment_type not in self._supported:
             _error("이 품목의 실행 매핑은 아직 제공하지 않습니다.", code="unsupported_mapping")
 
-    def _pi_values(self, feature: str, values: Any) -> None:
+    def _pi_values(self, feature: str, values: Any, garment_type: str | None = None) -> None:
         if not _string_list(values):
             _error("PI values는 중복 없는 canonical 문자열 배열이어야 합니다.", code="invalid_input")
         allowed = self._pi[feature]["values"]
@@ -754,6 +806,9 @@ class ParkRegistry:
             _error("전체 허용값이 공개되지 않은 PI 항목입니다.", code="unsupported_mapping")
         if any(v not in allowed for v in values):
             _error("사전에 없는 PI 값입니다. 자동 치환하지 않습니다.", code="unsupported_mapping")
+        by_garment = self._pi[feature].get("values_by_garment_type")
+        if by_garment is not None and any(v not in by_garment.get(garment_type, []) for v in values):
+            _error("이 품목에 쓰지 않는 PI 값입니다.", code="unsupported_mapping")
 
     def validate_binding(self, binding: BindingSpec, garment_type: str | None) -> None:
         if not isinstance(binding, dict):
@@ -774,7 +829,7 @@ class ParkRegistry:
             else:
                 if binding["match"] not in ("any", "all"):
                     _error("이 사전은 any/all만 지원하며 range는 실행하지 않습니다.", code="unsupported_mapping")
-                self._pi_values(keys[0], binding["values"])
+                self._pi_values(keys[0], binding["values"], garment_type)
 
     def validate_observation(self, observation: PIObservation | FEAObservation, garment_type: str | None) -> None:
         if not isinstance(observation, dict):
@@ -789,7 +844,7 @@ class ParkRegistry:
             return
         self._supported_target(garment_type)
         if pi:
-            self._pi_values(keys[0], value)
+            self._pi_values(keys[0], value, garment_type)
         elif type(value) is not bool:
             _error("상품 태그의 present는 bool 또는 null이어야 합니다.", code="invalid_input")
 
@@ -797,7 +852,7 @@ class ParkRegistry:
         """All seven PI fields and all 30 FEA tags, with explicit null states."""
         if not all(isinstance(v, str) and bool(v.strip()) and len(v) <= 128 for v in (target_id, garment_type)):
             _error("target ID와 garment_type이 필요합니다.", code="invalid_input")
-        supported = garment_type == "Pants"
+        supported = garment_type in self._supported
         return {
             "target_id": target_id,
             "garment_type": garment_type,
@@ -839,15 +894,31 @@ class ParkRegistry:
         if value["status"] in ("specified", "inferred"):
             self._supported_target(garment_type)
             if pi:
-                self._pi_values(keys[0], value[field])
+                self._pi_values(keys[0], value[field], garment_type)
             elif value[field] not in ("prefer", "avoid", "require"):
                 _error("FEA 요구 방향이 유효하지 않습니다.", code="invalid_input")
         elif value[field] is not None:
             _error("이 목표 상태의 값은 null이어야 합니다.", code="invalid_input")
 
 
+_LOADED: dict[str, ParkRegistry] = {}
+
+
 def load_registry(version: str) -> ParkRegistry:
     """Load an explicit v1 registry; legacy APIs retain their original default."""
-    if version != V1_REGISTRY_VERSION:
+    if version not in V1_REGISTRY_VERSIONS:
         raise StyleMateError("unsupported_contract", "지원하지 않는 v1 사전 버전입니다.")
-    return ParkRegistry()
+    return ParkRegistry(version)
+
+
+def product_fact_statuses(registry_version: str) -> tuple[str, ...]:
+    """Product-map statuses that may satisfy a user condition.
+
+    Park keeps the original rule: only confirmed facts match. A collected value
+    dictionary may opt in to also matching model-interpreted (inferred) product
+    values; the Map still records them as inferred model_interpretation.
+    """
+    if registry_version not in _LOADED:
+        _LOADED[registry_version] = load_registry(registry_version)
+    accepts = _LOADED[registry_version].describe()["execution"].get("accept_inferred_product_pi") is True
+    return ("confirmed", "inferred") if accepts else ("confirmed",)

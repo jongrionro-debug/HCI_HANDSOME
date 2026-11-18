@@ -23,7 +23,7 @@ from .contracts import (
     FeaturePath, ProductMap, SearchHit, SearchResult, TargetMap, validate_ref,
 )
 from .errors import StyleMateError
-from .registry import load_registry
+from .registry import load_registry, product_fact_statuses
 
 
 logger = logging.getLogger(__name__)
@@ -234,7 +234,7 @@ def _evaluate(product_map: ProductMap, constraints: list[Constraint], registry, 
         else:
             observation = observations.get(canonical(_path(binding)))
         satisfied = None
-        if observation is not None and observation["status"] == "confirmed":
+        if observation is not None and observation["status"] in product_fact_statuses(product_map["registry_version"]):
             value = observation["observation"]
             if binding["domain"] == "PI" and value["values"] is not None:
                 matches = [v in value["values"] for v in binding["values"]]

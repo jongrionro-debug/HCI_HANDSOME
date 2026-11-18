@@ -27,7 +27,7 @@ from .catalog_validation import (
     validate_assertions, validate_record, version,
 )
 from .contracts import (
-    CATALOG_FORMAT_VERSION, V1_REGISTRY_VERSION, CatalogRecord, CatalogVersions,
+    CATALOG_FORMAT_VERSION, V1_REGISTRY_VERSION, V1_REGISTRY_VERSIONS, CatalogRecord, CatalogVersions,
     ImageSource, ProductMap, RegistryPort,
 )
 from .errors import StyleMateError
@@ -48,7 +48,7 @@ class Catalog:
         if not isinstance(allowed_image_hosts, tuple) or any(not isinstance(host, str) for host in allowed_image_hosts):
             fail("allowed_image_hosts", "tuple of exact supplier DNS hostnames required")
         self.registry = registry if registry is not None else load_registry(V1_REGISTRY_VERSION)
-        if self.registry.version != V1_REGISTRY_VERSION:
+        if self.registry.version not in V1_REGISTRY_VERSIONS:
             fail("registry", "unsupported catalog registry", "unsupported_contract")
         try:
             self.db_path = Path(db_path).resolve() if str(db_path) != ":memory:" else None
