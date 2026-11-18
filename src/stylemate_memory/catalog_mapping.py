@@ -25,7 +25,7 @@ from .catalog_validation import (
 )
 from .contracts import (
     CatalogRecord, ModelGateway, ProductAssertion, ProductMap, RegistryPort,
-    V1_REGISTRY_VERSION,
+    V1_REGISTRY_VERSIONS,
 )
 from .errors import StyleMateError
 
@@ -283,7 +283,7 @@ def build_product_map(record: CatalogRecord, *, raw_version: int, registry: Regi
     Only canonical, axis-matched technical metadata or supplied verified labels
     can be confirmed. Case-normalized metadata and all model output are inferred.
     """
-    if registry.version != V1_REGISTRY_VERSION:
+    if registry.version not in V1_REGISTRY_VERSIONS:
         fail("registry", "unsupported product mapping registry", "unsupported_contract")
     version(raw_version, "raw_version")
     record = validate_record(record, registry, "record")

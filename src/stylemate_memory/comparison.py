@@ -14,6 +14,7 @@ from itertools import combinations, product
 import math
 
 from .catalog_validation import canonical, fields, identifier, version
+from .registry import product_fact_statuses
 from .contracts import (
     CandidatePlan, CatalogPort, SearchHit, SearchResult, TargetMap,
 )
@@ -32,7 +33,8 @@ def _value(entry: dict, feature: str) -> tuple[str, ...] | None:
     for assertion in entry["map"]["assertions"]:
         observation = assertion["observation"]
         if (observation["domain"] == "PI" and observation["feature"] == feature
-                and assertion["status"] == "confirmed" and observation["values"]):
+                and assertion["status"] in product_fact_statuses(entry["map"]["registry_version"])
+                and observation["values"]):
             return tuple(sorted(observation["values"]))
     return None
 

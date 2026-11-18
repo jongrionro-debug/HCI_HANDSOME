@@ -499,7 +499,7 @@ def _v1_basis(basis: Any, registry: c.RegistryPort) -> c.Basis:
     if not isinstance(basis, dict) or set(basis) != c.Basis.__required_keys__:
         _v1_fail()
     if (basis["contract_version"] != c.CONTRACT_VERSION
-            or basis["registry_version"] != registry.version or registry.version != c.V1_REGISTRY_VERSION):
+            or basis["registry_version"] != registry.version or registry.version not in c.V1_REGISTRY_VERSIONS):
         raise StyleMateError("unsupported_contract", "목표 생성에는 명시적인 v1 계약과 Park 사전이 필요합니다.")
     if (not _v1_text(basis["request_id"])
             or any(type(basis[key]) is not int or basis[key] < minimum

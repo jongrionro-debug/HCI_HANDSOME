@@ -17,4 +17,4 @@ lumi-consumer = "stylemate_memory.consumer:main"
 where = ["src"]
 
 [tool.setuptools.package-data]
-stylemate_memory = ["inspector.html", "consumer.html", "consumer.css", "consumer.js", "consumer-fixture.js", "consumer-http.js", "resources/park-2025-feature-map.json"]
+stylemate_memory = ["inspector.html", "consumer.html", "consumer.css", "consumer.js", "consumer-fixture.js", "consumer-http.js", "resources/park-2025-feature-map.json", "resources/lumi-29cm-v1.json"]

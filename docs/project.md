@@ -52,7 +52,7 @@
 | 입력 해석 | [model_io.py](../src/stylemate_memory/model_io.py)·[llm.py](../src/stylemate_memory/llm.py): complete/extract/propose, 인용·출처 alias 검사, pending 재처리 | 실제 한국어·선택 이유 해석 품질, 실제 provider 검증 |
 | 메모리 저장 | [store.py](../src/stylemate_memory/store.py)·[store_v1.py](../src/stylemate_memory/store_v1.py)·[store_feedback.py](../src/stylemate_memory/store_feedback.py)·[store_cleanup.py](../src/stylemate_memory/store_cleanup.py): 근거·문장·선택적 binding, 확인·동의·교체·철회·삭제 | 실제 사용자 DB 이관·운영 자료 검증 |
 | 조회·목표 생성 | [retrieval.py](../src/stylemate_memory/retrieval.py)·[inference.py](../src/stylemate_memory/inference.py): 유효성/대상/요청 필터, 구조+키워드 검색, PI/FEA 목표·최신성 검사 | 실제 의미 검색 모델 선정·관련성 평가 |
-| 상품·이미지 비교 | [catalog.py](../src/stylemate_memory/catalog.py)·[catalog_mapping.py](../src/stylemate_memory/catalog_mapping.py)·[product_search.py](../src/stylemate_memory/product_search.py)·[comparison.py](../src/stylemate_memory/comparison.py)·[hypotheses.py](../src/stylemate_memory/hypotheses.py): 가져오기·PI Map·필수 조건 필터·가설 비교 | 실제 상·하의 수집, 수집 기반 value 사전 확정·실행 연결, 검증·추천 품질 |
+| 상품·이미지 비교 | [catalog.py](../src/stylemate_memory/catalog.py)·[catalog_mapping.py](../src/stylemate_memory/catalog_mapping.py)·[product_search.py](../src/stylemate_memory/product_search.py)·[comparison.py](../src/stylemate_memory/comparison.py)·[hypotheses.py](../src/stylemate_memory/hypotheses.py): 가져오기·PI Map·필수 조건 필터·가설 비교 | 수집 사전(`lumi-29cm-v1`) 연결 완료. 모델 보완값 표본 검수, 상품 수 확대, 추천 품질 |
 | 서비스·소비자 UI | [app.py](../src/stylemate_memory/app.py)의 `ConsumerService`, [consumer.py](../src/stylemate_memory/consumer.py)·[consumer.js](../src/stylemate_memory/consumer.js)·[consumer-http.js](../src/stylemate_memory/consumer-http.js): 온보딩·피드백·확인·재탐색·종료·별도 장기 동의·삭제 | 공개 인증/배포, 실제 참가자 사용성·기기 검증 |
 
 ### 이미지·텍스트 인터랙션
@@ -134,11 +134,18 @@ PI 7개 축과 FEA 분류를 차용한 출처는 Park, H., Kim, S., Choi, Y., & 
 
 ### 현재 실행 사전
 
-[JSON](../output/feature-map/park-2025-feature-map.json)의 PI 값은 논문 차용 및 현재 코드의 실행 기준이며, 수집 후 확정할 최종 PI value 목록은 아직 없다. 기존 JSON·CSV와 출처·라이선스는 보존하고 전체 enum을 이 문서에 복제하지 않는다.
+실행 사전은 두 가지이며 `--registry`/`STYLEMATE_REGISTRY`로 명시적으로 고른다. 기본값은 Park 사전이다.
 
-[registry.py](../src/stylemate_memory/registry.py)의 `load_registry("park-2025-source-v1")`가 실행 사전을 공급한다. [패키지 JSON](../src/stylemate_memory/resources/park-2025-feature-map.json)은 정본의 생성 사본이다. `python3 scripts/sync_feature_registry.py`로 동기화하며 수동 편집하지 않는다.
+| 버전 | 정본 | 범위 |
+|---|---|---|
+| `park-2025-source-v1` (기본) | [park-2025-feature-map.json](../output/feature-map/park-2025-feature-map.json) | 논문 차용 값, Pants만, confirmed 상품 값만 비교 |
+| `lumi-29cm-v1` | [lumi-29cm-v1.json](../output/feature-map/lumi-29cm-v1.json) | 29CM 수집 기반 한국어 value, 상·하의 10개 품목, 모델 보완값도 비교([ADR 0012](adr/0012-collected-29cm-value-dictionary.md)) |
 
-현재 코드의 값 있는 매핑은 **Pants만 지원**한다. 원문의 값은 무신사 여성 바지 기준이며 이 실행 한계가 수집 대상을 바지로 제한하지는 않는다. Brand는 원문의 전체 419개 값이 미공개여서 현재 실행 enum을 지원하지 않는다. Price는 원문 구간 문자열 일치만 지원하고 수치 변환·통화·경계 포함·range는 미정이다. 다른 품목, `Relaxed→Wide`, 원단 종류→섬유 원료 같은 자동 치환은 지원하지 않는다. 수집 기반 사전·상의 매핑·한국어 값 정규화는 아직 실행 코드에 반영하지 않았다.
+[registry.py](../src/stylemate_memory/registry.py)의 `load_registry(version)`이 실행 사전을 공급한다. [패키지 resources](../src/stylemate_memory/resources)의 JSON은 정본의 생성 사본이다. `python3 scripts/sync_feature_registry.py`로 동기화하며 수동 편집하지 않는다. 전체 enum을 이 문서에 복제하지 않는다.
+
+**lumi-29cm-v1.** [build_29cm_registry.py](../scripts/build_29cm_registry.py)가 `lumi-catalog-v1.jsonl`의 원문(`pi_raw`)과 DeepSeek 보완값을 고정 규칙으로 정규화하고, 7개 PI 축이 모두 값을 가진 상품만 `lumi-catalog-complete-v1.jsonl`로 내보낸 뒤 그 분포로 사전을 만든다. 2026-11-18 데이터 기준 230개 중 86개(상의 48·하의 38)가 남았다. 제외 사유는 Detail 59·Fit 55·Color 40·Fabric 34·Type 30개(중복 포함)다. Type은 29CM 소분류(“기타 팬츠”·“하의” 같은 일반 분류 제외), Brand는 남은 상품의 51개 브랜드, Price는 KRW 5구간(하한 포함·상한 미포함)이다. 원문에서 정규화한 값은 confirmed, 모델 보완값은 inferred·model_interpretation이며 화면에 “추정”으로 표시한다. 사전을 다시 만들면 `--check`로 정본과 같은지 확인한다.
+
+Park 사전의 값 있는 매핑은 **Pants만 지원**한다. 원문의 값은 무신사 여성 바지 기준이며 이 실행 한계가 수집 대상을 바지로 제한하지는 않는다. Brand는 원문의 전체 419개 값이 미공개여서 현재 실행 enum을 지원하지 않는다. Price는 원문 구간 문자열 일치만 지원하고 수치 변환·통화·경계 포함·range는 미정이다. 다른 품목, `Relaxed→Wide`, 원단 종류→섬유 원료 같은 자동 치환은 지원하지 않는다. 이 한계는 `lumi-29cm-v1`에는 적용되지 않는다. 다만 두 사전 모두 모델 지시상 사용자 Brand·숫자 가격 조건은 만들지 않는다.
 
 ### 직접 PI와 FEA→PI 가설
 
@@ -210,6 +217,22 @@ PYTHONPATH=src python3 -m stylemate_memory.consumer --provider fake
 
 소비자 화면은 [http://127.0.0.1:8766](http://127.0.0.1:8766)이다. `python3 -m stylemate_memory.cli serve`도 같은 서버를 실행한다. 합성 fixture의 이미지 바이트는 자동 공급하지 않는다. 기본 fake는 빈 추출/제안을 반환하는 연결용 adapter이므로 자연어 해석·상품 추천 데모로 사용하지 않는다. 확인된 기억이 없는 context는 blocked이며 통합 검사는 별도의 명시적 합성 추출을 공급한다.
 
+### 29CM 완전 채움 상품으로 실행
+
+수집 폴더(예: `~/Documents/LUMI-data/29cm-catalog`)에 `lumi-catalog-v1.jsonl`이 있을 때, 새 DB 두 개를 쓰고 같은 사전 버전으로 적재·Map·서버를 실행한다. 자연어 해석에는 실제 모델이 필요하므로 `--provider opencode-go`는 실행이 요청된 경우에만 사용한다.
+
+```sh
+DATA=~/Documents/LUMI-data/29cm-catalog
+python3 scripts/build_29cm_registry.py --catalog-dir "$DATA"   # 사전 갱신 시 이어서 sync_feature_registry.py
+export STYLEMATE_REGISTRY=lumi-29cm-v1 STYLEMATE_IMAGE_ROOT="$DATA/images"
+export STYLEMATE_DB=/private/tmp/lumi-29cm/memory.sqlite3 STYLEMATE_CATALOG_DB=/private/tmp/lumi-29cm/catalog.sqlite3
+PYTHONPATH=src python3 -m stylemate_memory.cli catalog-import --file "$DATA/lumi-catalog-complete-v1.jsonl"
+PYTHONPATH=src python3 -m stylemate_memory.cli catalog-map
+PYTHONPATH=src python3 -m stylemate_memory.consumer --provider opencode-go --endpoint <확인한 https 주소>
+```
+
+시작 화면은 사전이 지원하는 품목을 고르게 하고, 상품 카드는 현재 Map의 PI 값을 보여준다. 이 흐름은 실제 86개 상품과 각본 모델 응답으로 적재→Map→검색→FEA→Fit 가설 비교→선택→종료→장기 동의까지 확인했다. 실제 DeepSeek 응답 품질은 별도 평가 대상이다.
+
 ### 설정
 
 | 환경변수 | CLI / 기본값 |
@@ -224,6 +247,7 @@ PYTHONPATH=src python3 -m stylemate_memory.consumer --provider fake
 | OPENCODE_API_KEY | opencode-go를 명시적으로 선택할 때만 조회 |
 | STYLEMATE_OPENAI_MODEL | openai 경로의 `--model`, 기본 gpt-6-luna. 새 실제 평가에는 사용하지 않음 |
 | STYLEMATE_PORT | `--port`, 기본 8766 |
+| STYLEMATE_REGISTRY | `--registry park-2025-source-v1 / lumi-29cm-v1`, 기본 park. 카탈로그 적재·Map·서버에 같은 값을 쓴다 |
 | OPENAI_API_KEY | openai를 명시적으로 선택할 때만 조회 |
 
 [settings.py](../src/stylemate_memory/settings.py)가 경로·설정·gateway를 구성한다. 실제 API 실행이 요청된 경우에만 사용자가 로컬 환경에 `OPENCODE_API_KEY`를 설정하고 `PYTHONPATH=src python3 -m stylemate_memory.consumer --provider opencode-go --endpoint <확인한 https 주소>`로 시작한다. 기존 `--provider openai`는 호환 경로다. 키를 CLI 인자·예제 파일·로그에 넣지 않는다. import·기본 fake·상품 가져오기/Map 생성·읽기 관찰에는 키가 필요 없다.
@@ -366,9 +390,9 @@ node --test tests/test_naver_crawler.mjs
 |---|---|---|
 | 메모리 저장·계약 | 약 90% | 합성 검증까지 완료 |
 | 조회·목표 Map | 약 80% | 의미 검색은 포트만 있음 |
-| 상품·이미지 비교 | 약 75% | 값 있는 매핑은 Pants만 지원 |
+| 상품·이미지 비교 | 약 85% | 29CM 수집 사전으로 상·하의 실행. 모델 값 검수 전 |
 | 소비자 서비스·UI | 약 85% | 실제 참가자·기기 검증 전 |
-| 상품 수집 | 약 25% | 수집기·합성 테스트만 있음. 실제 수집 0건 |
+| 상품 수집 | 약 60% | 29CM 230개 수집·보완, 완전 채움 86개 사용 |
 | 실제 모델 검증 | 약 40% | adapter 구현·합성 추출 평가 통과 31/32. 가설·실제 발화 평가 전 |
 | 사용자 연구 준비 | 약 10% | 설계만 있음. 시스템 약 55%, 연구 포함 약 40% |
 

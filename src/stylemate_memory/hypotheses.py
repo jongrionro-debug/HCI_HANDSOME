@@ -9,6 +9,7 @@ from . import contracts as c
 from .errors import StyleMateError
 from .inference import infer_v1
 from .model_io import validate_proposal_v1
+from .registry import product_fact_statuses
 
 
 def infer_with_hypotheses(context, gateway, *, registry):
@@ -77,7 +78,8 @@ def comparison_options(service, hypothesis, plan):
     options = []
     for card in cards:
         observation = next((a["observation"] for a in service._catalog.get_product_map(card["product_id"])["assertions"]
-                            if a["status"] == "confirmed" and a["observation"].get("feature") == feature), None)
+                            if a["status"] in product_fact_statuses(service.registry.version)
+                            and a["observation"].get("feature") == feature), None)
         if observation and observation["values"]:
             options.append({"candidate_id": card["candidate_id"], "values": observation["values"]})
     wanted = hypothesis["binding"]["values"][0]

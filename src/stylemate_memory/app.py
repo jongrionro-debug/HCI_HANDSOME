@@ -253,6 +253,30 @@ class ConsumerService:
             views.append({k: record[k] for k in c.RequestState.__required_keys__})
         return views
 
+    def _garment_options(self) -> list[dict[str, str]]:
+        description = self.registry.describe()
+        labels = {g["value"]: g["label_ko"] for g in description.get("garment_types", [])}
+        labels.setdefault("Pants", "바지")
+        return [{"value": g, "label_ko": labels.get(g, g)} for g in description["execution"]["supported_garment_types"]]
+
+    def _card_facts(self, product_id: str) -> list[dict[str, Any]]:
+        """Display-only PI values of the current product Map, with their origin."""
+        from .registry import product_fact_statuses
+        product_map = self._catalog.get_product_map(product_id)
+        statuses = product_fact_statuses(product_map["registry_version"])
+        labels = self.registry.describe()["product_information"]
+        facts = []
+        for assertion in product_map["assertions"]:
+            observation = assertion["observation"]
+            if (observation["domain"] != "PI" or not observation["values"]
+                    or assertion["status"] not in statuses or observation["feature"] not in labels):
+                continue
+            model = any(p["kind"] == "model_interpretation" for p in assertion["provenance"])
+            facts.append({"feature": observation["feature"], "label_ko": labels[observation["feature"]]["label_ko"],
+                          "values": list(observation["values"]), "origin": "model" if model else "supplier"})
+        order = list(labels)
+        return sorted(facts, key=lambda f: order.index(f["feature"]))
+
     def state(self, request_id: str | None = None) -> c.ConsumerState:
         return self._run(self._state, request_id)
 
@@ -273,7 +297,7 @@ class ConsumerService:
             "contract_version": c.CONTRACT_VERSION, "state_version": self._journal.next_version(),
             "request": None, "requests": requests, "expected": None, "phase": "onboarding", "operation": "idle",
             "memories": [], "cards": [], "reviews": [], "questions": [], "error": None,
-            "comparison": None,
+            "comparison": None, "garment_types": self._garment_options(),
         }
         if request_id is None:
             return result
@@ -311,7 +335,8 @@ class ConsumerService:
                         # Remote supplier references are not fetched/proxied.
                         if source is not None and source["kind"] == "local":
                             image_url = f"/api/images/{quote(card['image_id'], safe='')}?version={card['image_version']}"
-                    result["cards"].append(deepcopy(card) | {"title": record["title"], "image_url": image_url})
+                    result["cards"].append(deepcopy(card) | {"title": record["title"], "image_url": image_url,
+                                                             "facts": self._card_facts(card["product_id"])})
                 from .hypotheses import load_comparison, public_comparison
                 comparison = load_comparison(self, candidate_set["id"])
                 if comparison and not comparison["answered"]:

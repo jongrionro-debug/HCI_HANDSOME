@@ -14,7 +14,7 @@ from typing import Any
 
 from .contracts import (
     ExtractedCandidate, ExtractionInput, ExtractionResult, Proposal, ProposalInput,
-    V1_REGISTRY_VERSION,
+    V1_REGISTRY_VERSIONS,
 )
 from .errors import StyleMateError
 from .registry import load_registry
@@ -258,9 +258,9 @@ def _prepare(inputs: Any, *, proposal: bool = False) -> tuple[dict[str, Any], An
         if source["source_id"] in sources:
             _fail(code)
         sources[source["source_id"]] = source
-    if not isinstance(inputs["registry"], dict) or inputs["registry"].get("version") != V1_REGISTRY_VERSION:
-        raise StyleMateError("unsupported_contract", "v1 모델에는 Park 사전이 필요합니다.")
-    registry = load_registry(V1_REGISTRY_VERSION)
+    if not isinstance(inputs["registry"], dict) or inputs["registry"].get("version") not in V1_REGISTRY_VERSIONS:
+        raise StyleMateError("unsupported_contract", "v1 모델에는 Park 또는 수집 기반 사전이 필요합니다.")
+    registry = load_registry(inputs["registry"]["version"])
     canonical = registry.describe()
     # Never forward arbitrary extra fields, source-document metadata or private DB data.
     vocabulary = {

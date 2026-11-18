@@ -23,6 +23,7 @@ class ConsumerSettings:
     model: str = "gpt-6-luna"
     port: int = 8766
     endpoint: str | None = None
+    registry: str = "park-2025-source-v1"
 
     @classmethod
     def from_options(cls, options: Any, settings: Mapping[str, str] | None = None) -> ConsumerSettings:
@@ -56,8 +57,12 @@ class ConsumerSettings:
         else:
             model = pick("model", "STYLEMATE_OPENAI_MODEL", "gpt-6-luna")
         endpoint = pick("endpoint", "STYLEMATE_OPENCODE_ENDPOINT") if provider == "opencode-go" else None
+        from .contracts import V1_REGISTRY_VERSION, V1_REGISTRY_VERSIONS
+        registry = pick("registry", "STYLEMATE_REGISTRY", V1_REGISTRY_VERSION)
+        if registry not in V1_REGISTRY_VERSIONS:
+            raise StyleMateError("invalid_input", "registry는 " + " 또는 ".join(V1_REGISTRY_VERSIONS) + "로 지정해 주세요.")
         return cls(db_path, catalog_path, image_path, pick("user", "STYLEMATE_USER_ID", "local-tester"),
-                   provider, model, port, endpoint)
+                   provider, model, port, endpoint, registry)
 
     def gateway(self, *, settings: Mapping[str, str] | None = None, transport: Any = None) -> Any:
         from .llm import create_model_gateway
@@ -73,5 +78,7 @@ class ConsumerSettings:
         from .app import ConsumerService
         self.db.parent.mkdir(parents=True, exist_ok=True)
         self.catalog_db.parent.mkdir(parents=True, exist_ok=True)
+        from .registry import load_registry
         return ConsumerService(self.db, self.catalog_db, gateway if gateway is not None else self.gateway(),
-                               user_id=self.user_id, image_root=self.image_root)
+                               user_id=self.user_id, image_root=self.image_root,
+                               registry=load_registry(self.registry))

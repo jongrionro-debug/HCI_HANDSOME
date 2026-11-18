@@ -1,0 +1,675 @@
+{
+  "name": "LUMI 29CM collected PI values + Park FEA taxonomy",
+  "version": "lumi-29cm-v1",
+  "status": "Generated",
+  "runtime_implemented": true,
+  "scope": "29CM 상·하의 수집 상품 중 PI 7개 축이 모두 정규화된 상품에서 만든 value 사전이다.",
+  "lumi_use": "ADR 0010에 따라 PI 축은 Park et al. (2025)를 유지하고 value만 수집 데이터에서 정한다. FEA 30개 태그는 Park 사전을 그대로 쓴다.",
+  "generated_by": "scripts/build_29cm_registry.py",
+  "product_information": {
+    "Type": {
+      "label_ko": "아이템 종류",
+      "values": [
+        "긴소매 티셔츠",
+        "데님 스커트",
+        "데님 팬츠",
+        "레깅스",
+        "반소매 셔츠",
+        "반소매 티셔츠",
+        "부츠컷 팬츠",
+        "브이넥 니트",
+        "블라우스",
+        "셔츠",
+        "쇼트 팬츠",
+        "스웨트 집업",
+        "스웨트셔츠",
+        "스트레이트 팬츠",
+        "슬랙스",
+        "슬리브리스",
+        "슬림 팬츠",
+        "아노락",
+        "와이드 팬츠",
+        "집업 니트",
+        "캐시미어 니트",
+        "코튼 팬츠",
+        "크루넥 니트",
+        "터틀넥 니트",
+        "트레이닝 팬츠",
+        "폴로 니트",
+        "플리스",
+        "피케·카라 티셔츠",
+        "후드 니트",
+        "후디"
+      ],
+      "reported_count": 30,
+      "enumeration_complete": true,
+      "distribution": {
+        "긴소매 티셔츠": 1,
+        "데님 스커트": 1,
+        "데님 팬츠": 4,
+        "레깅스": 2,
+        "반소매 셔츠": 5,
+        "반소매 티셔츠": 3,
+        "부츠컷 팬츠": 5,
+        "브이넥 니트": 2,
+        "블라우스": 2,
+        "셔츠": 1,
+        "쇼트 팬츠": 1,
+        "스웨트 집업": 1,
+        "스웨트셔츠": 5,
+        "스트레이트 팬츠": 2,
+        "슬랙스": 6,
+        "슬리브리스": 1,
+        "슬림 팬츠": 2,
+        "아노락": 1,
+        "와이드 팬츠": 5,
+        "집업 니트": 3,
+        "캐시미어 니트": 1,
+        "코튼 팬츠": 7,
+        "크루넥 니트": 2,
+        "터틀넥 니트": 5,
+        "트레이닝 팬츠": 3,
+        "폴로 니트": 4,
+        "플리스": 1,
+        "피케·카라 티셔츠": 5,
+        "후드 니트": 1,
+        "후디": 4
+      },
+      "values_by_garment_type": {
+        "Blouse": [
+          "블라우스"
+        ],
+        "Hoodie": [
+          "후디"
+        ],
+        "Knit/Sweater": [
+          "브이넥 니트",
+          "집업 니트",
+          "캐시미어 니트",
+          "크루넥 니트",
+          "터틀넥 니트",
+          "폴로 니트",
+          "후드 니트"
+        ],
+        "Pants": [
+          "데님 팬츠",
+          "레깅스",
+          "부츠컷 팬츠",
+          "쇼트 팬츠",
+          "스트레이트 팬츠",
+          "슬랙스",
+          "슬림 팬츠",
+          "와이드 팬츠",
+          "코튼 팬츠",
+          "트레이닝 팬츠"
+        ],
+        "Polo": [
+          "피케·카라 티셔츠"
+        ],
+        "Shirt": [
+          "반소매 셔츠",
+          "셔츠"
+        ],
+        "Skirt": [
+          "데님 스커트"
+        ],
+        "Sleeveless": [
+          "슬리브리스"
+        ],
+        "Sweatshirt": [
+          "스웨트 집업",
+          "스웨트셔츠"
+        ],
+        "T-shirt": [
+          "긴소매 티셔츠",
+          "반소매 티셔츠",
+          "아노락",
+          "플리스"
+        ]
+      }
+    },
+    "Brand": {
+      "label_ko": "브랜드",
+      "values": [
+        "108파운드",
+        "그노노이",
+        "글로니",
+        "노티카",
+        "누아",
+        "더니트컴퍼니",
+        "더미튼",
+        "던스트",
+        "데케트",
+        "데케트 우먼",
+        "디스이즈네버댓",
+        "디스커스 애슬레틱",
+        "디키즈",
+        "런디",
+        "로라로라",
+        "로우",
+        "리스트",
+        "몽돌",
+        "무드인사이드",
+        "미세키서울",
+        "브라운야드",
+        "빼빼",
+        "수아레",
+        "스텝어라운드",
+        "시스",
+        "시야쥬",
+        "아디다스",
+        "아웃도어보이스",
+        "아웃스탠딩",
+        "안다르",
+        "애습",
+        "어나더오피스",
+        "얼스캄에라",
+        "에스이에스티",
+        "에이카",
+        "엘무드",
+        "으음키임",
+        "이알티알",
+        "조질롱",
+        "챔피온",
+        "커스텀어클락 우먼",
+        "쿠어",
+        "크랭크",
+        "테켓",
+        "토르테",
+        "토마스모어",
+        "파르티멘토",
+        "파브레가",
+        "펜필드",
+        "포 유어 아이즈 온리",
+        "푸마"
+      ],
+      "reported_count": 51,
+      "enumeration_complete": true,
+      "distribution": {
+        "108파운드": 1,
+        "그노노이": 1,
+        "글로니": 1,
+        "노티카": 3,
+        "누아": 1,
+        "더니트컴퍼니": 4,
+        "더미튼": 1,
+        "던스트": 2,
+        "데케트": 1,
+        "데케트 우먼": 2,
+        "디스이즈네버댓": 1,
+        "디스커스 애슬레틱": 1,
+        "디키즈": 3,
+        "런디": 1,
+        "로라로라": 1,
+        "로우": 1,
+        "리스트": 1,
+        "몽돌": 5,
+        "무드인사이드": 1,
+        "미세키서울": 1,
+        "브라운야드": 1,
+        "빼빼": 1,
+        "수아레": 2,
+        "스텝어라운드": 1,
+        "시스": 3,
+        "시야쥬": 5,
+        "아디다스": 2,
+        "아웃도어보이스": 1,
+        "아웃스탠딩": 4,
+        "안다르": 1,
+        "애습": 1,
+        "어나더오피스": 5,
+        "얼스캄에라": 1,
+        "에스이에스티": 1,
+        "에이카": 1,
+        "엘무드": 2,
+        "으음키임": 1,
+        "이알티알": 3,
+        "조질롱": 1,
+        "챔피온": 3,
+        "커스텀어클락 우먼": 1,
+        "쿠어": 1,
+        "크랭크": 1,
+        "테켓": 1,
+        "토르테": 1,
+        "토마스모어": 3,
+        "파르티멘토": 1,
+        "파브레가": 1,
+        "펜필드": 1,
+        "포 유어 아이즈 온리": 1,
+        "푸마": 1
+      }
+    },
+    "Price": {
+      "label_ko": "가격 구간",
+      "values": [
+        "4만원 미만",
+        "4만~6만원",
+        "6만~9만원",
+        "9만~13만원",
+        "13만원 이상"
+      ],
+      "reported_count": 5,
+      "enumeration_complete": true,
+      "distribution": {
+        "4만원 미만": 7,
+        "4만~6만원": 23,
+        "6만~9만원": 30,
+        "9만~13만원": 14,
+        "13만원 이상": 12
+      },
+      "currency": "KRW",
+      "boundaries": [
+        {
+          "label": "4만원 미만",
+          "min_inclusive": 0,
+          "max_exclusive": 40000
+        },
+        {
+          "label": "4만~6만원",
+          "min_inclusive": 40000,
+          "max_exclusive": 60000
+        },
+        {
+          "label": "6만~9만원",
+          "min_inclusive": 60000,
+          "max_exclusive": 90000
+        },
+        {
+          "label": "9만~13만원",
+          "min_inclusive": 90000,
+          "max_exclusive": 130000
+        },
+        {
+          "label": "13만원 이상",
+          "min_inclusive": 130000,
+          "max_exclusive": null
+        }
+      ]
+    },
+    "Color": {
+      "label_ko": "색상",
+      "values": [
+        "스카이블루",
+        "네이비",
+        "차콜",
+        "블랙",
+        "화이트",
+        "아이보리",
+        "베이지",
+        "브라운",
+        "카키",
+        "그린",
+        "블루",
+        "그레이",
+        "레드",
+        "퍼플",
+        "옐로우"
+      ],
+      "reported_count": 15,
+      "enumeration_complete": true,
+      "distribution": {
+        "스카이블루": 8,
+        "네이비": 15,
+        "차콜": 21,
+        "블랙": 35,
+        "화이트": 6,
+        "아이보리": 13,
+        "베이지": 10,
+        "브라운": 12,
+        "카키": 5,
+        "그린": 3,
+        "블루": 5,
+        "그레이": 25,
+        "레드": 4,
+        "퍼플": 5,
+        "옐로우": 2
+      }
+    },
+    "Fit": {
+      "label_ko": "핏",
+      "values": [
+        "세미오버",
+        "오버",
+        "와이드",
+        "부츠컷·플레어",
+        "슬림",
+        "레귤러",
+        "루즈·릴랙스",
+        "스트레이트",
+        "H라인",
+        "크롭",
+        "조거"
+      ],
+      "reported_count": 11,
+      "enumeration_complete": true,
+      "distribution": {
+        "세미오버": 3,
+        "오버": 11,
+        "와이드": 13,
+        "부츠컷·플레어": 7,
+        "슬림": 11,
+        "레귤러": 25,
+        "루즈·릴랙스": 24,
+        "스트레이트": 13,
+        "H라인": 1,
+        "크롭": 3,
+        "조거": 2
+      }
+    },
+    "Fabric": {
+      "label_ko": "소재 원료",
+      "values": [
+        "캐시미어",
+        "울",
+        "면",
+        "폴리에스터",
+        "나일론",
+        "폴리우레탄",
+        "레이온",
+        "아크릴",
+        "린넨",
+        "리오셀",
+        "모달",
+        "아세테이트"
+      ],
+      "reported_count": 12,
+      "enumeration_complete": true,
+      "distribution": {
+        "캐시미어": 5,
+        "울": 15,
+        "면": 45,
+        "폴리에스터": 46,
+        "나일론": 11,
+        "폴리우레탄": 27,
+        "레이온": 17,
+        "아크릴": 9,
+        "린넨": 1,
+        "리오셀": 1,
+        "모달": 1,
+        "아세테이트": 1
+      }
+    },
+    "Detail": {
+      "label_ko": "디테일",
+      "values": [
+        "하프집업",
+        "지퍼·집업",
+        "밴딩",
+        "스트링",
+        "턱·핀턱",
+        "플리츠·주름",
+        "포켓",
+        "버튼",
+        "슬릿·트임",
+        "워싱",
+        "리브·골지",
+        "카라",
+        "후드",
+        "넥라인",
+        "로고·자수",
+        "스트라이프",
+        "체크·패턴",
+        "벨트",
+        "기모",
+        "스티치",
+        "타이",
+        "코듀로이"
+      ],
+      "reported_count": 22,
+      "enumeration_complete": true,
+      "distribution": {
+        "하프집업": 9,
+        "지퍼·집업": 8,
+        "밴딩": 17,
+        "스트링": 7,
+        "턱·핀턱": 10,
+        "플리츠·주름": 6,
+        "포켓": 26,
+        "버튼": 15,
+        "슬릿·트임": 3,
+        "워싱": 10,
+        "리브·골지": 10,
+        "카라": 8,
+        "후드": 4,
+        "넥라인": 16,
+        "로고·자수": 14,
+        "스트라이프": 3,
+        "체크·패턴": 4,
+        "벨트": 8,
+        "기모": 4,
+        "스티치": 5,
+        "타이": 2,
+        "코듀로이": 1
+      }
+    }
+  },
+  "consumer_needs_taxonomy": {
+    "Functional": {
+      "Protection": [
+        {
+          "attribute": "Warmth",
+          "label_ko": "보온성"
+        },
+        {
+          "attribute": "Durability",
+          "label_ko": "내구성"
+        }
+      ],
+      "Mobility": [
+        {
+          "attribute": "Lightweight",
+          "label_ko": "가벼움"
+        },
+        {
+          "attribute": "Elasticity",
+          "label_ko": "신축성"
+        }
+      ],
+      "Comfort": [
+        {
+          "attribute": "Waterproof",
+          "label_ko": "방수"
+        },
+        {
+          "attribute": "Windproof",
+          "label_ko": "방풍"
+        }
+      ],
+      "Donning": [
+        {
+          "attribute": "Ease",
+          "label_ko": "착용 여유와 편안함"
+        },
+        {
+          "attribute": "Easy maintenance",
+          "label_ko": "관리 편의"
+        }
+      ]
+    },
+    "Expressive": {
+      "Role": [
+        {
+          "attribute": "Teen fashion",
+          "label_ko": "10대 패션 성향"
+        },
+        {
+          "attribute": "Young adult fashion",
+          "label_ko": "20대 패션 성향"
+        },
+        {
+          "attribute": "Mature fashion",
+          "label_ko": "30대 패션 성향"
+        },
+        {
+          "attribute": "Working professional",
+          "label_ko": "직장인 옷차림"
+        },
+        {
+          "attribute": "Student",
+          "label_ko": "학생 옷차림"
+        }
+      ],
+      "TPO": [
+        {
+          "attribute": "Business wear",
+          "label_ko": "업무복"
+        },
+        {
+          "attribute": "Wedding guest wear",
+          "label_ko": "하객복"
+        },
+        {
+          "attribute": "Sportswear",
+          "label_ko": "운동복"
+        },
+        {
+          "attribute": "Loungewear",
+          "label_ko": "실내 휴식복"
+        },
+        {
+          "attribute": "Travel wear",
+          "label_ko": "여행복"
+        }
+      ],
+      "Status": [
+        {
+          "attribute": "Good value for money",
+          "label_ko": "가격 대비 품질"
+        },
+        {
+          "attribute": "Luxury",
+          "label_ko": "고급성"
+        }
+      ],
+      "Self-esteem": [
+        {
+          "attribute": "Positive feedback",
+          "label_ko": "주변의 긍정적 반응"
+        }
+      ]
+    },
+    "Aesthetic": {
+      "Body/garment relationship": [
+        {
+          "attribute": "Opaque",
+          "label_ko": "비침 방지"
+        },
+        {
+          "attribute": "Groin coverage",
+          "label_ko": "가랑이 부위 강조 완화"
+        },
+        {
+          "attribute": "Waist contouring",
+          "label_ko": "허리선 보정"
+        },
+        {
+          "attribute": "Hip contouring",
+          "label_ko": "힙 라인 강조"
+        },
+        {
+          "attribute": "Leg contouring",
+          "label_ko": "길고 날씬한 다리선 연출"
+        }
+      ],
+      "Matching item": [
+        {
+          "attribute": "Sneakers",
+          "label_ko": "운동화와의 매칭"
+        },
+        {
+          "attribute": "Sandals",
+          "label_ko": "샌들과의 매칭"
+        },
+        {
+          "attribute": "Formal shoes",
+          "label_ko": "구두와의 매칭"
+        }
+      ],
+      "Design principle": [
+        {
+          "attribute": "Trends",
+          "label_ko": "유행 반영"
+        }
+      ]
+    }
+  },
+  "garment_types": [
+    {
+      "value": "Blouse",
+      "label_ko": "블라우스"
+    },
+    {
+      "value": "Hoodie",
+      "label_ko": "후디"
+    },
+    {
+      "value": "Knit/Sweater",
+      "label_ko": "니트"
+    },
+    {
+      "value": "Pants",
+      "label_ko": "바지"
+    },
+    {
+      "value": "Polo",
+      "label_ko": "폴로·카라 티셔츠"
+    },
+    {
+      "value": "Shirt",
+      "label_ko": "셔츠"
+    },
+    {
+      "value": "Skirt",
+      "label_ko": "스커트"
+    },
+    {
+      "value": "Sleeveless",
+      "label_ko": "슬리브리스"
+    },
+    {
+      "value": "Sweatshirt",
+      "label_ko": "스웨트셔츠"
+    },
+    {
+      "value": "T-shirt",
+      "label_ko": "티셔츠"
+    }
+  ],
+  "execution": {
+    "supported_garment_types": [
+      "Blouse",
+      "Hoodie",
+      "Knit/Sweater",
+      "Pants",
+      "Polo",
+      "Shirt",
+      "Skirt",
+      "Sleeveless",
+      "Sweatshirt",
+      "T-shirt"
+    ],
+    "accept_inferred_product_pi": true,
+    "price_currency": "KRW",
+    "price_boundary_inclusion": "min_inclusive_max_exclusive"
+  },
+  "counts": {
+    "products": 86,
+    "product_information_categories": 7,
+    "consumer_needs_attributes": 30,
+    "values": {
+      "Type": 30,
+      "Brand": 51,
+      "Price": 5,
+      "Color": 15,
+      "Fit": 11,
+      "Fabric": 12,
+      "Detail": 22
+    }
+  },
+  "source_boundaries": [
+    "Type은 29CM 소분류, Brand는 표시 브랜드, Price는 판매가의 고정 KRW 구간이다.",
+    "Color·Fit·Fabric·Detail은 원문 또는 DeepSeek 보완 문장에서 이 스크립트의 고정 키워드 규칙으로 찾은 값이다. 규칙에 없는 표현은 값으로 만들지 않는다.",
+    "DeepSeek 보완값은 상품 Map에서 status=inferred·model_interpretation으로 남는다. accept_inferred_product_pi=true는 이 사전 버전에서 그 값을 상품 비교에 쓰도록 한 실행 선택이며 검증 라벨이 아니다.",
+    "FEA 성능 태그를 상품 사진·문구만으로 확정하지 않는다."
+  ]
+}
