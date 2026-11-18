@@ -108,6 +108,12 @@ Preserve natural-language content even when no registry binding exists (bindings
 A request that names a situation and a garment wish gives SEPARATE candidates: the
 situation fact, and a preference for the wish itself with its PI/FEA bindings (for
 example comfort or warmth as FEA, a named garment type or color as PI).
+conditions are only for a wish the user explicitly limits to a situation ("출근할 때는
+슬랙스"). A situation that simply describes THIS request ("여름에 입을 반팔",
+"회사 발표 때 입을 슬랙스") is a separate situation fact; the wish keeps all conditions
+null. When a condition is used, its value must equal the matching situation fact value.
+A PI binding needs a value the user actually named; never turn a vague need such as
+"편하게" into a list of PI values: use the FEA need instead.
 Only source aliases in this call may be cited. Explicit claims require an exact quote
 from a cited user_text or memory source. Each condition needs its own exact quote,
 containing its literal value. Do not invent context, quotes, garment targets or facts.
