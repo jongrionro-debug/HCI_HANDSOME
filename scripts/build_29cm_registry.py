@@ -103,7 +103,7 @@ FIT_RULES = [
 FABRIC_RULES = [
     ("캐시미어", r"cashmere|캐시미어"),
     ("울", r"wool|울(?!트라)|merino|메리노|모\s*\d"),
-    ("면", r"cotton|코튼|면\s*\d|%\s*면|면스판"),
+    ("면", r"cotton|코튼|(?<![가-힣])면(?![가-힣])|면\s*\d|면스판"),
     ("폴리에스터", r"polyester|폴리에스터|폴리에스테르|poly(?!u|amide|ure)\w*|폴리(?!우레탄|아미드)"),
     ("나일론", r"nylon|나일론|polyamide|폴리아미드"),
     ("폴리우레탄", r"polyure\w*|폴리우레탄|spandex|\bspan\b|스판|elastane|엘라스탄|\bpu\b"),
@@ -165,12 +165,21 @@ def price_bucket(amount: int) -> str:
 
 def normalize(feature: str, text: str, garment: str) -> list[str]:
     if feature == "Type":
-        value = TYPE_BY_GARMENT.get(garment, {}).get(text.strip())
+        types = TYPE_BY_GARMENT.get(garment, {})
+        value = types.get(text.strip()) or (text.strip() if text.strip() in types.values() else None)
         return [value] if value else []
     if feature == "Brand":
         return [text.strip()] if text.strip() else []
     rules = {"Color": COLOR_RULES, "Fit": FIT_RULES, "Fabric": FABRIC_RULES, "Detail": DETAIL_RULES}[feature]
     return _match(text, rules)
+
+
+def allowed_values(feature: str, garment: str) -> list[str]:
+    """Canonical values a gap fill may choose from (the normalization rules' vocabulary)."""
+    if feature == "Type":
+        return sorted(set(TYPE_BY_GARMENT.get(garment, {}).values()))
+    rules = {"Color": COLOR_RULES, "Fit": FIT_RULES, "Fabric": FABRIC_RULES, "Detail": DETAIL_RULES}.get(feature, [])
+    return [canonical for canonical, _ in rules]
 
 
 def resolve(record: dict[str, Any]) -> dict[str, dict[str, Any]]:
@@ -294,6 +303,8 @@ def main() -> int:
     parser.add_argument("--input", default="lumi-catalog-v1.jsonl")
     parser.add_argument("--output", default="lumi-catalog-complete-v1.jsonl")
     parser.add_argument("--report", default="complete_report.json")
+    parser.add_argument("--gaps", default="pi_gaps.json",
+                        help="빈 축 목록과 허용 value(fill_pi_deepseek.py --gaps 입력)")
     parser.add_argument("--registry", type=Path, default=REGISTRY)
     parser.add_argument("--check", action="store_true", help="사전 파일을 쓰지 않고 정본과 같은지 확인")
     args = parser.parse_args()
@@ -302,13 +313,17 @@ def main() -> int:
         print("FAIL: 수집 데이터 경로는 저장소 밖이어야 합니다.", file=sys.stderr)
         return 2
     records = [json.loads(line) for line in (directory / args.input).read_text(encoding="utf-8").splitlines() if line.strip()]
-    complete, missing = [], Counter()
+    complete, missing, gaps = [], Counter(), {}
     for record in records:
         resolved = resolve(record)
         absent = [f for f in AXES if f not in resolved]
         missing.update(absent)
         if not absent:
             complete.append((record, resolved))
+        else:
+            gaps[record["product_id"].removeprefix("29cm-")] = {
+                "garment_type": record["garment_type"], "features": absent,
+                "allowed_values": {f: allowed_values(f, record["garment_type"]) for f in absent}}
     registry = build_registry(complete)
     text = json.dumps(registry, ensure_ascii=False, indent=2) + "\n"
     if args.check:
@@ -330,6 +345,8 @@ def main() -> int:
         "origin_by_axis": {f: {"raw": origin[(f, "raw")], "model": origin[(f, "model")]} for f in AXES},
         "value_counts": registry["counts"]["values"],
     }
+    (directory / args.gaps).write_text(json.dumps({"registry_version": VERSION, "products": gaps},
+                                                  ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
     (directory / args.report).write_text(json.dumps(report, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     print(json.dumps(report, ensure_ascii=False, indent=2))
     return 0

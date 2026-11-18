@@ -73,6 +73,10 @@ class NormalizationTests(unittest.TestCase):
             label = exported[0]["labels"][0]
             self.assertEqual((label["observation"]["feature"], label["status"], label["provenance"][0]["kind"]),
                              ("Fit", "inferred", "model_interpretation"))
+            gaps = json.loads((root / "pi_gaps.json").read_text(encoding="utf-8"))["products"]
+            self.assertEqual(list(gaps), ["2"])
+            self.assertEqual(gaps["2"]["features"], ["Color"])
+            self.assertIn("네이비", gaps["2"]["allowed_values"]["Color"])
             registry = json.loads((root / "registry.json").read_text(encoding="utf-8"))
             self.assertEqual(registry["product_information"]["Brand"]["values"], ["합성브랜드"])
 

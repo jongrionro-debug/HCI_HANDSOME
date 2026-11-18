@@ -304,6 +304,57 @@ def image_fill_one(gateway: VisionGateway, model: str, data: Path, record: dict[
     return out
 
 
+# ---- Gap pass: only axes that are still empty after normalization (build_29cm_registry.py --gaps) ----
+
+GAP_FILL_VERSION = "29cm-pi-gap-fill-v1"
+GAP_INSTRUCTIONS = IMAGE_INSTRUCTIONS.replace(
+    "Return exactly the requested feature keys and nothing else.",
+    """Each requested feature lists allowed_values. value must be one allowed value, or several joined by ", "
+when the product clearly has several (e.g. color options). Do not invent other wording.
+Return exactly the requested feature keys and nothing else.""")
+
+
+def validate_gap_fill(result: Any, gap: dict[str, Any], text: str, labels: set[str]) -> tuple[dict[str, Any], dict[str, str]]:
+    accepted, rejected = validate_image_fill(result, gap["features"], text, labels)
+    for feature, item in list(accepted.items()):
+        parts = [p.strip() for p in item["value"].split(",") if p.strip()]
+        if not parts or any(p not in gap["allowed_values"][feature] for p in parts):
+            rejected[feature] = "not_allowed_value"
+            del accepted[feature]
+    return accepted, rejected
+
+
+def gap_fill_one(gateway: VisionGateway, model: str, data: Path, record: dict[str, Any],
+                 gap: dict[str, Any]) -> dict[str, Any]:
+    requested = list(gap["features"])
+    text = source_text(record)
+    out: dict[str, Any] = {"fill_version": GAP_FILL_VERSION, "product_id": record["product_id"],
+                           "provenance": "model_interpretation", "model": model,
+                           "called_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
+                           "requested": requested, "images_sent": [], "fills": {}, "rejected": {}, "error": None, "called": False}
+    if not requested:
+        return out
+    gateway.tiles = image_tiles(data, record)  # may be empty: text-only call
+    out["images_sent"] = [label for label, _ in gateway.tiles]
+    payload = {"product_text": text, "image_labels": out["images_sent"],
+               "requested_features": {f: {"meaning": FEATURE_GUIDE[f], "allowed_values": gap["allowed_values"][f]}
+                                      for f in requested}}
+    out["called"] = True
+    started = time.monotonic()
+    try:
+        result = gateway.complete(GAP_INSTRUCTIONS, payload, image_schema(requested))
+    except StyleMateError as error:
+        out["error"] = error.code
+        return out
+    finally:
+        out["elapsed_s"] = round(time.monotonic() - started, 1)
+        gateway.tiles = []
+    out["fills"], out["rejected"] = validate_gap_fill(result, gap, text, set(out["images_sent"]))
+    out["rejected_candidates"] = {f: result.get(f) for f, reason in out["rejected"].items()
+                                  if reason != "no_evidence" and isinstance(result, dict) and isinstance(result.get(f), dict)}
+    return out
+
+
 GARMENT_RULES = (  # (pattern on breadcrumb/subcategory, registry garment_type); first match wins
     (r"스커트", "Skirt"),
     (r"니트", "Knit/Sweater"),
@@ -329,7 +380,7 @@ def garment_type(record: dict[str, Any]) -> str:
 
 
 def catalog_record(record: dict[str, Any], fill: dict[str, Any] | None,
-                   image_fill: dict[str, Any] | None = None) -> dict[str, Any]:
+                   image_fill: dict[str, Any] | None = None, gap_fill: dict[str, Any] | None = None) -> dict[str, Any]:
     """lumi-catalog-v1 record. Raw PI text stays under top-level aliases; model fills stay nested and labelled."""
     pid = record["product_id"]
     price = record.get("price") or {}
@@ -349,6 +400,9 @@ def catalog_record(record: dict[str, Any], fill: dict[str, Any] | None,
         model_values[f] = {**v, "provenance": "model_interpretation", "model": image_fill.get("model")}
     for f, v in ((fill or {}).get("fills") or {}).items():  # text-pass fills take precedence
         model_values[f] = {**v, "evidence_type": "text", "provenance": "model_interpretation", "model": fill.get("model")}
+    for f, v in ((gap_fill or {}).get("fills") or {}).items():  # gap pass targets axes the others left unusable
+        model_values[f] = {**v, "provenance": "model_interpretation", "model": gap_fill.get("model"),
+                           "fill_version": GAP_FILL_VERSION}
     if model_values:
         raw["pi_model_interpretation"] = model_values
     images = []
@@ -395,9 +449,12 @@ def export(data: Path, target: Path) -> dict[str, Any]:
     records = [json.loads(p.read_text(encoding="utf-8")) for p in sorted((data / "products").glob("*.json"))]
     fills = _load(data / "pi_fills")
     image_fills = _load(data / "pi_fills_image")
+    gap_fills = _load(data / "pi_fills_gap")
     with target.open("w", encoding="utf-8") as handle:
         for record in records:
-            handle.write(json.dumps(catalog_record(record, fills.get(record["product_id"]), image_fills.get(record["product_id"])), ensure_ascii=False) + "\n")
+            pid = record["product_id"]
+            handle.write(json.dumps(catalog_record(record, fills.get(pid), image_fills.get(pid), gap_fills.get(pid)),
+                                    ensure_ascii=False) + "\n")
     report = {"records": len(records), "by_group": {g: sum(r.get("group") == g for r in records) for g in ("top", "bottom")},
               "fill_rate": {g: fill_rates([r for r in records if g == "all" or r.get("group") == g], fills, image_fills)
                             for g in ("all", "top", "bottom")},
@@ -406,7 +463,10 @@ def export(data: Path, target: Path) -> dict[str, Any]:
               "rejections": _count(r for f in fills.values() for r in f.get("rejected", {}).values()),
               "image_calls": sum(1 for f in image_fills.values() if f.get("called")),
               "image_call_errors": _count(f["error"] for f in image_fills.values() if f.get("error")),
-              "image_rejections": _count(r for f in image_fills.values() for r in f.get("rejected", {}).values())}
+              "image_rejections": _count(r for f in image_fills.values() for r in f.get("rejected", {}).values()),
+              "gap_calls": sum(1 for f in gap_fills.values() if f.get("called")),
+              "gap_filled": _count(k for f in gap_fills.values() for k in f.get("fills", {})),
+              "gap_rejections": _count(r for f in gap_fills.values() for r in f.get("rejected", {}).values())}
     return report
 
 
@@ -437,6 +497,8 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--skip-fill", action="store_true", help="only export; make no model calls")
     parser.add_argument("--images", action="store_true",
                         help="image pass: send main+detail images for axes still empty after the text pass")
+    parser.add_argument("--gaps", default=None,
+                        help="gap pass: pi_gaps.json from build_29cm_registry.py; fills only those axes from allowed values")
     args = parser.parse_args(argv)
     data = Path(args.data).expanduser().resolve()
     repo = Path(__file__).resolve().parents[1]
@@ -454,13 +516,16 @@ def main(argv: list[str] | None = None) -> int:
     if not key.strip():
         print("OPENCODE_API_KEY가 설정되지 않아 중단합니다(다른 provider로 대체하지 않음).", file=sys.stderr)
         return 3
-    out_dir = data / ("pi_fills_image" if args.images else "pi_fills")
+    gaps = (json.loads(Path(args.gaps).expanduser().read_text(encoding="utf-8"))["products"] if args.gaps else None)
+    out_dir = data / ("pi_fills_gap" if gaps is not None else "pi_fills_image" if args.images else "pi_fills")
     out_dir.mkdir(exist_ok=True)
     text_fills = _load(data / "pi_fills")
     gateway = (VisionGateway(endpoint=ENDPOINT, model=args.model, api_key=key, timeout=OPENCODE_TIMEOUT * 2,
-                             max_output_tokens=OPENCODE_MAX_OUTPUT_TOKENS) if args.images
+                             max_output_tokens=OPENCODE_MAX_OUTPUT_TOKENS) if args.images or gaps is not None
                else create_model_gateway("opencode-go", model=args.model, api_key=key, endpoint=ENDPOINT))
     paths = sorted((data / "products").glob("*.json"))
+    if gaps is not None:
+        paths = [p for p in paths if p.stem in gaps]
     calls = errors = processed = 0
     for path in paths:
         if args.limit is not None and processed >= args.limit:
@@ -474,10 +539,14 @@ def main(argv: list[str] | None = None) -> int:
             print(f"max-calls {args.max_calls} 도달", file=sys.stderr)
             break
         record = json.loads(path.read_text(encoding="utf-8"))
-        if args.images and record.get("detail_images_status") != "collected":
+        if gaps is None and args.images and record.get("detail_images_status") != "collected":
             continue  # wait for the detail-image crawl of this product
-        result = (image_fill_one(gateway, args.model, data, record, text_fills.get(record["product_id"])) if args.images
-                  else fill_one(gateway, args.model, record))
+        if gaps is not None:
+            result = gap_fill_one(gateway, args.model, data, record, gaps[record["product_id"]])
+        elif args.images:
+            result = image_fill_one(gateway, args.model, data, record, text_fills.get(record["product_id"]))
+        else:
+            result = fill_one(gateway, args.model, record)
         processed += 1
         if result["called"]:
             calls += 1
