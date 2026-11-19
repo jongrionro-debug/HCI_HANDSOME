@@ -26,8 +26,14 @@
     - occasion: 출근·발표/미팅·면접·데이트·하객·여행·주말 외출·운동·집
     - season: 봄·여름·가을·겨울
     - activity: 걷기 많음·오래 앉음·야외·실내
-12. 근거 예산 6,000자는 사용자 문장과 근거 원문만 센다. ID·참조·제약 사본은 세지 않는다.
-13. 이행: `src/stylemate_memory/graph/`에 구현하고 `STYLEMATE_ENGINE=graph|legacy`로 선택한다. 평가에서 기존 경로 이상이면 legacy 흐름 코드를 삭제한다.
+12. parse_turn 모델 출력은 `situations`·`wishes`·`questions` 세 필드로 나눈다. 상황은 선호 후보 틀에 넣지 않는다.
+    - `situations`: 항목마다 `id`, `key`(occasion·season·activity), `value`(11번 사전 값 또는 `기타`), `raw`(원문 표현), `quote`, `source_ids`를 둔다. 상황 항목에는 polarity·strength·binding이 없다.
+    - `wishes`: 선호·요구·비선호를 담는다. `polarity`는 prefer·avoid·indifferent이고, 요구는 `prefer` + `strength=hard`로 표현한다(`require` 폐지). 모델 출력에는 `kind`를 두지 않고 코드가 polarity·strength로 유도한다. binding은 `pi`(feature·values·match)와 `fea`(category·subcategory·tag) 목록으로 나누고, polarity·strength는 wish의 값을 물려받는다.
+    - 상황 연결: wish는 자유 텍스트 조건 대신 `situation_ids`로 같은 응답의 상황 항목만 참조한다. 코드가 ID 존재를 검사한다. 기본은 이번 요청의 상황에 묶고, "원래·평소·항상"처럼 일반 취향이라는 명시적 신호가 있을 때만 `situation_ids=[]`로 둔다. 빈 목록은 일반 취향(baseline)을 뜻하므로 `scope_hint`는 두지 않는다. "출근할 땐 슬랙스, 주말엔 청바지"처럼 상황별 규칙은 상황 항목 여러 개와 각 wish의 참조로 표현한다. 10번 거절 기억의 상황 조건은 wish가 참조한 상황에서 가져온다.
+    - `questions`: 모델이 해석이 애매해 되묻는 질문이며 최대 3개다. 항목마다 `text`(한국어 한 문장), `about`(같은 응답의 `wish_keys`·`situation_ids`), `reason`(ambiguous_need·unclear_situation·possible_correction·unstated_reason)을 둔다. 코드가 `about`의 키 존재를 검사하고, 틀린 질문은 그 질문만 버린다. 품목 누락과 hard 충돌 질문은 route가 만들므로 모델 `reason`에 두지 않는다. 모델 질문과 코드 질문은 6번의 같은 큐에 들어가며, 답은 parse_turn이 `about`의 대상에 반영한다.
+    - 코드는 이 출력을 기존 MemoryItem(상황은 `kind=situation`과 `fact`)으로 변환해 저장한다. 확인·동의·삭제 경로는 공유한다.
+13. 근거 예산 6,000자는 사용자 문장과 근거 원문만 센다. ID·참조·제약 사본은 세지 않는다.
+14. 이행: `src/stylemate_memory/graph/`에 구현하고 `STYLEMATE_ENGINE=graph|legacy`로 선택한다. 평가에서 기존 경로 이상이면 legacy 흐름 코드를 삭제한다.
 
 ## 대안
 
@@ -36,6 +42,8 @@
 - FEA→PI 연결표를 사전에 두고 코드가 선택: 사용자 결정으로 채택하지 않았다. 모델이 FEA 맥락을 읽고 제안한다.
 - 거절을 값 단위 비선호("와이드 싫음")로 저장: 상황에 따른 선호가 일반 취향으로 잘못 넓어진다.
 - 거절 기억의 자동 장기 저장: ADR 0007의 종료 후 별도 동의, RQ1의 통제감과 충돌한다.
+- 상황을 `kind=situation` 후보로 선호와 같은 목록에 유지: 의미 없는 고정값(polarity·strength·빈 binding)이 생기고 상황과 바람을 섞는 실수가 잦아 프롬프트 규칙이 늘어난다.
+- wish마다 자유 텍스트 조건(`conditions`) 유지: 사전 밖 텍스트가 조건에 들어가 매칭이 흔들린다. 상황 ID 참조로 대체한다.
 - 저장 계층까지 LangGraph store로 교체: 검증된 확인·동의·삭제 계약을 다시 만들어야 한다.
 
 ## 영향
