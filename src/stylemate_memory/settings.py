@@ -24,6 +24,7 @@ class ConsumerSettings:
     port: int = 8766
     endpoint: str | None = None
     registry: str = "park-2025-source-v1"
+    engine: str = "legacy"  # ADR 0013: STYLEMATE_ENGINE=graph selects the LangGraph intent loop
 
     @classmethod
     def from_options(cls, options: Any, settings: Mapping[str, str] | None = None) -> ConsumerSettings:
@@ -61,8 +62,11 @@ class ConsumerSettings:
         registry = pick("registry", "STYLEMATE_REGISTRY", V1_REGISTRY_VERSION)
         if registry not in V1_REGISTRY_VERSIONS:
             raise StyleMateError("invalid_input", "registry는 " + " 또는 ".join(V1_REGISTRY_VERSIONS) + "로 지정해 주세요.")
+        engine = pick("engine", "STYLEMATE_ENGINE", "legacy")
+        if engine not in ("legacy", "graph"):
+            raise StyleMateError("invalid_input", "engine은 legacy 또는 graph로 지정해 주세요.")
         return cls(db_path, catalog_path, image_path, pick("user", "STYLEMATE_USER_ID", "local-tester"),
-                   provider, model, port, endpoint, registry)
+                   provider, model, port, endpoint, registry, engine)
 
     def gateway(self, *, settings: Mapping[str, str] | None = None, transport: Any = None) -> Any:
         from .llm import create_model_gateway
@@ -81,4 +85,4 @@ class ConsumerSettings:
         from .registry import load_registry
         return ConsumerService(self.db, self.catalog_db, gateway if gateway is not None else self.gateway(),
                                user_id=self.user_id, image_root=self.image_root,
-                               registry=load_registry(self.registry))
+                               registry=load_registry(self.registry), engine=self.engine)

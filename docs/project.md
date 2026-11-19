@@ -53,6 +53,7 @@
 | 메모리 저장 | [store.py](../src/stylemate_memory/store.py)·[store_v1.py](../src/stylemate_memory/store_v1.py)·[store_feedback.py](../src/stylemate_memory/store_feedback.py)·[store_cleanup.py](../src/stylemate_memory/store_cleanup.py): 근거·문장·선택적 binding, 확인·동의·교체·철회·삭제 | 실제 사용자 DB 이관·운영 자료 검증 |
 | 조회·목표 생성 | [retrieval.py](../src/stylemate_memory/retrieval.py)·[inference.py](../src/stylemate_memory/inference.py): 유효성/대상/요청 필터, 구조+키워드 검색, PI/FEA 목표·최신성 검사 | 실제 의미 검색 모델 선정·관련성 평가 |
 | 상품·이미지 비교 | [catalog.py](../src/stylemate_memory/catalog.py)·[catalog_mapping.py](../src/stylemate_memory/catalog_mapping.py)·[product_search.py](../src/stylemate_memory/product_search.py)·[comparison.py](../src/stylemate_memory/comparison.py)·[hypotheses.py](../src/stylemate_memory/hypotheses.py): 가져오기·PI Map·필수 조건 필터·가설 비교 | 수집 사전(`lumi-29cm-v1`) 연결 완료. 모델 보완값 표본 검수, 상품 수 확대, 추천 품질 |
+| 의도 순환 엔진(선택) | [graph/](../src/stylemate_memory/graph/): [ADR 0013](adr/0013-langgraph-intent-loop.md)의 LangGraph 턴 루프(parse_turn v2 → 의도 갱신 → FEA→PI 가설 → route → 8장 그리드 → interrupt), 값별 Beta 점수·대비 귀속, 상품 단위 "별로", 이해 칩 고정/해제/빼기, 상황 사전 [situation-dictionary-v1.json](../src/stylemate_memory/resources/situation-dictionary-v1.json). `STYLEMATE_ENGINE=graph`일 때 쇼핑 요청만 사용하며 온보딩은 기존 흐름 | 실제 모델 응답 품질, 실제 카탈로그의 대조 칸 구성률·수렴 판정, legacy 전환 기준([ADR 0013](adr/0013-langgraph-intent-loop.md) 15번), 최종 선택 단위 |
 | 서비스·소비자 UI | [app.py](../src/stylemate_memory/app.py)의 `ConsumerService`, [consumer.py](../src/stylemate_memory/consumer.py)·[consumer.js](../src/stylemate_memory/consumer.js)·[consumer-http.js](../src/stylemate_memory/consumer-http.js): 온보딩·피드백·확인·재탐색·종료·별도 장기 동의·삭제 | 공개 인증/배포, 실제 참가자 사용성·기기 검증 |
 
 ### 이미지·텍스트 인터랙션
@@ -253,6 +254,7 @@ PYTHONPATH=src python3 -m stylemate_memory.consumer --provider opencode-go --end
 | STYLEMATE_PORT | `--port`, 기본 8766 |
 | STYLEMATE_REGISTRY | `--registry park-2025-source-v1 / lumi-29cm-v1`, 기본 park. 카탈로그 적재·Map·서버에 같은 값을 쓴다 |
 | OPENAI_API_KEY | openai를 명시적으로 선택할 때만 조회 |
+| STYLEMATE_ENGINE | `--engine legacy / graph`, 기본 legacy. graph는 선택 의존성 `pip install -e '.[graph]'`(langgraph)이 필요하며, 체크포인트는 메모리 DB 옆 `<이름>.graph.sqlite3`에 둔다 |
 
 [settings.py](../src/stylemate_memory/settings.py)가 경로·설정·gateway를 구성한다. 실제 API 실행이 요청된 경우에만 사용자가 로컬 환경에 `OPENCODE_API_KEY`를 설정하고 `PYTHONPATH=src python3 -m stylemate_memory.consumer --provider opencode-go --endpoint <확인한 https 주소>`로 시작한다. 기존 `--provider openai`는 호환 경로다. 키를 CLI 인자·예제 파일·로그에 넣지 않는다. import·기본 fake·상품 가져오기/Map 생성·읽기 관찰에는 키가 필요 없다.
 
@@ -269,6 +271,7 @@ PYTHONPATH=src python3 -m stylemate_memory.consumer --provider opencode-go --end
 | retry_extraction / explore | 같은 pending 근거 재해석 / 유효 조건으로 재탐색 |
 | prepare_review / respond_review | 서버 표시 준비 / 표시 참조에 대한 명시적 응답 |
 | select_final / end_request | 최종 상품 선택 / 상품·저장 없이도 세션 종료 |
+| grid_feedback / adjust_intent | graph 엔진 전용: 8장 다중 선택·상품별 "별로"·"이거랑 비슷한 거"·"다 별로"·선택 사항인 글 / 이해 칩 고정·해제·빼기, 숨김 해제, 좋았던 축 답변 |
 
 `ConsumerState`는 요청·phase·operation·기억·카드·가설 비교·검토·질문·안전한 오류를 반환한다. interpretation_pending·blocked·no_results·stale·error는 성공과 구분한다. provider 실패를 다른 provider나 rule 성공으로 대체하지 않는다. 수정 문장은 새 근거로 추출·재확인하고 기존 장기 동의를 자동 승계하지 않는다.
 
@@ -358,7 +361,12 @@ PYTHONPATH=src python3 scripts/evaluate_offline.py
 node tests/check_consumer_http_browser.mjs
 node tests/check_hypothesis_browser.mjs
 node --test tests/test_naver_crawler.mjs
+# graph 엔진(선택 의존성, 저장소 밖 venv 예: ~/.venvs/lumi-graph)
+PYTHONPATH=src ~/.venvs/lumi-graph/bin/python -m unittest tests.test_graph_engine tests.test_graph_logic -q
+LUMI_GRAPH_PYTHON=~/.venvs/lumi-graph/bin/python node tests/check_graph_browser.mjs
 ```
+
+[graph 순수 로직 검사](../tests/test_graph_logic.py)는 의존성 없이 돌고, [graph 통합 검사](../tests/test_graph_engine.py)는 langgraph가 없으면 skip한다. CI는 graph 의존성을 설치해 두 검사를 모두 실행한다. 각본 모델과 합성 상품이므로 실제 가설 품질·추천 품질을 보이지 않는다.
 
 브라우저 검사는 설치된 Node·Playwright·Chromium을 사용하며 의존성을 자동 설치하지 않는다. [서비스 검사](../tests/test_consumer_service.py)·[HTTP 검사](../tests/test_consumer_http.py)·[가설 검사](../tests/test_hypotheses.py)와 두 브라우저 검사는 접수·후보 확인·PI 비교·선택+이유·종료 후 동의·재시작·새 요청·삭제·늦은 응답을 검사한다. 브라우저 그림과 상품은 합성 자료다.
 

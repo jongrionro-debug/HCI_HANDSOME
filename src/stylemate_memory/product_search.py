@@ -171,7 +171,7 @@ def _validate_target_map(target_map: TargetMap):
                 or constraint["selector"]["slot_id"] not in (None, target["target_id"])):
             _fail("Constraint selector does not match its target.")
         conditions = constraint["conditions"]
-        if not isinstance(conditions, dict) or not set(conditions) <= {"occasion", "activity", "goal"}:
+        if not isinstance(conditions, dict) or not set(conditions) <= {"occasion", "activity", "goal", "season"}:
             _fail("Invalid constraint conditions.")
         for value in conditions.values():
             text(value, "condition", 4000)

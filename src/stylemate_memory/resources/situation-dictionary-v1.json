@@ -1,0 +1,11 @@
+{
+  "version": "lumi-situations-v1",
+  "status": "draft",
+  "source": "ADR 0013 decision 11 draft values",
+  "other": "기타",
+  "keys": {
+    "occasion": ["출근", "발표/미팅", "면접", "데이트", "하객", "여행", "주말 외출", "운동", "집"],
+    "season": ["봄", "여름", "가을", "겨울"],
+    "activity": ["걷기 많음", "오래 앉음", "야외", "실내"]
+  }
+}

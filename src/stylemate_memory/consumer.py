@@ -151,6 +151,8 @@ def add_options(parser: argparse.ArgumentParser, *, provider: bool = True) -> No
     parser.add_argument("--user", help="서버에 고정할 trusted user (STYLEMATE_USER_ID)")
     parser.add_argument("--registry", choices=V1_REGISTRY_VERSIONS,
                         help="실행 사전 (STYLEMATE_REGISTRY; 기본 park-2025-source-v1, 29CM 수집 기반은 lumi-29cm-v1)")
+    parser.add_argument("--engine", choices=("legacy", "graph"),
+                        help="흐름 엔진 (STYLEMATE_ENGINE; 기본 legacy, graph는 선택 의존성 graph 필요)")
     if provider:
         parser.add_argument("--provider", choices=("fake", "openai", "opencode-go"), help="기본 fake; 실제 provider는 명시적 설정")
         parser.add_argument("--model", help="STYLEMATE_MODEL(opencode-go) / STYLEMATE_OPENAI_MODEL(openai)")
@@ -176,7 +178,7 @@ def main(argv: list[str] | None = None) -> int:
 def serve(settings: ConsumerSettings) -> int:
     with settings.open_service() as service:
         server = make_server(service, settings.port)
-        print(f"LUMI consumer: http://127.0.0.1:{server.server_port} (provider={settings.provider})", flush=True)
+        print(f"LUMI consumer: http://127.0.0.1:{server.server_port} (provider={settings.provider}, engine={settings.engine})", flush=True)
         try:
             server.serve_forever()
         except KeyboardInterrupt:

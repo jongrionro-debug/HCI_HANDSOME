@@ -22,7 +22,7 @@ from .registry import FEATURES, REGISTRY_VERSION, category_for_garment_type, val
 from .retrieval import build_context_v1  # opt-in v1; legacy build_context stays unchanged
 
 
-_SUPPORTED_FACTS = {"occasion", "activity", "goal"}
+_SUPPORTED_FACTS = {"occasion", "activity", "goal", "season"}
 _SCOPES = {"short_term", "long_term"}
 _POLARITIES = {"prefer", "avoid", "require"}
 _STRENGTHS = {"soft", "hard"}

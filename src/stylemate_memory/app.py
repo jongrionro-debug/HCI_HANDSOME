@@ -113,8 +113,12 @@ class ConsumerService:
 
     def __init__(self, db_path: str | Path, catalog_path: str | Path, gateway: Any = None, *,
                  user_id: str = "local-tester", image_root: str | Path | None = None,
-                 registry: Any = None, semantic: Any = None, clock: Any = None) -> None:
+                 registry: Any = None, semantic: Any = None, clock: Any = None, engine: str = "legacy") -> None:
         _text(user_id)
+        if engine not in ("legacy", "graph"):
+            raise StyleMateError("invalid_input", "engine은 legacy 또는 graph로 지정해 주세요.")
+        self.engine = engine
+        self._graph = None
         self.user_id = user_id
         self.gateway = gateway
         self.registry = registry
@@ -129,6 +133,17 @@ class ConsumerService:
             self._models.shutdown(wait=True)
             self._db.shutdown(wait=True)
             raise
+        if engine == "graph":
+            try:
+                from .graph.engine import GraphEngine
+                from .graph.service import GraphBridge
+                self._graph_bridge = GraphBridge(self)
+                db = Path(db_path)
+                # Checkpoints sit next to the external memory DB, never in the repository.
+                self._graph = GraphEngine(self._graph_bridge, db.with_name(db.stem + ".graph.sqlite3"))
+            except BaseException:
+                self.close()
+                raise
 
     def _open(self, db_path: Any, catalog_path: Any, image_root: Any, clock: Any) -> None:
         from .catalog import Catalog
@@ -164,6 +179,8 @@ class ConsumerService:
         self._run(self._jobs.clear)
         self._closed = True
         self._models.shutdown(wait=True)
+        if self._graph is not None:
+            self._graph.close()
         self._run(lambda: (self._catalog.close(), self._store.close()))
         self._db.shutdown(wait=True)
 
@@ -347,6 +364,10 @@ class ConsumerService:
             except StyleMateError:
                 operation, error = "stale", _error(StyleMateError("stale_context"))
                 result["cards"] = []
+        if self._graph is not None and snapshot["request"]["mode"] == "shopping":
+            from .graph.service import graph_view
+            result["graph"] = graph_view(self, request_id)
+            result["comparison"] = None
         result["reviews"] = self._reviews(snapshot)
         closed = snapshot["request"]["status"] != "open"
         result["phase"] = ("wrap_up" if closed or snapshot["request"]["final_selection"] else "review" if result["reviews"]
@@ -411,9 +432,17 @@ class ConsumerService:
                     feedback = {"op": "submit_feedback", "round_id": None, "candidate_set_id": None,
                                 "reaction": "text_only", "selections": [], "text": action["text"], "question_id": None}
                     receipt = self._apply(request_id, self._step(command_id, "intake"), [feedback])
-                    self._extract(request_id, self._feedback_ref(receipt), command_id)
+                    if self._graph is not None and action["mode"] == "shopping":
+                        from .graph.service import start as graph_start
+                        graph_start(self, request_id, command_id, self._feedback_ref(receipt))
+                    else:
+                        self._extract(request_id, self._feedback_ref(receipt), command_id)
                 elif action["mode"] == "shopping":
-                    self._explore(request_id, command_id)
+                    if self._graph is not None:
+                        from .graph.service import start as graph_start
+                        graph_start(self, request_id, command_id, None)
+                    else:
+                        self._explore(request_id, command_id)
                 self._journal.finish(command_id, "accepted" if request_id in self._jobs else "applied")
             else:
                 snapshot = self._snapshot(request_id)
@@ -421,7 +450,15 @@ class ConsumerService:
                 if not prior:
                     self._check_expected(snapshot, command["expected"])
                 self._journal.reserve(command, request_id)
-                if op == "resume_request":
+                handled = False
+                if self._graph is not None and op not in ("resume_request", "prepare_review", "respond_review", "end_request"):
+                    from .graph.service import handle_command as graph_command
+                    handled = graph_command(self, snapshot, command, command_id)
+                if handled:
+                    pass
+                elif op in ("grid_feedback", "adjust_intent"):
+                    raise StyleMateError("invalid_input")
+                elif op == "resume_request":
                     if self._journal.active() != request_id:
                         self._jobs.clear()
                     self._journal.activate(request_id)
@@ -494,6 +531,8 @@ class ConsumerService:
                   "end_request": c.SimpleUI, "submit_feedback": c.FeedbackAction, "retry_extraction": c.RetryExtractionUI,
                   "prepare_review": c.ReviewUI, "respond_review": c.RespondReviewUI, "select_final": c.SelectFinalAction}
         shapes["respond_comparison"] = c.RespondComparisonUI
+        shapes["grid_feedback"] = c.GridFeedbackUI
+        shapes["adjust_intent"] = c.AdjustIntentUI
         if not isinstance(action.get("op"), str) or action["op"] not in shapes:
             raise StyleMateError("invalid_input")
         optional = {"text"} if action["op"] == "respond_comparison" and "text" in action else set()
@@ -816,6 +855,8 @@ class ConsumerService:
             # Request erasure has its own trusted-store method, rather than a
             # fabricated MemoryMeaning or a made-up memory/evidence subject.
             self._store.delete_request(self.user_id, request_id)
+            if self._graph is not None:
+                self._graph.forget(request_id)  # checkpoints/trace follow request erasure
             self._jobs.pop(request_id, None)
             self._journal.clear_operation(request_id)
             self._journal.deleted(command)

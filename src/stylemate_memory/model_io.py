@@ -20,7 +20,7 @@ from .errors import StyleMateError
 from .registry import load_registry
 
 
-_FACTS = ("occasion", "activity", "goal")
+_FACTS = ("occasion", "activity", "goal", "season")
 _POLARITIES = ("prefer", "avoid", "require", "indifferent")
 MAX_JSON_BYTES = 256 * 1024
 
@@ -133,7 +133,7 @@ If the explanation corrects the displayed PI, keep the correction and ask as nee
 do not confirm the shown interpretation or invent a reason when text is absent.
 Never infer consent, preference or avoidance from none, unsure or skipped responses.
 Hard rules checked by code (a violation rejects the whole answer):
-- kind=situation: fact is REQUIRED ({key: occasion|activity|goal, value: literal text
+- kind=situation: fact is REQUIRED ({key: occasion|activity|goal|season, value: literal text
   from the quote}), polarity=prefer, strength=soft, bindings=[]. Never use
   indifferent, avoid or require for a situation.
 - Every condition value must be a literal substring of its own condition quote, and
@@ -505,4 +505,8 @@ class FakeModelGateway(ModelOperations):
             return {"candidates": [], "questions": []}
         if "suggestions" in properties:
             return {"suggestions": [], "questions": []}
+        if "situations" in properties:  # ADR 0013 parse_turn v2
+            return {"situations": [], "wishes": [], "questions": []}
+        if "hypotheses" in properties:
+            return {"hypotheses": []}
         raise StyleMateError("invalid_output", "fake JSON 변환에는 명시적 fixture가 필요합니다.")
