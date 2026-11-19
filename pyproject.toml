@@ -9,6 +9,11 @@ description = "Shopping memory context and target-feature inference prototype"
 requires-python = ">=3.11"
 dependencies = []
 
+[project.optional-dependencies]
+# ADR 0013 graph engine (STYLEMATE_ENGINE=graph). The legacy engine and the
+# pure-logic graph modules run without it.
+graph = ["langgraph==1.2.22", "langgraph-checkpoint-sqlite==3.1.3"]
+
 [project.scripts]
 stylemate-memory = "stylemate_memory.cli:main"
 lumi-consumer = "stylemate_memory.consumer:main"
@@ -17,4 +22,4 @@ lumi-consumer = "stylemate_memory.consumer:main"
 where = ["src"]
 
 [tool.setuptools.package-data]
-stylemate_memory = ["inspector.html", "consumer.html", "consumer.css", "consumer.js", "consumer-fixture.js", "consumer-http.js", "resources/park-2025-feature-map.json", "resources/lumi-29cm-v1.json"]
+stylemate_memory = ["inspector.html", "consumer.html", "consumer.css", "consumer.js", "consumer-fixture.js", "consumer-http.js", "resources/park-2025-feature-map.json", "resources/lumi-29cm-v1.json", "resources/situation-dictionary-v1.json"]

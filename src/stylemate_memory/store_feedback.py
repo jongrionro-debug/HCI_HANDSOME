@@ -151,7 +151,7 @@ class FeedbackStorage:
         images = {i["image_id"]: i["version"] for i in versions["images"]}
         targets = {t["target_id"] for t in json.loads(request["targets_json"])}
         candidates, positions, pairs = set(), set(), set()
-        for card in _list(plan["cards"], "cards", 4, nonempty=True):
+        for card in _list(plan["cards"], "cards", 8, nonempty=True):  # ADR 0013 grid: up to 8
             _shape(card, c.CandidateCard.__required_keys__, "candidate card")
             for field in ("candidate_id", "target_id", "product_id"):
                 _text(card[field], field)
@@ -346,7 +346,7 @@ class FeedbackStorage:
         reaction = action["reaction"]
         if reaction not in ("selected", "none", "unsure", "text_only", "question_skipped"):
             raise _fail("invalid_input", "unsupported feedback reaction")
-        selections = _list(action["selections"], "selections", 4)
+        selections = _list(action["selections"], "selections", 8)  # ADR 0013 multi-select
         text = action["text"]
         if text is not None:
             _text(text, "text", 4000)

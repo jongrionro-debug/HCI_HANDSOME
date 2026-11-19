@@ -620,14 +620,14 @@ class V1Storage:
             if target is None or selector["garment_type"] != target["garment_type"]:
                 raise _fail("invalid_input", "selector does not match a request target")
         conditions = memory["conditions"]
-        if not isinstance(conditions, dict) or set(conditions) - {"occasion", "activity", "goal"}:
-            raise _fail("invalid_input", "conditions must use occasion, activity or goal")
+        if not isinstance(conditions, dict) or set(conditions) - {"occasion", "activity", "goal", "season"}:
+            raise _fail("invalid_input", "conditions must use occasion, activity, goal or season")
         for value in conditions.values():
             _text(value, "condition", 4000)
         fact = memory["fact"]
         if fact is not None:
             _shape(fact, c.Fact.__required_keys__, "fact")
-            if memory["kind"] != "situation" or fact["key"] not in ("occasion", "activity", "goal"):
+            if memory["kind"] != "situation" or fact["key"] not in ("occasion", "activity", "goal", "season"):
                 raise _fail("invalid_input", "fact requires a situation and a supported key")
             _text(fact["value"], "fact value", 4000)
         start = _parse_datetime(memory["valid_from"], "valid_from")

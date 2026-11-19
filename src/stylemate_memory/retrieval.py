@@ -69,7 +69,7 @@ def _matches(selector: dict, target: dict) -> bool:
 
 
 def _conditions(value: Any) -> bool:
-    return (isinstance(value, dict) and not set(value) - {"occasion", "activity", "goal"}
+    return (isinstance(value, dict) and not set(value) - {"occasion", "activity", "goal", "season"}
             and all(isinstance(v, str) and 0 < len(v.strip()) <= 4000 for v in value.values()))
 
 

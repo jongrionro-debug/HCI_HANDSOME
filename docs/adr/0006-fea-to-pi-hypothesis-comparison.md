@@ -8,7 +8,7 @@
 - Applies to: 사용자 목표 Map의 PI·FEA 역할, 상품 Map의 PI 비교 범위, 가설 생성·이미지 비교·피드백의 로컬 실행 구현. 기존 데이터·범용 v1 호출은 호환 경로로 보존하며 실제 모델·상품·사용자 효과와 구분
 - Supersedes: ADR [0004](0004-adopt-park-2025-feature-map.md)의 Decision 3 중 상품과 목표의 공통 PI·FEA 적용 범위, ADR [0005](0005-evidence-linked-memory.md)의 목표 해석·이미지 비교 방향을 이 범위에서 구체화·부분 대체. 고정 사전과 기존 근거·확인·동의·삭제 경계는 유지
 - Superseded in part by: [0007](0007-joint-feedback-and-end-consent.md) (2026-11-01). 비교 선택과 선택 사항인 이유 텍스트를 함께 접수하며 소비자 장기 활용 동의는 세션 종료 후 요약에서 진행
-- Superseded in part by (Proposed): [0013](0013-langgraph-intent-loop.md) (2026-11-18). 가설은 전용 노드에서 모델이 제안하고, 대상 축을 Type·Color·Fit·Fabric·Detail, 값을 1~3개로 바꾼다. 직접 PI 우선·확인 경계는 유지
+- Superseded in part by (Proposed): [0013](0013-langgraph-intent-loop.md) (2026-11-18). 가설은 전용 노드에서 모델이 제안하고, 대상 축을 Type·Color·Fit·Fabric·Detail로, 값을 1개 이상(recall 우선)으로 바꾸며 대비 쌍 비교를 8장 그리드 탐색으로 바꾼다. 가설의 출처·직접 PI 우선·확인 경계는 유지
 
 ## Context
 

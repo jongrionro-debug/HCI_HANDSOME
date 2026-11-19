@@ -98,10 +98,11 @@ class Conditions(TypedDict, total=False):
     occasion: str
     activity: str
     goal: str
+    season: str
 
 
 class Fact(TypedDict):
-    key: Literal["occasion", "activity", "goal"]
+    key: Literal["occasion", "activity", "goal", "season"]
     value: str
 
 
@@ -724,7 +725,29 @@ class RespondComparisonUI(TypedDict):
     text: NotRequired[str | None]  # optional reason/correction, accepted with the image choice
 
 
-UIAction = StartRequestUI | SimpleUI | RetryExtractionUI | ReviewUI | RespondReviewUI | RespondComparisonUI | FeedbackAction | SelectFinalAction
+class GridFeedbackUI(TypedDict):
+    """ADR 0013 graph engine: one atomic grid response (multi-select, 별로, 비슷한 거, 다 별로, text)."""
+    op: Literal["grid_feedback"]
+    round_id: str
+    candidate_set_id: str
+    selections: list[Selection]
+    dislikes: list[str]       # candidate IDs marked "별로" (product-level only)
+    similar: str | None       # candidate ID for "이거랑 비슷한 거"
+    all_bad: bool             # "다 별로"
+    text: str | None
+    question_id: str | None
+
+
+class AdjustIntentUI(TypedDict):
+    """ADR 0013 graph engine: understanding chip pin/unpin/remove, unhide, liked-axis reason."""
+    op: Literal["adjust_intent"]
+    action: Literal["pin", "unpin", "remove", "unhide", "reason"]
+    key: str | None
+    feature: str | None
+
+
+UIAction = (StartRequestUI | SimpleUI | RetryExtractionUI | ReviewUI | RespondReviewUI | RespondComparisonUI
+            | FeedbackAction | SelectFinalAction | GridFeedbackUI | AdjustIntentUI)
 
 
 class ConsumerCommand(TypedDict):
