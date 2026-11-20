@@ -13,6 +13,7 @@ from . import memory, scoring
 
 GRID_SIZE = 8
 MAX_FOCUS_AXES = 2
+MAX_KEPT = 4  # previously picked products shown first; the rest of the 8 stay new
 
 
 def _has(product: dict[str, Any], axis: str, value: str) -> bool:
@@ -167,36 +168,53 @@ def plan_target(pool: list[dict[str, Any]], target_id: str, intent: dict[str, An
     return chosen, exposures
 
 
+def kept_products(products: list[dict[str, Any]], intent: dict[str, Any]) -> list[dict[str, Any]]:
+    """Products the user kept selected, in pick order (still in the catalog view)."""
+    by_key = {(p["product_id"], p["target_id"]): p for p in products if p["image_id"]}
+    found = [by_key.get((k["product_id"], k["target_id"])) for k in intent.get("kept", [])]
+    return [p for p in found if p][:MAX_KEPT]
+
+
 def plan_grid(products: list[dict[str, Any]], targets: list[dict[str, Any]], intent: dict[str, Any], scope: str,
-              turn: int, seed: str, anchor: dict[str, Any] | None = None) -> dict[str, Any]:
+              turn: int, seed: str, anchor: dict[str, Any] | None = None,
+              kept: list[dict[str, Any]] | None = None) -> dict[str, Any]:
     """Return {status, cards, exposures, pool_sizes, shortage}.
 
+    Kept products (earlier picks) come first with slot "kept" and fill part of
+    the 8; the remaining slots are planned as new candidates.
     status: results | no_results (conditions) | hidden_empty (hiding emptied the pool).
     """
     rng = random.Random(seed)
-    quotas = {t["target_id"]: GRID_SIZE // len(targets) for t in targets}
-    for t in targets[:GRID_SIZE % len(targets)]:
+    kept_cards = [{"slot": "kept", **p} for p in (kept or [])[:MAX_KEPT]]
+    kept_ids = {p["product_id"] for p in kept_cards}
+    room = GRID_SIZE - len(kept_cards)
+    quotas = {t["target_id"]: room // len(targets) for t in targets}
+    for t in targets[:room % len(targets)]:
         quotas[t["target_id"]] += 1
     cards, exposures, pool_sizes, status = [], {}, {}, "results"
     hidden_only = True
     for target in targets:
         tid = target["target_id"]
         pool, hidden = eligible(products, tid, intent, scope)
+        pool = [p for p in pool if p["product_id"] not in kept_ids]
         pool_sizes[tid] = len(pool)
         if not pool:
             if not hidden:
                 hidden_only = False
             continue
         hidden_only = False
+        if quotas[tid] <= 0:
+            continue
         picked, focus = plan_target(pool, tid, intent, scope, quotas[tid], turn, rng,
                                     anchor if anchor and anchor["target_id"] == tid else None)
         exposures[tid] = focus
         for slot, product in picked:
             cards.append({"slot": slot, **product})
-    if not cards:
+    if not cards and not kept_cards:
         status = "hidden_empty" if hidden_only and any(eligible(products, t["target_id"], intent, scope)[1] for t in targets) else "no_results"
     shortage = any(size < quotas[tid] for tid, size in pool_sizes.items())
-    return {"status": status, "cards": cards, "exposures": exposures, "pool_sizes": pool_sizes, "shortage": shortage}
+    return {"status": status, "cards": kept_cards + cards, "exposures": exposures,
+            "pool_sizes": pool_sizes, "shortage": shortage}
 
 
 def converged(history: list[list[str]], shortage: bool) -> bool:

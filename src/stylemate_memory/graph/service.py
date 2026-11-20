@@ -224,6 +224,20 @@ def public_summary(summary: dict[str, Any] | None) -> dict[str, Any] | None:
             "profile_view": summary.get("profile_view")}
 
 
+def _valid_liked(liked: dict[str, Any], cards: dict[str, dict[str, Any]], selected: set[str]) -> bool:
+    """Liked axes per selected card: each must be a known PI axis on that card."""
+    from .hypotheses import NON_HYPOTHESIS_AXES
+    for candidate_id, axes in liked.items():
+        if candidate_id not in selected or not isinstance(axes, list) or len(axes) > 8:
+            return False
+        if len(set(map(str, axes))) != len(axes) or not all(isinstance(a, str) for a in axes):
+            return False
+        facts = cards[candidate_id]["facts"]
+        if any(a not in facts or a in NON_HYPOTHESIS_AXES for a in axes):
+            return False
+    return True
+
+
 def run_turn(service: Any, request_id: str, command_id: str, event: dict[str, Any]) -> None:
     """Start one graph turn on the model executor; the UI polls state."""
     snapshot = service._snapshot(request_id)
@@ -493,26 +507,33 @@ def handle_command(service: Any, snapshot: dict[str, Any], command: dict[str, An
         last = intent["last_grid"] if intent else None
         if not last or last["set_id"] != action["candidate_set_id"]:
             raise StyleMateError("stale_context")
-        shown = {c["candidate_id"] for c in last["cards"]}
+        by_id = {c["candidate_id"]: c for c in last["cards"]}
+        shown = set(by_id)
         selected = [s["candidate_id"] for s in action["selections"]]
+        liked = action.get("liked", {})
         if (not isinstance(action["dislikes"], list) or not set(action["dislikes"]) <= shown or not set(selected) <= shown
                 or (action["similar"] is not None and action["similar"] not in shown) or not isinstance(action["all_bad"], bool)
-                or len(action["selections"]) > 8 or (action["all_bad"] and selected)):
+                or len(action["selections"]) > 8 or not isinstance(liked, dict) or not _valid_liked(liked, by_id, set(selected))):
+            raise StyleMateError("invalid_input")
+        # Earlier picks shown again (slot "kept") are carried, not re-recorded as new evidence.
+        fresh = [s for s in action["selections"] if by_id[s["candidate_id"]].get("slot") != "kept"]
+        if action["all_bad"] and fresh:
             raise StyleMateError("invalid_input")
         text = action["text"] if isinstance(action["text"], str) and action["text"].strip() else None
         feedback_ref = None
-        if selected or text or action["all_bad"]:
+        if fresh or text or action["all_bad"]:
             if service._latest_pending(snapshot):
                 raise StyleMateError("context_blocked")
-            reaction = "selected" if selected else "none" if action["all_bad"] else "text_only"
+            reaction = "selected" if fresh else "none" if action["all_bad"] else "text_only"
             receipt = service._apply(request_id, service._step(command_id, "intake"), [{
                 "op": "submit_feedback", "round_id": action["round_id"], "candidate_set_id": action["candidate_set_id"],
-                "reaction": reaction, "selections": action["selections"], "text": text, "question_id": action["question_id"]}],
+                "reaction": reaction, "selections": fresh, "text": text, "question_id": action["question_id"]}],
                 command["expected"])
             feedback_ref = service._feedback_ref(receipt)
         run_turn(service, request_id, command_id, {"type": "feedback", "feedback_ref": feedback_ref,
             "answers_question": bool(text), "novel_hint": bool(text and mem.NOVEL_HINT.search(text)), "grid": {"set_id": action["candidate_set_id"], "selected": selected,
-            "dislikes": list(action["dislikes"]), "similar": action["similar"], "all_bad": action["all_bad"]}})
+            "dislikes": list(action["dislikes"]), "similar": action["similar"], "all_bad": action["all_bad"],
+            "liked": {cid: list(axes) for cid, axes in liked.items() if axes}}})
         return True
     if op == "graph_summary":
         summary_command(service, snapshot, command, command_id)

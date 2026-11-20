@@ -545,6 +545,8 @@ class ConsumerService:
         optional = {"text"} if action["op"] == "respond_comparison" and "text" in action else set()
         if action["op"] == "start_request":
             optional = {k for k in ("gender", "situation") if k in action}
+        if action["op"] == "grid_feedback" and "liked" in action:
+            optional = {"liked"}
         _shape(action, shapes[action["op"]].__required_keys__ | optional)
         if action["op"] == "start_request":
             if command["request_id"] is not None or command["expected"] is not None:

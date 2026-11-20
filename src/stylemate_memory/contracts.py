@@ -746,6 +746,7 @@ class GridFeedbackUI(TypedDict):
     all_bad: bool             # "다 별로"
     text: str | None
     question_id: str | None
+    liked: NotRequired[dict[str, list[str]]]  # selected candidate ID -> PI axes the user liked on that image
 
 
 class AdjustIntentUI(TypedDict):

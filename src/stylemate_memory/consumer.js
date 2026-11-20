@@ -4,7 +4,7 @@
 const esc = value => String(value ?? "").replace(/[&<>"']/g, ch => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[ch]));
 const clone = value => structuredClone(value);
 const blankDraft = () => ({ text: "", selections: [], reaction: "text_only", question: null, hypothesis: null,
-  dislikes: [], similar: null, allBad: false, version: 0 });
+  dislikes: [], similar: null, allBad: false, liked: {}, version: 0 });
 const purposeLabel = {
   confirm_content: "이번 내용이 맞는지 확인", confirm_bindings: "이 속성 해석이 맞는지 확인",
   future_reuse: "이후 요청에서도 활용할 내용", replace: "수정할 내용 확인",
@@ -75,7 +75,11 @@ export function mountConsumer(root, adapter, { fixture = false, scenarios = {} }
   const canFeedback = () => isOpen() && !disabled() && state.operation !== "interpretation_pending";
   // ADR 0013 graph engine: 8-card multi-select grid with product-level "별로".
   const graphMode = () => Boolean(state?.graph) && isOpen();
-  const gridSignal = d => d.selections.length || d.dislikes.length || d.similar || d.allBad;
+  const isKept = id => state?.graph?.slots?.[id] === "kept";
+  const keptIds = () => Object.keys(state?.graph?.slots ?? {}).filter(isKept);
+  const gridSignal = d => d.selections.some(s => !isKept(s.candidate_id)) || keptIds().some(id => !d.selections.some(s => s.candidate_id === id))
+    || Object.values(d.liked).some(axes => axes.length) || d.dislikes.length || d.similar || d.allBad;
+  const LIKE_HIDDEN = new Set(["Brand", "Price"]);
   const canSubmit = d => canFeedback() && (graphMode() && state.graph.set_id ? Boolean(gridSignal(d) || d.text.trim())
     : Boolean(d.selections.length || d.text.trim() || ["none", "unsure", "question_skipped"].includes(d.reaction)));
   const button = (action, label, extra = "", off = disabled()) => `<button type="button" data-action="${action}" ${off ? "disabled" : ""} ${extra}>${label}</button>`;
@@ -195,7 +199,7 @@ export function mountConsumer(root, adapter, { fixture = false, scenarios = {} }
     const onboarding = startMode === "onboarding";
     const requests = state.requests.filter(r => r.mode === "shopping" && r.status !== "expired");
     return `<section class="start"><h1>${onboarding ? "평소 어떤 옷을 좋아하세요?" : "이번에는 어떤 옷이 필요하세요?"}</h1>
-      <p>${onboarding ? "짧게 적거나, 이미지부터 살펴봐도 좋아요. 내용을 확인한 뒤 이후 활용 여부를 따로 선택할 수 있어요." : "아이템과 입을 상황을 짧게 알려주세요. 이전 요청의 조건은 자동으로 이어지지 않아요."}</p>
+      <p>${onboarding ? "좋아하는 스타일·색·핏을 짧게 적어 주세요. 해석한 내용을 확인한 뒤 이후 활용 여부를 따로 선택할 수 있어요." : "아이템과 입을 상황을 짧게 알려주세요. 이전 요청의 조건은 자동으로 이어지지 않아요."}</p>
       <form class="start-form" data-form="start"><div><label for="target">찾을 아이템</label><select id="target" name="target">${garmentOptions().map(g => `<option value="${esc(g.value)}">${esc(g.label_ko)}${fixture ? " · 화면 연습 대상" : ""}</option>`).join("")}</select></div>
         ${state.engine === "graph" && !onboarding ? graphStartMarkup() : ""}
         <div><label for="initial-text">${onboarding ? "평소 취향 한마디 (선택)" : "입을 상황과 원하는 느낌 (선택)"}</label>
@@ -283,7 +287,8 @@ export function mountConsumer(root, adapter, { fixture = false, scenarios = {} }
     const d = draft();
     const refs = comparison();
     const activeQuestion = state.questions.find(q => q.ref.id === d.question && q.status === "open");
-    const cards = state.cards.map(card => {
+    const cards = state.cards.map(card => graphMode() && state.graph.set_id ? gridCard(card, d, refs) : listCard(card, d, refs)).join("");
+    function listCard(card, d, refs) {
       const selection = d.selections.find(s => s.candidate_id === card.candidate_id);
       const interpretation = state.comparison?.options.find(o => o.candidate_id === card.candidate_id);
       const disliked = d.dislikes.includes(card.candidate_id);
@@ -298,21 +303,34 @@ export function mountConsumer(root, adapter, { fixture = false, scenarios = {} }
         ${graphMode() && state.graph.set_id ? `${button("dislike", d.dislikes.includes(card.candidate_id) ? "별로 취소" : "별로", `data-card="${esc(card.candidate_id)}" aria-pressed="${d.dislikes.includes(card.candidate_id)}"`, !canFeedback() || d.allBad)}
           ${button("similar", d.similar === card.candidate_id ? "비슷한 거 취소" : "이거랑 비슷한 거", `data-card="${esc(card.candidate_id)}" aria-pressed="${d.similar === card.candidate_id}"`, !canFeedback() || d.allBad)}` : ""}
         ${state.request.mode === "shopping" ? button("preview-final", "최종 상품으로 살펴보기", `data-card="${esc(card.candidate_id)}" class="quiet"`, !canFeedback() || !refs.set) : ""}</div></article>`;
-    }).join("");
+    }
+    function gridCard(card, d, refs) {
+      const selected = d.selections.some(s => s.candidate_id === card.candidate_id);
+      const off = !canFeedback() || !refs.set || !refs.round;
+      const liked = d.liked[card.candidate_id] ?? [];
+      const facts = (card.facts ?? []).filter(f => !LIKE_HIDDEN.has(f.feature) && f.values?.length);
+      return `<article class="card grid-card ${selected ? "selected" : ""} ${isKept(card.candidate_id) ? "kept" : ""}">
+        <button type="button" class="image-pick" data-action="select" data-card="${esc(card.candidate_id)}" aria-pressed="${selected}" aria-label="${esc(card.title)} ${selected ? "선택 해제" : "선택"}" ${off ? "disabled" : ""}>${image(card)}
+          ${isKept(card.candidate_id) ? '<span class="kept-mark">고른 상품</span>' : ""}<span class="pick-mark" aria-hidden="true">✓</span></button>
+        ${selected && facts.length ? `<div class="liked" role="group" aria-label="이 상품에서 좋았던 점">${facts.map(f => button("like", esc(f.label_ko),
+          `data-card="${esc(card.candidate_id)}" data-feature="${esc(f.feature)}" aria-pressed="${liked.includes(f.feature)}" title="${esc(f.values.join(", "))}"`, off)).join("")}
+          ${state.request.mode === "shopping" ? button("preview-final", "이 상품으로 결정", `data-card="${esc(card.candidate_id)}" class="quiet"`, off) : ""}</div>` : ""}</article>`;
+    }
     const noCards = !isOpen() ? "" : graphMode() && state.operation === "running" ? '<p class="hint">다음 후보를 고르고 있어요.</p>' : `<div class="empty-state"><h2>${state.graph?.outcome === "hidden_empty" ? "별로라고 한 상품을 빼니 남은 후보가 없어요" : state.operation === "no_results" ? "조건에 맞는 상품이 없어요" : "아직 비교할 후보가 없어요"}</h2><p>조건을 그대로 두거나 글로 조정할 수 있어요. 상품을 고르지 않고 탐색을 마쳐도 괜찮아요.</p>${state.graph?.outcome === "hidden_empty" ? button("adjust", "숨김 해제", 'data-adjust="unhide"', !canFeedback()) : ""}</div>`;
     const questionItems = (isOpen() ? state.questions : []).filter(q => q.status === "open").map(q => `<section class="question"><h3>${esc(questionLabel(q.text))}</h3>
       <p class="hint">답을 고르거나 자유롭게 적어주세요. 반영하기 전까지 바꿀 수 있어요.</p><div class="actions">${q.options.map((option, index) => button("answer", esc(option), `data-question="${esc(q.ref.id)}" data-option="${index}"`, !canFeedback())).join("")}
       ${button("skip-question", "질문 건너뛰기", `data-question="${esc(q.ref.id)}" class="quiet"`, !canFeedback())}</div></section>`);
     const questions = (questionItems[0] ?? "") + (questionItems.length > 1
       ? `<details><summary>다른 확인 질문 ${questionItems.length - 1}개</summary>${questionItems.slice(1).join("")}</details>` : "");
-    return `<div class="page-heading"><div><h1>${state.request.mode === "onboarding" ? "평소 취향을 찾아볼까요?" : state.request.status === "closed" ? "이번 요청의 탐색 요약" : "원하는 느낌에 가까운 쪽을 골라주세요"}</h1><p>${isOpen() ? "하나만 골라도, 여러 장을 골라도 좋아요. 이유는 글로 덧붙일 수 있어요." : "이번 대화의 내용을 확인하고, 다음에도 활용할 항목을 선택할 수 있어요."}</p></div></div>
-      <div class="workspace ${isOpen() ? "open" : "closed"} ${state.comparison ? "hypothesis-comparison" : ""}"><section aria-label="이미지 비교"><h2>${isOpen() ? "나란히 보고 선택하기" : "대화 종료 요약"}</h2><p class="section-intro">${!isOpen() ? "저장 없이 마치거나, 확인한 내용을 이후 요청에 활용할 수 있어요." : fixture ? "색 영역으로 만든 합성 자료예요. 실제 상품이나 추천 결과가 아니에요." : state.comparison ? "원하는 해석을 고르거나, 글로 수정할 수 있어요." : graphMode() ? "마음에 드는 이미지를 여러 장 고르고 반영하면 다음 8장이 바뀌어요. 글은 필요할 때만 덧붙여 주세요." : "선택만으로 후보가 바뀌지 않아요. 글과 함께 반영할 수 있어요."}</p>
+    const onboardingText = state.request.mode === "onboarding" && !cards;
+    return `<div class="page-heading"><div><h1>${state.request.mode === "onboarding" ? "평소 취향을 찾아볼까요?" : state.request.status === "closed" ? "이번 요청의 탐색 요약" : "원하는 느낌에 가까운 쪽을 골라주세요"}</h1><p>${!isOpen() ? "이번 대화의 내용을 확인하고, 다음에도 활용할 항목을 선택할 수 있어요." : onboardingText ? "평소 취향은 글로 등록해요. 해석한 내용을 확인한 뒤 온보딩을 마치면 이후 활용 여부를 고를 수 있어요." : "하나만 골라도, 여러 장을 골라도 좋아요. 이유는 글로 덧붙일 수 있어요."}</p></div></div>
+      <div class="workspace ${isOpen() ? "open" : "closed"} ${state.comparison ? "hypothesis-comparison" : ""}"><section aria-label="이미지 비교"><h2>${!isOpen() ? "대화 종료 요약" : onboardingText ? "평소 취향 적기" : "나란히 보고 선택하기"}</h2><p class="section-intro">${!isOpen() ? "저장 없이 마치거나, 확인한 내용을 이후 요청에 활용할 수 있어요." : onboardingText ? "이 단계에서는 상품 이미지를 보여 주지 않아요. 상품은 온보딩을 마친 뒤 새 요청에서 볼 수 있어요." : fixture ? "색 영역으로 만든 합성 자료예요. 실제 상품이나 추천 결과가 아니에요." : state.comparison ? "원하는 해석을 고르거나, 글로 수정할 수 있어요." : graphMode() ? "마음에 드는 이미지를 눌러 고르고 반영하면 다음 8장이 바뀌어요." : "선택만으로 후보가 바뀌지 않아요. 글과 함께 반영할 수 있어요."}</p>
         ${state.comparison ? `<section class="question" aria-label="요구에 맞는 조건 비교"><h3>${esc(state.comparison.prompt)}</h3><p>조건을 고른 뒤 아래에서 한 번에 반영해 주세요. 좋은 이유를 함께 적어도 되고, 선택만 보내도 돼요.</p><div class="actions">${button("comparison-neither", "둘 다 원하는 해석이 아니에요", "", !canFeedback())}${button("comparison-unsure", "아직 잘 모르겠어요", "", !canFeedback())}</div><p class="hint">이유나 바꾸고 싶은 점은 선택 사항이에요. 선택과 설명이 다르면 함께 확인해요.</p></section>` : ""}
-        <div class="candidates">${cards}</div>${cards ? "" : noCards}
+        <div class="candidates">${cards}</div>${cards || onboardingText ? "" : noCards}
         ${cards && (!refs.round || !refs.set) ? `<p class="selection-note">비교 회차 정보를 확인할 수 없어 이미지 응답을 보류했어요. 글로 계속하거나 최신 화면을 확인해 주세요.</p>${button("refresh", "최신 화면 확인")}` : ""}
         ${isOpen() ? `<div class="candidate-actions"><fieldset class="reactions"><legend>고르기 어려울 때</legend><div class="actions">
           ${graphMode() && state.graph.set_id ? button("all-bad", d.allBad ? "다 별로 취소" : "다 별로", `aria-pressed="${d.allBad}"`, !canFeedback()) : [["none", "마음에 드는 게 없어요"], ["unsure", "잘 모르겠어요"], ["text_only", "텍스트만 보낼게요"]].map(([reaction, label]) => button("reaction", label, `data-reaction="${reaction}" aria-pressed="${d.reaction === reaction && !d.selections.length}"`, !canFeedback() || (reaction !== "text_only" && (!refs.round || !refs.set)))).join("")}
-        </div></fieldset><p class="selection-note">${d.selections.length ? `${d.selections.length}개를 선택했어요.` : "이미지 선택 없이도 이야기할 수 있어요."} ${graphMode() ? "여러 장을 골라도 좋아요. 고르지 않은 이미지나 별로는 취향으로 저장하지 않아요." : "개별 속성이나 선택하지 않은 후보의 비선호를 확정하지 않아요."}</p>
+        </div></fieldset><p class="selection-note">${d.selections.length ? `${d.selections.length}개를 선택했어요.` : "이미지 선택 없이도 이야기할 수 있어요."} ${graphMode() ? "이미지를 눌러 고르고, 좋았던 점을 누르면 그 점을 더 반영해요. 고른 상품은 다음 화면 맨 앞에 남아요." : "개별 속성이나 선택하지 않은 후보의 비선호를 확정하지 않아요."}</p>
         <div class="actions">${button("explore", "다른 후보 보기", "", !canFeedback() || Boolean(d.text || gridSignal(d)))}${button("end", "상품 선택 없이 종료", 'class="quiet"')}</div>
         ${d.text || d.selections.length ? '<p class="hint">작성 중인 선택과 글을 먼저 반영하거나, 그대로 둔 채 탐색을 마칠 수 있어요.</p>' : ""}</div>` : ""}
         ${partMarkup()}${graphSummaryMarkup()}${wrapMarkup()}</section>
@@ -389,8 +407,11 @@ export function mountConsumer(root, adapter, { fixture = false, scenarios = {} }
     const nextSet = uniqueRef("candidate_set");
     if (!sameRef(previousSet, nextSet)) {
       const d = draft();
-      if (d.selections.length) notice = "후보가 바뀌어 이미지 선택을 해제했어요. 작성하던 글은 그대로예요.";
-      d.selections = []; d.hypothesis = null; d.dislikes = []; d.similar = null; d.allBad = false; if (d.reaction === "selected") d.reaction = "text_only";
+      const kept = state.cards.filter(c => isKept(c.candidate_id)).map(c => ({ target_id: c.target_id, candidate_id: c.candidate_id, part_ref: null }));
+      if (d.selections.length && !kept.length) notice = "후보가 바뀌어 이미지 선택을 해제했어요. 작성하던 글은 그대로예요.";
+      else if (kept.length) notice = "";
+      d.selections = kept; d.hypothesis = null; d.dislikes = []; d.similar = null; d.allBad = false; d.liked = {};
+      d.reaction = kept.length ? "selected" : d.reaction === "selected" ? "text_only" : d.reaction;
       part = null; finalPreview = null;
     }
     const d = draft();
@@ -477,7 +498,8 @@ export function mountConsumer(root, adapter, { fixture = false, scenarios = {} }
     const refs = comparison();
     if (graphMode() && state.graph.set_id && refs.round && refs.set?.id === state.graph.set_id) return {
       op: "grid_feedback", round_id: refs.round.id, candidate_set_id: refs.set.id, selections: clone(d.selections),
-      dislikes: [...d.dislikes], similar: d.similar, all_bad: d.allBad, text: d.text.trim() ? d.text : null, question_id: null };
+      dislikes: [...d.dislikes], similar: d.similar, all_bad: d.allBad, text: d.text.trim() ? d.text : null, question_id: null,
+      liked: Object.fromEntries(Object.entries(d.liked).filter(([id, axes]) => axes.length && d.selections.some(s => s.candidate_id === id))) };
     if (d.hypothesis && state.comparison) return { op: "respond_comparison",
       candidate_set_ref: clone(state.comparison.candidate_set_ref), ...clone(d.hypothesis), text: d.text.trim() ? d.text : null };
     const needsComparison = d.selections.length || ["none", "unsure"].includes(d.reaction) || Boolean(d.question && state.cards.length);
@@ -542,11 +564,17 @@ export function mountConsumer(root, adapter, { fixture = false, scenarios = {} }
         d.hypothesis = null;
         const selected = d.selections.findIndex(s => s.candidate_id === card.candidate_id);
         d.allBad = false;
-        if (selected >= 0) d.selections.splice(selected, 1);
+        if (selected >= 0) { d.selections.splice(selected, 1); delete d.liked[card.candidate_id]; }
         else d.selections.push({ target_id: card.target_id, candidate_id: card.candidate_id, part_ref: null });
         d.reaction = d.selections.length ? "selected" : "text_only"; d.version += 1; render();
         root.querySelectorAll('[data-action="select"]').forEach(button => { if (button.dataset.card === card.candidate_id) button.focus({ preventScroll: true }); });
         break;
+      }
+      case "like": {
+        if (!card || !d.selections.some(s => s.candidate_id === card.candidate_id)) return;
+        const axes = d.liked[card.candidate_id] ?? [];
+        d.liked[card.candidate_id] = axes.includes(b.dataset.feature) ? axes.filter(a => a !== b.dataset.feature) : [...axes, b.dataset.feature];
+        d.version += 1; render(); break;
       }
       case "dislike":
         if (!card) return;
@@ -555,7 +583,10 @@ export function mountConsumer(root, adapter, { fixture = false, scenarios = {} }
       case "similar": if (!card) return; d.similar = d.similar === card.candidate_id ? null : card.candidate_id; d.version += 1; render(); break;
       case "all-bad":
         d.allBad = !d.allBad;
-        if (d.allBad) { d.selections = []; d.dislikes = []; d.similar = null; d.reaction = "text_only"; }
+        if (d.allBad) {
+          d.selections = d.selections.filter(s => isKept(s.candidate_id)); d.dislikes = []; d.similar = null;
+          d.liked = Object.fromEntries(Object.entries(d.liked).filter(([id]) => isKept(id))); d.reaction = d.selections.length ? "selected" : "text_only";
+        }
         d.version += 1; render(); root.querySelector('[data-action="all-bad"]')?.focus(); break;
       case "adjust":
         await send({ op: "adjust_intent", action: b.dataset.adjust, key: b.dataset.key ?? null, feature: b.dataset.feature ?? null }); break;

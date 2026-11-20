@@ -36,7 +36,8 @@ try {
   const cards = page.locator("article.card");
   await cards.first().waitFor();
   assert.equal(await cards.count(), 8);
-  assert.equal(await page.locator('[data-action="dislike"]').count(), 8);
+  assert.equal(await page.locator('[data-action="dislike"], [data-action="part"], .card-body').count(), 0);
+  assert.equal(await page.locator('.image-pick[data-action="select"]').count(), 8);
   assert.equal(await page.locator('[data-action="all-bad"]').count(), 1);
   assert.match(await page.locator(".graph-panel").innerText(), /출근/);
   await page.screenshot({ path: join(captures, "desktop.png"), fullPage: true });
@@ -45,28 +46,33 @@ try {
   await page.screenshot({ path: join(captures, "mobile.png"), fullPage: true });
   await page.setViewportSize({ width: 1360, height: 940 });
 
-  // Multi-select every Wide card, mark one other card "별로", submit once.
+  // Click every Wide image, mark "핏" as liked on one of them, submit once.
   let view = await rpc("inspect");
   const grid = view.intent.last_grid.cards;
   const wide = grid.filter(c => c.facts.Fit?.[0] === "Wide").map(c => c.candidate_id);
-  const other = grid.find(c => c.facts.Fit && c.facts.Fit[0] !== "Wide").candidate_id;
   const memories = view.state.memories.length;
   for (const id of wide) await page.locator(`[data-action="select"][data-card="${id}"]`).click();
-  await page.locator(`[data-action="dislike"][data-card="${other}"]`).click();
-  assert.match(await page.locator(`[data-action="dislike"][data-card="${other}"]`).innerText(), /별로 취소/);
+  await page.locator(`[data-action="like"][data-card="${wide[0]}"][data-feature="Fit"]`).click();
+  assert.equal(await page.locator(`[data-action="like"][data-card="${wide[0]}"][data-feature="Fit"]`).getAttribute("aria-pressed"), "true");
   await page.locator('[data-form="feedback"] button.primary').click();
-  await page.waitForFunction(turn => document.querySelector("article.card") && !document.querySelector('[aria-pressed="true"][data-action="select"]'), null);
+  await page.waitForFunction(() => document.querySelector(".kept-mark"));
   view = await rpc("inspect");
   const sent = commands.findLast(c => c.action.op === "grid_feedback");
   assert.deepEqual(sent.action.selections.map(s => s.candidate_id).sort(), [...wide].sort());
-  assert.deepEqual(sent.action.dislikes, [other]);
+  assert.deepEqual(sent.action.liked, { [wide[0]]: ["Fit"] });
   assert.equal(view.intent.turn, 2);
+  // Earlier picks come first, already selected, in the next 8.
+  const keptN = Math.min(wide.length, 4);
+  assert.deepEqual(view.intent.last_grid.cards.slice(0, keptN).map(c => c.slot), Array(keptN).fill("kept"));
+  assert.equal(await page.locator(".card.kept.selected").count(), keptN);
+  await page.screenshot({ path: join(captures, "kept.png"), fullPage: true });
   assert.equal(view.state.memories.length, memories, "image reactions alone never create memory");
 
-  // "다 별로" clears the draft selections and sends all_bad.
-  await page.locator('[data-action="select"]').first().click();
+  // "다 별로" clears new picks but keeps earlier picks, and sends all_bad.
+  await page.locator('.card:not(.kept) [data-action="select"]').first().click();
   await page.locator('[data-action="all-bad"]').click();
-  assert.equal(await page.locator('[aria-pressed="true"][data-action="select"]').count(), 0);
+  assert.equal(await page.locator('.card:not(.kept) [aria-pressed="true"][data-action="select"]').count(), 0);
+  assert.equal(await page.locator('.card.kept [aria-pressed="true"][data-action="select"]').count(), keptN);
   await page.locator('[data-form="feedback"] button.primary').click();
   await page.waitForFunction(() => document.querySelector('[data-action="all-bad"]')?.getAttribute("aria-pressed") === "false");
   view = await rpc("inspect");
@@ -76,7 +82,7 @@ try {
   // Two contrasts on Wide raise a chip; pin it and every card follows.
   view = await rpc("inspect");
   const grid3 = view.intent.last_grid.cards;
-  for (const c of grid3.filter(c => c.facts.Fit?.[0] === "Wide")) await page.locator(`[data-action="select"][data-card="${c.candidate_id}"]`).click();
+  for (const c of grid3.filter(c => c.facts.Fit?.[0] === "Wide" && c.slot !== "kept")) await page.locator(`[data-action="select"][data-card="${c.candidate_id}"]`).click();
   await page.locator('[data-form="feedback"] button.primary').click();
   const pin = page.locator('.chip [data-adjust="pin"]').first();
   await pin.waitFor();
@@ -88,7 +94,7 @@ try {
   assert.equal(commands.findLast(c => c.action.op === "adjust_intent").action.action, "pin");
   await page.screenshot({ path: join(captures, "pinned.png"), fullPage: true });
   assert.deepEqual(errors, []);
-  console.log(JSON.stringify({ status: "PASS", checks: ["8-card grid desktop/mobile", "multi-select + 별로 in one grid_feedback",
+  console.log(JSON.stringify({ status: "PASS", checks: ["8-card grid desktop/mobile", "image click multi-select + per-image liked axis", "earlier picks kept first",
     "no memory from image reactions", "다 별로 clears draft", "chip appears after repeated contrast", "pin narrows grid", "no runtime errors"], captures }));
 } finally {
   if (browser) await browser.close();

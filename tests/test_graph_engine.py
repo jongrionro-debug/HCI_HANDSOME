@@ -154,6 +154,42 @@ class GraphEngineTests(unittest.TestCase):
         self.service._graph.forget(request_id)
         self.assertIsNone(self.service._graph.intent(request_id))
 
+    def test_picks_stay_first_and_liked_axis_is_credited_per_image(self):
+        self.send({"op": "start_request", "mode": "shopping", "timezone": "Asia/Seoul",
+                   "targets": [{"target_id": "pants", "garment_type": "Pants"}], "text": None})
+        s = self.service.state()
+        request_id = s["request"]["id"]
+        cards = self.service._graph.intent(request_id)["last_grid"]["cards"]
+        picked = cards[2]
+        pick = {"target_id": "pants", "candidate_id": picked["candidate_id"], "part_ref": None}
+        # A liked axis must exist on that selected card.
+        self.send(self.grid(selections=[pick], liked={picked["candidate_id"]: ["Brand"]}), ok=False)
+        self.send(self.grid(selections=[], liked={picked["candidate_id"]: ["Fit"]}), ok=False)
+        self.send(self.grid(selections=[pick], liked={picked["candidate_id"]: ["Fit"]}))
+        intent = self.service._graph.intent(request_id)
+        key = scoring.score_key("pants", it.scope_of(intent), "Fit", picked["facts"]["Fit"][0])
+        self.assertGreaterEqual(intent["scores"][key]["a"], 1.0 + scoring.REASON_GAIN)
+        self.assertIsNone(intent["reason_prompt"])
+        grid = intent["last_grid"]["cards"]
+        self.assertEqual(len(grid), 8)
+        self.assertEqual((grid[0]["slot"], grid[0]["product_id"]), ("kept", picked["product_id"]))
+        self.assertEqual(sum(c["product_id"] == picked["product_id"] for c in grid), 1)
+        feedback = len(self.service.inspect_request(request_id)["snapshot"]["feedback"])
+
+        # Keeping only the earlier pick records no new evidence; "다 별로" may keep it too.
+        kept = {"target_id": "pants", "candidate_id": grid[0]["candidate_id"], "part_ref": None}
+        self.send(self.grid(selections=[kept], all_bad=True))
+        self.assertEqual(len(self.service.inspect_request(request_id)["snapshot"]["feedback"]), feedback + 1)
+        grid = self.service._graph.intent(request_id)["last_grid"]["cards"]
+        self.assertEqual(grid[0]["product_id"], picked["product_id"])
+        fresh = next(c for c in grid if c["slot"] != "kept")
+        self.send(self.grid(selections=[{"target_id": "pants", "candidate_id": fresh["candidate_id"], "part_ref": None}],
+                            all_bad=True), ok=False)
+        # Deselecting the kept card drops it from the next grid.
+        self.send(self.grid(selections=[{"target_id": "pants", "candidate_id": fresh["candidate_id"], "part_ref": None}]))
+        grid = self.service._graph.intent(request_id)["last_grid"]["cards"]
+        self.assertEqual([c["product_id"] for c in grid if c["slot"] == "kept"], [fresh["product_id"]])
+
     def test_legacy_ops_rejected_and_no_text_start(self):
         self.send({"op": "start_request", "mode": "shopping", "timezone": "Asia/Seoul",
                    "targets": [{"target_id": "pants", "garment_type": "Pants"}], "text": None})

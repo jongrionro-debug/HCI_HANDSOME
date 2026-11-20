@@ -152,17 +152,23 @@ class GraphEngine:
             cards = last["cards"]
             selected = set(signal["selected"])
             by_id = {c["candidate_id"]: c for c in cards}
+            liked = signal.get("liked") or {}
             intent["all_bad"] = bool(signal["all_bad"])
             extra = {t["target_id"]: mem.prior_values(intent, t["target_id"]) for t in intent["targets"]}
             before = {k: dict(v) for k, v in intent["scores"].items()}
             changed = [] if signal["all_bad"] else scoring.attribute_grid(intent, cards, selected, scope, extra)
+            for candidate_id, axes in sorted(liked.items()):
+                for axis in axes:  # "이 상품의 이 점이 좋았어요": credit only that card's axis
+                    scoring.apply_reason_axis(intent, cards, {candidate_id}, axis, scope)
             mem.note_contra(intent, before, scope, intent["turn"])
             mem.note_novel_pick(intent, cards, selected, intent["turn"])
             scoring.apply_dislikes(intent, [by_id[c]["product_id"] for c in signal["dislikes"] if c in by_id], intent["turn"])
             similar = by_id.get(signal["similar"]) if signal.get("similar") else None
             intent["anchor"] = {k: similar[k] for k in ("product_id", "target_id", "facts")} if similar else None
+            intent["kept"] = [{"product_id": c["product_id"], "target_id": c["target_id"]}
+                              for c in cards if c["candidate_id"] in selected][:grid_plan.MAX_KEPT]
             intent["reason_prompt"] = None
-            if selected and not changed and not signal["all_bad"]:
+            if selected and not changed and not liked and not signal["all_bad"]:
                 axes = self._differing_axes(cards, selected)
                 if axes:
                     intent["reason_prompt"] = {"set_id": last["set_id"], "selected": sorted(selected), "axes": axes}
@@ -359,8 +365,10 @@ class GraphEngine:
         intent = deepcopy(state["intent"])
         scope = it.scope_of(intent)
         turn = intent["turn"] + 1
-        plan = grid_plan.plan_grid(self.bridge.products(), intent["targets"], intent, scope, turn,
-                                   seed=f"{intent['request_id']}:{turn}", anchor=intent["anchor"])
+        products = self.bridge.products()
+        plan = grid_plan.plan_grid(products, intent["targets"], intent, scope, turn,
+                                   seed=f"{intent['request_id']}:{turn}", anchor=intent["anchor"],
+                                   kept=grid_plan.kept_products(products, intent))
         intent["planned"] = plan
         intent["anchor"] = None
         intent["all_bad"] = False

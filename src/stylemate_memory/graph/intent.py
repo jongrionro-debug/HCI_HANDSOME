@@ -26,6 +26,7 @@ def new_intent(request_id: str, targets: list[dict[str, Any]]) -> dict[str, Any]
         "gender": None, "lt_memories": [], "priors": [], "memory_chips": [], "memory_off": [],
         "memory_mode": "normal", "links": [], "novel_turns": [], "novelty_prompt": None,
         "contra": {}, "taste_prompt": None, "taste_asked": [],
+        "kept": [],  # earlier picks shown first in the next grid
     }
 
 
