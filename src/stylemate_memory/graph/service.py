@@ -14,6 +14,7 @@ from typing import Any
 from .. import contracts as c
 from ..errors import V1_ERROR_CODES, StyleMateError
 from . import intent as it
+from . import memory as mem
 from . import scoring
 
 
@@ -83,7 +84,30 @@ class GraphBridge:
                 "feedback_ref": feedback_ref, "extraction_key": key, "result": None, "error": public}])
         self._db(run)
 
+    def long_term_memories(self, request_id: str) -> list[dict[str, Any]]:
+        return self._db(self.long_term_now, request_id)
+
+    def long_term_now(self, request_id: str) -> list[dict[str, Any]]:
+        """Consented, confirmed, active long-term memories with their PI bindings (ADR 0015 decision 4)."""
+        snapshot = self.s._snapshot(request_id)
+        consented = {c["memory_id"] for c in snapshot["consents"] if c["status"] == "active"}
+        result = []
+        for m in snapshot["memories"]:
+            if (m["scope"] != "long_term" or m["status"] != "active" or not m["confirmed"]
+                    or m["consent_ref"] is None or m["id"] not in consented or m["kind"] == "situation"):
+                continue
+            bindings = [{"feature": b["feature"], "values": list(b["values"] or []), "polarity": b["polarity"]}
+                        for b in snapshot["bindings"] if b["memory_id"] == m["id"] and b["domain"] == "PI"
+                        and b["status"] in ("candidate", "active") and b["polarity"] in ("prefer", "avoid")]
+            result.append({"memory_id": m["id"], "content": m["content"], "conditions": dict(m["conditions"]),
+                           "garment_type": m["selector"]["garment_type"], "polarity": m["polarity"],
+                           "bindings": bindings, "created_at": m["created_at"]})
+        return result
+
     def products(self) -> list[dict[str, Any]]:
+        return self._db(self.products_now)
+
+    def products_now(self) -> list[dict[str, Any]]:
         """Product views per request target (garment match), cached per catalog version."""
         def run() -> list[dict[str, Any]]:
             from ..registry import product_fact_statuses
@@ -122,10 +146,11 @@ class GraphBridge:
                                   "product_map_version": maps.get(record["product_id"], product_map["map_version"]),
                                   "image_id": image["image_id"] if image else None,
                                   "image_version": image_versions.get(image["image_id"]) if image else None,
-                                  "facts": facts, "price": price if type(price) is int else None})
+                                  "facts": facts, "price": price if type(price) is int else None,
+                                  "gender": record["raw_metadata"].get("gender")})
             self._cache = {key: views}
             return views
-        return self._db(run)
+        return run()
 
     def publish(self, request_id: str, command_id: str, turn: int, plan: dict[str, Any]) -> dict[str, Any]:
         def run() -> dict[str, Any]:
@@ -178,7 +203,25 @@ def graph_view(service: Any, request_id: str) -> dict[str, Any] | None:
         "converged": intent["converged"], "shortage": intent.get("shortage", False),
         "hidden_count": len(intent["hidden"]), "unresolved_hard_fea": intent["unresolved_hard_fea"],
         "turn": intent["turn"],
+        # ADR 0015
+        "gender": intent.get("gender"),
+        "memory": {"chips": [dict(c) for c in intent.get("memory_chips", [])], "mode": intent.get("memory_mode", "normal"),
+                   "links": [dict(l) for l in intent.get("links", [])],
+                   "novelty_prompt": intent.get("novelty_prompt") == "ask",
+                   "taste_prompt": dict(intent["taste_prompt"]) if intent.get("taste_prompt") else None},
+        "summary": public_summary(service._graph.summary(request_id)),
     }
+
+
+def public_summary(summary: dict[str, Any] | None) -> dict[str, Any] | None:
+    if summary is None:
+        return None
+    return {"status": summary["status"], "situation_label": summary.get("situation_label"),
+            "proposals": [{"id": p["id"], "text": p["text"], "suggested": "baseline" if p["baseline"] else
+                           ("situation" if summary.get("conditions") else "baseline"), "source": p["source"]}
+                          for p in summary.get("proposals", [])],
+            "saved": summary.get("saved", []), "profile": summary.get("profile"),
+            "profile_view": summary.get("profile_view")}
 
 
 def run_turn(service: Any, request_id: str, command_id: str, event: dict[str, Any]) -> None:
@@ -208,6 +251,226 @@ def run_turn(service: Any, request_id: str, command_id: str, event: dict[str, An
     service._submit_model(request_id, calculate, apply_result)
 
 
+# ---- ADR 0015 end summary ------------------------------------------------------------
+def _evidence_for(service: Any, snapshot: dict[str, Any], proposal: dict[str, Any],
+                  facts: dict[str, dict[str, list[str]]]) -> list[dict[str, Any]]:
+    """Evidence refs that back one proposal. Image evidence comes from ONE candidate set
+    (the latest where the user picked a product with these values), so the closed-session
+    review can show its comparison basis."""
+    from ..app import _ref
+    by_id = {e["id"]: e for e in snapshot["evidence"]}
+    if proposal["evidence_ids"]:
+        return [_ref("evidence", by_id[i]) for i in proposal["evidence_ids"] if i in by_id][:64]
+    picks = [e for e in snapshot["evidence"] if e["kind"] == "image_selection" and e["selection"]]
+
+    def matches(e: dict[str, Any]) -> bool:
+        product = e["selection"]["product_id"]
+        if proposal["source"] == "final":
+            return product == proposal.get("product_id")
+        return all(set(values) & set(facts.get(product, {}).get(axis) or []) for axis, values in proposal["pi"])
+
+    hits = [e for e in picks if matches(e)]
+    if not hits:
+        return []
+    latest = hits[-1]["selection"]["candidate_set_ref"]["id"]
+    return [_ref("evidence", e) for e in hits if e["selection"]["candidate_set_ref"]["id"] == latest][:64]
+
+
+def _prepare(service: Any, snapshot: dict[str, Any]) -> dict[str, Any]:
+    request_id = snapshot["request"]["id"]
+    if snapshot["request"]["status"] != "open":
+        raise StyleMateError("request_closed")
+    intent = service._graph.intent(request_id)
+    if intent is None:
+        raise StyleMateError("stale_context")
+    service._graph_bridge._targets = snapshot["request"]["targets"]
+    views = service._graph_bridge.products_now()
+    facts = {v["product_id"]: v["facts"] for v in views}
+    final = None
+    chosen = snapshot["request"]["final_selection"]
+    if chosen:
+        view = next((v for v in views if v["product_id"] == chosen["product_id"] and v["target_id"] == chosen["target_id"]), None)
+        if view:
+            final = {"product_id": view["product_id"], "target_id": view["target_id"], "facts": view["facts"]}
+    items = []
+    for proposal in mem.proposals(intent, final, _labels(service)):
+        refs = _evidence_for(service, snapshot, proposal, facts)
+        if refs:
+            items.append(proposal | {"source_refs": refs})
+    for index, item in enumerate(items, 1):
+        item["id"] = f"p{index}"
+    conditions = mem.situation_conditions(intent)
+    summary = {"status": "draft", "proposals": items, "conditions": conditions,
+               "situation_label": mem.situation_label(intent), "saved": [], "profile": None, "profile_view": None}
+    service._graph.put_summary(request_id, summary)
+    return summary
+
+
+def _accept(service: Any, request_id: str, command_id: str, purpose: str, memory_ref: dict[str, Any],
+            step: str) -> dict[str, Any]:
+    """Issue the server display for a memory and record the user's accept on it (existing contract)."""
+    snapshot = service._snapshot(request_id)
+    display_id = service._prepare_review(snapshot, {"purpose": purpose, "subject_refs": [memory_ref], "proposed_text": None},
+                                         service._step(command_id, step + "-display"))
+    display_ref = {"type": "display", "id": display_id, "version": 1}
+    return service._store.record_user_event(service.user_id, request_id, command_id=service._step(command_id, step + "-event"),
+                                            display_ref=display_ref, purpose=purpose, expected=service._expected(snapshot))
+
+
+def _current(service: Any, request_id: str, memory_id: str) -> tuple[dict[str, Any], list[dict[str, Any]]]:
+    from ..app import _ref
+    snapshot = service._snapshot(request_id)
+    memory = next(m for m in snapshot["memories"] if m["id"] == memory_id)
+    bindings = [b for b in snapshot["bindings"] if b["memory_id"] == memory_id and b["status"] in ("candidate", "active")]
+    return _ref("memory", memory), [_ref("binding", b) for b in bindings]
+
+
+def _save(service: Any, snapshot: dict[str, Any], choices: list[dict[str, Any]], command_id: str) -> None:
+    """Chosen sentences -> short-term memory -> end -> content confirmation -> future-reuse consent.
+
+    One end-summary button is the user's confirmation AND consent for that exact
+    sentence (ADR 0015 decision 6); every step still goes through the store's
+    display/event proofs, so the storage contract is unchanged.
+    """
+    request_id = snapshot["request"]["id"]
+    summary = service._graph.summary(request_id)
+    if snapshot["request"]["status"] != "open" or not summary or summary["status"] != "draft":
+        raise StyleMateError("stale_context")
+    by_id = {p["id"]: p for p in summary["proposals"]}
+    picked = []
+    for choice in choices:
+        if (not isinstance(choice, dict) or set(choice) != {"id", "choice"} or choice["id"] not in by_id
+                or choice["choice"] not in ("baseline", "situation", "skip")
+                or (choice["choice"] == "situation" and not summary["conditions"])):
+            raise StyleMateError("invalid_input")
+        if choice["choice"] != "skip":
+            picked.append((by_id[choice["id"]], choice["choice"]))
+    targets = {t["target_id"]: t for t in snapshot["request"]["targets"]}
+    actions = []
+    for proposal, scope in picked:
+        garment = targets[proposal["target_id"]]["garment_type"] if proposal["target_id"] in targets else None
+        content = {"kind": "preference", "content": proposal["text"], "fact": None,
+                   "selector": {"garment_type": garment, "slot_id": None},
+                   "conditions": dict(summary["conditions"]) if scope == "situation" else {},
+                   "polarity": proposal["polarity"], "strength": "soft", "valid_from": None, "valid_until": None}
+        specs = [{"domain": "PI", "feature": axis, "values": list(values), "match": "any",
+                  "polarity": proposal["polarity"], "strength": "soft"} for axis, values in proposal["pi"]]
+        actions.append({"op": "create", "memory": content, "source_refs": proposal["source_refs"], "bindings": specs,
+                        "confirmation_event_ref": None, "consent_event_ref": None})
+    created = []
+    if actions:
+        receipt = service._apply(request_id, service._step(command_id, "summary-create"), actions)
+        created = [r["id"] for r in receipt["changed_refs"] if r["type"] == "memory"]
+    service._apply(request_id, service._step(command_id, "summary-end"), [{"op": "end_request"}])
+    service._jobs.pop(request_id, None)
+    service._journal.clear_operation(request_id)
+    saved = []
+    for index, memory_id in enumerate(created):
+        tag = f"summary-{index}"
+        memory_ref, _ = _current(service, request_id, memory_id)
+        event = _accept(service, request_id, command_id, "confirm_content", memory_ref, tag + "-confirm")
+        service._apply(request_id, service._step(command_id, tag + "-confirm"), [{"op": "confirm", "memory_id": memory_id,
+            "expected_version": memory_ref["version"], "confirmation_event_ref": event, "binding_confirmations": []}])
+        memory_ref, binding_refs = _current(service, request_id, memory_id)
+        if binding_refs:
+            event = _accept(service, request_id, command_id, "confirm_bindings", memory_ref, tag + "-bindings")
+            service._apply(request_id, service._step(command_id, tag + "-bindings"), [{"op": "confirm_bindings",
+                "memory_id": memory_id, "expected_version": memory_ref["version"], "confirmation_event_ref": event,
+                "binding_confirmations": binding_refs}])
+            memory_ref, _ = _current(service, request_id, memory_id)
+        event = _accept(service, request_id, command_id, "future_reuse", memory_ref, tag + "-consent")
+        service._apply(request_id, service._step(command_id, tag + "-consent"), [{"op": "promote", "memory_id": memory_id,
+            "expected_version": memory_ref["version"], "consent_event_ref": event}])
+        saved.append(picked[index][0]["text"])
+    memories = service._graph_bridge.long_term_now(request_id)
+    summary |= {"status": "saved", "saved": saved, "profile_view": mem.profile_view(memories),
+                "profile": {"status": "running" if saved else "skipped", "changes": []}}
+    service._graph.put_summary(request_id, summary)
+    if saved:
+        _rewrite_profile(service, request_id, memories)
+
+
+def _rewrite_profile(service: Any, request_id: str, memories: list[dict[str, Any]]) -> None:
+    """LLM rewrites the consented memories into a short profile; only changed lines are re-asked."""
+    def calculate() -> list[dict[str, Any]]:
+        raw = service.gateway.complete(mem.PROFILE_INSTRUCTIONS, mem.profile_payload(memories), mem.profile_schema())
+        return mem.validate_profile(raw, memories)
+
+    def apply_result(future: Any) -> None:
+        summary = service._graph.summary(request_id)
+        if summary is None:
+            return
+        try:
+            changes = future.result()
+            summary["profile"] = {"status": "ready" if changes else "unchanged", "changes": changes}
+        except Exception:
+            summary["profile"] = {"status": "unavailable", "changes": []}
+        service._graph.put_summary(request_id, summary)
+        service._journal.set_operation(request_id, "idle")
+
+    service._submit_model(request_id, calculate, apply_result)
+
+
+def _profile(service: Any, snapshot: dict[str, Any], choices: list[dict[str, Any]], command_id: str) -> None:
+    """Accepted profile lines replace their long-term memory; the original is kept as superseded."""
+    from ..app import _ref
+    request_id = snapshot["request"]["id"]
+    summary = service._graph.summary(request_id)
+    profile = (summary or {}).get("profile") or {}
+    if profile.get("status") != "ready":
+        raise StyleMateError("stale_context")
+    changes = {c["memory_id"]: c for c in profile["changes"]}
+    for choice in choices:
+        if (not isinstance(choice, dict) or set(choice) != {"id", "choice"} or choice["id"] not in changes
+                or choice["choice"] not in ("accept", "keep")):
+            raise StyleMateError("invalid_input")
+    for index, choice in enumerate(c for c in choices if c["choice"] == "accept"):
+        change = changes[choice["id"]]
+        snap = service._snapshot(request_id)
+        memory = next((m for m in snap["memories"] if m["id"] == change["memory_id"] and m["status"] == "active"), None)
+        if memory is None:
+            raise StyleMateError("stale_context")
+        content = {k: memory[k] for k in c.MemoryContent.__required_keys__} | {"content": change["text"]}
+        specs = [{k: b[k] for k in c.PIBindingSpec.__required_keys__} if b["domain"] == "PI"
+                 else {k: b[k] for k in c.FEABindingSpec.__required_keys__}
+                 for b in snap["bindings"] if b["memory_id"] == memory["id"] and b["status"] in ("candidate", "active")]
+        memory_ref = _ref("memory", memory)
+        subjects = [memory_ref] + list(memory["source_refs"])
+        meaning = content | {"scope": "long_term"}
+        events = []
+        for purpose, refs in (("replace", subjects), ("future_reuse", [memory_ref])):
+            display = service._store.issue_display(service.user_id, request_id, purpose=purpose,
+                snapshot={"meaning": meaning, "bindings": specs, "subject_refs": refs}, basis=service._basis(snap, refs=refs))
+            events.append(service._store.record_user_event(service.user_id, request_id,
+                command_id=service._step(command_id, f"profile-{index}-{purpose}"), display_ref=_ref("display", display),
+                purpose=purpose, expected=service._expected(snap)))
+        service._apply(request_id, service._step(command_id, f"profile-{index}"), [{"op": "replace", "memory_id": memory["id"],
+            "expected_version": memory["version"], "memory": content, "bindings": specs, "source_refs": list(memory["source_refs"]),
+            "confirmation_event_ref": events[0], "consent_event_ref": events[1]}])
+    memories = service._graph_bridge.long_term_now(request_id)
+    summary["profile"] = {"status": "done", "changes": []}
+    summary["profile_view"] = mem.profile_view(memories)
+    service._graph.put_summary(request_id, summary)
+
+
+def summary_command(service: Any, snapshot: dict[str, Any], command: dict[str, Any], command_id: str) -> None:
+    action = command["action"]
+    if action["step"] not in ("prepare", "save", "profile") or not isinstance(action["choices"], list) or len(action["choices"]) > 40:
+        raise StyleMateError("invalid_input")
+    if action["step"] == "prepare":
+        if action["choices"]:
+            raise StyleMateError("invalid_input")
+        _prepare(service, snapshot)
+    elif action["step"] == "save":
+        _save(service, snapshot, action["choices"], command_id)
+    else:
+        _profile(service, snapshot, action["choices"], command_id)
+
+
+ADJUST_ACTIONS = ("pin", "unpin", "remove", "unhide", "reason", "memory_off", "memory_on", "differ", "memory_full",
+                  "novelty_yes", "novelty_no", "taste_yes", "taste_no", "link_off", "link_on")
+
+
 def handle_command(service: Any, snapshot: dict[str, Any], command: dict[str, Any], command_id: str) -> bool:
     """Run a graph-mode command for an open shopping request. Return False to fall back to legacy."""
     action = command["action"]
@@ -215,14 +478,15 @@ def handle_command(service: Any, snapshot: dict[str, Any], command: dict[str, An
     request_id = snapshot["request"]["id"]
     if snapshot["request"]["mode"] != "shopping":
         return False
-    if op in ("submit_feedback", "grid_feedback", "explore", "adjust_intent", "retry_extraction") and request_id in service._jobs:
+    if op in ("submit_feedback", "grid_feedback", "explore", "adjust_intent", "retry_extraction", "graph_summary") and request_id in service._jobs:
         raise StyleMateError("context_blocked")
     if op == "submit_feedback":
         if service._latest_pending(snapshot):
             raise StyleMateError("context_blocked")
         receipt = service._apply(request_id, service._step(command_id, "intake"), [action], command["expected"])
         run_turn(service, request_id, command_id, {"type": "feedback", "feedback_ref": service._feedback_ref(receipt),
-                                                   "grid": None, "answers_question": action["question_id"] is not None})
+                                                   "grid": None, "answers_question": action["question_id"] is not None,
+                                                   "novel_hint": bool(action["text"] and mem.NOVEL_HINT.search(action["text"]))})
         return True
     if op == "grid_feedback":
         intent = service._graph.intent(request_id)
@@ -247,12 +511,19 @@ def handle_command(service: Any, snapshot: dict[str, Any], command: dict[str, An
                 command["expected"])
             feedback_ref = service._feedback_ref(receipt)
         run_turn(service, request_id, command_id, {"type": "feedback", "feedback_ref": feedback_ref,
-            "answers_question": bool(text), "grid": {"set_id": action["candidate_set_id"], "selected": selected,
+            "answers_question": bool(text), "novel_hint": bool(text and mem.NOVEL_HINT.search(text)), "grid": {"set_id": action["candidate_set_id"], "selected": selected,
             "dislikes": list(action["dislikes"]), "similar": action["similar"], "all_bad": action["all_bad"]}})
         return True
+    if op == "graph_summary":
+        summary_command(service, snapshot, command, command_id)
+        return True
     if op == "adjust_intent":
-        if action["action"] not in ("pin", "unpin", "remove", "unhide", "reason"):
+        if action["action"] not in ADJUST_ACTIONS:
             raise StyleMateError("invalid_input")
+        if action["action"] in ("memory_off", "memory_on"):
+            intent = service._graph.intent(request_id)
+            if not intent or not any(c["memory_id"] == action["key"] for c in intent["memory_chips"]):
+                raise StyleMateError("invalid_input")
         run_turn(service, request_id, command_id, {"type": "adjust", "action": action["action"], "key": action["key"],
                                                    "feature": action["feature"]})
         return True
@@ -275,9 +546,22 @@ def handle_command(service: Any, snapshot: dict[str, Any], command: dict[str, An
     return False
 
 
-def start(service: Any, request_id: str, command_id: str, feedback_ref: dict[str, Any] | None) -> None:
+def start_info(action: dict[str, Any]) -> dict[str, Any]:
+    """Validate ADR 0015 start options: gender filter and situation chip / free text."""
+    gender = action.get("gender")
+    if gender is not None and gender not in mem.GENDERS:
+        raise StyleMateError("invalid_input")
+    text = action["text"] if isinstance(action.get("text"), str) else ""
+    return {"gender": gender, "situation": mem.start_situation(action.get("situation")),
+            "novel_hint": bool(mem.NOVEL_HINT.search(text))}
+
+
+def start(service: Any, request_id: str, command_id: str, feedback_ref: dict[str, Any] | None,
+          info: dict[str, Any] | None = None) -> None:
     event = {"type": "feedback", "feedback_ref": feedback_ref, "grid": None} if feedback_ref else {"type": "explore"}
+    info = info or {"gender": None, "situation": None, "novel_hint": False}
+    event |= {"start": {"gender": info["gender"], "situation": info["situation"]}, "novel_hint": info["novel_hint"]}
     run_turn(service, request_id, command_id, event)
 
 
-__all__ = ["GraphBridge", "graph_view", "handle_command", "run_turn", "start", "c"]
+__all__ = ["GraphBridge", "graph_view", "handle_command", "run_turn", "start", "start_info", "c"]

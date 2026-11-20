@@ -314,7 +314,7 @@ class ConsumerService:
             "contract_version": c.CONTRACT_VERSION, "state_version": self._journal.next_version(),
             "request": None, "requests": requests, "expected": None, "phase": "onboarding", "operation": "idle",
             "memories": [], "cards": [], "reviews": [], "questions": [], "error": None,
-            "comparison": None, "garment_types": self._garment_options(),
+            "comparison": None, "garment_types": self._garment_options(), "engine": self.engine,
         }
         if request_id is None:
             return result
@@ -421,6 +421,12 @@ class ConsumerService:
             action, command_id = command["action"], command["command_id"]
             op = action["op"]
             if op == "start_request":
+                start_info = None
+                if self._graph is not None and action["mode"] == "shopping":
+                    from .graph.service import start_info as graph_start_info
+                    start_info = graph_start_info(action)
+                elif action.get("gender") is not None or action.get("situation") is not None:
+                    raise StyleMateError("invalid_input")
                 request = self._store.start_request(self.user_id, input_id=self._step(command_id, "start"),
                     text=action["text"], timezone=action["timezone"], mode=action["mode"], targets=action["targets"],
                     contract_version=c.CONTRACT_VERSION, registry_version=self.registry.version)
@@ -434,13 +440,13 @@ class ConsumerService:
                     receipt = self._apply(request_id, self._step(command_id, "intake"), [feedback])
                     if self._graph is not None and action["mode"] == "shopping":
                         from .graph.service import start as graph_start
-                        graph_start(self, request_id, command_id, self._feedback_ref(receipt))
+                        graph_start(self, request_id, command_id, self._feedback_ref(receipt), start_info)
                     else:
                         self._extract(request_id, self._feedback_ref(receipt), command_id)
                 elif action["mode"] == "shopping":
                     if self._graph is not None:
                         from .graph.service import start as graph_start
-                        graph_start(self, request_id, command_id, None)
+                        graph_start(self, request_id, command_id, None, start_info)
                     else:
                         self._explore(request_id, command_id)
                 self._journal.finish(command_id, "accepted" if request_id in self._jobs else "applied")
@@ -456,7 +462,7 @@ class ConsumerService:
                     handled = graph_command(self, snapshot, command, command_id)
                 if handled:
                     pass
-                elif op in ("grid_feedback", "adjust_intent"):
+                elif op in ("grid_feedback", "adjust_intent", "graph_summary"):
                     raise StyleMateError("invalid_input")
                 elif op == "resume_request":
                     if self._journal.active() != request_id:
@@ -533,9 +539,12 @@ class ConsumerService:
         shapes["respond_comparison"] = c.RespondComparisonUI
         shapes["grid_feedback"] = c.GridFeedbackUI
         shapes["adjust_intent"] = c.AdjustIntentUI
+        shapes["graph_summary"] = c.GraphSummaryUI
         if not isinstance(action.get("op"), str) or action["op"] not in shapes:
             raise StyleMateError("invalid_input")
         optional = {"text"} if action["op"] == "respond_comparison" and "text" in action else set()
+        if action["op"] == "start_request":
+            optional = {k for k in ("gender", "situation") if k in action}
         _shape(action, shapes[action["op"]].__required_keys__ | optional)
         if action["op"] == "start_request":
             if command["request_id"] is not None or command["expected"] is not None:

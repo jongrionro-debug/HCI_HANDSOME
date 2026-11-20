@@ -50,3 +50,4 @@ ADR은 구조·계약·운영·연구 방향에 오래 영향을 주는 선택�
 - [0012 · 29CM 완전 채움 상품으로 수집 기반 실행 사전(lumi-29cm-v1)을 만든다](0012-collected-29cm-value-dictionary.md)
 - [0013 · LangGraph 기반 의도 순환 추천으로 흐름 제어를 재구성한다](0013-langgraph-intent-loop.md)
 - [0014 · 29CM와 Shopify 크롤링 상품으로 PI v2(11축) 카탈로그를 만든다](0014-crawled-catalog-pi-v2.md)
+- [0015 · 상의 첫 빌드: 동의한 기억으로 시작하고 종료 요약에서 다시 동의받는다](0015-top-memory-warm-start.md)

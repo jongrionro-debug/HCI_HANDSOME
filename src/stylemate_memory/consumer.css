@@ -80,6 +80,15 @@ p { line-height: 1.7; overflow-wrap: anywhere; }
 .chip { display: flex; align-items: center; gap: .35rem; background: var(--tint); border-radius: 999px; padding: .15rem .25rem .15rem .8rem; font-size: .85rem; }
 .chip.pinned { outline: 2px solid var(--accent); }
 .chip button { min-height: 36px; font-size: .8rem; padding: .3rem .6rem; }
+/* ADR 0015: memory warm start, novelty slot, end summary */
+.memory-start { background: var(--paper); border: 1px solid var(--line); border-radius: var(--radius); padding: 1rem; display: grid; gap: .6rem; }
+.memory-start.dim .memory-chip { opacity: .5; }
+.memory-chip.off { opacity: .45; text-decoration: line-through; }
+.slot-badge { color: var(--accent); font-size: .8rem; font-weight: 600; }
+.graph-summary .proposal { padding: .75rem 0; border-bottom: 1px solid var(--line); }
+.graph-summary .proposal p { margin: 0 0 .5rem; }
+.start-gender, .start-situation { border: 0; padding: 0; margin: 0 0 1rem; display: grid; gap: .5rem; }
+.start-situation input { width: 100%; }
 .converged { background: var(--warm-tint); color: var(--warm); border-radius: 10px; padding: .6rem .8rem; margin: 0; }
 .candidate-actions { display: grid; gap: .85rem; margin-top: 1.5rem; }
 .reactions { margin: 0; padding: 0; border: 0; }

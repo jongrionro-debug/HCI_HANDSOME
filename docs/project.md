@@ -53,7 +53,7 @@
 | 메모리 저장 | [store.py](../src/stylemate_memory/store.py)·[store_v1.py](../src/stylemate_memory/store_v1.py)·[store_feedback.py](../src/stylemate_memory/store_feedback.py)·[store_cleanup.py](../src/stylemate_memory/store_cleanup.py): 근거·문장·선택적 binding, 확인·동의·교체·철회·삭제 | 실제 사용자 DB 이관·운영 자료 검증 |
 | 조회·목표 생성 | [retrieval.py](../src/stylemate_memory/retrieval.py)·[inference.py](../src/stylemate_memory/inference.py): 유효성/대상/요청 필터, 구조+키워드 검색, PI/FEA 목표·최신성 검사 | 실제 의미 검색 모델 선정·관련성 평가 |
 | 상품·이미지 비교 | [catalog.py](../src/stylemate_memory/catalog.py)·[catalog_mapping.py](../src/stylemate_memory/catalog_mapping.py)·[product_search.py](../src/stylemate_memory/product_search.py)·[comparison.py](../src/stylemate_memory/comparison.py)·[hypotheses.py](../src/stylemate_memory/hypotheses.py): 가져오기·PI Map·필수 조건 필터·가설 비교 | 수집 사전(`lumi-29cm-v1`) 연결 완료. 모델 보완값 표본 검수, 상품 수 확대, 추천 품질 |
-| 의도 순환 엔진(선택) | [graph/](../src/stylemate_memory/graph/): [ADR 0013](adr/0013-langgraph-intent-loop.md)의 LangGraph 턴 루프(parse_turn v2 → 의도 갱신 → FEA→PI 가설 → route → 8장 그리드 → interrupt), 값별 Beta 점수·대비 귀속, 상품 단위 "별로", 이해 칩 고정/해제/빼기, 상황 사전 [situation-dictionary-v1.json](../src/stylemate_memory/resources/situation-dictionary-v1.json). `STYLEMATE_ENGINE=graph`일 때 쇼핑 요청만 사용하며 온보딩은 기존 흐름 | 실제 모델 응답 품질, 실제 카탈로그의 대조 칸 구성률·수렴 판정, legacy 전환 기준([ADR 0013](adr/0013-langgraph-intent-loop.md) 15번), 최종 선택 단위 |
+| 의도 순환 엔진(선택) | [graph/](../src/stylemate_memory/graph/): [ADR 0013](adr/0013-langgraph-intent-loop.md)의 LangGraph 턴 루프(parse_turn v2 → 의도 갱신 → FEA→PI 가설 → route → 8장 그리드 → interrupt), 값별 Beta 점수·대비 귀속, 상품 단위 "별로", 이해 칩 고정/해제/빼기, 상황 사전 [situation-dictionary-v1.json](../src/stylemate_memory/resources/situation-dictionary-v1.json). `STYLEMATE_ENGINE=graph`일 때 쇼핑 요청만 사용하며 온보딩은 기존 흐름. 상의 첫 빌드([ADR 0015](adr/0015-top-memory-warm-start.md), [graph/memory.py](../src/stylemate_memory/graph/memory.py)): 시작 시 성별·상황 칩(출근·데이트·주말·나의 상황), 동의한 장기 기억을 Beta 사전값으로 넣는 warm start와 "이렇게 시작할게요" 문장 칩(최대 3개, x로 끄기), 새로움 칸 1~2장·"이번엔 다르게"·취향 변화 질문, 종료 요약 제안 문장 최대 3개 [평소에도][이 상황만][저장 안 함] → 기존 확인·동의 계약으로 장기 기억, LLM 프로필 다시 쓰기(바뀐 문장만 재동의), 자유 상황의 LLM 과거 상황 연결 | 실제 모델 응답 품질, 실제 카탈로그의 대조 칸 구성률·수렴 판정, legacy 전환 기준([ADR 0013](adr/0013-langgraph-intent-loop.md) 15번), 최종 선택 단위, ADR 0015 결정 8의 수치·새로움 칸 비율·프로필 말투·값 라벨 한국어 표시(써 보고 정함) |
 | 서비스·소비자 UI | [app.py](../src/stylemate_memory/app.py)의 `ConsumerService`, [consumer.py](../src/stylemate_memory/consumer.py)·[consumer.js](../src/stylemate_memory/consumer.js)·[consumer-http.js](../src/stylemate_memory/consumer-http.js): 온보딩·피드백·확인·재탐색·종료·별도 장기 동의·삭제 | 공개 인증/배포, 실제 참가자 사용성·기기 검증 |
 
 ### 이미지·텍스트 인터랙션
@@ -248,6 +248,17 @@ PYTHONPATH=src python3 -m stylemate_memory.cli catalog-map
 PYTHONPATH=src python3 -m stylemate_memory.consumer --engine graph --provider opencode-go --endpoint <확인한 https 주소>
 ```
 
+**상의 첫 빌드 써 보기([ADR 0015](adr/0015-top-memory-warm-start.md)).** 위 적재 뒤 graph 엔진을 띄운다. 실행 DB를 지우지 않으면 앞 요청에서 동의한 기억이 다음 요청에 이어진다. 한 세션에서 상황을 바꿔 가며 요청 3~4회(예: 출근 → 데이트 → 나의 상황 "팀 회식" → 비슷한 나의 상황)를 해 보고, 매 요청 끝의 [평소에도]/[이 상황만]으로 저장한다. 실제 DeepSeek 호출은 사용자가 이 명령을 실행할 때만 일어난다(OpenCode Go 키는 기존 설정 방식 그대로).
+
+```sh
+export STYLEMATE_DB=<저장소 밖>/memory.sqlite3 STYLEMATE_CATALOG_DB=<저장소 밖>/catalog.sqlite3
+export STYLEMATE_REGISTRY=lumi-pi-v2-top STYLEMATE_IMAGE_ROOT=<저장소 밖>/images STYLEMATE_ENGINE=graph
+PYTHONPATH=src <graph venv>/bin/python -m stylemate_memory.consumer --engine graph --provider opencode-go --endpoint <확인한 https 주소>
+# 모델 호출 없이 화면만: --provider fake (해석·프로필 다시 쓰기·상황 연결이 비어 있음)
+```
+
+graph 모드 흐름: 시작 화면에서 성별(전체·남성·여성, 원본 `gender`로 필터, 값 없는 상품은 전체에서만)과 상황 칩을 고른다. "나의 상황" 원문은 그대로 상황이 되고, 과거에 저장한 자유 상황이 있으면 LLM이 비슷한 하나를 골라 "비슷한 상황"으로 연결한다(끌 수 있음). 동의한 장기 기억 중 상황이 맞는 상황별 선호와 평소 취향이 PI 값별 Beta 사전값(세기 2.0)으로 들어간다. 같은 축은 상황별 기억이 우선하고 평소 취향은 남는 축(예: 색)에만 적용한다. 기억을 적용한 그리드에는 기억 없이 고른 "새로움" 칸 2장(흐림 때 1장)이 있다. 새로움 칸을 두 턴 고르거나 "평소랑 다르게"를 적으면 "이번엔 새로운 스타일로 볼까요?"를 한 번 묻고, 예면 기억을 흐리게(0.3배) 반영한다. 기억 값이 대조에서 두 턴 반대로 갱신되면 "취향이 바뀌었나요?"를 묻고 예면 이번 요청에서 그 기억을 끈다. "상품 선택 없이 종료"·"탐색 종료"는 요청을 닫기 전에 제안 문장(말한 선호 → 이유 있는 거절 → 이해 칩 → 최종 상품, 최대 3개)을 보이고, 고른 문장만 단기 생성 → 종료 → 내용·binding 확인 → 이후 활용 동의 순서로 기존 표시·이벤트 계약을 거쳐 장기 기억이 된다. 이미지 근거 문장은 한 비교 회차의 선택 근거만 연결한다. 저장 뒤 LLM이 동의한 기억 전체를 짧게 다시 쓰고, 바뀐 문장만 [바꾸기][그대로]로 받는다. 바꾸면 `replace`로 새 장기 기억을 만들고 원래 기억은 `superseded`로 남는다. 제안·프로필 초안은 graph 체크포인트 DB(`lumi_summaries`)에 두고 요청 삭제 때 지운다.
+
 시작 화면은 사전이 지원하는 품목을 고르게 하고, 상품 카드는 현재 Map의 PI 값을 보여준다. 이 흐름은 실제 86개 상품과 각본 모델 응답으로 적재→Map→검색→FEA→Fit 가설 비교→선택→종료→장기 동의까지 확인했다. 실제 DeepSeek 응답 품질은 별도 평가 대상이다.
 
 고정 한국어 요청 8개(바지 3·니트·티셔츠·스커트·셔츠·후디)를 새 요청→내용·조건 확인 수락→탐색→종료로 돌려 해석 문구·조건·카드·비교를 JSON으로 남기는 점검은 `PYTHONPATH=src python3 scripts/smoke_real_flow.py --catalog "$DATA/lumi-catalog-complete-v1.jsonl" --image-root "$DATA/images" --output <저장소 밖 경로>.json`이다. 기본 `--provider fake`는 호출 없이 배선만 확인하고, `--provider opencode-go`는 실제 호출이다. 품질 벤치마크가 아니라 끝까지 도는지 보는 점검이다. `--trace`는 시나리오별 모델 원 응답·검증 오류·탐색 보류 이유를 같은 JSON에 남긴다. 탐색 중 근거 없는 일반 PI 제안이나 직접 조건과 충돌하는 제안 하나는 실행 조건이 되지 않고 버려지며, 나머지 제안으로 탐색을 계속한다. 같은 이유로 `questions` 누락은 빈 질문으로, FEA 제약이 아닌 id를 단 가설 제안은 그 제안만 버린다(권한·hard·인용 위반은 여전히 응답 전체 거부). 후보 카드의 차이 비교는 조건 일치 점수가 카드 수 번째 후보 이상인 상품 안에서만 고르고, 내부 메모(`[q001]`·상태 코드)는 새 질문으로 다시 보이지 않는다.
@@ -285,7 +296,8 @@ PYTHONPATH=src python3 -m stylemate_memory.consumer --engine graph --provider op
 | retry_extraction / explore | 같은 pending 근거 재해석 / 유효 조건으로 재탐색 |
 | prepare_review / respond_review | 서버 표시 준비 / 표시 참조에 대한 명시적 응답 |
 | select_final / end_request | 최종 상품 선택 / 상품·저장 없이도 세션 종료 |
-| grid_feedback / adjust_intent | graph 엔진 전용: 8장 다중 선택·상품별 "별로"·"이거랑 비슷한 거"·"다 별로"·선택 사항인 글 / 이해 칩 고정·해제·빼기, 숨김 해제, 좋았던 축 답변 |
+| grid_feedback / adjust_intent | graph 엔진 전용: 8장 다중 선택·상품별 "별로"·"이거랑 비슷한 거"·"다 별로"·선택 사항인 글 / 이해 칩 고정·해제·빼기, 숨김 해제, 좋았던 축 답변, 기억 칩 끄기·켜기, "이번엔 다르게"·기억 다시 반영, 새로움·취향 변화 질문 답, 상황 연결 끄기·켜기 |
+| graph_summary | graph 엔진 전용([ADR 0015](adr/0015-top-memory-warm-start.md)): `prepare`(제안 문장) / `save`(문장별 baseline·situation·skip, 요청 종료 포함) / `profile`(바뀐 프로필 문장 accept·keep). `start_request`는 graph에서 선택 필드 `gender`·`situation`을 받는다 |
 
 `ConsumerState`는 요청·phase·operation·기억·카드·가설 비교·검토·질문·안전한 오류를 반환한다. interpretation_pending·blocked·no_results·stale·error는 성공과 구분한다. provider 실패를 다른 provider나 rule 성공으로 대체하지 않는다. 수정 문장은 새 근거로 추출·재확인하고 기존 장기 동의를 자동 승계하지 않는다.
 
@@ -406,6 +418,7 @@ LUMI_GRAPH_PYTHON=~/.venvs/lumi-graph/bin/python node tests/check_graph_browser.
 | 실제 모델·가설 비교 | DeepSeek로 명시적 실행 후 한국어 표현·선택 이유·실제 비교 축과 대안·FEA 성능 판단 경계 평가 |
 | 실제 의미 검색 | 모델 선정 후 관련 근거 회수·오탐·근거 완전성·삭제/재색인·비용 비교 |
 | 운영 자료 이관 | 원래 의미·대상·동의·기간 보존, 합성 이관/rollback과 실제 자료 승인을 구분 |
+| 상의 첫 빌드 써 보기([ADR 0015](adr/0015-top-memory-warm-start.md)) | 실제 DeepSeek로 요청 3~4회를 직접 써 보고 사전값 세기·새로움 칸 비율·프로필 말투·영어 값 라벨의 한국어 표시·자유 상황 연결 정확도를 정한다. 최종 상품 문장은 그 상품을 그리드에서 고른 근거가 있을 때만 제안된다. 새 화면(시작 옵션·요약 동의)은 각본 통합 테스트와 수동 화면 확인만 했고 브라우저 자동 검사는 없다 |
 | 사용자 연구 | 보고서 기준 파일럿·동의/과제 안내·설문·분석 준비. 참여자 자료는 저장소 밖 관리 |
 
 ### user study 전 진행 현황 (2026-11-12 추정)

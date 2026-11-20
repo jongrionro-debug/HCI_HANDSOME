@@ -9,7 +9,7 @@ from __future__ import annotations
 import random
 from typing import Any
 
-from . import scoring
+from . import memory, scoring
 
 GRID_SIZE = 8
 MAX_FOCUS_AXES = 2
@@ -33,9 +33,12 @@ def eligible(products: list[dict[str, Any]], target_id: str, intent: dict[str, A
     hard = [h for h in intent["hard"] if h["target_id"] in (None, target_id)]
     pins = [scoring.split_key(p["key"]) for p in intent["pinned"]]
     pool, hidden = [], 0
+    gender = intent.get("gender")
     for product in products:
         if product["target_id"] != target_id or not product["image_id"]:
             continue
+        if gender and product.get("gender") != gender:
+            continue  # ADR 0015: an unknown gender only shows under "전체"
         ok = True
         for h in hard:
             if h["kind"] == "price":
@@ -80,20 +83,36 @@ def plan_target(pool: list[dict[str, Any]], target_id: str, intent: dict[str, An
                 turn: int, rng: random.Random, anchor: dict[str, Any] | None) -> tuple[list[tuple[str, dict[str, Any]]], list[dict[str, str]]]:
     """Return [(slot, product)] and the focused (axis, value) exposures of this turn."""
     space = scoring.active_values(intent["hypotheses"], intent["excluded"], scope).get(target_id, {})
+    # ADR 0015: consented-memory values join the exploration space as Beta priors.
+    for axis, values in memory.prior_values(intent, target_id).items():
+        kept = {v for v in values if scoring.score_key(target_id, scope, axis, v) not in intent["excluded"]}
+        if kept:
+            space = {**space, axis: set(space.get(axis, set())) | kept}
+    novel_n = min(memory.novel_slots(intent, target_id), max(0, size - 1))
+    main_size = size - novel_n
     converge_n = min(6, 2 * max(1, turn))
     if intent.get("all_bad"):
         converge_n = max(0, converge_n - 4)
     if not space:
-        converge_n = size
-    samples = {}
-    for axis, values in space.items():
-        for value in values:
+        converge_n = main_size
+    samples, plain = {}, {}
+    for axis, values in sorted(space.items()):
+        for value in sorted(values):
             key = scoring.score_key(target_id, scope, axis, value)
-            samples[(axis, value)] = scoring.sample(scoring.get(intent["scores"], key), rng)
+            samples[(axis, value)] = scoring.sample(memory.effective(intent, key), rng)
+            plain[(axis, value)] = scoring.sample(scoring.get(intent["scores"], key), rng)
 
     def converge_score(product: dict[str, Any]) -> float:
         total = _soft(product, intent, target_id) + 0.5 * _similar(product, anchor)
         for (axis, value), drawn in samples.items():
+            if _has(product, axis, value):
+                total += drawn
+        return total + rng.random() * 1e-6
+
+    def novel_score(product: dict[str, Any]) -> float:
+        # Memory-free ranking; products without a memory-preferred value come first.
+        total = _soft(product, intent, target_id) - (10.0 if memory.preferred_by_memory(intent, product) else 0.0)
+        for (axis, value), drawn in plain.items():
             if _has(product, axis, value):
                 total += drawn
         return total + rng.random() * 1e-6
@@ -106,7 +125,7 @@ def plan_target(pool: list[dict[str, Any]], target_id: str, intent: dict[str, An
         used.add(product["product_id"])
 
     for product in sorted(pool, key=converge_score, reverse=True):
-        if len(chosen) >= min(converge_n, size):
+        if len(chosen) >= min(converge_n, main_size):
             break
         take("converge", product)
     # Focus at most MAX_FOCUS_AXES axes this turn: the most uncertain ones.
@@ -114,8 +133,8 @@ def plan_target(pool: list[dict[str, Any]], target_id: str, intent: dict[str, An
         return sum(1.0 / (1 + intent["exposures"].get(scoring.score_key(target_id, scope, axis, v), 0)) for v in space[axis])
     focus = sorted(space, key=lambda a: (-uncertainty(a), a))[:MAX_FOCUS_AXES]
     focus_values = [(a, v) for a in focus for v in sorted(space[a])]
-    control_needed = bool(focus_values) and len(chosen) < size
-    explore_budget = size - len(chosen) - (1 if control_needed else 0)
+    control_needed = bool(focus_values) and len(chosen) < main_size
+    explore_budget = main_size - len(chosen) - (1 if control_needed else 0)
     by_exposure = sorted(focus_values, key=lambda av: (intent["exposures"].get(scoring.score_key(target_id, scope, *av), 0), av))
     progress = True
     while explore_budget > 0 and progress:
@@ -135,6 +154,9 @@ def plan_target(pool: list[dict[str, Any]], target_id: str, intent: dict[str, An
                     and not any(_has(p, axis, value) for axis, value in focus_values)]
         if controls:
             take("control", max(controls, key=converge_score))
+    # Novelty slots: picked without memory priors (ADR 0015 decision 5).
+    for product in sorted((p for p in pool if p["product_id"] not in used), key=novel_score, reverse=True)[:novel_n]:
+        take("novel", product)
     # Any remaining room: best remaining eligible products (still distinct).
     for product in sorted(pool, key=converge_score, reverse=True):
         if len(chosen) >= size:

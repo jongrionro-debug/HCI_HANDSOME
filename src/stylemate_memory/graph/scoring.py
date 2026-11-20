@@ -52,7 +52,8 @@ def active_values(hypotheses: list[dict[str, Any]], excluded: list[str], scope: 
     return space
 
 
-def attribute_grid(state: dict[str, Any], cards: list[dict[str, Any]], selected: set[str], scope: str) -> list[str]:
+def attribute_grid(state: dict[str, Any], cards: list[dict[str, Any]], selected: set[str], scope: str,
+                   extra: dict[str, dict[str, set[str]]] | None = None) -> list[str]:
     """Update scores only where a selected/unselected value difference is confirmed.
 
     Values present on both sides are neutral. All-selected, none-selected or an
@@ -61,6 +62,10 @@ def attribute_grid(state: dict[str, Any], cards: list[dict[str, Any]], selected:
     """
     changed: list[str] = []
     space = active_values(state["hypotheses"], state["excluded"], scope)
+    for target_id, axes in (extra or {}).items():  # ADR 0015: consented-memory values are contrasted too
+        for axis, values in axes.items():
+            kept = {v for v in values if score_key(target_id, scope, axis, v) not in state["excluded"]}
+            space.setdefault(target_id, {}).setdefault(axis, set()).update(kept)
     for target_id, axes in space.items():
         shown = [c for c in cards if c["target_id"] == target_id]
         chosen = [c for c in shown if c["candidate_id"] in selected]

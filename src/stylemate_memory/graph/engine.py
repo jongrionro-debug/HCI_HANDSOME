@@ -14,6 +14,7 @@ interpretation and still reach the interrupt.
 from __future__ import annotations
 
 from copy import deepcopy
+import json
 import sqlite3
 import threading
 from pathlib import Path
@@ -22,6 +23,7 @@ from typing import Any, TypedDict
 from ..errors import StyleMateError
 from . import grid as grid_plan
 from . import intent as it
+from . import memory as mem
 from . import scoring
 from .hypotheses import (HYPOTHESIS_INSTRUCTIONS, NON_HYPOTHESIS_AXES, build_hypothesis_payload, hypothesis_schema,
                          validate_hypotheses)
@@ -57,6 +59,11 @@ class GraphEngine:
         self._forgotten: set[str] = set()
         self._conn = sqlite3.connect(str(checkpoint_path), check_same_thread=False)
         self.saver = SqliteSaver(self._conn)
+        # ADR 0015: end-summary proposals and profile drafts per request, erased with the request.
+        self._summary_lock = threading.Lock()
+        with self._summary_lock:
+            self._conn.execute("CREATE TABLE IF NOT EXISTS lumi_summaries (request_id TEXT PRIMARY KEY, payload_json TEXT NOT NULL)")
+            self._conn.commit()
         g = StateGraph(GraphState)
         for name in ("parse_turn", "update_intent", "propose_hypotheses", "ask_clarify", "retrieve",
                      "plan_probe", "compose_turn", "wait_user"):
@@ -109,6 +116,23 @@ class GraphEngine:
     def forget(self, request_id: str) -> None:
         self._forgotten.add(request_id)
         self.saver.delete_thread(request_id)
+        self.put_summary(request_id, None)
+
+    def summary(self, request_id: str) -> dict[str, Any] | None:
+        if request_id in self._forgotten:
+            return None
+        with self._summary_lock, self.saver.lock:
+            row = self._conn.execute("SELECT payload_json FROM lumi_summaries WHERE request_id=?", (request_id,)).fetchone()
+        return json.loads(row[0]) if row else None
+
+    def put_summary(self, request_id: str, payload: dict[str, Any] | None) -> None:
+        with self._summary_lock, self.saver.lock:
+            if payload is None:
+                self._conn.execute("DELETE FROM lumi_summaries WHERE request_id=?", (request_id,))
+            else:
+                self._conn.execute("INSERT OR REPLACE INTO lumi_summaries VALUES (?,?)",
+                                   (request_id, json.dumps(payload, ensure_ascii=False, sort_keys=True)))
+            self._conn.commit()
 
     # ---- nodes ------------------------------------------------------------
     def _parse_turn(self, state: GraphState) -> dict[str, Any]:
@@ -119,6 +143,8 @@ class GraphEngine:
         intent["route_question"] = None
         if event.get("command_id") and event["command_id"] in intent["processed"]:
             return {"intent": intent}
+        if event.get("start") and not intent.get("started"):
+            self._start(intent, event["start"])
         scope = it.scope_of(intent)
         last = intent["last_grid"]
         if event["type"] == "feedback" and event.get("grid") and last and event["grid"]["set_id"] == last["set_id"]:
@@ -127,7 +153,11 @@ class GraphEngine:
             selected = set(signal["selected"])
             by_id = {c["candidate_id"]: c for c in cards}
             intent["all_bad"] = bool(signal["all_bad"])
-            changed = [] if signal["all_bad"] else scoring.attribute_grid(intent, cards, selected, scope)
+            extra = {t["target_id"]: mem.prior_values(intent, t["target_id"]) for t in intent["targets"]}
+            before = {k: dict(v) for k, v in intent["scores"].items()}
+            changed = [] if signal["all_bad"] else scoring.attribute_grid(intent, cards, selected, scope, extra)
+            mem.note_contra(intent, before, scope, intent["turn"])
+            mem.note_novel_pick(intent, cards, selected, intent["turn"])
             scoring.apply_dislikes(intent, [by_id[c]["product_id"] for c in signal["dislikes"] if c in by_id], intent["turn"])
             similar = by_id.get(signal["similar"]) if signal.get("similar") else None
             intent["anchor"] = {k: similar[k] for k in ("product_id", "target_id", "facts")} if similar else None
@@ -138,6 +168,8 @@ class GraphEngine:
                     intent["reason_prompt"] = {"set_id": last["set_id"], "selected": sorted(selected), "axes": axes}
         elif event["type"] == "adjust":
             self._adjust(intent, event, scope)
+        if event.get("novel_hint"):
+            mem.ask_novelty(intent)
         if event.get("feedback_ref"):
             self._interpret(intent, event)
             if intent["questions"] and event.get("answers_question"):
@@ -178,6 +210,50 @@ class GraphEngine:
             if event.get("feature") in prompt["axes"] and prompt["set_id"] == intent["last_grid"]["set_id"]:
                 scoring.apply_reason_axis(intent, intent["last_grid"]["cards"], set(prompt["selected"]), event["feature"], scope)
             intent["reason_prompt"] = None
+        elif action in ("memory_off", "memory_on") and key:
+            off = [m for m in intent["memory_off"] if m != key]
+            intent["memory_off"] = off + [key] if action == "memory_off" else off
+        elif action in ("differ", "novelty_yes"):
+            intent["memory_mode"] = "dim"
+            intent["novelty_prompt"] = "done"
+        elif action == "novelty_no":
+            intent["novelty_prompt"] = "done"
+        elif action == "memory_full":
+            intent["memory_mode"] = "normal"
+        elif action in ("taste_yes", "taste_no") and intent["taste_prompt"]:
+            if action == "taste_yes" and intent["taste_prompt"]["memory_id"] not in intent["memory_off"]:
+                intent["memory_off"].append(intent["taste_prompt"]["memory_id"])
+            intent["taste_prompt"] = None
+        elif action in ("link_off", "link_on"):
+            for link in intent["links"]:
+                link["enabled"] = action == "link_on"
+
+    def _start(self, intent: dict[str, Any], start: dict[str, Any]) -> None:
+        """ADR 0015: gender, situation chip, consented memories and free-situation linking."""
+        intent["started"] = True
+        intent["gender"] = start.get("gender")
+        situation = start.get("situation")
+        if situation:
+            intent["situations"] = [situation]
+        try:
+            intent["lt_memories"] = self.bridge.long_term_memories(intent["request_id"])
+        except StyleMateError as failure:
+            intent["warnings"] = (intent["warnings"] + [f"memory_unavailable:{failure.code}"])[-50:]
+            intent["lt_memories"] = []
+        past = mem.past_free_situations(intent["lt_memories"])
+        if situation and mem.is_free(situation) and past:
+            if situation["raw"] in past:
+                intent["links"] = [{"raw": situation["raw"], "past": situation["raw"], "enabled": True}]
+                return
+            try:
+                raw = self.bridge.complete(mem.LINK_INSTRUCTIONS, {"current_situation": situation["raw"],
+                                                                   "past_situations": past}, mem.link_schema())
+                match = mem.validate_link(raw, past)
+            except Exception:
+                intent["warnings"] = (intent["warnings"] + ["situation_link_unavailable"])[-50:]
+                match = None
+            if match:
+                intent["links"] = [{"raw": situation["raw"], "past": match, "enabled": True}]
 
     def _interpret(self, intent: dict[str, Any], event: dict[str, Any]) -> None:
         bridge = self.bridge
@@ -219,12 +295,14 @@ class GraphEngine:
         if not record(result, None):
             return
         turn_tag = f"t{len(intent['processed']) + 1}"
+        parsed["aliases"] = aliases
         it.merge_parse(intent, parsed, turn_tag)
         intent["warnings"] = (intent["warnings"] + warnings)[-50:]
 
     def _update_intent(self, state: GraphState) -> dict[str, Any]:
         intent = deepcopy(state["intent"])
         it.derive(intent)
+        mem.refresh_priors(intent, it.fixed_axes(intent))
         return {"intent": intent}
 
     def _propose_hypotheses(self, state: GraphState) -> dict[str, Any]:
@@ -261,8 +339,8 @@ class GraphEngine:
         intent = state["intent"]
         if intent["pending_error"]:
             return "hold"
-        if intent["event"]["type"] == "adjust" and intent["event"].get("action") == "reason":
-            return "hold"  # a liked-axis answer updates scores; the grid stays
+        if intent["event"]["type"] == "adjust" and intent["event"].get("action") in ("reason", "novelty_no", "taste_no"):
+            return "hold"  # a liked-axis answer or a "no" keeps the grid
         return it.route(intent)
 
     def _ask_clarify(self, state: GraphState) -> dict[str, Any]:

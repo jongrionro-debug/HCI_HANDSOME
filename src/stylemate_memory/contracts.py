@@ -688,12 +688,21 @@ class MemorySnapshot(TypedDict):
     questions: list[Question]
 
 
+class StartSituation(TypedDict):
+    """ADR 0015: a situation chip (출근·데이트·주말) or "나의 상황" free text."""
+    kind: Literal["chip", "free"]
+    value: NotRequired[str]   # chip: 출근 / 데이트 / 주말
+    text: NotRequired[str]    # free: raw wording, stored as is
+
+
 class StartRequestUI(TypedDict):
     op: Literal["start_request"]
     mode: Literal["onboarding", "shopping"]
     timezone: str
     targets: list[TargetSpec]
     text: str | None
+    gender: NotRequired[Literal["men", "women"] | None]   # ADR 0015 graph engine only
+    situation: NotRequired[StartSituation | None]         # ADR 0015 graph engine only
 
 
 class SimpleUI(TypedDict):
@@ -742,13 +751,28 @@ class GridFeedbackUI(TypedDict):
 class AdjustIntentUI(TypedDict):
     """ADR 0013 graph engine: understanding chip pin/unpin/remove, unhide, liked-axis reason."""
     op: Literal["adjust_intent"]
-    action: Literal["pin", "unpin", "remove", "unhide", "reason"]
+    action: Literal["pin", "unpin", "remove", "unhide", "reason",
+                    # ADR 0015: memory chips, "이번엔 다르게", novelty / taste-change answers, situation link
+                    "memory_off", "memory_on", "differ", "memory_full", "novelty_yes", "novelty_no",
+                    "taste_yes", "taste_no", "link_off", "link_on"]
     key: str | None
     feature: str | None
 
 
+class SummaryChoice(TypedDict):
+    id: str          # proposal ID (save) or long-term memory ID (profile)
+    choice: Literal["baseline", "situation", "skip", "accept", "keep"]
+
+
+class GraphSummaryUI(TypedDict):
+    """ADR 0015 graph engine: end summary proposals, consented save, profile rewrite review."""
+    op: Literal["graph_summary"]
+    step: Literal["prepare", "save", "profile"]
+    choices: list[SummaryChoice]
+
+
 UIAction = (StartRequestUI | SimpleUI | RetryExtractionUI | ReviewUI | RespondReviewUI | RespondComparisonUI
-            | FeedbackAction | SelectFinalAction | GridFeedbackUI | AdjustIntentUI)
+            | FeedbackAction | SelectFinalAction | GridFeedbackUI | AdjustIntentUI | GraphSummaryUI)
 
 
 class ConsumerCommand(TypedDict):
@@ -801,6 +825,7 @@ class GarmentOption(TypedDict):
 
 class ConsumerState(TypedDict):
     comparison: NotRequired[dict[str, JSONValue] | None]
+    engine: NotRequired[Literal["legacy", "graph"]]  # ADR 0015: the start screen shows gender/situation for graph
     garment_types: NotRequired[list[GarmentOption]]  # registry-supported start targets
     contract_version: str
     state_version: int

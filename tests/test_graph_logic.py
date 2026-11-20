@@ -248,5 +248,158 @@ class RouteTests(unittest.TestCase):
         self.assertEqual(len(s["situations"]), 1)
 
 
+# ---- ADR 0015: consented-memory warm start, novelty, taste change, end summary -------------------
+from stylemate_memory.graph import memory as mem  # noqa: E402
+
+TOP = [{"target_id": "top", "garment_type": "Top"}]
+
+
+def lt(mid, content, conditions=None, bindings=(("Color", "Navy"),), polarity="prefer"):
+    return {"memory_id": mid, "content": content, "conditions": conditions or {}, "garment_type": "Top",
+            "polarity": polarity, "bindings": [{"feature": a, "values": [v], "polarity": polarity} for a, v in bindings],
+            "created_at": mid}
+
+
+def top_intent(memories, situation=None):
+    state = it.new_intent("r1", TOP)
+    if situation:
+        state["situations"] = [situation]
+    state["lt_memories"] = memories
+    mem.refresh_priors(state, it.fixed_axes(state))
+    return state
+
+
+def view(pid, gender="men", **facts):
+    return {"product_id": pid, "target_id": "top", "product_map_version": 1, "image_id": f"i-{pid}", "image_version": 1,
+            "facts": {k: [v] for k, v in facts.items()}, "price": None, "gender": gender}
+
+
+class MemoryWarmStartTests(unittest.TestCase):
+    def test_start_situation_chip_free_and_invalid(self):
+        self.assertEqual(mem.start_situation({"kind": "chip", "value": "주말"})["value"], "주말 외출")
+        free = mem.start_situation({"kind": "free", "text": " 팀 회식 "})
+        self.assertEqual((free["value"], free["raw"]), ("기타", "팀 회식"))
+        self.assertIsNone(mem.start_situation(None))
+        for bad in ({"kind": "chip", "value": "면접"}, {"kind": "free", "text": " "}, {"kind": "other"}):
+            with self.assertRaises(StyleMateError):
+                mem.start_situation(bad)
+
+    def test_situation_memory_wins_on_its_axis_and_baseline_fills_the_rest(self):
+        memories = [lt("m1", "평소 네이비 레귤러", bindings=(("Color", "Navy"), ("Fit", "Regular"))),
+                    lt("m2", "출근엔 슬림", {"occasion": "출근"}, bindings=(("Fit", "Slim"),)),
+                    lt("m3", "데이트엔 핑크", {"occasion": "데이트"}, bindings=(("Color", "Pink"),))]
+        state = top_intent(memories, mem.start_situation({"kind": "chip", "value": "출근"}))
+        self.assertEqual([c["memory_id"] for c in state["memory_chips"]], ["m2", "m1"])
+        self.assertEqual(sorted((p["memory_id"], p["axis"], p["value"]) for p in state["priors"]),
+                         [("m1", "Color", "Navy"), ("m2", "Fit", "Slim")])
+        # No situation: the usual taste applies in full; situation memories do not.
+        state = top_intent(memories)
+        self.assertEqual(sorted((p["axis"], p["value"]) for p in state["priors"]), [("Color", "Navy"), ("Fit", "Regular")])
+
+    def test_chips_are_capped_and_memory_off_and_dim_change_the_prior(self):
+        memories = [lt(f"m{i}", f"취향 {i}", bindings=((["Color", "Fit", "Type", "Tone"][i], ["Navy", "Slim", "Shirt", "Dark"][i]),))
+                    for i in range(4)]
+        state = top_intent(memories)
+        self.assertEqual(len(state["memory_chips"]), mem.MAX_MEMORY_CHIPS)
+        self.assertEqual(len(state["priors"]), mem.MAX_MEMORY_CHIPS)  # only what is shown is applied
+        key = scoring.score_key("top", it.scope_of(state), "Tone", "Dark")
+        self.assertEqual(mem.effective(state, key)["a"], 1.0 + mem.PRIOR_WEIGHT)
+        state["memory_mode"] = "dim"
+        self.assertAlmostEqual(mem.effective(state, key)["a"], 1.0 + mem.PRIOR_WEIGHT * mem.DIM_FACTOR)
+        state["memory_off"] = ["m3"]
+        self.assertEqual(mem.effective(state, key)["a"], 1.0)
+        self.assertEqual(state["scores"], {})  # priors never write learned scores
+
+    def test_grid_gender_filter_and_novelty_slots_without_memory_values(self):
+        products = [view(f"n{i}", Color="Navy", Fit="Regular") for i in range(8)]
+        products += [view(f"o{i}", Color="Black", Fit="Oversized") for i in range(4)]
+        products += [view(f"w{i}", gender="women", Color="Pink", Fit="Slim") for i in range(4)]
+        state = top_intent([lt("m1", "평소 네이비", bindings=(("Color", "Navy"),))])
+        state["gender"] = "men"
+        plan = grid.plan_grid(products, TOP, state, it.scope_of(state), 1, seed="s")
+        self.assertEqual(len(plan["cards"]), 8)
+        self.assertTrue(all(c["gender"] == "men" for c in plan["cards"]))
+        novel = [c for c in plan["cards"] if c["slot"] == "novel"]
+        self.assertEqual(len(novel), mem.NOVEL_SLOTS)
+        self.assertTrue(all(c["facts"]["Color"] == ["Black"] for c in novel))
+        state["memory_mode"] = "dim"
+        plan = grid.plan_grid(products, TOP, state, it.scope_of(state), 1, seed="s")
+        self.assertEqual([c["slot"] for c in plan["cards"]].count("novel"), mem.NOVEL_SLOTS_DIM)
+        state["memory_off"] = ["m1"]
+        plan = grid.plan_grid(products, TOP, state, it.scope_of(state), 1, seed="s")
+        self.assertNotIn("novel", [c["slot"] for c in plan["cards"]])
+
+    def test_novelty_prompt_after_repeated_novel_picks_only_once(self):
+        state = top_intent([lt("m1", "평소 네이비")])
+        cards = [{"candidate_id": "a", "slot": "novel"}, {"candidate_id": "b", "slot": "converge"}]
+        mem.note_novel_pick(state, cards, {"a"}, 1)
+        self.assertIsNone(state["novelty_prompt"])
+        mem.note_novel_pick(state, cards, {"a"}, 1)  # same turn counts once
+        self.assertIsNone(state["novelty_prompt"])
+        mem.note_novel_pick(state, cards, {"a"}, 2)
+        self.assertEqual(state["novelty_prompt"], "ask")
+        state["novelty_prompt"] = "done"
+        mem.ask_novelty(state)
+        self.assertEqual(state["novelty_prompt"], "done")
+        cold = top_intent([])
+        mem.ask_novelty(cold)  # no memory applied: nothing to make "new"
+        self.assertIsNone(cold["novelty_prompt"])
+
+    def test_taste_change_question_after_two_contrary_turns(self):
+        state = top_intent([lt("m1", "평소 네이비")])
+        scope = it.scope_of(state)
+        key = scoring.score_key("top", scope, "Color", "Navy")
+        for turn in (1, 2):
+            before = {k: dict(v) for k, v in state["scores"].items()}
+            entry = scoring.get(state["scores"], key)
+            state["scores"][key] = entry | {"b": entry["b"] + scoring.MISS_PENALTY, "n": entry["n"] + 1}
+            mem.note_contra(state, before, scope, turn)
+            if turn == 1:
+                self.assertIsNone(state["taste_prompt"])
+        self.assertEqual(state["taste_prompt"], {"memory_id": "m1", "text": "평소 네이비"})
+
+
+class SummaryProposalTests(unittest.TestCase):
+    def test_order_dedupe_cap_and_sentences(self):
+        state = it.new_intent("r1", TOP)
+        base = {"target_id": "top", "origin": "explicit", "applies": {"mode": "baseline", "situation_ids": []},
+                "evidence_ids": ["ev1"], "fea": [], "price": None}
+        state["wishes"] = [
+            base | {"key": "w1", "content": "네이비가 좋아요.", "polarity": "prefer", "pi": [{"feature": "Color", "values": ["Navy"]}]},
+            base | {"key": "w2", "content": "후드는 싫어요.", "polarity": "avoid", "pi": [{"feature": "Type", "values": ["Hoodie"]}]},
+            base | {"key": "w3", "content": "추정", "polarity": "prefer", "origin": "inferred", "pi": [{"feature": "Fit", "values": ["Slim"]}]}]
+        scope = it.scope_of(state)
+        state["scores"] = {scoring.score_key("top", scope, "Color", "Navy"): {"a": 4.0, "b": 1.0, "n": 3},
+                           scoring.score_key("top", scope, "Fit", "Relaxed"): {"a": 4.0, "b": 1.0, "n": 3},
+                           scoring.score_key("top", scope, "Tone", "Dark"): {"a": 3.0, "b": 1.0, "n": 2}}
+        labels = {"Color": "색상", "Fit": "핏(여유)", "Tone": "색 톤"}
+        items = mem.proposals(state, None, labels)
+        self.assertEqual([(p["source"], p["text"]) for p in items],
+                         [("wish", "네이비가 좋아요."), ("reject", "후드는 싫어요."), ("chip", "핏(여유)은 Relaxed 쪽이 좋아요.")])
+        self.assertEqual([p["id"] for p in items], ["p1", "p2", "p3"])
+        self.assertEqual(mem.chip_sentence("색 톤", "Dark"), "색 톤은 Dark 쪽이 좋아요.")
+        self.assertEqual(mem.chip_sentence("색상", "Navy"), "색상은 Navy 쪽이 좋아요.")
+
+    def test_conditions_keep_free_situation_raw(self):
+        state = it.new_intent("r1", TOP)
+        state["situations"] = [mem.start_situation({"kind": "free", "text": "팀 회식"})]
+        self.assertEqual(mem.situation_conditions(state), {"occasion": "팀 회식"})
+        self.assertEqual(mem.past_free_situations([lt("m1", "x", {"occasion": "팀 회식"}), lt("m2", "y", {"occasion": "출근"})]),
+                         ["팀 회식"])
+
+    def test_link_and_profile_outputs_are_validated(self):
+        self.assertEqual(mem.validate_link({"match": "팀 회식"}, ["팀 회식"]), "팀 회식")
+        self.assertIsNone(mem.validate_link({"match": "지어낸 상황"}, ["팀 회식"]))
+        with self.assertRaises(StyleMateError):
+            mem.validate_link({"match": None, "extra": 1}, [])
+        memories = [lt("m1", "평소 네이비를 좋아해요."), lt("m2", "출근엔 슬림", {"occasion": "출근"})]
+        raw = {"lines": [{"memory_id": "m1", "text": "네이비를 좋아해요."}, {"memory_id": "m2", "text": "출근엔 슬림"},
+                         {"memory_id": "ghost", "text": "지어낸 취향"}, {"memory_id": "m1", "text": "중복"}]}
+        changed = mem.validate_profile(raw, memories)
+        self.assertEqual([(c["memory_id"], c["old"], c["text"]) for c in changed], [("m1", "평소 네이비를 좋아해요.", "네이비를 좋아해요.")])
+        view_ = mem.profile_view(memories)
+        self.assertEqual(view_, {"usual": ["평소 네이비를 좋아해요."], "situations": [{"situation": "출근", "lines": ["출근엔 슬림"]}]})
+
+
 if __name__ == "__main__":
     unittest.main()

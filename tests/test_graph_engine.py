@@ -165,5 +165,246 @@ class GraphEngineTests(unittest.TestCase):
         self.assertEqual(result["outcome"], "rejected")
 
 
+# ---- ADR 0015: tops, gender, consented-memory warm start, end summary, free situations -------------
+TOPS = [("men", "Navy", "Regular", "T-shirt"), ("men", "Navy", "Oversized", "Shirt"), ("men", "Black", "Regular", "Shirt"),
+        ("men", "Black", "Oversized", "T-shirt"), ("men", "White", "Regular", "T-shirt"), ("men", "White", "Oversized", "Shirt"),
+        ("men", "Beige", "Regular", "Shirt"), ("men", "Beige", "Oversized", "T-shirt"), ("men", "Navy", "Slim", "Shirt"),
+        ("men", "Grey", "Regular", "T-shirt"), ("men", "Grey", "Oversized", "Shirt"), ("men", "Navy", "Relaxed", "T-shirt"),
+        ("women", "Navy", "Regular", "Blouse"), ("women", "Pink", "Oversized", "T-shirt"), ("women", "White", "Slim", "Blouse"),
+        ("women", "Black", "Regular", "Shirt"), ("women", "Beige", "Relaxed", "T-shirt"), ("women", "Pink", "Regular", "Blouse"),
+        ("women", "Grey", "Oversized", "Shirt"), ("women", "Navy", "Slim", "T-shirt")]
+
+
+def top(index, gender, color, fit, kind):
+    pid = f"t{index:02}"
+    return {"format_version": c.CATALOG_FORMAT_VERSION, "product_id": pid,
+            "source": {"source_id": "synthetic-top", "url": f"https://example.invalid/{pid}", "collected_at": "2026-11-19T09:00:00+09:00"},
+            "title": f"합성 상의 {pid}", "description": None, "garment_type": "Top",
+            "raw_metadata": {"gender": gender, "type": [kind], "color": [color], "fit": [fit]}, "labels": [],
+            "images": [{"image_id": f"image-{pid}", "kind": "local", "location": f"{pid}.png",
+                        "source_revision": "synthetic-v1", "sha256": None, "regions": []}]}
+
+
+class MemoryGateway(FakeModelGateway):
+    """Scripted parse (two fixed sentences), situation link and profile rewrite."""
+
+    model = "scripted-memory"
+
+    def __init__(self):
+        super().__init__()
+        self.calls = []
+
+    @staticmethod
+    def wish(key, content, text_id, quote, applies, pi):
+        return {"key": key, "content": content, "target_id": "top", "source_ids": [text_id], "quote": quote,
+                "origin": "explicit", "polarity": "prefer", "strength": "soft", "applies": applies,
+                "pi": pi, "fea": [], "price": None}
+
+    def complete(self, instructions, payload, schema):
+        properties = schema.get("properties", {})
+        if "match" in properties:
+            self.calls.append(("link", payload["current_situation"], tuple(payload["past_situations"])))
+            return {"match": next((p for p in payload["past_situations"] if "회식" in p and "회식" in payload["current_situation"]), None)}
+        if "lines" in properties:
+            self.calls.append(("profile", len(payload["memories"])))
+            return {"lines": [{"memory_id": m["memory_id"], "text": m["text"].replace("좋아해요", "좋아요")} for m in payload["memories"]]}
+        if "situations" not in properties:
+            return super().complete(instructions, payload, schema)
+        self.calls.append(("parse",))
+        text = next((s for s in payload["sources"] if s["kind"] == "user_text"), None)
+        wishes = []
+        if text and "네이비" in text["content"]:
+            wishes.append(self.wish("w1", "평소 네이비 레귤러 핏을 좋아해요.", text["source_id"], "네이비",
+                                    {"mode": "baseline", "situation_ids": []},
+                                    [{"feature": "Color", "values": ["Navy"], "match": "any"},
+                                     {"feature": "Fit", "values": ["Regular"], "match": "any"}]))
+        if text and "오버사이즈" in text["content"]:
+            wishes.append(self.wish("w2", "회식 때는 오버사이즈 핏을 좋아해요.", text["source_id"], "오버사이즈",
+                                    {"mode": "request", "situation_ids": []},
+                                    [{"feature": "Fit", "values": ["Oversized"], "match": "any"}]))
+        return {"situations": [], "wishes": wishes, "questions": []}
+
+
+@unittest.skipUnless(graph_available(), "optional graph dependency (langgraph) is not installed")
+class TopMemoryTests(unittest.TestCase):
+    """ADR 0015 end to end: request 1 saves consented memory, request 2 starts from it."""
+
+    def setUp(self):
+        from stylemate_memory.app import ConsumerService
+        from stylemate_memory.registry import load_registry
+        self.temp = tempfile.TemporaryDirectory(prefix="lumi-top-")
+        self.addCleanup(self.temp.cleanup)
+        root = Path(self.temp.name)
+        images = root / "images"
+        images.mkdir()
+        records = [top(i, *row) for i, row in enumerate(TOPS)]
+        for record in records:
+            (images / record["images"][0]["location"]).write_bytes(PNG)
+        (root / "catalog.json").write_text(json.dumps(records), encoding="utf-8")
+        self.gateway = MemoryGateway()
+        self.service = ConsumerService(root / "memory.sqlite3", root / "catalog.sqlite3", self.gateway,
+                                       user_id="synthetic-user", image_root=images, engine="graph",
+                                       registry=load_registry(c.LUMI_PI_V2_TOP_REGISTRY_VERSION))
+        self.addCleanup(self.service.close)
+        self.service.import_catalog(root / "catalog.json")
+        self.service.build_catalog_maps()
+        self.serial = 0
+        self.gender = {r["product_id"]: r["raw_metadata"]["gender"] for r in records}
+
+    send = GraphEngineTests.send
+    grid = GraphEngineTests.grid
+
+    def start(self, text=None, situation=None, gender="men"):
+        self.send({"op": "start_request", "mode": "shopping", "timezone": "Asia/Seoul",
+                   "targets": [{"target_id": "top", "garment_type": "Top"}], "text": text,
+                   "gender": gender, "situation": situation})
+        s = self.service.state()
+        self.assertEqual(s["operation"], "idle", s["error"])
+        return s
+
+    def intent(self):
+        return self.service._graph.intent(self.service.state()["request"]["id"])
+
+    def summary(self, step, choices=()):
+        self.send({"op": "graph_summary", "step": step, "choices": list(choices)})
+        return self.service.state()["graph"]["summary"]
+
+    def first_request(self, text, situation, choices):
+        self.start(text, situation)
+        summary = self.summary("prepare")
+        self.assertEqual(summary["status"], "draft")
+        by_text = {p["text"]: p["id"] for p in summary["proposals"]}
+        saved = self.summary("save", [{"id": by_text[t], "choice": ch} for t, ch in choices])
+        self.assertEqual(self.service.state()["request"]["status"], "closed")
+        return saved
+
+    def long_term(self):
+        rid = self.service.state()["request"]["id"]
+        return self.service._run(self.service._graph_bridge.long_term_now, rid)
+
+    def test_gender_filter_warm_start_novelty_and_profile_consent(self):
+        s = self.start("평소 네이비 상의 좋아해요", {"kind": "chip", "value": "출근"})
+        self.assertEqual(len(s["cards"]), 8)
+        self.assertTrue(all(self.gender[c["product_id"]] == "men" for c in s["cards"]))
+        self.assertEqual(s["graph"]["situations"], [{"key": "occasion", "value": "출근", "raw": "출근"}])
+        self.assertEqual(s["graph"]["memory"]["chips"], [])  # nothing consented yet: cold start, no novelty slot
+        self.assertNotIn("novel", s["graph"]["slots"].values())
+
+        summary = self.summary("prepare")
+        self.assertEqual([(p["text"], p["suggested"]) for p in summary["proposals"]], [("평소 네이비 레귤러 핏을 좋아해요.", "baseline")])
+        self.assertEqual(self.long_term(), [])  # proposing is not saving
+        saved = self.summary("save", [{"id": "p1", "choice": "baseline"}])
+        self.assertEqual(saved["saved"], ["평소 네이비 레귤러 핏을 좋아해요."])
+        self.service.wait_idle()
+        memories = self.long_term()
+        self.assertEqual([(m["content"], m["conditions"]) for m in memories], [("평소 네이비 레귤러 핏을 좋아해요.", {})])
+        profile = self.service.state()["graph"]["summary"]["profile"]
+        self.assertEqual(profile["status"], "ready")
+        self.assertEqual(profile["changes"][0]["text"], "평소 네이비 레귤러 핏을 좋아요.")
+        self.summary("profile", [{"id": profile["changes"][0]["memory_id"], "choice": "accept"}])
+        memories = self.long_term()
+        self.assertEqual([m["content"] for m in memories], ["평소 네이비 레귤러 핏을 좋아요."])
+        self.assertEqual(sorted((b["feature"], tuple(b["values"])) for b in memories[0]["bindings"]),
+                         [("Color", ("Navy",)), ("Fit", ("Regular",))])
+        rid = self.service.state()["request"]["id"]
+        old = self.service.inspect_request(rid)["snapshot"]
+        # The original memory is kept as superseded (evidence preserved), not erased.
+        rows = self.service._store.connection.execute(
+            "SELECT json_extract(payload_json,'$.scope'),json_extract(payload_json,'$.content') FROM v1_memories "
+            "WHERE status='superseded'").fetchall()
+        self.assertIn(("long_term", "평소 네이비 레귤러 핏을 좋아해요."), [tuple(r) for r in rows])
+        self.assertTrue(old["request"]["status"] == "closed")
+
+        # Request 2, another situation: the usual taste starts the grid as soft priors.
+        s = self.start(None, {"kind": "chip", "value": "데이트"})
+        memory = s["graph"]["memory"]
+        self.assertEqual([(c["text"], c["kind"], c["enabled"]) for c in memory["chips"]], [("평소 네이비 레귤러 핏을 좋아요.", "baseline", True)])
+        intent = self.intent()
+        self.assertEqual(sorted((p["axis"], p["value"]) for p in intent["priors"]), [("Color", "Navy"), ("Fit", "Regular")])
+        self.assertEqual(intent["hard"], [])  # memory never becomes a hard filter
+        cards = intent["last_grid"]["cards"]
+        novel = [c for c in cards if c["slot"] == "novel"]
+        self.assertEqual(len(novel), 2)
+        self.assertTrue(all("Navy" not in (c["facts"].get("Color") or []) and "Regular" not in (c["facts"].get("Fit") or [])
+                            for c in novel))
+        self.assertEqual(self.gateway.calls.count(("parse",)), 1)  # no text in request 2: no parse call
+
+        # x on the memory chip removes its priors; the next grid has no novelty slot.
+        self.send({"op": "adjust_intent", "action": "memory_off", "key": memory["chips"][0]["memory_id"], "feature": None})
+        s = self.service.state()
+        self.assertFalse(s["graph"]["memory"]["chips"][0]["enabled"])
+        self.assertNotIn("novel", s["graph"]["slots"].values())
+        self.send({"op": "adjust_intent", "action": "memory_off", "key": "unknown", "feature": None}, ok=False)
+
+    def test_free_situation_link_situation_priority_and_novelty_prompt(self):
+        self.first_request("평소 네이비 좋아하고 회식엔 오버사이즈", {"kind": "free", "text": "팀 회식"},
+                           [("평소 네이비 레귤러 핏을 좋아해요.", "baseline"), ("회식 때는 오버사이즈 핏을 좋아해요.", "situation")])
+        memories = self.long_term()
+        self.assertEqual(sorted(m["conditions"].get("occasion", "") for m in memories), ["", "팀 회식"])
+
+        # A new free situation: the model links it to the saved raw situation; situation wins on Fit.
+        s = self.start(None, {"kind": "free", "text": "회사 회식 자리"})
+        self.assertIn(("link", "회사 회식 자리", ("팀 회식",)), self.gateway.calls)
+        memory = s["graph"]["memory"]
+        self.assertEqual(memory["links"], [{"raw": "회사 회식 자리", "past": "팀 회식", "enabled": True}])
+        self.assertEqual([c["kind"] for c in memory["chips"]], ["situation", "baseline"])
+        priors = sorted((p["kind"], p["axis"], p["value"]) for p in self.intent()["priors"])
+        self.assertEqual(priors, [("baseline", "Color", "Navy"), ("situation", "Fit", "Oversized")])
+
+        # Turning the link off drops the situation memory; the usual taste applies in full again.
+        self.send({"op": "adjust_intent", "action": "link_off", "key": None, "feature": None})
+        priors = sorted((p["kind"], p["axis"], p["value"]) for p in self.intent()["priors"])
+        self.assertEqual(priors, [("baseline", "Color", "Navy"), ("baseline", "Fit", "Regular")])
+
+        # "평소랑 다르게" asks once; yes dims memory and keeps one novelty slot.
+        self.send(self.grid(text="이번엔 평소랑 다르게 보고 싶어요"))
+        self.assertTrue(self.service.state()["graph"]["memory"]["novelty_prompt"])
+        self.send({"op": "adjust_intent", "action": "novelty_yes", "key": None, "feature": None})
+        s = self.service.state()
+        self.assertEqual(s["graph"]["memory"]["mode"], "dim")
+        self.assertFalse(s["graph"]["memory"]["novelty_prompt"])
+        self.assertEqual(list(s["graph"]["slots"].values()).count("novel"), 1)
+
+    def test_converged_images_and_final_product_become_situation_memory(self):
+        self.first_request("평소 네이비 상의 좋아해요", None, [("평소 네이비 레귤러 핏을 좋아해요.", "baseline")])
+        self.start(None, {"kind": "chip", "value": "데이트"})
+        for _ in range(3):
+            cards = self.intent()["last_grid"]["cards"]
+            navy = [c["candidate_id"] for c in cards if "Navy" in (c["facts"].get("Color") or [])]
+            self.send(self.grid(selections=[{"target_id": "top", "candidate_id": n, "part_ref": None} for n in navy]))
+        s = self.service.state()
+        self.assertIn(("Color", "Navy"), [(ch["feature"], ch["value"]) for ch in s["graph"]["chips"]])
+        snapshot = self.service.inspect_request(s["request"]["id"])["snapshot"]
+        active = next(r for r in snapshot["rounds"] if r["status"] == "active")
+        final = next(c for c in self.intent()["last_grid"]["cards"] if "Navy" in (c["facts"].get("Color") or []))
+        self.send({"op": "select_final", "candidate_set_ref": active["candidate_set_ref"], "candidate_id": final["candidate_id"]})
+        summary = self.summary("prepare")
+        texts = [p["text"] for p in summary["proposals"]]
+        self.assertIn("색상은 Navy 쪽이 좋아요.", texts)
+        self.assertEqual(summary["situation_label"], "데이트")
+        self.assertTrue(all(p["suggested"] == "situation" for p in summary["proposals"]))
+        choices = [{"id": p["id"], "choice": "situation" if p["text"].startswith("색상") else "skip"} for p in summary["proposals"]]
+        saved = self.summary("save", choices)
+        self.assertEqual(saved["saved"], ["색상은 Navy 쪽이 좋아요."])
+        self.service.wait_idle()
+        situational = [m for m in self.long_term() if m["conditions"]]
+        self.assertEqual([(m["content"], m["conditions"]) for m in situational], [("색상은 Navy 쪽이 좋아요.", {"occasion": "데이트"})])
+
+    def test_skip_saves_nothing_and_women_filter(self):
+        s = self.start("평소 네이비 상의 좋아해요", None, gender="women")
+        self.assertTrue(all(self.gender[c["product_id"]] == "women" for c in s["cards"]))
+        self.assertEqual(len(s["cards"]), 8)
+        self.summary("prepare")
+        summary = self.summary("save", [{"id": "p1", "choice": "skip"}])
+        self.assertEqual(summary["saved"], [])
+        self.assertEqual(self.service.state()["request"]["status"], "closed")
+        self.assertEqual(self.long_term(), [])
+        # "이 상황만" needs a situation; none was given.
+        self.start("평소 네이비 상의 좋아해요", None)
+        self.summary("prepare")
+        result, _ = self.send({"op": "graph_summary", "step": "save", "choices": [{"id": "p1", "choice": "situation"}]}, ok=False)
+        self.assertEqual(result["outcome"], "rejected")
+
+
 if __name__ == "__main__":
     unittest.main()

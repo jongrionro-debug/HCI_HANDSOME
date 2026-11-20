@@ -22,6 +22,10 @@ def new_intent(request_id: str, targets: list[dict[str, Any]]) -> dict[str, Any]
         "all_bad": False, "anchor": None, "reason_prompt": None, "outcome": "idle", "converged": False,
         "event": None, "pending_error": None, "unresolved_hard_fea": False, "route_question": None,
         "pool_sizes": {}, "shortage": False,
+        # ADR 0015: gender filter, consented-memory warm start, novelty and taste-change prompts.
+        "gender": None, "lt_memories": [], "priors": [], "memory_chips": [], "memory_off": [],
+        "memory_mode": "normal", "links": [], "novel_turns": [], "novelty_prompt": None,
+        "contra": {}, "taste_prompt": None, "taste_asked": [],
     }
 
 
@@ -39,8 +43,10 @@ def merge_parse(intent: dict[str, Any], parsed: dict[str, Any], turn_tag: str) -
         counts[s["key"]] = counts.get(s["key"], 0) + 1
     replaced = {k for k, n in counts.items() if n == 1}
     intent["situations"] = [s for s in intent["situations"] if s["key"] not in replaced] + [dict(s) for s in new]
+    aliases = parsed.get("aliases", {})
     for wish in parsed["wishes"]:
-        intent["wishes"].append(dict(wish) | {"key": f"{turn_tag}-{wish['key']}"})
+        evidence = [aliases[s] for s in wish["source_ids"] if s in aliases]
+        intent["wishes"].append(dict(wish) | {"key": f"{turn_tag}-{wish['key']}", "evidence_ids": evidence})
     intent["held"] += [dict(w) | {"key": f"{turn_tag}-{w['key']}"} for w in parsed["held"]]
     for q in parsed["questions"]:
         intent["questions"].append({"text": q["text"], "reason": q["reason"], "origin": "model"})

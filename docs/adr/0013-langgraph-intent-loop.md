@@ -4,6 +4,7 @@
 - Date: 2026-11-18
 - Related Work: 현재 대화의 파이프라인 재설계 요청, 재설계 메모(LUMI 파이프라인 재설계 메모), Issue [#7](https://github.com/jongrionro-debug/HCI_HANDSOME/issues/7)·[#1](https://github.com/jongrionro-debug/HCI_HANDSOME/issues/1)
 - Approval: 설계 결정 Q1~Q28은 2026-11-18 대화에서 사용자 승인. 추출 출력 스키마·recall 우선 가설·8장 그리드·점수 이어받기·칩 고정·후보 분포 비공개, Codex(gpt-6.2-sol) 검수 반영 수정(거절 기억 경계·값 귀속·그리드 예외·상황 참조·칩 고정 권한·다중 선택 이벤트·재개 멱등)과 2차 검수 반영(상황 참조 실패 보류·대조 있는 값 갱신·종료 시 pending 처리·상품 단위 "별로"·일반 탐색 8장·참조 키·가격·필수 FEA)·3차 검수 반영(품목 범위 재사용 후보·이유 없는 "별로"의 값 비반영·숨김 해제·결정 15 분리)은 2026-11-19 대화에서 사용자 승인. 이 ADR의 Accepted 승인은 미승인
+- Superseded by (부분): [ADR 0015](0015-top-memory-warm-start.md)가 결정 8의 점수 요청 한정과 결정 11의 `기타` 매칭 제외를 부분 대체
 - Supersedes: [ADR 0002](0002-memory-prototype-storage.md)의 근거 예산 계산 기준(부분), [ADR 0006](0006-fea-to-pi-hypothesis-comparison.md)의 가설 생성 주체·대상 축·값 개수·대비 쌍 비교 방식(부분). 다른 결정은 유지
 
 ## 맥락
