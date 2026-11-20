@@ -1,0 +1,910 @@
+{
+  "name": "LUMI PI v2 tops (ADR 0014) + Park FEA taxonomy",
+  "version": "lumi-pi-v2-top",
+  "status": "Generated",
+  "runtime_implemented": true,
+  "scope": "29CM·Cole Buxton·Wax London 상의만 담은 PI v2 실행 사전이다. 값 라벨은 영어다(ADR 0014).",
+  "lumi_use": "PI 축은 ADR 0014의 11축(+Brand), FEA 30개 태그는 Park 사전을 그대로 쓴다. Price는 통화가 섞여 조건에서 뺀다.",
+  "generated_by": "scripts/build_lumi_pi_v2.py --export-top",
+  "axis_order": [
+    "Type",
+    "Brand",
+    "Color",
+    "Tone",
+    "Pattern",
+    "Fit",
+    "Silhouette",
+    "Length",
+    "Texture",
+    "Fabric",
+    "Detail",
+    "Style"
+  ],
+  "product_information": {
+    "Type": {
+      "label_ko": "종류",
+      "values": [
+        "T-shirt",
+        "Long-sleeve T-shirt",
+        "Polo",
+        "Shirt",
+        "Overshirt",
+        "Blouse",
+        "Sweater",
+        "Cardigan",
+        "Knit vest",
+        "Sleeveless",
+        "Sweatshirt",
+        "Hoodie",
+        "Zip hoodie"
+      ],
+      "reported_count": 13,
+      "enumeration_complete": true,
+      "distribution": {
+        "T-shirt": 262,
+        "Long-sleeve T-shirt": 48,
+        "Polo": 116,
+        "Shirt": 147,
+        "Overshirt": 72,
+        "Blouse": 15,
+        "Sweater": 196,
+        "Cardigan": 11,
+        "Knit vest": 1,
+        "Sleeveless": 30,
+        "Sweatshirt": 84,
+        "Hoodie": 106,
+        "Zip hoodie": 10
+      },
+      "values_by_garment_type": {
+        "Top": [
+          "T-shirt",
+          "Long-sleeve T-shirt",
+          "Polo",
+          "Shirt",
+          "Overshirt",
+          "Blouse",
+          "Sweater",
+          "Cardigan",
+          "Knit vest",
+          "Sleeveless",
+          "Sweatshirt",
+          "Hoodie",
+          "Zip hoodie"
+        ]
+      }
+    },
+    "Brand": {
+      "label_ko": "브랜드",
+      "values": [
+        "108파운드",
+        "24/7 시리즈",
+        "COLE BUXTON",
+        "Cole Buxton",
+        "Wax London",
+        "cole buxton",
+        "가더",
+        "고요웨어",
+        "구보",
+        "글로니",
+        "기준",
+        "긴스키",
+        "나이스고스트클럽",
+        "넌블랭크",
+        "네세서리",
+        "노멜렛",
+        "노앙",
+        "노우드",
+        "노운베러",
+        "노이스",
+        "노이즈",
+        "노티카",
+        "니티드",
+        "다이브인",
+        "더니트컴퍼니",
+        "더마고",
+        "더미튼",
+        "더바넷",
+        "더블유브이프로젝트",
+        "던스트",
+        "데미오",
+        "데이즈데이즈",
+        "도큐먼트",
+        "드파운드",
+        "디스이즈네버댓",
+        "디스커스 애슬레틱",
+        "디야니",
+        "뚜누",
+        "라메레이",
+        "라무어",
+        "락피쉬웨더웨어",
+        "러프사이드",
+        "런디",
+        "레이브",
+        "레이지지",
+        "레터프롬문",
+        "로라로라",
+        "로우클래식",
+        "론론",
+        "루에브르",
+        "르",
+        "르나브",
+        "르바",
+        "리",
+        "리임",
+        "링서울",
+        "마리떼 프랑소와 저버",
+        "마인드브릿지 맨",
+        "망고매니플리즈",
+        "매든",
+        "메리온",
+        "모노크롬",
+        "몽돌",
+        "무드인사이드",
+        "무드인사이드 우먼",
+        "무브웜",
+        "문달",
+        "미세키서울",
+        "미세키서울 맨",
+        "미치코런던 코시노",
+        "밀로 아카이브",
+        "반로에",
+        "버드노트",
+        "벌스데이수트",
+        "부기홀리데이",
+        "부디무드라",
+        "브라운야드",
+        "브렌슨",
+        "브론슨",
+        "비바라비다",
+        "비와이씨",
+        "비터셀즈",
+        "사일라스",
+        "사파리스팟",
+        "선데이후르츠마켓",
+        "세터",
+        "센토르",
+        "셰리오브",
+        "수아레",
+        "수아레 우먼",
+        "슈퍼서브",
+        "스노우피크 어패럴",
+        "스텝어라운드",
+        "슬리",
+        "시눈",
+        "시스",
+        "시야쥬",
+        "시엔느",
+        "시티브리즈",
+        "썸웨어버터",
+        "씨타",
+        "아디다스",
+        "아메스 월드와이드",
+        "아수라",
+        "아우로",
+        "아웃도어보이스",
+        "아웃스탠딩",
+        "아워코모스",
+        "아워호프",
+        "아캄",
+        "아틀리에 나인",
+        "애습",
+        "애프터프레이",
+        "앤더슨벨",
+        "앤유",
+        "어나더오피스",
+        "어랜",
+        "어반에이지",
+        "어패럴아카이브",
+        "언더아머",
+        "얼스캄에라",
+        "엄브로",
+        "에이치덱스",
+        "에이카",
+        "에토스",
+        "엔더블유티",
+        "엔도어",
+        "엔오디",
+        "엔조블루스",
+        "엘엠씨",
+        "엽페",
+        "오끼뜨",
+        "오떼뜨",
+        "오르",
+        "오버듀플레어",
+        "오브유이",
+        "오헤시오",
+        "온스카",
+        "우마뭉",
+        "위드아웃썸머",
+        "유니온 블루",
+        "유라고",
+        "유제",
+        "윤슬",
+        "이스케이프프롬",
+        "이스트로그 퍼머넌트",
+        "이아",
+        "이알티알",
+        "일리고",
+        "제너럴아이디어",
+        "조질롱",
+        "지에마르",
+        "챔피온",
+        "체",
+        "카셀",
+        "커버낫",
+        "커스텀어클락 우먼",
+        "컴포트랩",
+        "코드그라피",
+        "코어드",
+        "쿠어",
+        "타스",
+        "테이크이지",
+        "테켓",
+        "토르테",
+        "토마스모어",
+        "튜드먼트",
+        "틸아이다이",
+        "파르티멘토",
+        "파르티멘토 우먼",
+        "파브레가",
+        "파사드패턴",
+        "파타고니아",
+        "페세스",
+        "펜필드",
+        "편마",
+        "포 유어 아이즈 온리",
+        "포에토",
+        "포커페이스",
+        "폴 브레이크",
+        "폴뉴아",
+        "프랑메리코",
+        "프렙포더",
+        "프로젝트 웨이브",
+        "프리버07",
+        "플루크",
+        "플리즈프로젝트",
+        "하케쉬",
+        "해브해드",
+        "허그유어스킨",
+        "헤이그",
+        "헤인즈",
+        "호쿠스포쿠스"
+      ],
+      "reported_count": 193,
+      "enumeration_complete": true,
+      "distribution": {
+        "108파운드": 11,
+        "24/7 시리즈": 3,
+        "COLE BUXTON": 15,
+        "Cole Buxton": 152,
+        "Wax London": 396,
+        "cole buxton": 59,
+        "가더": 5,
+        "고요웨어": 1,
+        "구보": 1,
+        "글로니": 7,
+        "기준": 1,
+        "긴스키": 1,
+        "나이스고스트클럽": 2,
+        "넌블랭크": 2,
+        "네세서리": 3,
+        "노멜렛": 1,
+        "노앙": 1,
+        "노우드": 1,
+        "노운베러": 2,
+        "노이스": 2,
+        "노이즈": 1,
+        "노티카": 7,
+        "니티드": 2,
+        "다이브인": 1,
+        "더니트컴퍼니": 14,
+        "더마고": 1,
+        "더미튼": 3,
+        "더바넷": 1,
+        "더블유브이프로젝트": 1,
+        "던스트": 10,
+        "데미오": 1,
+        "데이즈데이즈": 1,
+        "도큐먼트": 1,
+        "드파운드": 1,
+        "디스이즈네버댓": 11,
+        "디스커스 애슬레틱": 3,
+        "디야니": 1,
+        "뚜누": 1,
+        "라메레이": 1,
+        "라무어": 1,
+        "락피쉬웨더웨어": 1,
+        "러프사이드": 2,
+        "런디": 1,
+        "레이브": 2,
+        "레이지지": 1,
+        "레터프롬문": 1,
+        "로라로라": 1,
+        "로우클래식": 2,
+        "론론": 1,
+        "루에브르": 2,
+        "르": 4,
+        "르나브": 1,
+        "르바": 3,
+        "리": 1,
+        "리임": 1,
+        "링서울": 2,
+        "마리떼 프랑소와 저버": 1,
+        "마인드브릿지 맨": 1,
+        "망고매니플리즈": 1,
+        "매든": 2,
+        "메리온": 5,
+        "모노크롬": 1,
+        "몽돌": 9,
+        "무드인사이드": 5,
+        "무드인사이드 우먼": 1,
+        "무브웜": 4,
+        "문달": 1,
+        "미세키서울": 2,
+        "미세키서울 맨": 3,
+        "미치코런던 코시노": 10,
+        "밀로 아카이브": 2,
+        "반로에": 1,
+        "버드노트": 1,
+        "벌스데이수트": 2,
+        "부기홀리데이": 1,
+        "부디무드라": 1,
+        "브라운야드": 4,
+        "브렌슨": 1,
+        "브론슨": 9,
+        "비바라비다": 3,
+        "비와이씨": 1,
+        "비터셀즈": 10,
+        "사일라스": 2,
+        "사파리스팟": 1,
+        "선데이후르츠마켓": 1,
+        "세터": 1,
+        "센토르": 3,
+        "셰리오브": 2,
+        "수아레": 8,
+        "수아레 우먼": 2,
+        "슈퍼서브": 1,
+        "스노우피크 어패럴": 1,
+        "스텝어라운드": 1,
+        "슬리": 1,
+        "시눈": 1,
+        "시스": 5,
+        "시야쥬": 8,
+        "시엔느": 1,
+        "시티브리즈": 1,
+        "썸웨어버터": 1,
+        "씨타": 2,
+        "아디다스": 10,
+        "아메스 월드와이드": 1,
+        "아수라": 2,
+        "아우로": 1,
+        "아웃도어보이스": 1,
+        "아웃스탠딩": 9,
+        "아워코모스": 1,
+        "아워호프": 4,
+        "아캄": 3,
+        "아틀리에 나인": 2,
+        "애습": 1,
+        "애프터프레이": 2,
+        "앤더슨벨": 1,
+        "앤유": 1,
+        "어나더오피스": 4,
+        "어랜": 3,
+        "어반에이지": 1,
+        "어패럴아카이브": 1,
+        "언더아머": 2,
+        "얼스캄에라": 1,
+        "엄브로": 1,
+        "에이치덱스": 1,
+        "에이카": 1,
+        "에토스": 1,
+        "엔더블유티": 1,
+        "엔도어": 1,
+        "엔오디": 1,
+        "엔조블루스": 1,
+        "엘엠씨": 4,
+        "엽페": 1,
+        "오끼뜨": 1,
+        "오떼뜨": 1,
+        "오르": 2,
+        "오버듀플레어": 3,
+        "오브유이": 2,
+        "오헤시오": 1,
+        "온스카": 2,
+        "우마뭉": 4,
+        "위드아웃썸머": 1,
+        "유니온 블루": 5,
+        "유라고": 3,
+        "유제": 1,
+        "윤슬": 1,
+        "이스케이프프롬": 1,
+        "이스트로그 퍼머넌트": 1,
+        "이아": 5,
+        "이알티알": 1,
+        "일리고": 3,
+        "제너럴아이디어": 1,
+        "조질롱": 3,
+        "지에마르": 1,
+        "챔피온": 7,
+        "체": 1,
+        "카셀": 1,
+        "커버낫": 1,
+        "커스텀어클락 우먼": 3,
+        "컴포트랩": 1,
+        "코드그라피": 1,
+        "코어드": 1,
+        "쿠어": 3,
+        "타스": 1,
+        "테이크이지": 1,
+        "테켓": 10,
+        "토르테": 6,
+        "토마스모어": 14,
+        "튜드먼트": 1,
+        "틸아이다이": 2,
+        "파르티멘토": 5,
+        "파르티멘토 우먼": 1,
+        "파브레가": 9,
+        "파사드패턴": 2,
+        "파타고니아": 1,
+        "페세스": 1,
+        "펜필드": 9,
+        "편마": 1,
+        "포 유어 아이즈 온리": 3,
+        "포에토": 3,
+        "포커페이스": 1,
+        "폴 브레이크": 1,
+        "폴뉴아": 1,
+        "프랑메리코": 1,
+        "프렙포더": 1,
+        "프로젝트 웨이브": 1,
+        "프리버07": 2,
+        "플루크": 1,
+        "플리즈프로젝트": 3,
+        "하케쉬": 1,
+        "해브해드": 3,
+        "허그유어스킨": 1,
+        "헤이그": 3,
+        "헤인즈": 1,
+        "호쿠스포쿠스": 1
+      }
+    },
+    "Color": {
+      "label_ko": "색상",
+      "values": [
+        "Black",
+        "White",
+        "Ecru",
+        "Grey",
+        "Charcoal",
+        "Navy",
+        "Blue",
+        "Light blue",
+        "Brown",
+        "Beige",
+        "Khaki",
+        "Green",
+        "Red",
+        "Pink",
+        "Purple",
+        "Yellow",
+        "Orange",
+        "Multi"
+      ],
+      "reported_count": 18,
+      "enumeration_complete": true,
+      "distribution": {
+        "Black": 238,
+        "White": 135,
+        "Ecru": 188,
+        "Grey": 189,
+        "Charcoal": 104,
+        "Navy": 172,
+        "Blue": 106,
+        "Light blue": 31,
+        "Brown": 124,
+        "Beige": 62,
+        "Khaki": 37,
+        "Green": 60,
+        "Red": 46,
+        "Pink": 26,
+        "Purple": 30,
+        "Yellow": 19,
+        "Orange": 19,
+        "Multi": 14
+      }
+    },
+    "Tone": {
+      "label_ko": "색 톤",
+      "values": [
+        "Dark",
+        "Medium",
+        "Light"
+      ],
+      "reported_count": 3,
+      "enumeration_complete": true,
+      "distribution": {
+        "Dark": 488,
+        "Medium": 430,
+        "Light": 430
+      }
+    },
+    "Pattern": {
+      "label_ko": "패턴",
+      "values": [
+        "Solid",
+        "Stripe",
+        "Check",
+        "Graphic",
+        "Logo",
+        "Floral",
+        "Jacquard",
+        "Other"
+      ],
+      "reported_count": 8,
+      "enumeration_complete": true,
+      "distribution": {
+        "Solid": 639,
+        "Stripe": 94,
+        "Check": 79,
+        "Graphic": 216,
+        "Logo": 24,
+        "Floral": 33,
+        "Jacquard": 34,
+        "Other": 28
+      }
+    },
+    "Fit": {
+      "label_ko": "핏(여유)",
+      "values": [
+        "Slim",
+        "Regular",
+        "Relaxed",
+        "Oversized"
+      ],
+      "reported_count": 4,
+      "enumeration_complete": true,
+      "distribution": {
+        "Slim": 89,
+        "Regular": 463,
+        "Relaxed": 490,
+        "Oversized": 106
+      }
+    },
+    "Silhouette": {
+      "label_ko": "실루엣",
+      "values": [
+        "Straight",
+        "Boxy"
+      ],
+      "reported_count": 2,
+      "enumeration_complete": true,
+      "distribution": {
+        "Straight": 665,
+        "Boxy": 431
+      }
+    },
+    "Length": {
+      "label_ko": "기장·소매",
+      "values": [
+        "Short sleeve",
+        "Long sleeve",
+        "Sleeveless",
+        "Cropped",
+        "Full"
+      ],
+      "reported_count": 5,
+      "enumeration_complete": true,
+      "distribution": {
+        "Short sleeve": 415,
+        "Long sleeve": 618,
+        "Sleeveless": 35,
+        "Cropped": 33,
+        "Full": 3
+      }
+    },
+    "Texture": {
+      "label_ko": "표면감",
+      "values": [
+        "Jersey",
+        "Knit",
+        "Ribbed",
+        "Fleece",
+        "Denim",
+        "Corduroy",
+        "Twill",
+        "Seersucker",
+        "Waffle",
+        "Boucle"
+      ],
+      "reported_count": 10,
+      "enumeration_complete": true,
+      "distribution": {
+        "Jersey": 295,
+        "Knit": 324,
+        "Ribbed": 113,
+        "Fleece": 159,
+        "Denim": 17,
+        "Corduroy": 14,
+        "Twill": 35,
+        "Seersucker": 20,
+        "Waffle": 29,
+        "Boucle": 48
+      }
+    },
+    "Fabric": {
+      "label_ko": "소재",
+      "values": [
+        "Cotton",
+        "Wool",
+        "Cashmere",
+        "Linen",
+        "Polyester",
+        "Nylon",
+        "Viscose",
+        "Elastane",
+        "Acrylic",
+        "Silk"
+      ],
+      "reported_count": 10,
+      "enumeration_complete": true,
+      "distribution": {
+        "Cotton": 647,
+        "Wool": 209,
+        "Cashmere": 41,
+        "Linen": 35,
+        "Polyester": 146,
+        "Nylon": 77,
+        "Viscose": 56,
+        "Elastane": 79,
+        "Acrylic": 41,
+        "Silk": 6
+      }
+    },
+    "Detail": {
+      "label_ko": "디테일",
+      "values": [
+        "Pockets",
+        "Zip",
+        "Buttons",
+        "Collar",
+        "Hood",
+        "Drawcord",
+        "Elastic waist",
+        "Pleats",
+        "Embroidery",
+        "Patch",
+        "Washed",
+        "Distressed",
+        "Slit"
+      ],
+      "reported_count": 13,
+      "enumeration_complete": true,
+      "distribution": {
+        "Pockets": 110,
+        "Zip": 139,
+        "Buttons": 257,
+        "Collar": 231,
+        "Hood": 110,
+        "Drawcord": 13,
+        "Elastic waist": 6,
+        "Pleats": 19,
+        "Embroidery": 118,
+        "Patch": 84,
+        "Washed": 234,
+        "Distressed": 10,
+        "Slit": 33
+      }
+    },
+    "Style": {
+      "label_ko": "스타일",
+      "values": [
+        "Vintage",
+        "Sporty",
+        "Workwear",
+        "Tailored",
+        "Classic",
+        "Preppy",
+        "Street"
+      ],
+      "reported_count": 7,
+      "enumeration_complete": true,
+      "distribution": {
+        "Vintage": 279,
+        "Sporty": 160,
+        "Workwear": 29,
+        "Tailored": 27,
+        "Classic": 698,
+        "Preppy": 71,
+        "Street": 155
+      }
+    }
+  },
+  "consumer_needs_taxonomy": {
+    "Functional": {
+      "Protection": [
+        {
+          "attribute": "Warmth",
+          "label_ko": "보온성"
+        },
+        {
+          "attribute": "Durability",
+          "label_ko": "내구성"
+        }
+      ],
+      "Mobility": [
+        {
+          "attribute": "Lightweight",
+          "label_ko": "가벼움"
+        },
+        {
+          "attribute": "Elasticity",
+          "label_ko": "신축성"
+        }
+      ],
+      "Comfort": [
+        {
+          "attribute": "Waterproof",
+          "label_ko": "방수"
+        },
+        {
+          "attribute": "Windproof",
+          "label_ko": "방풍"
+        }
+      ],
+      "Donning": [
+        {
+          "attribute": "Ease",
+          "label_ko": "착용 여유와 편안함"
+        },
+        {
+          "attribute": "Easy maintenance",
+          "label_ko": "관리 편의"
+        }
+      ]
+    },
+    "Expressive": {
+      "Role": [
+        {
+          "attribute": "Teen fashion",
+          "label_ko": "10대 패션 성향"
+        },
+        {
+          "attribute": "Young adult fashion",
+          "label_ko": "20대 패션 성향"
+        },
+        {
+          "attribute": "Mature fashion",
+          "label_ko": "30대 패션 성향"
+        },
+        {
+          "attribute": "Working professional",
+          "label_ko": "직장인 옷차림"
+        },
+        {
+          "attribute": "Student",
+          "label_ko": "학생 옷차림"
+        }
+      ],
+      "TPO": [
+        {
+          "attribute": "Business wear",
+          "label_ko": "업무복"
+        },
+        {
+          "attribute": "Wedding guest wear",
+          "label_ko": "하객복"
+        },
+        {
+          "attribute": "Sportswear",
+          "label_ko": "운동복"
+        },
+        {
+          "attribute": "Loungewear",
+          "label_ko": "실내 휴식복"
+        },
+        {
+          "attribute": "Travel wear",
+          "label_ko": "여행복"
+        }
+      ],
+      "Status": [
+        {
+          "attribute": "Good value for money",
+          "label_ko": "가격 대비 품질"
+        },
+        {
+          "attribute": "Luxury",
+          "label_ko": "고급성"
+        }
+      ],
+      "Self-esteem": [
+        {
+          "attribute": "Positive feedback",
+          "label_ko": "주변의 긍정적 반응"
+        }
+      ]
+    },
+    "Aesthetic": {
+      "Body/garment relationship": [
+        {
+          "attribute": "Opaque",
+          "label_ko": "비침 방지"
+        },
+        {
+          "attribute": "Groin coverage",
+          "label_ko": "가랑이 부위 강조 완화"
+        },
+        {
+          "attribute": "Waist contouring",
+          "label_ko": "허리선 보정"
+        },
+        {
+          "attribute": "Hip contouring",
+          "label_ko": "힙 라인 강조"
+        },
+        {
+          "attribute": "Leg contouring",
+          "label_ko": "길고 날씬한 다리선 연출"
+        }
+      ],
+      "Matching item": [
+        {
+          "attribute": "Sneakers",
+          "label_ko": "운동화와의 매칭"
+        },
+        {
+          "attribute": "Sandals",
+          "label_ko": "샌들과의 매칭"
+        },
+        {
+          "attribute": "Formal shoes",
+          "label_ko": "구두와의 매칭"
+        }
+      ],
+      "Design principle": [
+        {
+          "attribute": "Trends",
+          "label_ko": "유행 반영"
+        }
+      ]
+    }
+  },
+  "garment_types": [
+    {
+      "value": "Top",
+      "label_ko": "상의"
+    }
+  ],
+  "execution": {
+    "supported_garment_types": [
+      "Top"
+    ],
+    "accept_inferred_product_pi": true,
+    "price_currency": null,
+    "price_boundary_inclusion": null
+  },
+  "counts": {
+    "products": 1098,
+    "product_information_categories": 12,
+    "consumer_needs_attributes": 30,
+    "values": {
+      "Type": 13,
+      "Brand": 193,
+      "Color": 18,
+      "Tone": 3,
+      "Pattern": 8,
+      "Fit": 4,
+      "Silhouette": 2,
+      "Length": 5,
+      "Texture": 10,
+      "Fabric": 10,
+      "Detail": 13,
+      "Style": 7
+    }
+  },
+  "source_boundaries": [
+    "confirmed는 구조화 필드·판매자 문구 키워드, derived는 고정 규칙, inferred는 DeepSeek 텍스트·이미지 해석이다.",
+    "inferred 값은 상품 Map에서 status=inferred·model_interpretation으로 남는다. accept_inferred_product_pi=true는 실행 선택이며 검증 라벨이 아니다.",
+    "Fabric은 사진으로 갱신하지 않는다(ADR 0013 결정 8)."
+  ]
+}

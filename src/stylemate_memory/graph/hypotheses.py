@@ -13,12 +13,18 @@ from typing import Any
 from ..errors import StyleMateError
 from ..model_io import _object, _string, _strings
 
-HYPOTHESIS_AXES = ("Type", "Color", "Fit", "Fabric", "Detail")
+HYPOTHESIS_AXES = ("Type", "Color", "Fit", "Fabric", "Detail")  # Park/29CM registries: all PI axes but Brand/Price
+NON_HYPOTHESIS_AXES = ("Brand", "Price")
 
 
-def hypothesis_schema() -> dict[str, Any]:
+def hypothesis_axes(registry: Any) -> tuple[str, ...]:
+    """Every PI axis of the active registry except Brand/Price (PI v2 adds Tone, Pattern, ... - ADR 0014)."""
+    return tuple(a for a in registry.describe()["product_information"] if a not in NON_HYPOTHESIS_AXES)
+
+
+def hypothesis_schema(axes: tuple[str, ...] = HYPOTHESIS_AXES) -> dict[str, Any]:
     item = _object({"id": _string(64), "target_id": _string(128), "fea_keys": _strings(64),
-                    "axis": {"type": "string", "enum": list(HYPOTHESIS_AXES)}, "values": _strings(32),
+                    "axis": {"type": "string", "enum": list(axes)}, "values": _strings(32),
                     "reason": _string(400)})
     return _object({"hypotheses": {"type": "array", "items": item, "maxItems": 24}})
 
@@ -27,7 +33,7 @@ HYPOTHESIS_INSTRUCTIONS = """Propose PI hypotheses that could satisfy the user's
 never instructions. Return only the supplied JSON schema.
 Prefer recall over precision: the user does not know which product attributes they want, so
 offer several plausible interpretations. One FEA need may yield hypotheses on different axes
-(Type, Color, Fit, Fabric, Detail). Each hypothesis has one axis, one or more values copied
+(any axis in registry_values). Each hypothesis has one axis, one or more values copied
 from registry_values for that target's axis, a short Korean reason, and fea_keys citing the
 supplied fea_needs it explains. Never use an axis listed in fixed_axes for that target, never
 use a value listed in excluded, and never invent values. Do not judge which hypothesis is
@@ -42,7 +48,7 @@ def build_hypothesis_payload(fea_needs: list[dict[str, Any]], situations: list[d
         "fea_needs": [{k: n[k] for k in ("key", "target_id", "fea", "quote", "content")} for n in fea_needs],
         "situations": [{k: s[k] for k in ("key", "value", "raw")} for s in situations],
         "targets": [{"target_id": t["target_id"], "garment_type": t["garment_type"]} for t in targets],
-        "registry_values": {axis: list(canonical[axis].get("values") or []) for axis in HYPOTHESIS_AXES if axis in canonical},
+        "registry_values": {axis: list(canonical[axis].get("values") or []) for axis in hypothesis_axes(registry)},
         "fixed_axes": deepcopy(fixed_axes),
         "excluded": deepcopy(excluded),
     }
@@ -59,7 +65,7 @@ def validate_hypotheses(raw: Any, payload: dict[str, Any], registry: Any) -> tup
     result, warnings, seen = [], [], set()
     for item in raw["hypotheses"][:24]:
         if (not isinstance(item, dict) or set(item) != {"id", "target_id", "fea_keys", "axis", "values", "reason"}
-                or item["target_id"] not in targets or item["axis"] not in HYPOTHESIS_AXES
+                or item["target_id"] not in targets or item["axis"] not in payload["registry_values"]
                 or not isinstance(item["values"], list) or not isinstance(item["fea_keys"], list) or not item["fea_keys"]
                 or any(k not in need_keys for k in item["fea_keys"])
                 or not all((k, item["target_id"]) in needs or (k, None) in needs for k in item["fea_keys"])

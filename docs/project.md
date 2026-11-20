@@ -135,12 +135,13 @@ PI 7개 축과 FEA 분류를 차용한 출처는 Park, H., Kim, S., Choi, Y., & 
 
 ### 현재 실행 사전
 
-실행 사전은 두 가지이며 `--registry`/`STYLEMATE_REGISTRY`로 명시적으로 고른다. 기본값은 Park 사전이다.
+실행 사전은 세 가지이며 `--registry`/`STYLEMATE_REGISTRY`로 명시적으로 고른다. 기본값은 Park 사전이다.
 
 | 버전 | 정본 | 범위 |
 |---|---|---|
 | `park-2025-source-v1` (기본) | [park-2025-feature-map.json](../output/feature-map/park-2025-feature-map.json) | 논문 차용 값, Pants만, confirmed 상품 값만 비교 |
 | `lumi-29cm-v1` | [lumi-29cm-v1.json](../output/feature-map/lumi-29cm-v1.json) | 29CM 수집 기반 한국어 value, 상·하의 10개 품목, 모델 보완값도 비교([ADR 0012](adr/0012-collected-29cm-value-dictionary.md)) |
+| `lumi-pi-v2-top` | [lumi-pi-v2-top.json](../output/feature-map/lumi-pi-v2-top.json) | PI v2 11축(+Brand) 영어 value, 상의만(품목 `Top` 1개), 모델 보완값도 비교([ADR 0014](adr/0014-crawled-catalog-pi-v2.md)). graph 엔진의 가설·이유 축은 사전의 축을 그대로 읽는다 |
 
 [registry.py](../src/stylemate_memory/registry.py)의 `load_registry(version)`이 실행 사전을 공급한다. [패키지 resources](../src/stylemate_memory/resources)의 JSON은 정본의 생성 사본이다. `python3 scripts/sync_feature_registry.py`로 동기화하며 수동 편집하지 않는다. 전체 enum을 이 문서에 복제하지 않는다.
 
@@ -234,6 +235,19 @@ PYTHONPATH=src python3 -m stylemate_memory.cli catalog-map
 PYTHONPATH=src python3 -m stylemate_memory.consumer --provider opencode-go --endpoint <확인한 https 주소>
 ```
 
+**PI v2 상의(`lumi-pi-v2-top`).** 저장소 안 `data/`(커밋 제외)의 수집 결과로 상의 카탈로그를 만든다. 빈 축은 규칙 → DeepSeek 텍스트 보완 → DeepSeek 첫 이미지+텍스트 보완 순으로 채우고, 모델 값은 inferred로 남는다. Fabric은 사진으로 채우지 않는다. 실행 DB와 이미지 root는 저장소 밖이어야 하므로 이미지를 실행 폴더로 복사한다.
+
+```sh
+python3 scripts/fill_pi_v2_text.py --data data      # 실제 DeepSeek 호출, OPENCODE_API_KEY 필요
+python3 scripts/build_lumi_pi_v2.py --data data
+python3 scripts/fill_pi_v2_image.py --data data     # 상의 빈 축만, 이미지 768px 축소(Pillow 있을 때), data/raw/fills_image/에 캐시
+python3 scripts/build_lumi_pi_v2.py --data data --export-top && python3 scripts/sync_feature_registry.py
+export STYLEMATE_REGISTRY=lumi-pi-v2-top STYLEMATE_IMAGE_ROOT=<저장소 밖>/images   # data/images의 상의 이미지를 같은 상대 경로로 복사
+PYTHONPATH=src python3 -m stylemate_memory.cli catalog-import --file data/catalog/lumi-pi-v2-top-import.jsonl
+PYTHONPATH=src python3 -m stylemate_memory.cli catalog-map
+PYTHONPATH=src python3 -m stylemate_memory.consumer --engine graph --provider opencode-go --endpoint <확인한 https 주소>
+```
+
 시작 화면은 사전이 지원하는 품목을 고르게 하고, 상품 카드는 현재 Map의 PI 값을 보여준다. 이 흐름은 실제 86개 상품과 각본 모델 응답으로 적재→Map→검색→FEA→Fit 가설 비교→선택→종료→장기 동의까지 확인했다. 실제 DeepSeek 응답 품질은 별도 평가 대상이다.
 
 고정 한국어 요청 8개(바지 3·니트·티셔츠·스커트·셔츠·후디)를 새 요청→내용·조건 확인 수락→탐색→종료로 돌려 해석 문구·조건·카드·비교를 JSON으로 남기는 점검은 `PYTHONPATH=src python3 scripts/smoke_real_flow.py --catalog "$DATA/lumi-catalog-complete-v1.jsonl" --image-root "$DATA/images" --output <저장소 밖 경로>.json`이다. 기본 `--provider fake`는 호출 없이 배선만 확인하고, `--provider opencode-go`는 실제 호출이다. 품질 벤치마크가 아니라 끝까지 도는지 보는 점검이다. `--trace`는 시나리오별 모델 원 응답·검증 오류·탐색 보류 이유를 같은 JSON에 남긴다. 탐색 중 근거 없는 일반 PI 제안이나 직접 조건과 충돌하는 제안 하나는 실행 조건이 되지 않고 버려지며, 나머지 제안으로 탐색을 계속한다. 같은 이유로 `questions` 누락은 빈 질문으로, FEA 제약이 아닌 id를 단 가설 제안은 그 제안만 버린다(권한·hard·인용 위반은 여전히 응답 전체 거부). 후보 카드의 차이 비교는 조건 일치 점수가 카드 수 번째 후보 이상인 상품 안에서만 고르고, 내부 메모(`[q001]`·상태 코드)는 새 질문으로 다시 보이지 않는다.
@@ -252,7 +266,7 @@ PYTHONPATH=src python3 -m stylemate_memory.consumer --provider opencode-go --end
 | OPENCODE_API_KEY | opencode-go를 명시적으로 선택할 때만 조회 |
 | STYLEMATE_OPENAI_MODEL | openai 경로의 `--model`, 기본 gpt-6-luna. 새 실제 평가에는 사용하지 않음 |
 | STYLEMATE_PORT | `--port`, 기본 8766 |
-| STYLEMATE_REGISTRY | `--registry park-2025-source-v1 / lumi-29cm-v1`, 기본 park. 카탈로그 적재·Map·서버에 같은 값을 쓴다 |
+| STYLEMATE_REGISTRY | `--registry park-2025-source-v1 / lumi-29cm-v1 / lumi-pi-v2-top`, 기본 park. 카탈로그 적재·Map·서버에 같은 값을 쓴다 |
 | OPENAI_API_KEY | openai를 명시적으로 선택할 때만 조회 |
 | STYLEMATE_ENGINE | `--engine legacy / graph`, 기본 legacy. graph는 선택 의존성 `pip install -e '.[graph]'`(langgraph)이 필요하며, 체크포인트는 메모리 DB 옆 `<이름>.graph.sqlite3`에 둔다 |
 

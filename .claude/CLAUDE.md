@@ -51,9 +51,9 @@ PYTHONPATH=src python3 -m stylemate_memory.cli catalog-map
 PYTHONPATH=src python3 -m stylemate_memory.consumer --provider fake   # http://127.0.0.1:8766
 ```
 
-DB·이미지·수집 원본은 반드시 저장소 밖 경로를 쓴다. 기본 provider `fake`는 외부 호출이 없다. 실제 모델(`opencode-go`, `openai`)과 Codex 기반 관찰 도구는 사용자가 요청한 실행에서만 쓴다.
+실행 DB는 저장소 밖 경로를 쓴다. 수집 원본·이미지는 저장소 안 `data/`(gitignore, [ADR 0014](../docs/adr/0014-crawled-catalog-pi-v2.md))에 둔다. 기본 provider `fake`는 외부 호출이 없다. 실제 모델(`opencode-go`, `openai`)과 Codex 기반 관찰 도구는 사용자가 요청한 실행에서만 쓴다.
 
 ## 데이터 위치
 
-- 수집 원본은 저장소 밖 `LUMI-data/`(사용자 Mac, 예: `~/Documents/LUMI-data`)에 둔다. 사이트별 `summary.json`에 PI 7축 채움률이 있다.
+- 수집 원본·첫 이미지는 저장소 안 `data/`(커밋 제외)에 둔다: `data/raw/<출처>/`, `data/images/<출처>/`, `data/catalog/lumi-pi-v2.jsonl`(+ `-report.json` 축별 채움률). 만드는 명령은 `scripts/fetch_shopify_first_images.py`, `scripts/build_lumi_pi_v2.py`.
 - 저장소에는 스크립트와 요약만 올린다. 참여자 정보·동의서·원시 응답·실행 DB는 커밋하지 않는다.

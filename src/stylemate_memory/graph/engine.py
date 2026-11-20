@@ -23,7 +23,8 @@ from ..errors import StyleMateError
 from . import grid as grid_plan
 from . import intent as it
 from . import scoring
-from .hypotheses import HYPOTHESIS_INSTRUCTIONS, build_hypothesis_payload, hypothesis_schema, validate_hypotheses
+from .hypotheses import (HYPOTHESIS_INSTRUCTIONS, NON_HYPOTHESIS_AXES, build_hypothesis_payload, hypothesis_schema,
+                         validate_hypotheses)
 from .parse import PARSE_INSTRUCTIONS, build_payload, parse_schema_v2, to_v1_extraction, validate_parse_v2
 
 
@@ -150,7 +151,7 @@ class GraphEngine:
         chosen = [c for c in cards if c["candidate_id"] in selected]
         rest = [c for c in cards if c["candidate_id"] not in selected]
         axes = []
-        for axis in ("Type", "Color", "Fit", "Fabric", "Detail"):
+        for axis in sorted({a for c in cards for a in c["facts"]} - set(NON_HYPOTHESIS_AXES)):
             a = {v for c in chosen for v in c["facts"].get(axis) or []}
             b = {v for c in rest for v in c["facts"].get(axis) or []}
             if a and a != b:
@@ -245,7 +246,7 @@ class GraphEngine:
                                            it.fixed_axes(intent),
                                            [{"target_id": t, "axis": a, "values": v} for (t, a), v in excluded.items()])
         try:
-            raw = self.bridge.complete(HYPOTHESIS_INSTRUCTIONS, payload, hypothesis_schema())
+            raw = self.bridge.complete(HYPOTHESIS_INSTRUCTIONS, payload, hypothesis_schema(tuple(payload["registry_values"])))
             hypotheses, warnings = validate_hypotheses(raw, payload, self.bridge.registry)
         except Exception:
             intent["warnings"] = (intent["warnings"] + ["hypotheses_unavailable"])[-50:]

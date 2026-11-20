@@ -6,8 +6,8 @@ from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parents[1]
-# Park 원문 사전과 29CM 수집 기반 value 사전(scripts/build_29cm_registry.py가 생성).
-NAMES = ("park-2025-feature-map.json", "lumi-29cm-v1.json")
+# Park 원문 사전, 29CM 수집 기반 value 사전(scripts/build_29cm_registry.py), PI v2 상의 사전(scripts/build_lumi_pi_v2.py --export-top).
+NAMES = ("park-2025-feature-map.json", "lumi-29cm-v1.json", "lumi-pi-v2-top.json")
 
 
 def main() -> int:

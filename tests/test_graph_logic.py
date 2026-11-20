@@ -73,6 +73,23 @@ class ParseTurnTests(unittest.TestCase):
         self.assertEqual(parsed["wishes"][1]["pi"], [])  # only the bad binding is dropped
         self.assertIn("pi_binding_dropped", parsed["warnings"])
 
+    def test_unique_fea_tag_under_wrong_subcategory_is_moved_unknown_tag_dropped(self):
+        body, registry = payload()
+        raw = {"situations": [], "wishes": [
+            wish(fea=[{"category": "Functional", "subcategory": "Comfort", "tag": "Ease"}],
+                 applies={"mode": "request", "situation_ids": []}),
+            wish(key="w2", fea=[{"category": "Functional", "subcategory": "Comfort", "tag": "Softness"}],
+                 applies={"mode": "request", "situation_ids": []}),
+            wish(key="w3", fea=[{"category": "Functional", "subcategory": "Donning", "tag": "착용 여유와 편안함"}],
+                 applies={"mode": "request", "situation_ids": []})], "questions": []}
+        parsed = validate_parse_v2(raw, body, registry, [])
+        ease = [{"category": "Functional", "subcategory": "Donning", "tag": "Ease"}]
+        self.assertEqual(parsed["wishes"][0]["fea"], ease)
+        self.assertEqual(parsed["wishes"][1]["fea"], [])
+        self.assertEqual(parsed["wishes"][2]["fea"], ease)  # the copied label_ko maps to its tag
+        self.assertIn("fea_path_repaired", parsed["warnings"])
+        self.assertIn("fea_binding_dropped", parsed["warnings"])
+
     def test_broken_situation_reference_is_held_not_widened(self):
         body, registry = payload()
         parsed = validate_parse_v2({"situations": [], "wishes": [wish(applies={"mode": "situations", "situation_ids": ["s9"]})],

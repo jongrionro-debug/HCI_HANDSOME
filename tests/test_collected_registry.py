@@ -9,7 +9,8 @@ import unittest.mock
 
 from scripts import build_29cm_registry as build
 from stylemate_memory.catalog_mapping import build_product_map
-from stylemate_memory.contracts import COLLECTED_29CM_REGISTRY_VERSION, V1_REGISTRY_VERSION
+from stylemate_memory.contracts import COLLECTED_29CM_REGISTRY_VERSION, LUMI_PI_V2_TOP_REGISTRY_VERSION, V1_REGISTRY_VERSION
+from stylemate_memory.graph.hypotheses import HYPOTHESIS_AXES, hypothesis_axes
 from stylemate_memory.errors import StyleMateError
 from stylemate_memory.product_search import _evaluate
 from stylemate_memory.registry import load_registry, product_fact_statuses
@@ -119,6 +120,53 @@ class CollectedRegistryTests(unittest.TestCase):
                       "match": "any", "polarity": "prefer", "strength": "soft"}}
         hit = _evaluate(product_map, [constraint], self.registry, "Pants")
         self.assertEqual((hit["matched_constraint_ids"], hit["score"]), (["fit"], 1.0))
+
+
+class PIV2TopRegistryTests(unittest.TestCase):
+    """lumi-pi-v2-top (ADR 0014): tops only, 11 English PI axes + Brand, axes read from the registry."""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.registry = load_registry(LUMI_PI_V2_TOP_REGISTRY_VERSION)
+        cls.pi = cls.registry.describe()["product_information"]
+
+    def test_axes_and_hypothesis_space_follow_the_registry(self):
+        self.assertEqual(list(self.pi), ["Type", "Brand", "Color", "Tone", "Pattern", "Fit", "Silhouette", "Length",
+                                         "Texture", "Fabric", "Detail", "Style"])
+        self.assertEqual(self.registry.describe()["execution"]["supported_garment_types"], ["Top"])
+        self.assertEqual(product_fact_statuses(LUMI_PI_V2_TOP_REGISTRY_VERSION), ("confirmed", "inferred"))
+        self.assertEqual(hypothesis_axes(self.registry), tuple(a for a in self.pi if a != "Brand"))
+        self.assertEqual(hypothesis_axes(load_registry(V1_REGISTRY_VERSION)), HYPOTHESIS_AXES)
+        binding = {"domain": "PI", "feature": "Pattern", "values": ["Stripe"], "match": "any",
+                   "polarity": "prefer", "strength": "soft"}
+        self.registry.validate_binding(binding, "Top")
+        with self.assertRaises(StyleMateError):
+            self.registry.validate_binding(binding | {"values": ["줄무늬"]}, "Top")
+        with self.assertRaises(StyleMateError):
+            self.registry.validate_binding(binding, "Pants")
+
+    def test_export_shape_maps_confirmed_metadata_and_inferred_labels(self):
+        evidence = "Wide, square body with dropped shoulders in photo"
+        row = {"format_version": "lumi-catalog-v1", "product_id": "shop-1",
+               "source": {"source_id": "shop", "url": "https://example.invalid/products/1",
+                          "collected_at": "2026-11-19T07:45:50+00:00"},
+               "title": "SYNTHETIC TEE", "description": None, "garment_type": "Top",
+               "raw_metadata": {"type": ["T-shirt"], "pattern": ["Stripe"], "tone": ["Dark"], "price_text": "75.00",
+                                "pi_inferred": {"Fit": {"values": ["Oversized"], "method": "image_model",
+                                                        "evidence": evidence}}},
+               "images": [],
+               "labels": [{"observation": {"domain": "PI", "feature": "Fit", "values": ["Oversized"]},
+                           "status": "inferred",
+                           "provenance": [{"kind": "model_interpretation",
+                                           "source_field": "raw_metadata.pi_inferred.Fit.evidence", "quote": evidence,
+                                           "verifier": None, "evidence_ref": None, "verified_at": None}]}]}
+        product_map = build_product_map(deepcopy(row), raw_version=1, registry=self.registry, pi_only=True)
+        statuses = {a["observation"]["feature"]: (a["status"], a["observation"]["values"]) for a in product_map["assertions"]
+                    if a["observation"]["values"]}
+        self.assertEqual(statuses["Pattern"], ("confirmed", ["Stripe"]))
+        self.assertEqual(statuses["Tone"], ("confirmed", ["Dark"]))
+        self.assertEqual(statuses["Fit"], ("inferred", ["Oversized"]))
+        self.assertNotIn("Price", statuses)
 
 
 if __name__ == "__main__":

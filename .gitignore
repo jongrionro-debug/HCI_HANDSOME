@@ -23,5 +23,5 @@ dist/
 
 # 참여자 정보·동의서·원시 응답은 저장소 밖에서 관리
 private/
-data/raw/
-data/private/
+# 수집 원본·이미지(ADR 0014): 저장소 안 data/에 두되 커밋하지 않음
+data/

@@ -164,6 +164,13 @@ def validate_parse_v2(raw: Any, payload: dict[str, Any], registry: Any,
     known_situations = {s["id"] for s in situations} | {s["id"] for s in previous_situations}
     canonical = registry.describe()
     pi_values = {name: set(meta.get("values") or []) for name, meta in canonical["product_information"].items()}
+    # FEA tags and their Korean labels are unique across the taxonomy, so a known tag (or label_ko,
+    # which the model often copies) under the wrong path is moved to its single canonical path.
+    fea_paths = {}
+    for category, subcategories in canonical["consumer_needs_taxonomy"].items():
+        for subcategory, entries in subcategories.items():
+            for entry in entries:
+                fea_paths[entry["attribute"]] = fea_paths[entry["label_ko"]] = (category, subcategory, entry["attribute"])
     wishes: list[dict[str, Any]] = []
     held: list[dict[str, Any]] = []
     wish_keys: set[str] = set()
@@ -220,6 +227,10 @@ def validate_parse_v2(raw: Any, payload: dict[str, Any], registry: Any,
             try:
                 if not isinstance(binding, dict) or set(binding) != {"category", "subcategory", "tag"}:
                     raise ValueError
+                path = fea_paths.get(binding["tag"])
+                if path and (binding["category"], binding["subcategory"], binding["tag"]) != path:
+                    binding = {"category": path[0], "subcategory": path[1], "tag": path[2]}
+                    warnings.append("fea_path_repaired")
                 registry.validate_binding({"domain": "FEA", **binding, "polarity": "prefer", "strength": "soft"}, garment)
             except Exception:
                 warnings.append("fea_binding_dropped")

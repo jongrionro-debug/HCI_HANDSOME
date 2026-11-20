@@ -17,7 +17,7 @@ from typing import Any, get_args
 from .contracts import (
     BindingSpec, FEAObservation, FEAValue, FeaturePath, LEGACY_REGISTRY_VERSION,
     MapStatus, PIObservation, PIValue, Polarity, Strength, Target,
-    COLLECTED_29CM_REGISTRY_VERSION, V1_REGISTRY_VERSION, V1_REGISTRY_VERSIONS, validate_ref,
+    COLLECTED_29CM_REGISTRY_VERSION, LUMI_PI_V2_TOP_REGISTRY_VERSION, V1_REGISTRY_VERSION, V1_REGISTRY_VERSIONS, validate_ref,
 )
 from .errors import StyleMateError
 
@@ -706,9 +706,33 @@ def _validate_collected_resource(document: Any) -> None:
         raise ValueError("FEA count")
 
 
+def _validate_pi_v2_resource(document: Any) -> None:
+    """Structure of the PI v2 tops dictionary (ADR 0014): axes listed in ``axis_order``, English values."""
+    if not isinstance(document, dict) or document.get("version") != LUMI_PI_V2_TOP_REGISTRY_VERSION:
+        raise ValueError("registry version")
+    pi = document["product_information"]
+    if not isinstance(pi, dict) or list(pi) != document["axis_order"] or "Type" not in pi or "Price" in pi:
+        raise ValueError("PI axes")
+    for entry in pi.values():
+        if (not isinstance(entry["label_ko"], str) or entry["enumeration_complete"] is not True
+                or not _string_list(entry["values"]) or entry["reported_count"] != len(entry["values"])):
+            raise ValueError("PI enumeration")
+    supported = document["execution"]["supported_garment_types"]
+    by_type = pi["Type"]["values_by_garment_type"]
+    if not _string_list(supported) or set(by_type) != set(supported):
+        raise ValueError("garment types")
+    if any(not set(values) <= set(pi["Type"]["values"]) for values in by_type.values()):
+        raise ValueError("Type by garment")
+    tags = [entry["attribute"] for subcategories in document["consumer_needs_taxonomy"].values()
+            for entries in subcategories.values() for entry in entries]
+    if not _string_list(tags) or len(tags) != 30:
+        raise ValueError("FEA count")
+
+
 _RESOURCES = {
     V1_REGISTRY_VERSION: ("park-2025-feature-map.json", _validate_resource),
     COLLECTED_29CM_REGISTRY_VERSION: ("lumi-29cm-v1.json", _validate_collected_resource),
+    LUMI_PI_V2_TOP_REGISTRY_VERSION: ("lumi-pi-v2-top.json", _validate_pi_v2_resource),
 }
 
 

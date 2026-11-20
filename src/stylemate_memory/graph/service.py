@@ -95,9 +95,12 @@ class GraphBridge:
             records = catalog.export_records()
             ids = [r["product_id"] for r in records]
             images = [i["image_id"] for r in records for i in r["images"][:1] if i["kind"] == "local"]
-            versions = catalog.current_versions(ids, images)
-            maps = {p["product_id"]: p["map_version"] for p in versions["products"]}
-            image_versions = {i["image_id"]: i["version"] for i in versions["images"]}
+            # current_versions accepts at most 256 IDs per call; real catalogs are larger (ADR 0014).
+            maps, image_versions = {}, {}
+            for start in range(0, max(len(ids), len(images)), 256):
+                versions = catalog.current_versions(ids[start:start + 256], images[start:start + 256])
+                maps.update({p["product_id"]: p["map_version"] for p in versions["products"]})
+                image_versions.update({i["image_id"]: i["version"] for i in versions["images"]})
             views = []
             for record in records:
                 try:
