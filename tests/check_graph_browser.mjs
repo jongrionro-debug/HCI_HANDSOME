@@ -54,7 +54,7 @@ try {
   for (const id of wide) await page.locator(`[data-action="select"][data-card="${id}"]`).click();
   await page.locator(`[data-action="like"][data-card="${wide[0]}"][data-feature="Fit"]`).click();
   assert.equal(await page.locator(`[data-action="like"][data-card="${wide[0]}"][data-feature="Fit"]`).getAttribute("aria-pressed"), "true");
-  await page.locator('[data-form="feedback"] button.primary').click();
+  await page.locator('[data-submit="grid"]').click();
   await page.waitForFunction(() => document.querySelector(".kept-mark"));
   view = await rpc("inspect");
   const sent = commands.findLast(c => c.action.op === "grid_feedback");
@@ -73,7 +73,7 @@ try {
   await page.locator('[data-action="all-bad"]').click();
   assert.equal(await page.locator('.card:not(.kept) [aria-pressed="true"][data-action="select"]').count(), 0);
   assert.equal(await page.locator('.card.kept [aria-pressed="true"][data-action="select"]').count(), keptN);
-  await page.locator('[data-form="feedback"] button.primary').click();
+  await page.locator('[data-submit="grid"]').click();
   await page.waitForFunction(() => document.querySelector('[data-action="all-bad"]')?.getAttribute("aria-pressed") === "false");
   view = await rpc("inspect");
   assert.equal(commands.findLast(c => c.action.op === "grid_feedback").action.all_bad, true);
@@ -83,7 +83,7 @@ try {
   view = await rpc("inspect");
   const grid3 = view.intent.last_grid.cards;
   for (const c of grid3.filter(c => c.facts.Fit?.[0] === "Wide" && c.slot !== "kept")) await page.locator(`[data-action="select"][data-card="${c.candidate_id}"]`).click();
-  await page.locator('[data-form="feedback"] button.primary').click();
+  await page.locator('[data-submit="grid"]').click();
   const pin = page.locator('.chip [data-adjust="pin"]').first();
   await pin.waitFor();
   await pin.click();

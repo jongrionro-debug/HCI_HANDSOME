@@ -126,7 +126,7 @@ export function mountConsumer(root, adapter, { fixture = false, scenarios = {} }
       ${button("adjust", chip.pinned ? "고정 해제" : "고정", `data-adjust="${chip.pinned ? "unpin" : "pin"}" data-key="${esc(chip.key)}" aria-pressed="${chip.pinned}" class="quiet"`, !canFeedback())}
       ${button("adjust", "빼기", `data-adjust="remove" data-key="${esc(chip.key)}" class="quiet" aria-label="${esc(chip.label_ko)} ${esc(chip.value)} 빼기"`, !canFeedback())}</li>`).join("");
     const m = g.memory ?? { chips: [], links: [], mode: "normal" };
-    const memoryBlock = m.chips.length || m.links.length ? `<section class="memory-start ${m.mode === "dim" ? "dim" : ""}" aria-label="기억으로 시작"><h3>이렇게 시작할게요</h3>
+    const memoryBlock = m.chips.length || m.links.length ? `<section class="memory-start ${m.mode === "dim" ? "dim" : ""}" aria-label="기억으로 시작"><h3>기억에서 이렇게 시작했어요</h3>
       ${m.links.map(link => `<p class="hint">비슷한 상황: ${esc(link.past)} ${button("adjust", link.enabled ? "연결 끄기" : "다시 연결", `data-adjust="${link.enabled ? "link_off" : "link_on"}" class="quiet"`, !canFeedback())}</p>`).join("")}
       ${m.chips.length ? `<ul class="chips">${m.chips.map(chip => `<li class="chip memory-chip ${chip.enabled ? "" : "off"}"><span>${esc(chip.text)}</span>
         ${button("adjust", chip.enabled ? "×" : "다시 켜기", `data-adjust="${chip.enabled ? "memory_off" : "memory_on"}" data-key="${esc(chip.memory_id)}" class="quiet" aria-label="${chip.enabled ? "이 기억 끄기" : "이 기억 다시 켜기"}"`, !canFeedback())}</li>`).join("")}</ul>
@@ -139,7 +139,7 @@ export function mountConsumer(root, adapter, { fixture = false, scenarios = {} }
     const reason = g.reason_prompt ? `<section class="question" aria-label="좋았던 점"><h3>고른 이미지에서 어떤 점이 좋았나요?</h3><p class="hint">선택 사항이에요. 하나를 누르면 그 속성만 반영해요.</p>
       <div class="actions">${g.reason_prompt.axes.map(axis => button("adjust", esc(axis.label_ko), `data-adjust="reason" data-feature="${esc(axis.feature)}"`, !canFeedback())).join("")}</div></section>` : "";
     const directions = g.hypotheses.length ? `<p class="hint">살펴보는 방향: ${g.hypotheses.map(h => `${esc(h.label_ko)} ${esc(h.values.join("·"))}`).join(" / ")}</p>` : "";
-    return `<section class="graph-panel" aria-label="지금까지 이해한 내용"><h3>지금까지 이해한 내용</h3>
+    return `<section class="graph-panel" aria-label="LUMI가 이해한 것"><h3>LUMI가 이해한 것</h3>
       ${g.situations.length ? `<p class="hint">상황: ${g.situations.map(s => esc(s.raw || s.value)).join(", ")}</p>` : ""}
       ${chips ? `<ul class="chips">${chips}</ul>` : '<p class="hint">이미지를 몇 번 고르면 반복해서 고른 특징이 여기에 나타나요.</p>'}
       ${directions}
@@ -195,29 +195,50 @@ export function mountConsumer(root, adapter, { fixture = false, scenarios = {} }
   function garmentLabel(value) {
     return garmentOptions().find(g => g.value === value)?.label_ko ?? value;
   }
+  function contextMarkup() {
+    if (!graphMode() || panel) return "";
+    const g = state.graph;
+    const items = [...g.situations.map(s => s.raw || s.value), { men: "남성", women: "여성" }[g.gender],
+      garmentLabel(state.request.targets?.[0]?.garment_type ?? "")].filter(Boolean);
+    return items.length ? `<div class="context" aria-label="이번 요청">${items.map(item => `<span>${esc(item)}</span>`).join("")}</div>` : "";
+  }
+  function longTermMemories() {
+    return state.memories.filter(m => m.scope === "long_term" && !["withdrawn", "superseded"].includes(m.status));
+  }
+  function prefsMarkup() {
+    const items = longTermMemories();
+    return `<section class="prefs" aria-labelledby="prefs-title"><div><h1 id="prefs-title">평소 취향</h1>
+      <p class="section-intro">이후 활용에 동의한 문장만 여기에 있어요. 다음 요청을 시작할 때 이 문장으로 시작해요.</p></div>
+      ${items.length ? `<ul>${items.map(m => `<li>${esc(m.content)}</li>`).join("")}</ul>` : '<div class="empty-state"><h2>아직 저장한 평소 취향이 없어요</h2><p>요청을 마칠 때 고른 문장이나 한마디로 알려 준 취향이 여기에 쌓여요.</p></div>'}
+      <div class="actions">${button("teach-preferences", "한마디로 알려 주기", 'class="primary"')}${button("close-preferences", state.request ? "보던 화면으로" : "새 요청 시작")}</div>
+      <p class="hint">적은 내용은 내용 확인과 이후 활용 동의를 따로 거친 뒤에 저장돼요.</p></section>`;
+  }
   function startMarkup() {
     const onboarding = startMode === "onboarding";
     const requests = state.requests.filter(r => r.mode === "shopping" && r.status !== "expired");
-    return `<section class="start"><h1>${onboarding ? "평소 어떤 옷을 좋아하세요?" : "이번에는 어떤 옷이 필요하세요?"}</h1>
+    const remembered = onboarding ? [] : longTermMemories().slice(0, 3);
+    return `<div class="start"><section class="start-main"><h1>${onboarding ? "평소 어떤 옷을 좋아하세요?" : "이번엔 어떤 옷을 찾을까요?"}</h1>
       <p>${onboarding ? "좋아하는 스타일·색·핏을 짧게 적어 주세요. 해석한 내용을 확인한 뒤 이후 활용 여부를 따로 선택할 수 있어요." : "아이템과 입을 상황을 짧게 알려주세요. 이전 요청의 조건은 자동으로 이어지지 않아요."}</p>
       <form class="start-form" data-form="start"><div><label for="target">찾을 아이템</label><select id="target" name="target">${garmentOptions().map(g => `<option value="${esc(g.value)}">${esc(g.label_ko)}${fixture ? " · 화면 연습 대상" : ""}</option>`).join("")}</select></div>
         ${state.engine === "graph" && !onboarding ? graphStartMarkup() : ""}
         <div><label for="initial-text">${onboarding ? "평소 취향 한마디 (선택)" : "입을 상황과 원하는 느낌 (선택)"}</label>
           <textarea id="initial-text" maxlength="4000" placeholder="${onboarding ? "예: 평소에는 여유 있는 바지를 자주 입어요." : state.engine === "graph" ? "예: 깔끔하게 입을 네이비 셔츠를 찾고 있어요." : "예: 이번 회사 발표에 입을 단정한 바지를 찾고 있어요."}">${esc(initialText[startMode])}</textarea></div>
-        <div class="actions"><button class="primary" ${disabled() ? "disabled" : ""}>${onboarding ? "취향 살펴보기" : "새 요청 시작"}</button>
+        <div class="actions"><button class="primary" ${disabled() ? "disabled" : ""}>${onboarding ? "취향 살펴보기" : state.engine === "graph" ? "첫 8장 보기" : "새 요청 시작"}</button>
           ${onboarding ? button("skip-onboarding", "저장 없이 요청 시작", 'class="quiet"') : ""}
           ${state.request ? button("cancel-start", "기존 요청으로 돌아가기", 'class="quiet"') : ""}</div>
         <p class="hint">${fixture ? "합성 이미지와 문장으로 조작을 연습합니다. 실제 상품 검색이나 저장은 하지 않아요." : "처음부터 모든 조건을 정할 필요는 없어요."}</p>
-      </form>
-      ${requests.length ? `<section class="request-list"><h2>기존 요청 다시 보기</h2><p class="hint">열린 요청은 이어서 탐색하고, 종료한 요청은 요약을 볼 수 있어요.</p>${requests.map((r, index) => button("resume", `${esc(garmentLabel(r.targets?.[0]?.garment_type ?? "Pants"))} 요청 ${index + 1} · ${r.status === "open" ? "탐색 이어하기" : "종료 요약"}`, `data-request="${esc(r.id)}"`)).join("")}</section>` : ""}
-    </section>`;
+      </form></section>
+      ${remembered.length || requests.length ? `<aside class="start-aside">
+      ${remembered.length ? `<section aria-label="기억하는 취향"><h2>기억하는 취향으로 시작해요</h2><ul>${remembered.map(m => `<li>${esc(m.content)}</li>`).join("")}</ul><p class="hint">동의한 문장만 써요. 탐색 중에 하나씩 끌 수 있어요.</p></section>` : ""}
+      ${requests.length ? `<section class="request-list"><h2>이어서 보기</h2><p class="hint">열린 요청은 이어서 탐색하고, 종료한 요청은 요약을 볼 수 있어요.</p>${requests.map((r, index) => button("resume", `${esc(garmentLabel(r.targets?.[0]?.garment_type ?? "Pants"))} 요청 ${index + 1} · ${r.status === "open" ? "탐색 이어하기" : "종료 요약"}`, `data-request="${esc(r.id)}"`)).join("")}</section>` : ""}
+      </aside>` : ""}</div>`;
   }
   function graphStartMarkup() {
-    const situations = [["출근", "출근"], ["데이트", "데이트"], ["주말", "주말"], ["free", "나의 상황"]];
+    const situations = [["출근", "출근", "단정하게"], ["데이트", "데이트", "조금 신경 써서"], ["주말", "주말", "편하게"], ["free", "나의 상황", "직접 적기"]];
     return `<fieldset class="start-gender"><legend>누구 옷을 볼까요?</legend><div class="actions">${[["", "전체"], ["men", "남성"], ["women", "여성"]].map(([value, label]) =>
         button("gender", label, `data-gender="${value}" aria-pressed="${startGender === value}"`)).join("")}</div></fieldset>
-      <fieldset class="start-situation"><legend>어떤 상황에 입나요? (선택)</legend><div class="actions">${situations.map(([value, label]) =>
-        button("situation", label, `data-situation="${value}" aria-pressed="${startSituation === value}"`)).join("")}</div>
+      <fieldset class="start-situation"><legend>어떤 상황에 입나요? <span class="sit-hint">(선택)</span></legend><div class="actions">${situations.map(([value, label, hint]) =>
+        button("situation", `${label} <span class="sit-hint">${hint}</span>`, `data-situation="${value}" aria-pressed="${startSituation === value}"`)).join("")}</div>
         ${startSituation === "free" ? `<label for="free-situation">나의 상황을 짧게 적어 주세요</label><input id="free-situation" maxlength="200" placeholder="예: 팀 회식, 친구 결혼식 뒤풀이" value="${esc(freeSituation)}">` : ""}
         <p class="hint">적은 상황은 그대로 저장해 두었다가, 다음에 비슷한 상황이 오면 연결해서 보여 드려요.</p></fieldset>`;
   }
@@ -234,11 +255,11 @@ export function mountConsumer(root, adapter, { fixture = false, scenarios = {} }
         ["baseline", "평소에도"], ["situation", sm.situation_label ? `이 상황만 (${esc(sm.situation_label)})` : "이 상황만"], ["skip", "저장 안 함"]].map(([value, label]) =>
         button("summary-choice", label, `data-proposal="${esc(p.id)}" data-choice="${value}" aria-pressed="${summaryChoices.get(p.id) === value}"`,
           disabled() || (value === "situation" && !sm.situation_label))).join("")}</div></div>`).join("");
-      return `<section class="wrap-up graph-summary" aria-label="종료 요약"><h2>이번 요청에서 알게 된 점</h2>
+      return `<div class="sheet-backdrop"><section class="wrap-up graph-summary sheet" role="dialog" aria-modal="true" aria-labelledby="summary-title"><h2 id="summary-title">이번 요청에서 알게 된 점</h2>
         <p class="section-intro">다음 요청에도 쓸 문장만 골라 주세요. 고르지 않은 문장은 저장하지 않아요.</p>
         ${rows || '<p class="hint">이번에는 저장할 만한 문장이 없어요.</p>'}
         <p class="hint">[평소에도]나 [이 상황만]을 고르면 이 문장 그대로 다음 요청을 시작할 때 써요.</p>
-        <div class="actions">${button("summary-save", "저장하고 마치기", 'class="primary"')}${button("summary-cancel", "계속 탐색")}</div></section>`;
+        <div class="actions">${button("summary-cancel", "계속 탐색")}${button("summary-save", "저장하고 마치기", 'class="primary"')}</div></section></div>`;
     }
     const profile = sm.profile ?? { status: "skipped", changes: [] };
     const view = sm.profile_view;
@@ -272,6 +293,14 @@ export function mountConsumer(root, adapter, { fixture = false, scenarios = {} }
     const show = request.status !== "open" || final || request.mode === "onboarding";
     if (!show && !finalPreview) return "";
     const previewCard = state.cards.find(c => c.candidate_id === finalPreview);
+    if (previewCard && !final) {
+      const facts = (previewCard.facts ?? []).filter(f => f.values?.length);
+      return `<div class="sheet-backdrop"><section class="wrap-up sheet decide" role="dialog" aria-modal="true" aria-labelledby="decide-title">${image(previewCard)}
+        <div class="decide-body"><h2 id="decide-title">이 상품으로 결정할까요?</h2><p class="product">${esc(previewCard.title)}</p>
+        ${facts.length ? `<dl class="card-facts">${facts.map(f => `<div><dt>${esc(f.label_ko)}</dt><dd>${esc(f.values.join(", "))}</dd></div>`).join("")}</dl>` : ""}
+        <div class="actions">${button("cancel-final", "계속 탐색")}${button("confirm-final", "이 상품 확정", 'class="primary"', !canFeedback() || !comparison().set)}</div>
+        <p class="hint">확정해도 취향이 저장되지는 않아요. 저장은 마칠 때 문장별로 따로 골라요.</p></div></section></div>`;
+    }
     return `<section class="wrap-up" aria-label="선택과 마무리"><h2>${request.status === "closed" ? "탐색을 마쳤어요" : previewCard ? "이 상품으로 결정할까요?" : final ? "상품을 선택했어요" : "평소 취향을 확인해 주세요"}</h2>
       <p class="section-intro">${previewCard ? esc(previewCard.title) : final ? `${esc(selected?.title ?? "선택한 상품")} · ${request.status === "open" ? "탐색은 아직 열려 있어요." : "선택 내용은 요약에 남아요."}` : request.status === "closed" ? "상품 선택 없이 종료했어요." : "내용 확인과 이후 활용 선택을 각각 진행할 수 있어요."}</p>
       ${previewCard ? `<div class="actions">${button("confirm-final", "이 상품 확정", 'class="primary"', !canFeedback() || !comparison().set)}${button("cancel-final", "계속 탐색")}</div>` : ""}
@@ -311,8 +340,8 @@ export function mountConsumer(root, adapter, { fixture = false, scenarios = {} }
       const facts = (card.facts ?? []).filter(f => !LIKE_HIDDEN.has(f.feature) && f.values?.length);
       return `<article class="card grid-card ${selected ? "selected" : ""} ${isKept(card.candidate_id) ? "kept" : ""}">
         <button type="button" class="image-pick" data-action="select" data-card="${esc(card.candidate_id)}" aria-pressed="${selected}" aria-label="${esc(card.title)} ${selected ? "선택 해제" : "선택"}" ${off ? "disabled" : ""}>${image(card)}
-          ${isKept(card.candidate_id) ? '<span class="kept-mark">고른 상품</span>' : ""}<span class="pick-mark" aria-hidden="true">✓</span></button>
-        ${selected && facts.length ? `<div class="liked" role="group" aria-label="이 상품에서 좋았던 점">${facts.map(f => button("like", esc(f.label_ko),
+          ${isKept(card.candidate_id) ? '<span class="kept-mark">고른 상품</span>' : state.graph.slots?.[card.candidate_id] === "novel" ? '<span class="novel-mark" title="기억을 반영하지 않은 후보">새로움</span>' : ""}<span class="pick-mark" aria-hidden="true">✓</span></button>
+        ${selected && facts.length ? `<div class="liked" role="group" aria-label="이 상품에서 좋았던 점"><span class="liked-label" aria-hidden="true">좋았던 점 (선택)</span>${facts.map(f => button("like", esc(f.label_ko),
           `data-card="${esc(card.candidate_id)}" data-feature="${esc(f.feature)}" aria-pressed="${liked.includes(f.feature)}" title="${esc(f.values.join(", "))}"`, off)).join("")}
           ${state.request.mode === "shopping" ? button("preview-final", "이 상품으로 결정", `data-card="${esc(card.candidate_id)}" class="quiet"`, off) : ""}</div>` : ""}</article>`;
     }
@@ -323,12 +352,18 @@ export function mountConsumer(root, adapter, { fixture = false, scenarios = {} }
     const questions = (questionItems[0] ?? "") + (questionItems.length > 1
       ? `<details><summary>다른 확인 질문 ${questionItems.length - 1}개</summary>${questionItems.slice(1).join("")}</details>` : "");
     const onboardingText = state.request.mode === "onboarding" && !cards;
-    return `<div class="page-heading"><div><h1>${state.request.mode === "onboarding" ? "평소 취향을 찾아볼까요?" : state.request.status === "closed" ? "이번 요청의 탐색 요약" : "원하는 느낌에 가까운 쪽을 골라주세요"}</h1><p>${!isOpen() ? "이번 대화의 내용을 확인하고, 다음에도 활용할 항목을 선택할 수 있어요." : onboardingText ? "평소 취향은 글로 등록해요. 해석한 내용을 확인한 뒤 온보딩을 마치면 이후 활용 여부를 고를 수 있어요." : "하나만 골라도, 여러 장을 골라도 좋아요. 이유는 글로 덧붙일 수 있어요."}</p></div></div>
-      <div class="workspace ${isOpen() ? "open" : "closed"} ${state.comparison ? "hypothesis-comparison" : ""}"><section aria-label="이미지 비교"><h2>${!isOpen() ? "대화 종료 요약" : onboardingText ? "평소 취향 적기" : "나란히 보고 선택하기"}</h2><p class="section-intro">${!isOpen() ? "저장 없이 마치거나, 확인한 내용을 이후 요청에 활용할 수 있어요." : onboardingText ? "이 단계에서는 상품 이미지를 보여 주지 않아요. 상품은 온보딩을 마친 뒤 새 요청에서 볼 수 있어요." : fixture ? "색 영역으로 만든 합성 자료예요. 실제 상품이나 추천 결과가 아니에요." : state.comparison ? "원하는 해석을 고르거나, 글로 수정할 수 있어요." : graphMode() ? "마음에 드는 이미지를 눌러 고르고 반영하면 다음 8장이 바뀌어요." : "선택만으로 후보가 바뀌지 않아요. 글과 함께 반영할 수 있어요."}</p>
+    const grid = graphMode() && Boolean(state.graph.set_id);
+    const likedCount = d.selections.reduce((n, s) => n + (d.liked[s.candidate_id]?.length ?? 0), 0);
+    const gridBar = `<div class="grid-bar" role="group" aria-label="이번 화면 반영"><p class="grid-bar-summary" aria-live="polite"><strong>${d.allBad ? "이번 화면은 다 별로 · 고른 상품만 남겨요" : d.selections.length ? `${d.selections.length}장 선택${likedCount ? ` · 좋았던 점 ${likedCount}개` : ""}` : "마음에 드는 이미지를 눌러 주세요"}</strong><span class="hint">고른 상품은 다음 화면 맨 앞에 남아요.</span></p>
+        ${button("end", "선택 없이 마치기", 'class="quiet"')}${button("explore", "다른 후보 보기", "", !canFeedback() || Boolean(d.text || gridSignal(d)))}
+        ${button("all-bad", d.allBad ? "다 별로 취소" : "다 별로예요", `aria-pressed="${d.allBad}"`, !canFeedback())}
+        <button type="submit" form="feedback-form" class="primary" data-submit="grid" ${canSubmit(d) ? "" : "disabled"}>${d.allBad ? "다른 방향으로 8장" : "반영하고 다음 8장"}</button></div>`;
+    return `<div class="page-heading"><div><h1>${state.request.mode === "onboarding" ? "평소 취향을 찾아볼까요?" : state.request.status === "closed" ? "이번 요청의 탐색 요약" : "원하는 느낌에 가까운 쪽을 골라주세요"}</h1><p>${!isOpen() ? "이번 대화의 내용을 확인하고, 다음에도 활용할 항목을 선택할 수 있어요." : onboardingText ? "평소 취향은 글로 등록해요. 해석한 내용을 확인한 뒤 온보딩을 마치면 이후 활용 여부를 고를 수 있어요." : grid ? "여러 장 골라도 돼요. 고른 이미지에서 좋았던 점을 누르면 그 점을 더 반영해요." : "하나만 골라도, 여러 장을 골라도 좋아요. 이유는 글로 덧붙일 수 있어요."}</p></div></div>
+      <div class="workspace ${isOpen() ? "open" : "closed"} ${state.comparison ? "hypothesis-comparison" : ""} ${grid ? "graph" : ""}"><section aria-label="이미지 비교"><h2 ${grid ? 'class="visually-hidden"' : ""}>${!isOpen() ? "대화 종료 요약" : onboardingText ? "평소 취향 적기" : "나란히 보고 선택하기"}</h2>${grid ? "" : `<p class="section-intro">${!isOpen() ? "저장 없이 마치거나, 확인한 내용을 이후 요청에 활용할 수 있어요." : onboardingText ? "이 단계에서는 상품 이미지를 보여 주지 않아요. 상품은 온보딩을 마친 뒤 새 요청에서 볼 수 있어요." : fixture ? "색 영역으로 만든 합성 자료예요. 실제 상품이나 추천 결과가 아니에요." : state.comparison ? "원하는 해석을 고르거나, 글로 수정할 수 있어요." : graphMode() ? "마음에 드는 이미지를 눌러 고르고 반영하면 다음 8장이 바뀌어요." : "선택만으로 후보가 바뀌지 않아요. 글과 함께 반영할 수 있어요."}</p>`}
         ${state.comparison ? `<section class="question" aria-label="요구에 맞는 조건 비교"><h3>${esc(state.comparison.prompt)}</h3><p>조건을 고른 뒤 아래에서 한 번에 반영해 주세요. 좋은 이유를 함께 적어도 되고, 선택만 보내도 돼요.</p><div class="actions">${button("comparison-neither", "둘 다 원하는 해석이 아니에요", "", !canFeedback())}${button("comparison-unsure", "아직 잘 모르겠어요", "", !canFeedback())}</div><p class="hint">이유나 바꾸고 싶은 점은 선택 사항이에요. 선택과 설명이 다르면 함께 확인해요.</p></section>` : ""}
-        <div class="candidates">${cards}</div>${cards || onboardingText ? "" : noCards}
+        <div class="candidates ${grid ? "grid" : ""}">${cards}</div>${cards || onboardingText ? "" : noCards}
         ${cards && (!refs.round || !refs.set) ? `<p class="selection-note">비교 회차 정보를 확인할 수 없어 이미지 응답을 보류했어요. 글로 계속하거나 최신 화면을 확인해 주세요.</p>${button("refresh", "최신 화면 확인")}` : ""}
-        ${isOpen() ? `<div class="candidate-actions"><fieldset class="reactions"><legend>고르기 어려울 때</legend><div class="actions">
+        ${grid ? gridBar : isOpen() ? `<div class="candidate-actions"><fieldset class="reactions"><legend>고르기 어려울 때</legend><div class="actions">
           ${graphMode() && state.graph.set_id ? button("all-bad", d.allBad ? "다 별로 취소" : "다 별로", `aria-pressed="${d.allBad}"`, !canFeedback()) : [["none", "마음에 드는 게 없어요"], ["unsure", "잘 모르겠어요"], ["text_only", "텍스트만 보낼게요"]].map(([reaction, label]) => button("reaction", label, `data-reaction="${reaction}" aria-pressed="${d.reaction === reaction && !d.selections.length}"`, !canFeedback() || (reaction !== "text_only" && (!refs.round || !refs.set)))).join("")}
         </div></fieldset><p class="selection-note">${d.selections.length ? `${d.selections.length}개를 선택했어요.` : "이미지 선택 없이도 이야기할 수 있어요."} ${graphMode() ? "이미지를 눌러 고르고, 좋았던 점을 누르면 그 점을 더 반영해요. 고른 상품은 다음 화면 맨 앞에 남아요." : "개별 속성이나 선택하지 않은 후보의 비선호를 확정하지 않아요."}</p>
         <div class="actions">${button("explore", "다른 후보 보기", "", !canFeedback() || Boolean(d.text || gridSignal(d)))}${button("end", "상품 선택 없이 종료", 'class="quiet"')}</div>
@@ -336,11 +371,11 @@ export function mountConsumer(root, adapter, { fixture = false, scenarios = {} }
         ${partMarkup()}${graphSummaryMarkup()}${wrapMarkup()}</section>
         <aside class="conversation" aria-label="대화와 반영 내용">${reviewMarkup()}${graphMarkup()}${graphMode() && state.graph.question ? `<section class="question graph-question"><h3>${esc(state.graph.question)}</h3><p class="hint">아래에 답을 적거나, 이미지만 골라도 괜찮아요.</p></section>` : ""}${questions}
           <section><details id="reflected-info" ${detailsOpen ? "open" : ""}><summary>반영 내용 보기</summary><p class="hint">이번 요청과 평소 취향은 구분해요. 평소 취향 수정은 별도 검토가 필요해요.</p>${memories()}</details></section>
-          <section class="composer"><form data-form="feedback"><label for="free-text">${!isOpen() ? "종료 전에 작성하던 글" : state.comparison ? "좋은 이유나 바꾸고 싶은 점 (선택)" : activeQuestion ? "질문에 대한 답과 덧붙일 이야기" : "선택에 덧붙이거나, 글로 이야기해 주세요"}</label>
+          <section class="composer"><form data-form="feedback" id="feedback-form"><label for="free-text">${!isOpen() ? "종료 전에 작성하던 글" : grid && !activeQuestion ? "말로 덧붙이기" : state.comparison ? "좋은 이유나 바꾸고 싶은 점 (선택)" : activeQuestion ? "질문에 대한 답과 덧붙일 이야기" : "선택에 덧붙이거나, 글로 이야기해 주세요"}</label>
             <textarea id="free-text" maxlength="4000" placeholder="예: A의 색은 좋지만, 더 여유 있는 형태가 좋아요." ${isOpen() ? "" : "readonly"}>${esc(d.text)}</textarea>
             <div class="actions"><span class="hint">${graphMode() && state.graph.set_id ? (gridSignal(d) ? "이미지 반응 + 글 함께 반영" : "글만 반영") : d.reaction === "selected" ? "선택 + 글 함께 반영" : {none: "후보 없음으로 응답", unsure: "판단 보류로 응답", text_only: "글만 반영", question_skipped: "질문 건너뛰기"}[d.reaction]}</span>
-              <button class="primary" ${canSubmit(d) ? "" : "disabled"}>선택과 글 반영</button></div>
-            <p class="hint">${isOpen() ? "반영하기 전까지 자유롭게 고칠 수 있어요." : "종료한 요청이에요. 작성하던 초안은 이 화면에 남겨 두었어요."}</p>
+              ${grid ? "" : `<button class="primary" ${canSubmit(d) ? "" : "disabled"}>선택과 글 반영</button>`}</div>
+            <p class="hint">${grid ? "아래 반영 버튼을 누르면 고른 이미지와 함께 반영돼요. 기억 저장은 마칠 때 따로 물어봐요." : isOpen() ? "반영하기 전까지 자유롭게 고칠 수 있어요." : "종료한 요청이에요. 작성하던 초안은 이 화면에 남겨 두었어요."}</p>
             ${lastReceipt?.requestId === requestId() ? `<p class="hint">${fixture ? "화면 연습에서 접수한 입력" : "접수한 입력"}: ${esc(lastReceipt.text ?? "이미지·질문 반응")} · 내용 확인과 이후 활용 동의는 별도예요.</p>` : ""}
           </form></section>
         </aside></div>`;
@@ -353,9 +388,9 @@ export function mountConsumer(root, adapter, { fixture = false, scenarios = {} }
     const focusAction = focused?.dataset.action;
     const focusData = focused ? { ...focused.dataset } : {};
     const selection = focused?.selectionStart !== undefined ? [focused.selectionStart, focused.selectionEnd] : null;
-    root.innerHTML = `<header class="topbar"><span class="wordmark" aria-label="LUMI">LUMI</span><nav aria-label="주요 메뉴">${button("new", "새 요청")}${button("preferences", "평소 취향")}</nav></header>
+    root.innerHTML = `<header class="topbar"><span class="wordmark" aria-label="LUMI">LUMI</span>${contextMarkup()}<nav aria-label="주요 메뉴">${graphMode() && !panel ? `<span class="turn">${esc(state.graph.turn)}번째 화면</span>` : ""}${button("preferences", "평소 취향", panel === "preferences" ? 'aria-current="page"' : "")}${button("new", "새 요청")}</nav></header>
       ${fixture ? `<div class="fixture-strip"><strong>화면 연습</strong><span>합성 자료 · 실제 저장·모델 호출 없음 · 새로고침하면 초기화</span><label>상태 연습<select id="fixture-scenario" ${busy ? "disabled" : ""}>${Object.entries(scenarios).map(([key, label]) => `<option value="${key}" ${adapter.scenario === key ? "selected" : ""}>${esc(label)}</option>`).join("")}</select></label></div>` : ""}
-      <main class="shell" id="workspace" tabindex="-1" aria-busy="${busy || state?.operation === "running"}">${statusMarkup()}${state ? panel === "start" || !state.request ? startMarkup() : workspaceMarkup() : '<p class="boot-message">화면을 불러오고 있어요.</p>'}</main>`;
+      <main class="shell" id="workspace" tabindex="-1" aria-busy="${busy || state?.operation === "running"}">${statusMarkup()}${state ? panel === "preferences" ? prefsMarkup() : panel === "start" || !state.request ? startMarkup() : workspaceMarkup() : '<p class="boot-message">화면을 불러오고 있어요.</p>'}</main>`;
     root.querySelectorAll("img[data-image]").forEach(img => {
       const card = state?.cards.find(c => c.candidate_id === img.dataset.image);
       if (!card) return;
@@ -545,10 +580,9 @@ export function mountConsumer(root, adapter, { fixture = false, scenarios = {} }
         }
         break;
       case "new": panel = "start"; startMode = "shopping"; part = null; render(); focusMain(); break;
-      case "preferences":
-        if (panel === "start" || !state.request) { announce(state.memories.filter(m => m.scope === "long_term").map(m => m.content).join(" / ") || "이후 활용하기로 한 평소 취향이 아직 없어요."); }
-        else { detailsOpen = true; render(); root.querySelector("#reflected-info summary")?.focus(); }
-        break;
+      case "preferences": panel = "preferences"; part = null; render(); focusMain(); break;
+      case "close-preferences": panel = null; render(); focusMain(); break;
+      case "teach-preferences": panel = "start"; startMode = "onboarding"; render(); root.querySelector("#initial-text")?.focus(); break;
       case "skip-onboarding": startMode = "shopping"; render(); root.querySelector("#initial-text")?.focus(); break;
       case "cancel-start": panel = null; render(); focusMain(); break;
       case "resume": {
@@ -659,8 +693,7 @@ export function mountConsumer(root, adapter, { fixture = false, scenarios = {} }
     const t = event.target;
     if (t.id === "free-text") {
       const d = draft(); d.text = t.value; d.version += 1;
-      const submit = root.querySelector('[data-form="feedback"] button[type="submit"], [data-form="feedback"] button.primary');
-      if (submit) submit.disabled = !canSubmit(d);
+      root.querySelectorAll('[data-form="feedback"] button.primary, [data-submit="grid"]').forEach(submit => { submit.disabled = !canSubmit(d); });
       root.querySelectorAll('[data-action="explore"]').forEach(b => { b.disabled = !canFeedback() || Boolean(d.text || gridSignal(d)); });
     }
     if (t.id === "initial-text") initialText[startMode] = t.value;
@@ -748,7 +781,12 @@ export function mountConsumer(root, adapter, { fixture = false, scenarios = {} }
     drag = null;
     if (previous?.stage.hasPointerCapture(previous.id)) previous.stage.releasePointerCapture(previous.id);
   }
-  const listeners = { click: onClick, input: onInput, change: onChange, submit: onSubmit, pointerdown: onPointer, pointermove: onPointer, pointerup: onPointer, pointercancel: onPointer, lostpointercapture: onPointer };
+  function onKeydown(event) {
+    if (event.key !== "Escape" || busy) return;
+    if (finalPreview && !state?.request?.final_selection) { finalPreview = null; render(); }
+    else if (state?.graph?.summary?.status === "draft" && isOpen() && !summaryHidden) { summaryHidden = true; render(); }
+  }
+  const listeners = { keydown: onKeydown, click: onClick, input: onInput, change: onChange, submit: onSubmit, pointerdown: onPointer, pointermove: onPointer, pointerup: onPointer, pointercancel: onPointer, lostpointercapture: onPointer };
   Object.entries(listeners).forEach(([name, handler]) => root.addEventListener(name, handler));
   window.addEventListener("blur", cancelDrag);
   render();
