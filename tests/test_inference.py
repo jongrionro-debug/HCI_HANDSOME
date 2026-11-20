@@ -328,6 +328,22 @@ class V1InferenceTests(unittest.TestCase):
         self.assertEqual([s["binding"]["values"] for s in split], [["Wide"], ["Relaxed"]])
         self.assertEqual(raw["suggestions"][0]["binding"]["values"], ["Wide", "Relaxed"])  # input untouched
 
+    def test_unscoped_bound_extraction_takes_the_only_garment_type(self):
+        from stylemate_memory.model_io import _tolerate_shape_slips
+        style = {"domain": "PI", "feature": "Style", "values": ["Vintage"], "match": "any",
+                 "polarity": "prefer", "strength": "soft"}
+        candidate = {"selector": {"garment_type": None, "slot_id": None}, "bindings": [style]}
+        plain = {"selector": {"garment_type": None, "slot_id": None}, "bindings": []}
+        raw = {"candidates": [candidate, plain], "questions": []}
+        one = {"targets": [{"target_id": "item-1", "garment_type": "Top"}]}
+        fixed = _tolerate_shape_slips(raw, one, proposal=False)["candidates"]
+        self.assertEqual([c["selector"]["garment_type"] for c in fixed], ["Top", None])
+        self.assertIsNone(candidate["selector"]["garment_type"])  # input untouched
+        two = {"targets": [{"target_id": "item-1", "garment_type": "Top"},
+                           {"target_id": "item-2", "garment_type": "Pants"}]}
+        kept = _tolerate_shape_slips(raw, two, proposal=False)["candidates"]
+        self.assertIsNone(kept[0]["selector"]["garment_type"])
+
     def test_content_confirmation_keeps_mapping_inferred_until_binding_confirmation(self):
         m = self.fixture.add("unmapped", "빈티지한 느낌")
         binding = self.fixture.bind(m, "Brown", feature="Color", confirmed=False, origin="inferred")

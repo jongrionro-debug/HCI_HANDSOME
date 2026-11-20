@@ -446,7 +446,8 @@ def _tolerate_shape_slips(raw: Any, inputs: Any, *, proposal: bool) -> Any:
     suggestion whose ``fea_constraint_ids`` does not point at supplied FEA
     constraints of its own target is a mis-filed hypothesis: it is dropped,
     never re-labelled; a multi-value "any" hypothesis is split into one
-    suggestion per value. Every other rule (authority claims, hard states, quotes,
+    suggestion per value. In an extraction, a bound candidate with no garment
+    takes the request's only garment type. Every other rule (authority claims, hard states, quotes,
     sources) still rejects the whole answer.
     """
     if not isinstance(raw, dict):
@@ -470,6 +471,19 @@ def _tolerate_shape_slips(raw: Any, inputs: Any, *, proposal: bool) -> Any:
             else:
                 split.append(s)
         raw["suggestions"] = split
+    if not proposal and isinstance(raw.get("candidates"), list):
+        # A baseline wish ("평소엔 빈티지") with bindings but no garment is
+        # unambiguous when the request has one garment type: bind it there.
+        # With several garment types it stays unscoped and is rejected.
+        garments = {t.get("garment_type") for t in inputs.get("targets", []) if isinstance(t, dict)}
+        if len(garments) == 1:
+            garment = next(iter(garments))
+            raw["candidates"] = [
+                c | {"selector": c["selector"] | {"garment_type": garment}}
+                if isinstance(c, dict) and c.get("bindings") and isinstance(c.get("selector"), dict)
+                and c["selector"].get("garment_type") is None and c["selector"].get("slot_id") is None
+                else c
+                for c in raw["candidates"]]
     return raw
 
 
