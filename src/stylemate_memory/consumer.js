@@ -343,7 +343,7 @@ export function mountConsumer(root, adapter, { fixture = false, scenarios = {} }
           ${isKept(card.candidate_id) ? '<span class="kept-mark">고른 상품</span>' : state.graph.slots?.[card.candidate_id] === "novel" ? '<span class="novel-mark" title="기억을 반영하지 않은 후보">새로움</span>' : ""}<span class="pick-mark" aria-hidden="true">✓</span></button>
         ${selected && facts.length ? `<div class="liked" role="group" aria-label="이 상품에서 좋았던 점"><span class="liked-label" aria-hidden="true">좋았던 점 (선택)</span>${facts.map(f => button("like", esc(f.label_ko),
           `data-card="${esc(card.candidate_id)}" data-feature="${esc(f.feature)}" aria-pressed="${liked.includes(f.feature)}" title="${esc(f.values.join(", "))}"`, off)).join("")}
-          ${state.request.mode === "shopping" ? button("preview-final", "이 상품으로 결정", `data-card="${esc(card.candidate_id)}" class="quiet"`, off) : ""}</div>` : ""}</article>`;
+          ${state.request.mode === "shopping" ? button("preview-final", "이 상품으로 결정", `data-card="${esc(card.candidate_id)}" class="decide"`, off) : ""}</div>` : ""}</article>`;
     }
     const noCards = !isOpen() ? "" : graphMode() && state.operation === "running" ? '<p class="hint">다음 후보를 고르고 있어요.</p>' : `<div class="empty-state"><h2>${state.graph?.outcome === "hidden_empty" ? "별로라고 한 상품을 빼니 남은 후보가 없어요" : state.operation === "no_results" ? "조건에 맞는 상품이 없어요" : "아직 비교할 후보가 없어요"}</h2><p>조건을 그대로 두거나 글로 조정할 수 있어요. 상품을 고르지 않고 탐색을 마쳐도 괜찮아요.</p>${state.graph?.outcome === "hidden_empty" ? button("adjust", "숨김 해제", 'data-adjust="unhide"', !canFeedback()) : ""}</div>`;
     const questionItems = (isOpen() ? state.questions : []).filter(q => q.status === "open").map(q => `<section class="question"><h3>${esc(questionLabel(q.text))}</h3>
