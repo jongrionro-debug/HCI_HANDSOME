@@ -144,7 +144,9 @@ class GraphEngineTests(unittest.TestCase):
         self.send({"op": "adjust_intent", "action": "bogus", "key": None, "feature": None}, ok=False)
         snapshot = self.service.inspect_request(s["request"]["id"])["snapshot"]
         active = next(r for r in snapshot["rounds"] if r["status"] == "active")
-        self.send({"op": "select_final", "candidate_set_ref": active["candidate_set_ref"], "candidate_id": s["cards"][0]["candidate_id"]})
+        shortlisted = {i["product_id"] for i in s["graph"]["shortlist"]}  # F8: the final comes from the shortlist
+        final = next(c for c in s["cards"] if c["product_id"] in shortlisted)
+        self.send({"op": "select_final", "candidate_set_ref": active["candidate_set_ref"], "candidate_id": final["candidate_id"]})
         self.send({"op": "end_request"})
         self.assertEqual(self.service.state()["request"]["status"], "closed")
 
