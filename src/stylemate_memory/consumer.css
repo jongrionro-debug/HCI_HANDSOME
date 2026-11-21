@@ -338,7 +338,7 @@ details > summary { cursor: pointer; min-height: 44px; padding: .5rem 0; font-we
 }
 .workspace.graph { display: block; padding-bottom: 2rem; }
 .workspace.graph.is-loading .candidates { opacity: .45; pointer-events: none; }
-.grid-card .image-stage { border-radius: 0; }
+.grid-card .image-stage { border-radius: 0; aspect-ratio: 3 / 4 !important; }  /* equal tiles whatever the photo ratio */
 .image-pick { border-radius: 0; border: 0; }
 .image-pick:hover:not(:disabled) { transform: translateY(-3px); box-shadow: 0 10px 22px -12px rgba(0,0,0,.35); }
 .image-pick[aria-pressed="true"], .image-pick[aria-pressed="true"]:hover:not(:disabled) { outline: 2px solid #1a1a1a; outline-offset: 0; box-shadow: 0 14px 28px -12px rgba(0,0,0,.45); }

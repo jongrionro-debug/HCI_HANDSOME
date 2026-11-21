@@ -212,7 +212,7 @@ def graph_view(service: Any, request_id: str) -> dict[str, Any] | None:
         "slots": {c["candidate_id"]: c["slot"] for c in last["cards"]},
         "chips": chips,
         "question": question,
-        "reason_prompt": ({"axes": [{"feature": a, "label_ko": labels.get(a, a)} for a in prompt["axes"]],
+        "reason_prompt": ({"axes": [{"feature": a, "label_ko": labels.get(a, a)} for a in _prompt_axes(intent, prompt)],
                            "question": clarify["question"] if clarify else None,
                            "options": [dict(o) for o in clarify["options"]] if clarify else None} if prompt else None),
         "hypotheses": [{"target_id": h["target_id"], "feature": h["axis"], "label_ko": labels.get(h["axis"], h["axis"]),
@@ -249,6 +249,20 @@ def _taste(service: Any, request_id: str) -> list[dict[str, Any]]:
         return []
     return [{"memory_id": m["memory_id"], "text": m["content"], "situation": " · ".join(m["conditions"].values()) or None}
             for m in reversed(memories)]
+
+
+MAX_PROMPT_AXES = 3  # U2: the fallback question stays one line
+
+
+def _prompt_axes(intent: dict[str, Any], prompt: dict[str, Any]) -> list[str]:
+    """Fallback chips for reason_prompt: axes where every pick shares a value first, Fabric last, max 3."""
+    cards = [c for c in (intent["last_grid"] or {}).get("cards", []) if c["candidate_id"] in set(prompt["selected"])]
+
+    def shared(axis: str) -> bool:
+        sets = [set(c["facts"].get(axis) or []) for c in cards]
+        return bool(sets) and bool(set.intersection(*sets))
+    ranked = sorted(prompt["axes"], key=lambda a: (not shared(a), a in scoring.IMAGE_BLIND_AXES, prompt["axes"].index(a)))
+    return ranked[:MAX_PROMPT_AXES]
 
 
 def _chip_evidence(intent: dict[str, Any], chip: dict[str, Any]) -> dict[str, int] | None:
