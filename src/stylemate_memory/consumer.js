@@ -76,6 +76,11 @@ export function mountConsumer(root, adapter, { fixture = false, scenarios = {} }
   // ADR 0013 graph engine: 8-card multi-select grid with product-level "별로".
   const graphMode = () => Boolean(state?.graph) && isOpen();
   const isKept = id => state?.graph?.slots?.[id] === "kept";
+  // Liked axes already reflected for a kept card stay visibly pressed; they are shown only, never re-sent.
+  // candidate_id changes every turn, so the key uses the product image, which is stable within a request.
+  const appliedLiked = new Map();
+  const stableKey = card => `${requestId()}:${card.target_id}:${card.image_id ?? card.title}`;
+  const applied = card => (card && isKept(card.candidate_id) ? appliedLiked.get(stableKey(card)) : null) ?? [];
   const keptIds = () => Object.keys(state?.graph?.slots ?? {}).filter(isKept);
   const gridSignal = d => d.selections.some(s => !isKept(s.candidate_id)) || keptIds().some(id => !d.selections.some(s => s.candidate_id === id))
     || Object.values(d.liked).some(axes => axes.length) || d.dislikes.length || d.similar || d.allBad;
@@ -337,12 +342,14 @@ export function mountConsumer(root, adapter, { fixture = false, scenarios = {} }
       const selected = d.selections.some(s => s.candidate_id === card.candidate_id);
       const off = !canFeedback() || !refs.set || !refs.round;
       const liked = d.liked[card.candidate_id] ?? [];
+      const done = applied(card);
       const facts = (card.facts ?? []).filter(f => !LIKE_HIDDEN.has(f.feature) && f.values?.length);
       return `<article class="card grid-card ${selected ? "selected" : ""} ${isKept(card.candidate_id) ? "kept" : ""}">
         <button type="button" class="image-pick" data-action="select" data-card="${esc(card.candidate_id)}" aria-pressed="${selected}" aria-label="${esc(card.title)} ${selected ? "선택 해제" : "선택"}" ${off ? "disabled" : ""}>${image(card)}
           ${isKept(card.candidate_id) ? '<span class="kept-mark">고른 상품</span>' : state.graph.slots?.[card.candidate_id] === "novel" ? '<span class="novel-mark" title="기억을 반영하지 않은 후보">새로움</span>' : ""}<span class="pick-mark" aria-hidden="true">✓</span></button>
-        ${selected && facts.length ? `<div class="liked" role="group" aria-label="이 상품에서 좋았던 점"><span class="liked-label" aria-hidden="true">좋았던 점 (선택)</span>${facts.map(f => button("like", esc(f.label_ko),
-          `data-card="${esc(card.candidate_id)}" data-feature="${esc(f.feature)}" aria-pressed="${liked.includes(f.feature)}" title="${esc(f.values.join(", "))}"`, off)).join("")}
+        ${selected && facts.length ? `<div class="liked" role="group" aria-label="이 상품에서 좋았던 점"><span class="liked-label" aria-hidden="true">좋았던 점 (선택)</span>${facts.map(f => done.includes(f.feature)
+          ? button("like", esc(f.label_ko), `data-card="${esc(card.candidate_id)}" data-feature="${esc(f.feature)}" class="applied" aria-pressed="true" aria-disabled="true" title="이미 반영한 좋았던 점이에요"`, false)
+          : button("like", esc(f.label_ko), `data-card="${esc(card.candidate_id)}" data-feature="${esc(f.feature)}" aria-pressed="${liked.includes(f.feature)}" title="${esc(f.values.join(", "))}"`, off)).join("")}
           ${state.request.mode === "shopping" ? button("preview-final", "이 상품으로 결정", `data-card="${esc(card.candidate_id)}" class="decide"`, off) : ""}</div>` : ""}</article>`;
     }
     const noCards = !isOpen() ? "" : graphMode() && state.operation === "running" ? '<p class="hint">다음 후보를 고르고 있어요.</p>' : `<div class="empty-state"><h2>${state.graph?.outcome === "hidden_empty" ? "별로라고 한 상품을 빼니 남은 후보가 없어요" : state.operation === "no_results" ? "조건에 맞는 상품이 없어요" : "아직 비교할 후보가 없어요"}</h2><p>조건을 그대로 두거나 글로 조정할 수 있어요. 상품을 고르지 않고 탐색을 마쳐도 괜찮아요.</p>${state.graph?.outcome === "hidden_empty" ? button("adjust", "숨김 해제", 'data-adjust="unhide"', !canFeedback()) : ""}</div>`;
@@ -446,6 +453,8 @@ export function mountConsumer(root, adapter, { fixture = false, scenarios = {} }
       if (d.selections.length && !kept.length) notice = "후보가 바뀌어 이미지 선택을 해제했어요. 작성하던 글은 그대로예요.";
       else if (kept.length) notice = "";
       d.selections = kept; d.hypothesis = null; d.dislikes = []; d.similar = null; d.allBad = false; d.liked = {};
+      const keptKeys = new Set(state.cards.filter(c => isKept(c.candidate_id)).map(stableKey));
+      for (const key of [...appliedLiked.keys()]) if (!keptKeys.has(key)) appliedLiked.delete(key);
       d.reaction = kept.length ? "selected" : d.reaction === "selected" ? "text_only" : d.reaction;
       part = null; finalPreview = null;
     }
@@ -495,6 +504,10 @@ export function mountConsumer(root, adapter, { fixture = false, scenarios = {} }
     };
     readSequence += 1;
     busy = true; localError = null; notice = ""; clearTimeout(pollTimer); render();
+    const sentLiked = outgoing.action.op === "grid_feedback" ? Object.entries(outgoing.action.liked ?? {}).flatMap(([id, axes]) => {
+      const card = state?.cards.find(c => c.candidate_id === id);
+      return card ? [[stableKey(card), axes]] : [];
+    }) : [];
     try {
       const result = await adapter.command(clone(outgoing));
       if (disposed) return null;
@@ -509,6 +522,10 @@ export function mountConsumer(root, adapter, { fixture = false, scenarios = {} }
           if (initialText[mode] === (outgoing.action.text ?? "")) initialText[mode] = "";
         }
         if (outgoing.action.op === "select_final") finalPreview = null;
+        if (outgoing.action.op === "grid_feedback" && outgoing.request_id === requestId()) {
+          // The next grid may arrive later by polling; entries for cards that are not kept are dropped when it does.
+          for (const [key, axes] of sentLiked) appliedLiked.set(key, [...new Set([...(appliedLiked.get(key) ?? []), ...axes])]);
+        }
         if (["submit_feedback", "respond_comparison", "grid_feedback"].includes(outgoing.action.op)) {
           const d = drafts.get(outgoing.request_id);
           if (d && submitted?.version === d.version) drafts.set(outgoing.request_id, blankDraft());
@@ -605,7 +622,7 @@ export function mountConsumer(root, adapter, { fixture = false, scenarios = {} }
         break;
       }
       case "like": {
-        if (!card || !d.selections.some(s => s.candidate_id === card.candidate_id)) return;
+        if (!card || !d.selections.some(s => s.candidate_id === card.candidate_id) || applied(card).includes(b.dataset.feature)) return;
         const axes = d.liked[card.candidate_id] ?? [];
         d.liked[card.candidate_id] = axes.includes(b.dataset.feature) ? axes.filter(a => a !== b.dataset.feature) : [...axes, b.dataset.feature];
         d.version += 1; render(); break;
