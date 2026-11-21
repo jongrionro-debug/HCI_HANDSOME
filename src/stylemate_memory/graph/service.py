@@ -237,7 +237,18 @@ def graph_view(service: Any, request_id: str) -> dict[str, Any] | None:
         "memory_notice": _memory_notice(intent),
         "musts": [{"quote": n["quote"], "content": n["content"]} for n in intent["fea_needs"] if n["strength"] == "hard"],
         "profile_rewrite": profile_rewrite_enabled(),
+        "taste": _taste(service, request_id),
     }
+
+
+def _taste(service: Any, request_id: str) -> list[dict[str, Any]]:
+    """U5-a: consented long-term sentences with their situation, for the grouped 평소 취향 page."""
+    try:
+        memories = service._graph_bridge.long_term_now(request_id)
+    except Exception:
+        return []
+    return [{"memory_id": m["memory_id"], "text": m["content"], "situation": " · ".join(m["conditions"].values()) or None}
+            for m in reversed(memories)]
 
 
 def _chip_evidence(intent: dict[str, Any], chip: dict[str, Any]) -> dict[str, int] | None:

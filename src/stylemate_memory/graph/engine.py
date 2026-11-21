@@ -144,7 +144,9 @@ class GraphEngine:
         intent["route_question"] = None
         if event.get("command_id") and event["command_id"] in intent["processed"]:
             return {"intent": intent}
-        intent["compare_mode"] = event["type"] == "adjust" and event.get("action") == "shortlist_compare"
+        # The shortlist grid is (re)drawn on "후보함에서 고르기" and on a removal made while comparing.
+        intent["compare_mode"] = event["type"] == "adjust" and (event.get("action") == "shortlist_compare" or (
+            event.get("action") == "shortlist_remove" and bool((intent["last_grid"] or {}).get("compare"))))
         if event.get("start") and not intent.get("started"):
             self._start(intent, event["start"])
         scope = it.scope_of(intent)
@@ -401,6 +403,8 @@ class GraphEngine:
         intent = state["intent"]
         if intent["pending_error"]:
             return "hold"
+        if intent.get("compare_mode"):
+            return it.route(intent)
         if intent["event"]["type"] == "adjust" and intent["event"].get("action") in (
                 "reason", "reason_skip", "novelty_no", "taste_no", "shortlist_remove"):
             return "hold"  # a liked-axis answer, a "no" or a shortlist removal keeps the grid
