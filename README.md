@@ -1,5 +1,12 @@
 # LUMI · HCI_HANDSOME
 
+> **`jaehyun_work` 브랜치 안내** — main(`dd75945`)에서 갈라진 개인 개선 작업 브랜치다. main에 병합하지 않은 상태로 개선안(기능 F1~F12, 화면 U1~U9)의 구현만 따로 쌓는다.
+>
+> - 범위: graph 엔진(`STYLEMATE_ENGINE=graph`)의 추천 흐름·화면. 저장 계약(`store_v1.apply_batch`, 확인·동의 분리)은 바꾸지 않는다.
+> - 팀 합의·ADR이 필요한 항목(F3 프로필 다시 쓰기 끄기, F12/U8 이미지 기반 온보딩, F7 수치 확정)은 합의 전까지 구현하지 않거나 설정으로 끌 수 있게 둔다.
+> - 개발 중 기본 provider는 `fake`이고, 실제 DeepSeek 호출은 명시적으로 실행할 때만 한다.
+> - 변경 내역은 `git log main..jaehyun_work`, main과의 차이는 `git diff main...jaehyun_work`로 확인한다. 이 안내 블록은 main 병합 전에 지운다.
+
 LUMI는 장·단기 메모리와 이미지 선택·대화를 활용해 사용자의 평소 취향과 현재 상황을 함께 반영하는 패션 추천 에이전트 연구 프로젝트다.
 
 현재 구현·동작·실행·검증의 유일한 문서 정본은 [docs/project.md](docs/project.md)다. 과거 결정과 승인·대체 관계는 [docs/adr/](docs/adr/), 개발 작업 규칙은 [AGENTS.md](AGENTS.md)에서 관리한다. 연구 설계 원문인 중간보고서와 현재 구현의 범위도 project.md에서 구분한다.
