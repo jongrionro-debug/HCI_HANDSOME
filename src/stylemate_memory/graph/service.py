@@ -9,13 +9,25 @@ graph; onboarding keeps the legacy flow.
 from __future__ import annotations
 
 import hashlib
+import os
 from typing import Any
+from urllib.parse import quote
 
 from .. import contracts as c
 from ..errors import V1_ERROR_CODES, StyleMateError
 from . import intent as it
 from . import memory as mem
 from . import scoring
+from .labels import VALUE_LABELS_KO, value_label
+from .summary_text import POLISH_INSTRUCTIONS, polish_payload, polish_schema, validate_polish
+
+READY_SHORTLIST = 3  # F9: "이제 후보함에서 골라도 돼요" after 3 picks + 2 chips, or convergence
+READY_CHIPS = 2
+
+
+def profile_rewrite_enabled() -> bool:
+    """F3: STYLEMATE_PROFILE_REWRITE=off skips the profile rewrite step (default on, ADR 0015 decision 6)."""
+    return os.environ.get("STYLEMATE_PROFILE_REWRITE", "on").strip().lower() not in ("off", "0", "false", "no")
 
 
 class GraphBridge:
@@ -191,12 +203,18 @@ def graph_view(service: Any, request_id: str) -> dict[str, Any] | None:
     question = intent.get("route_question") or (intent["questions"][0]["text"] if intent["questions"] else None)
     last = intent["last_grid"] or {"set_id": None, "cards": []}
     prompt = intent["reason_prompt"]
+    chips = [chip | {"value_label_ko": value_label(chip["feature"], chip["value"]), "evidence": _chip_evidence(intent, chip)}
+             for chip in scoring.chips(intent, scope, labels)]
+    shortlist = _shortlist_view(service, intent, last)
+    clarify = intent.get("clarify") if prompt else None
     return {
         "outcome": intent["outcome"], "set_id": last["set_id"],
         "slots": {c["candidate_id"]: c["slot"] for c in last["cards"]},
-        "chips": scoring.chips(intent, scope, labels),
+        "chips": chips,
         "question": question,
-        "reason_prompt": ({"axes": [{"feature": a, "label_ko": labels.get(a, a)} for a in prompt["axes"]]} if prompt else None),
+        "reason_prompt": ({"axes": [{"feature": a, "label_ko": labels.get(a, a)} for a in prompt["axes"]],
+                           "question": clarify["question"] if clarify else None,
+                           "options": [dict(o) for o in clarify["options"]] if clarify else None} if prompt else None),
         "hypotheses": [{"target_id": h["target_id"], "feature": h["axis"], "label_ko": labels.get(h["axis"], h["axis"]),
                         "values": h["values"], "reason": h["reason"]} for h in intent["hypotheses"]],
         "situations": [{"key": s["key"], "value": s["value"], "raw": s["raw"]} for s in intent["situations"]],
@@ -210,7 +228,58 @@ def graph_view(service: Any, request_id: str) -> dict[str, Any] | None:
                    "novelty_prompt": intent.get("novelty_prompt") == "ask",
                    "taste_prompt": dict(intent["taste_prompt"]) if intent.get("taste_prompt") else None},
         "summary": public_summary(service._graph.summary(request_id)),
+        # jaehyun_work
+        "value_labels": VALUE_LABELS_KO,
+        "compare": bool(last.get("compare")),
+        "shortlist": shortlist,
+        "progress": {"turn": intent["turn"], "shortlist_count": len(shortlist), "converged": intent["converged"],
+                     "ready": bool(intent["converged"] or (len(shortlist) >= READY_SHORTLIST and len(chips) >= READY_CHIPS))},
+        "memory_notice": _memory_notice(intent),
+        "musts": [{"quote": n["quote"], "content": n["content"]} for n in intent["fea_needs"] if n["strength"] == "hard"],
+        "profile_rewrite": profile_rewrite_enabled(),
     }
+
+
+def _chip_evidence(intent: dict[str, Any], chip: dict[str, Any]) -> dict[str, int] | None:
+    """F11: "고르신 6장 중 5장이 여유 핏" from the request's pick history; None without history."""
+    picks = [p for p in intent.get("pick_history", []) if p["target_id"] == chip["target_id"] and p["facts"].get(chip["feature"])]
+    if not picks:
+        return None
+    return {"with": sum(chip["value"] in p["facts"][chip["feature"]] for p in picks), "of": len(picks)}
+
+
+def _shortlist_view(service: Any, intent: dict[str, Any], last: dict[str, Any]) -> list[dict[str, Any]]:
+    """F8: every pick of the request with its image, title and the candidate ID when it is on screen."""
+    on_screen = {(c["product_id"], c["target_id"]): c["candidate_id"] for c in last["cards"]}
+    result = []
+    for item in intent.get("shortlist", []):
+        try:
+            record = service._catalog.get_record(item["product_id"])
+        except Exception:
+            continue
+        image_url = None
+        if item["image_id"] and any(i["image_id"] == item["image_id"] and i["kind"] == "local" for i in record["images"]):
+            image_url = f"/api/images/{quote(item['image_id'], safe='')}?version={item['image_version']}"
+        result.append({"product_id": item["product_id"], "target_id": item["target_id"], "title": record["title"],
+                       "turn": item["turn"], "image_url": image_url,
+                       "candidate_id": on_screen.get((item["product_id"], item["target_id"]))})
+    return result
+
+
+def _memory_notice(intent: dict[str, Any]) -> dict[str, Any] | None:
+    """F10: on the first memory-applied grid, which consented memories shaped it and where they came from."""
+    chips = [c for c in intent.get("memory_chips", []) if c["enabled"]]
+    if not chips or intent["turn"] > 1:
+        return None
+    by_id = {m["memory_id"]: m for m in intent.get("lt_memories", [])}
+    sources = []
+    for chip in chips:
+        conditions = (by_id.get(chip["memory_id"]) or {}).get("conditions") or {}
+        label = " · ".join(conditions.values()) if chip["kind"] == "situation" and conditions else None
+        if label not in sources:
+            sources.append(label)
+    return {"lines": [c["text"] for c in chips][:3], "situations": [s for s in sources if s],
+            "baseline": None in sources, "mode": intent.get("memory_mode", "normal")}
 
 
 def public_summary(summary: dict[str, Any] | None) -> dict[str, Any] | None:
@@ -314,10 +383,40 @@ def _prepare(service: Any, snapshot: dict[str, Any]) -> dict[str, Any]:
     for index, item in enumerate(items, 1):
         item["id"] = f"p{index}"
     conditions = mem.situation_conditions(intent)
-    summary = {"status": "draft", "proposals": items, "conditions": conditions,
+    summary = {"status": "polishing" if items else "draft", "proposals": items, "conditions": conditions,
                "situation_label": mem.situation_label(intent), "saved": [], "profile": None, "profile_view": None}
     service._graph.put_summary(request_id, summary)
+    if items:
+        _polish(service, request_id, items, summary["situation_label"])
     return summary
+
+
+def _polish(service: Any, request_id: str, items: list[dict[str, Any]], situation: str | None) -> None:
+    """F2: the model rewrites each code-built sentence from its materials. Saving waits for this;
+    a failure or a sentence that drops a value keeps the rule sentence (fake provider: always)."""
+    labels = _labels(service)
+
+    def calculate() -> dict[str, str]:
+        payload = polish_payload(items, situation, labels)
+        raw = service.gateway.complete(POLISH_INSTRUCTIONS, payload, polish_schema())
+        return validate_polish(raw, items)
+
+    def apply_result(future: Any) -> None:
+        summary = service._graph.summary(request_id)
+        if summary is None or summary["status"] != "polishing":
+            return
+        try:
+            texts = future.result()
+        except Exception:
+            texts = {}
+        for proposal in summary["proposals"]:
+            if proposal["id"] in texts:
+                proposal["text"] = texts[proposal["id"]]
+        summary["status"] = "draft"
+        service._graph.put_summary(request_id, summary)
+        service._journal.set_operation(request_id, "idle")
+
+    service._submit_model(request_id, calculate, apply_result)
 
 
 def _accept(service: Any, request_id: str, command_id: str, purpose: str, memory_ref: dict[str, Any],
@@ -397,10 +496,11 @@ def _save(service: Any, snapshot: dict[str, Any], choices: list[dict[str, Any]],
             "expected_version": memory_ref["version"], "consent_event_ref": event}])
         saved.append(picked[index][0]["text"])
     memories = service._graph_bridge.long_term_now(request_id)
+    rewrite = bool(saved) and profile_rewrite_enabled()
     summary |= {"status": "saved", "saved": saved, "profile_view": mem.profile_view(memories),
-                "profile": {"status": "running" if saved else "skipped", "changes": []}}
+                "profile": {"status": "running" if rewrite else "skipped", "changes": []}}
     service._graph.put_summary(request_id, summary)
-    if saved:
+    if rewrite:
         _rewrite_profile(service, request_id, memories)
 
 
@@ -482,7 +582,8 @@ def summary_command(service: Any, snapshot: dict[str, Any], command: dict[str, A
 
 
 ADJUST_ACTIONS = ("pin", "unpin", "remove", "unhide", "reason", "memory_off", "memory_on", "differ", "memory_full",
-                  "novelty_yes", "novelty_no", "taste_yes", "taste_no", "link_off", "link_on")
+                  "novelty_yes", "novelty_no", "taste_yes", "taste_no", "link_off", "link_on",
+                  "reason_skip", "shortlist_remove", "shortlist_compare")
 
 
 def handle_command(service: Any, snapshot: dict[str, Any], command: dict[str, Any], command_id: str) -> bool:
@@ -545,6 +646,12 @@ def handle_command(service: Any, snapshot: dict[str, Any], command: dict[str, An
             intent = service._graph.intent(request_id)
             if not intent or not any(c["memory_id"] == action["key"] for c in intent["memory_chips"]):
                 raise StyleMateError("invalid_input")
+        if action["action"] in ("shortlist_remove", "shortlist_compare"):
+            intent = service._graph.intent(request_id)
+            shortlist = (intent or {}).get("shortlist", [])
+            if not shortlist or (action["action"] == "shortlist_remove"
+                                 and not any(s["product_id"] == action["key"] for s in shortlist)):
+                raise StyleMateError("invalid_input")
         run_turn(service, request_id, command_id, {"type": "adjust", "action": action["action"], "key": action["key"],
                                                    "feature": action["feature"]})
         return True
@@ -560,6 +667,10 @@ def handle_command(service: Any, snapshot: dict[str, Any], command: dict[str, An
         intent = service._graph.intent(request_id)
         if intent and intent["unresolved_hard_fea"]:
             raise StyleMateError("context_blocked", "필수 기능 요구의 상품 근거를 먼저 확인하거나 조건을 조정해 주세요.")
+        # F8: the final product comes from the shortlist (a displayed candidate of the current set).
+        card = next((c for c in (intent or {}).get("last_grid", {}).get("cards", []) if c["candidate_id"] == action["candidate_id"]), None) if intent and intent.get("last_grid") else None
+        if card is None or not any(s["product_id"] == card["product_id"] for s in intent.get("shortlist", [])):
+            raise StyleMateError("invalid_input")
         service._apply(request_id, service._step(command_id, "apply"), [action], command["expected"])
         service._jobs.pop(request_id, None)
         service._journal.clear_operation(request_id)

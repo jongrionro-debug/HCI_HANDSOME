@@ -14,6 +14,9 @@ from . import memory, scoring
 GRID_SIZE = 8
 MAX_FOCUS_AXES = 2
 MAX_KEPT = 4  # previously picked products shown first; the rest of the 8 stay new
+MAX_SHORTLIST = 24  # F8: every pick of the request; the comparison grid shows the latest GRID_SIZE
+MAX_PICK_HISTORY = 80  # F11: picked cards' facts for chip evidence
+MUST_PRIOR = 2.0  # F5: extra Beta pseudo count for values hypothesized from a "꼭" FEA need (pilot assumption)
 
 
 def _has(product: dict[str, Any], axis: str, value: str) -> bool:
@@ -97,10 +100,14 @@ def plan_target(pool: list[dict[str, Any]], target_id: str, intent: dict[str, An
     if not space:
         converge_n = main_size
     samples, plain = {}, {}
+    musts = must_values(intent)
     for axis, values in sorted(space.items()):
         for value in sorted(values):
             key = scoring.score_key(target_id, scope, axis, value)
-            samples[(axis, value)] = scoring.sample(memory.effective(intent, key), rng)
+            entry = memory.effective(intent, key)
+            if (target_id, axis, value) in musts:
+                entry = entry | {"a": entry["a"] + MUST_PRIOR}
+            samples[(axis, value)] = scoring.sample(entry, rng)
             plain[(axis, value)] = scoring.sample(scoring.get(intent["scores"], key), rng)
 
     def converge_score(product: dict[str, Any]) -> float:
@@ -166,6 +173,22 @@ def plan_target(pool: list[dict[str, Any]], target_id: str, intent: dict[str, An
             take("explore" if space else "converge", product)
     exposures = [{"axis": a, "value": v} for a, v in focus_values]
     return chosen, exposures
+
+
+def must_values(intent: dict[str, Any]) -> set[tuple[str, str, str]]:
+    """F5: (target, axis, value) hypothesized from a hard FEA need. Soft boost only, never a filter."""
+    hard = {n["key"] for n in intent["fea_needs"] if n["strength"] == "hard"}
+    return {(h["target_id"], h["axis"], v) for h in intent["hypotheses"] if set(h["fea_keys"]) & hard for v in h["values"]}
+
+
+def shortlist_grid(products: list[dict[str, Any]], intent: dict[str, Any]) -> dict[str, Any]:
+    """F8: the latest shortlist picks side by side, published as a normal candidate set so the
+    existing select_final contract (final = a displayed candidate) applies unchanged."""
+    by_key = {(p["product_id"], p["target_id"]): p for p in products if p["image_id"]}
+    found = [by_key.get((s["product_id"], s["target_id"])) for s in intent.get("shortlist", [])]
+    cards = [{"slot": "shortlist", **p} for p in found if p][-GRID_SIZE:]
+    return {"status": "results" if cards else "no_results", "cards": cards, "exposures": {},
+            "pool_sizes": {}, "shortage": False, "compare": True}
 
 
 def kept_products(products: list[dict[str, Any]], intent: dict[str, Any]) -> list[dict[str, Any]]:

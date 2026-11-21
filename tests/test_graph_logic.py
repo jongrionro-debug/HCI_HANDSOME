@@ -375,10 +375,10 @@ class SummaryProposalTests(unittest.TestCase):
         labels = {"Color": "색상", "Fit": "핏(여유)", "Tone": "색 톤"}
         items = mem.proposals(state, None, labels)
         self.assertEqual([(p["source"], p["text"]) for p in items],
-                         [("wish", "네이비가 좋아요."), ("reject", "후드는 싫어요."), ("chip", "핏(여유)은 Relaxed 쪽이 좋아요.")])
+                         [("wish", "네이비가 좋아요."), ("reject", "후드는 싫어요."), ("chip", "여유 핏 쪽이 좋아요.")])
         self.assertEqual([p["id"] for p in items], ["p1", "p2", "p3"])
-        self.assertEqual(mem.chip_sentence("색 톤", "Dark"), "색 톤은 Dark 쪽이 좋아요.")
-        self.assertEqual(mem.chip_sentence("색상", "Navy"), "색상은 Navy 쪽이 좋아요.")
+        self.assertEqual(mem.chip_sentence("색 톤", "어두운 톤"), "어두운 톤 쪽이 좋아요.")
+        self.assertEqual(mem.chip_sentence("색상", "네이비"), "네이비 쪽이 좋아요.")
 
     def test_conditions_keep_free_situation_raw(self):
         state = it.new_intent("r1", TOP)
@@ -403,3 +403,72 @@ class SummaryProposalTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class ImprovementLogicTests(unittest.TestCase):
+    """jaehyun_work F1-F5, F10, F11: code still decides; model text is validated or dropped."""
+
+    def need_state(self, strength="soft"):
+        state = it.new_intent("r1", TOP)
+        state["fea_needs"] = [{"key": "t1-w1", "target_id": "top", "fea": [], "quote": "단정하게", "content": "단정한 상의",
+                               "strength": strength}]
+        state["hypotheses"] = [{"id": "h1", "target_id": "top", "axis": "Fit", "values": ["Regular"], "reason": "단정",
+                                "fea_keys": ["t1-w1"]}]
+        return state
+
+    def test_f1_refresh_waits_and_needs_a_shared_unexplored_value(self):
+        from stylemate_memory.graph.hypotheses import refresh_selection
+        state = self.need_state()
+        state["pick_history"] = [{"turn": t, "target_id": "top", "facts": {"Pattern": ["Stripe"], "Fit": ["Regular"],
+                                                                           "Fabric": ["Cotton"]}} for t in (1, 2, 3)]
+        state["turn"] = 2
+        self.assertIsNone(refresh_selection(state))  # too early
+        state["turn"] = 3
+        summary = refresh_selection(state)
+        self.assertEqual([(v["axis"], v["value"]) for v in summary["common_values"]], [("Pattern", "Stripe")])  # Fit explored, Fabric blind
+        state["fea_needs"] = []
+        self.assertIsNone(refresh_selection(state))
+
+    def test_f2_polish_keeps_values_and_negation(self):
+        from stylemate_memory.graph.summary_text import validate_polish
+        items = [{"id": "p1", "pi": [("Fit", ["Relaxed"])], "polarity": "prefer"},
+                 {"id": "p2", "pi": [("Detail", ["Hood"])], "polarity": "avoid"}]
+        ok = validate_polish({"sentences": [{"id": "p1", "text": "출근할 땐 여유 핏 셔츠가 좋아요"},
+                                            {"id": "p2", "text": "후드 달린 옷이 좋아요"}]}, items)
+        self.assertEqual(ok, {"p1": "출근할 땐 여유 핏 셔츠가 좋아요"})  # p2 lost its negation -> rule text stays
+        self.assertEqual(validate_polish({"sentences": [{"id": "p1", "text": "편한 옷이 좋아요"}]}, items), {})
+        with self.assertRaises(StyleMateError):
+            validate_polish({"bogus": []}, items)
+
+    def test_f4_clarify_only_offers_differing_axes(self):
+        from stylemate_memory.graph.clarify import validate_clarify
+        labels = {"Fit": "핏", "Color": "색상"}
+        raw = {"question": "핏 때문에 고르셨나요?", "options": [{"axis": "Fit", "label": "넉넉한 품"},
+                                                         {"axis": "Pattern", "label": "줄무늬"}, {"axis": "Color", "label": "밝은 색"}]}
+        result = validate_clarify(raw, ["Fit", "Color"], labels)
+        self.assertEqual([o["feature"] for o in result["options"]], ["Fit", "Color"])
+        self.assertIsNone(validate_clarify({"question": "?", "options": [{"axis": "Fit", "label": "핏"}]}, ["Fit"], labels))
+
+    def test_f5_must_values_come_only_from_hard_needs(self):
+        self.assertEqual(grid.must_values(self.need_state("soft")), set())
+        self.assertEqual(grid.must_values(self.need_state("hard")), {("top", "Fit", "Regular")})
+
+    def test_f10_notice_and_f11_evidence(self):
+        from stylemate_memory.graph.service import _chip_evidence, _memory_notice, profile_rewrite_enabled
+        state = top_intent([lt("m1", "출근엔 네이비", {"occasion": "출근"})], situation=mem.start_situation({"kind": "chip", "value": "출근"}))
+        state["turn"] = 1
+        notice = _memory_notice(state)
+        self.assertEqual((notice["lines"], notice["situations"]), (["출근엔 네이비"], ["출근"]))
+        state["turn"] = 2
+        self.assertIsNone(_memory_notice(state))
+        state["pick_history"] = [{"turn": 1, "target_id": "top", "facts": {"Fit": ["Relaxed"]}},
+                                 {"turn": 2, "target_id": "top", "facts": {"Fit": ["Regular"]}},
+                                 {"turn": 2, "target_id": "top", "facts": {"Color": ["Navy"]}}]
+        self.assertEqual(_chip_evidence(state, {"target_id": "top", "feature": "Fit", "value": "Relaxed"}), {"with": 1, "of": 2})
+        self.assertIsNone(_chip_evidence(state, {"target_id": "top", "feature": "Pattern", "value": "Solid"}))
+        import os
+        from unittest import mock
+        with mock.patch.dict(os.environ, {"STYLEMATE_PROFILE_REWRITE": "off"}):
+            self.assertFalse(profile_rewrite_enabled())
+        with mock.patch.dict(os.environ, {}, clear=True):
+            self.assertTrue(profile_rewrite_enabled())
