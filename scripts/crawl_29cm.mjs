@@ -363,14 +363,17 @@ export async function main(args = process.argv.slice(2)) {
   const get = (flag, fallback) => { const i = args.indexOf(flag); return i >= 0 ? args[i + 1] : fallback; };
   const outArg = get('--out');
   if (!outArg) {
-    console.log('node scripts/crawl_29cm.mjs --out <저장소 밖 경로> [--per-group 110] [--pants-only] [--pages 1] [--new <새 상품 수>] [--limit <상품 방문 상한>] [--interval-ms 2000] [--no-images] [--details [--max-detail 8]] [--headed] [--browser-path <chromium>]');
+    console.log('node scripts/crawl_29cm.mjs --out <저장소 밖 경로> [--per-group 110] [--pants-only] [--gender men|women] [--pages 1] [--new <새 상품 수>] [--limit <상품 방문 상한>] [--interval-ms 2000] [--no-images] [--details [--max-detail 8]] [--headed] [--browser-path <chromium>]');
     return 2;
   }
   const newOnly = args.includes('--new') ? Number(get('--new')) : null; // count only products not saved before
   const perGroup = newOnly ?? Number(get('--per-group', 110));
   const pantsOnly = args.includes('--pants-only');
   const pages = Math.max(1, Number(get('--pages', 1)));
-  const runTag = pantsOnly || pages > 1 ? `-${pantsOnly ? 'pants' : 'all'}-p${pages}` : '';
+  const gender = get('--gender', null); // men | women: only that gender's seeds
+  if (gender !== null && !['men', 'women'].includes(gender)) { console.error('--gender must be men or women'); return 2; }
+  const runTag = pantsOnly || pages > 1 || gender ? `-${pantsOnly ? 'pants' : 'all'}${gender ? `-${gender}` : ''}-p${pages}` : '';
+  const seeds = (pantsOnly ? PANTS_SEEDS : SEEDS).filter(s => !gender || s.gender === gender);
   const limit = Number(get('--limit', Infinity));
   const intervalMs = Math.max(2000, Number(get('--interval-ms', 2000)));
   const browserPath = get('--browser-path', process.env.LUMI_CHROMIUM_PATH || undefined);
@@ -398,7 +401,7 @@ export async function main(args = process.argv.slice(2)) {
   try {
     const page = await (await browser.newContext({ locale: 'ko-KR' })).newPage();
     const discovery = await discover(page, root, intervalMs, state,
-      { seeds: pantsOnly ? PANTS_SEEDS : SEEDS, pages, name: `discovery${runTag}.json` });
+      { seeds, pages, name: `discovery${runTag}.json` });
     const queue = { top: [], bottom: [] };
     for (const g of ['top', 'bottom']) {
       queue[g] = roundRobin(discovery.lists.filter(l => l.group === g && !l.excluded).map(l => ({
