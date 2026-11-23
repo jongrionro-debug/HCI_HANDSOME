@@ -340,7 +340,7 @@ def records_29cm(data: Path) -> list[dict[str, Any]]:
         fill_common(pi, type_value, seller, model_text)
         out.append({"id": record["product_id"], "source": "29cm", "source_product_id": record["product_id"].removeprefix("29cm-"),
                     "group": "top" if type_value in TOPS else "bottom", "gender": md.get("gender"), "title": record["title"],
-                    "brand": md.get("brand"), "price": {"amount": md.get("price_amount"), "currency": "KRW"},
+                    "brand": md.get("brand"), "price": {"amount": md.get("price"), "currency": "KRW"},
                     "image": str(image.relative_to(data)), "url_handle": record["source"]["url"], "pi": pi})
     return out
 

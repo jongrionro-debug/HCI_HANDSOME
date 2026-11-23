@@ -1,6 +1,6 @@
 # 0014 · 29CM와 Shopify 크롤링 상품으로 PI v2(11축) 카탈로그를 만든다
 
-- Status: Proposed
+- Status: Proposed (결정 3은 [ADR 0016](0016-pi-v3-value-shapes.md)이 `lumi-pi-v3`에서 부분 대체)
 - Date: 2026-11-19
 - Related Work: 현재 대화의 graph 엔진 벤치마크 설계(“쓸수록 마음에 드는 아이템을 더 빨리 찾는다”), [ADR 0013](0013-langgraph-intent-loop.md)
 - Approval: 2026-11-19 사용자 결정
