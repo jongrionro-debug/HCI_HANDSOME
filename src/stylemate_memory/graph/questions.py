@@ -168,7 +168,7 @@ def valid_answer(question: dict[str, Any] | None, answer: dict[str, Any]) -> boo
 def interpret(intent: dict[str, Any], question: dict[str, Any], answer: dict[str, Any], scope: str) -> list[str]:
     """Apply one answer. Returns the changed score/pin keys (empty: nothing changes, e.g. unsure/skip).
 
-    v0 (3-feedback.md, text_options row): a chosen option pins that value for this request. neither/unsure/skip
+    v0 (2-feedback.md, text_options row): a chosen option pins that value for this request. neither/unsure/skip
     change nothing. Other modes return [] until the ② Issue defines their rows.
     """
     changed: list[str] = []

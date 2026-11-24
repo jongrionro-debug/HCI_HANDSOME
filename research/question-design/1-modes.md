@@ -1,7 +1,7 @@
 # ① 질문 방식
 
-- 주인: 킥오프에서 정함
-- 상태: **v0** (확인 지점 A 전). v0은 [agent-pipeline.md](../../docs/specs/agent-pipeline.md)의 `ask_question` 5가지다.
+- 주인: 파트 1 담당 (Issue "질문 설계 1 · 질문 방식")
+- 상태: **v0** (확인 지점 A 전). v0은 [agent-pipeline.md](../../docs/specs/agent-pipeline.md)의 `ask_question` 5가지다. 코드에서는 [graph/questions.py](../../src/stylemate_memory/graph/questions.py)의 `MODES`에 방식마다 `build`를 채운다. v0에는 `text_options`만 있다.
 - 다른 파트는 이 파일을 직접 고치지 않고 PR 리뷰 댓글로 제안한다. 새 방식 제안은 아래 "후보"에 행을 추가하는 PR로 해도 된다.
 
 ## 방식 목록

@@ -41,7 +41,7 @@
 - [상품·PI 수집](specs/crawling.md): 네이버·29CM·Shopify 상품의 PI 원문 값·이미지 수집 경로, 중간 레코드·정규화·검증 계약
 - [대화형 에이전트 파이프라인 (제안)](specs/agent-pipeline.md): tool 안과 플래너 안의 비교, 합친 파이프라인·tool 목록·검증 방법. 팀 결정 전, 미구현
 - [에이전트 시나리오](specs/agent-scenario.md): 합친 파이프라인을 한 사용자의 열 턴으로 따라가는 가상 시나리오와 구현 점검표
-- [질문 설계 작업 공간](../research/question-design/README.md): 질문 방식·상황 매핑·답 반영을 근거 카드로 정하는 파트별 작업 공간과 브랜치 협업 규칙([ADR 0017](adr/0017-question-design-research-workspace.md)). 확정 전 초안
+- [질문 설계 작업 공간](../research/question-design/README.md): 1 질문 방식·2 답 해석·반영·3 언제 어떤 방식을 근거 카드로 정하고 [questions.py](../src/stylemate_memory/graph/questions.py) 계약에 구현하는 파트별 작업 공간과 브랜치 협업 규칙([ADR 0017](adr/0017-question-design-research-workspace.md)). 결정 문서는 확정 전 초안
 - [연구 설계 원문](sources/Team4_mid-term_report.pdf) · [발표 원문](sources/Team4_mid-term_presentation.pdf)
 - [기존 보존 자료의 용도](../archive/README.md): ADR의 직접 근거·고정 재현·라이선스 자료만 유지한다. 새 보관 문서를 늘리지 않는다.
 

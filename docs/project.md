@@ -53,7 +53,7 @@
 | 메모리 저장 | [store.py](../src/stylemate_memory/store.py)·[store_v1.py](../src/stylemate_memory/store_v1.py)·[store_feedback.py](../src/stylemate_memory/store_feedback.py)·[store_cleanup.py](../src/stylemate_memory/store_cleanup.py): 근거·문장·선택적 binding, 확인·동의·교체·철회·삭제 | 실제 사용자 DB 이관·운영 자료 검증 |
 | 조회·목표 생성 | [retrieval.py](../src/stylemate_memory/retrieval.py)·[inference.py](../src/stylemate_memory/inference.py): 유효성/대상/요청 필터, 구조+키워드 검색, PI/FEA 목표·최신성 검사 | 실제 의미 검색 모델 선정·관련성 평가 |
 | 상품·이미지 비교 | [catalog.py](../src/stylemate_memory/catalog.py)·[catalog_mapping.py](../src/stylemate_memory/catalog_mapping.py)·[product_search.py](../src/stylemate_memory/product_search.py)·[comparison.py](../src/stylemate_memory/comparison.py)·[hypotheses.py](../src/stylemate_memory/hypotheses.py): 가져오기·PI Map·필수 조건 필터·가설 비교 | 수집 사전(`lumi-29cm-v1`) 연결 완료. 모델 보완값 표본 검수, 상품 수 확대, 추천 품질 |
-| 의도 순환 엔진(선택) | [graph/](../src/stylemate_memory/graph/): [ADR 0013](adr/0013-langgraph-intent-loop.md)의 LangGraph 턴 루프(parse_turn v2 → 의도 갱신 → FEA→PI 가설 → route → 8장 그리드 → interrupt), 값별 Beta 점수·대비 귀속, 이미지만 보이는 그리드(이미지를 눌러 선택, 고른 상품은 다음 그리드 맨 앞에 최대 4장 유지·선택 상태로 시작, 상단 요청 맥락 칩·화면 차례와 하단 고정 반영 바(다 별로·반영하고 다음 8장), 최종 결정 확인과 종료 요약은 화면 위 시트로 표시, 설명·부분 선택·상품별 "별로"·"이거랑 비슷한 거" 버튼은 화면에서 제외), 이해 칩 고정/해제/빼기, 상황 사전 [situation-dictionary-v1.json](../src/stylemate_memory/resources/situation-dictionary-v1.json). `STYLEMATE_ENGINE=graph`일 때 쇼핑 요청만 사용하며 온보딩은 기존 흐름. 상의 첫 빌드([ADR 0015](adr/0015-top-memory-warm-start.md), [graph/memory.py](../src/stylemate_memory/graph/memory.py)): 시작 시 성별·상황 칩(출근·데이트·주말·나의 상황), 동의한 장기 기억을 Beta 사전값으로 넣는 warm start와 "이렇게 시작할게요" 문장 칩(최대 3개, x로 끄기), 새로움 칸 1~2장·"이번엔 다르게"·취향 변화 질문, 종료 요약 제안 문장 최대 3개 [평소에도][이 상황만][저장 안 함] → 기존 확인·동의 계약으로 장기 기억, LLM 프로필 다시 쓰기(바뀐 문장만 재동의), 자유 상황의 LLM 과거 상황 연결 | 실제 모델 응답 품질, 실제 카탈로그의 대조 칸 구성률·수렴 판정, legacy 전환 기준([ADR 0013](adr/0013-langgraph-intent-loop.md) 15번), 최종 선택 단위, ADR 0015 결정 8의 수치·새로움 칸 비율·프로필 말투·값 라벨 한국어 표시(써 보고 정함) |
+| 의도 순환 엔진(선택) | [graph/](../src/stylemate_memory/graph/): [ADR 0013](adr/0013-langgraph-intent-loop.md)의 LangGraph 턴 루프(parse_turn v2 → 의도 갱신 → FEA→PI 가설 → route → 8장 그리드 → interrupt), 값별 Beta 점수·대비 귀속, 이미지만 보이는 그리드(이미지를 눌러 선택, 고른 상품은 다음 그리드 맨 앞에 최대 4장 유지·선택 상태로 시작, 상단 요청 맥락 칩·화면 차례와 하단 고정 반영 바(다 별로·반영하고 다음 8장), 최종 결정 확인과 종료 요약은 화면 위 시트로 표시, 설명·부분 선택·상품별 "별로"·"이거랑 비슷한 거" 버튼은 화면에서 제외), 이해 칩 고정/해제/빼기, 질문 루프 v0([questions.py](../src/stylemate_memory/graph/questions.py), `STYLEMATE_QUESTION_LOOP=on`일 때 그리드 위 텍스트 선택지 질문 → 고른 값 고정, 결정 로그), 상황 사전 [situation-dictionary-v1.json](../src/stylemate_memory/resources/situation-dictionary-v1.json). `STYLEMATE_ENGINE=graph`일 때 쇼핑 요청만 사용하며 온보딩은 기존 흐름. 상의 첫 빌드([ADR 0015](adr/0015-top-memory-warm-start.md), [graph/memory.py](../src/stylemate_memory/graph/memory.py)): 시작 시 성별·상황 칩(출근·데이트·주말·나의 상황), 동의한 장기 기억을 Beta 사전값으로 넣는 warm start와 "이렇게 시작할게요" 문장 칩(최대 3개, x로 끄기), 새로움 칸 1~2장·"이번엔 다르게"·취향 변화 질문, 종료 요약 제안 문장 최대 3개 [평소에도][이 상황만][저장 안 함] → 기존 확인·동의 계약으로 장기 기억, LLM 프로필 다시 쓰기(바뀐 문장만 재동의), 자유 상황의 LLM 과거 상황 연결 | 실제 모델 응답 품질, 실제 카탈로그의 대조 칸 구성률·수렴 판정, legacy 전환 기준([ADR 0013](adr/0013-langgraph-intent-loop.md) 15번), 최종 선택 단위, ADR 0015 결정 8의 수치·새로움 칸 비율·프로필 말투·값 라벨 한국어 표시(써 보고 정함) |
 | 서비스·소비자 UI | [app.py](../src/stylemate_memory/app.py)의 `ConsumerService`, [consumer.py](../src/stylemate_memory/consumer.py)·[consumer.js](../src/stylemate_memory/consumer.js)·[consumer-http.js](../src/stylemate_memory/consumer-http.js): 온보딩·피드백·확인·재탐색·종료·별도 장기 동의·삭제 | 공개 인증/배포, 실제 참가자 사용성·기기 검증 |
 
 ### 이미지·텍스트 인터랙션
@@ -314,6 +314,7 @@ graph 모드 흐름: 시작 화면에서 성별(전체·남성·여성, 원본 `
 | STYLEMATE_REGISTRY | `--registry park-2025-source-v1 / lumi-29cm-v1 / lumi-pi-v2-top / lumi-pi-v3`, 기본 park. 카탈로그 적재·Map·서버에 같은 값을 쓴다 |
 | OPENAI_API_KEY | openai를 명시적으로 선택할 때만 조회 |
 | STYLEMATE_PROFILE_REWRITE | graph 종료 요약 뒤 프로필 다시 쓰기. 기본 on, `off`면 고른 문장을 그대로 두고 다시 묻지 않음 |
+| STYLEMATE_QUESTION_LOOP | graph 엔진의 질문 루프([questions.py](../src/stylemate_memory/graph/questions.py)). 기본 off, `on`이면 그리드 위에 질문 하나를 띄우고 답을 반영한다 |
 | STYLEMATE_ENGINE | `--engine legacy / graph`, 기본 legacy. graph는 선택 의존성 `pip install -e '.[graph]'`(langgraph)이 필요하며, 체크포인트는 메모리 DB 옆 `<이름>.graph.sqlite3`에 둔다 |
 
 [settings.py](../src/stylemate_memory/settings.py)가 경로·설정·gateway를 구성한다. 실제 API 실행이 요청된 경우에만 사용자가 로컬 환경에 `OPENCODE_API_KEY`를 설정하고 `PYTHONPATH=src python3 -m stylemate_memory.consumer --provider opencode-go --endpoint <확인한 https 주소>`로 시작한다. 기존 `--provider openai`는 호환 경로다. 키를 CLI 인자·예제 파일·로그에 넣지 않는다. import·기본 fake·상품 가져오기/Map 생성·읽기 관찰에는 키가 필요 없다.
@@ -447,29 +448,29 @@ LUMI_GRAPH_PYTHON=~/.venvs/lumi-graph/bin/python node tests/check_graph_browser.
 
 | 미구현·미검증 범위 | 필요한 확인 |
 |---|---|
-| 상품 카탈로그 | 29CM·Shopify 수집과 PI v2 채움(상·하의 이미지 채움 포함), v3 변환 1,748개(2026-11-23)까지 했다. 실행 사전·graph 엔진은 아직 상의 전용 `lumi-pi-v2-top`이다. v3 사람 검수(`--review-sample 30`) 일치율, 하의·v3 실행 사전 연결은 미완 |
+| 상품 카탈로그 | 29CM·Shopify 수집, PI v2 채움, v3 변환과 상·하의 실행 사전 `lumi-pi-v3`까지 했다(로컬 1,748개, 원격 서버 3,600개). v3 사람 검수 일치율, 원격 3,600개의 로컬 반영, 점수·색 거리를 쓰는 비교는 미완([#27](https://github.com/jongrionro-debug/HCI_HANDSOME/issues/27)) |
 | DeepSeek(OpenCode Go) 품질·한도 평가 | 합성 한국어 추출 16개×2회: 검증 통과 31/32, 중앙 지연 약 3초([ADR 0011](adr/0011-use-deepseek-api-for-real-model.md)). 새 발화·참가자 말투 재평가, 선택 이유·FEA→PI 가설 품질, 참가자 규모의 사용량 한도는 미평가 |
 | 실제 모델·가설 비교 | DeepSeek로 명시적 실행 후 한국어 표현·선택 이유·실제 비교 축과 대안·FEA 성능 판단 경계 평가 |
 | 실제 의미 검색 | 모델 선정 후 관련 근거 회수·오탐·근거 완전성·삭제/재색인·비용 비교 |
 | 운영 자료 이관 | 원래 의미·대상·동의·기간 보존, 합성 이관/rollback과 실제 자료 승인을 구분 |
 | 상의 첫 빌드 써 보기([ADR 0015](adr/0015-top-memory-warm-start.md)) | 실제 DeepSeek로 요청 3~4회를 직접 써 보고 사전값 세기·새로움 칸 비율·프로필 말투·영어 값 라벨의 한국어 표시·자유 상황 연결 정확도를 정한다. 최종 상품 문장은 그 상품을 그리드에서 고른 근거가 있을 때만 제안된다. 새 화면(시작 옵션·요약 동의)은 각본 통합 테스트와 수동 화면 확인만 했고 브라우저 자동 검사는 없다 |
 | 사용자 연구 | 보고서 기준 파일럿·동의/과제 안내·설문·분석 준비. 참여자 자료는 저장소 밖 관리 |
-| 대화형 에이전트 전환 | [합친 파이프라인 제안](specs/agent-pipeline.md)(턴당 LLM 1회 + tool 8개)과 [시나리오](specs/agent-scenario.md)의 팀 결정. 질문 방식·상황 매핑·답 반영 규칙은 [질문 설계 작업 공간](../research/question-design/README.md)에서 근거 기반으로 정한다. 결정되면 ADR로 남기고 graph 엔진에 반영한다. 미구현 |
-| Proposed ADR 승인 | 0013·0014·0015·0016·0017이 Proposed다. 구현이 들어간 0013~0016은 써 보기 결과와 함께 승인·수정 여부를 정한다 |
+| 대화형 에이전트 전환 | [합친 파이프라인 제안](specs/agent-pipeline.md)(턴당 LLM 1회 + tool 8개)과 [시나리오](specs/agent-scenario.md)의 팀 결정. 질문 방식·답 반영·방식 선택은 [질문 설계 작업 공간](../research/question-design/README.md)의 세 파트가 근거 기반으로 정하고 [questions.py](../src/stylemate_memory/graph/questions.py)에 구현한다. v0 질문 루프(`text_options`만)는 있고 기본 off다 |
+| Proposed ADR 승인 | 0013·0014·0015·0016·0018이 Proposed다. 구현이 들어간 0013~0016은 써 보기 결과와 함께 승인·수정 여부를 정한다 |
 
 ### 지금 할 일 (2026-11-25 기준)
 
-순서는 의존 관계 기준이다. 완료 조건과 진행은 각 Issue에서 관리하고 이 목록은 요약만 둔다.
+남은 핵심 작업은 질문 설계 세 파트다. 세 파트가 main에 합쳐지면 질문 루프가 켜진 1차 시스템이 된다. 공통 계약은 [graph/questions.py](../src/stylemate_memory/graph/questions.py), 진행 방법은 [질문 설계 작업 공간](../research/question-design/README.md)에 있고, 완료 조건은 각 Issue에서 관리한다.
 
-1. **main 밖 브랜치 정리([#23](https://github.com/jongrionro-debug/HCI_HANDSOME/issues/23)):** 원격에 main 미반영 브랜치가 있다. `claude/pi-v3-pants-texture`(Texture Smooth·`--axes` 재질문), `feat/pi-v4-outer`(남성 아우터 품목군), `jaehyun_work`(graph 엔진 개선안 F·U 항목), `feat/grid-decide-button`(결정 버튼·칩 표시). 각각 PR로 검토해 반영하거나 닫는다. `feat/pi-v4-outer`의 ADR 번호 0017은 main의 [ADR 0017](adr/0017-question-design-research-workspace.md)과 겹치므로 반영 전에 0018로 바꾼다.
-2. **질문 설계 킥오프([#24](https://github.com/jongrionro-debug/HCI_HANDSOME/issues/24)):** [작업 공간](../research/question-design/README.md)의 파트 ①②③ 담당자, 확인 지점 A·B·C 날짜, 채택 기준을 정하고 [ADR 0017](adr/0017-question-design-research-workspace.md) 승인 여부를 정한다.
-3. **카탈로그 실행 전환([#25](https://github.com/jongrionro-debug/HCI_HANDSOME/issues/25), 검수는 [#20](https://github.com/jongrionro-debug/HCI_HANDSOME/issues/20)):** v3 검수 시트로 모델 채움값 일치율을 재고, 상·하의(필요하면 아우터) 실행 사전을 만들어 graph 엔진에 연결한다.
-4. **실제 모델로 써 보기:** DeepSeek로 상의 첫 빌드와 하의 흐름을 직접 써 보고 ADR 0015 결정 8의 수치·라벨 한국어 표시·가설 품질을 정한다.
-5. **에이전트 파이프라인 결정:** 질문 설계 확인 지점 B·C 결과로 [agent-pipeline.md](specs/agent-pipeline.md)를 확정하고 ADR로 남긴 뒤 구현 이슈로 나눈다.
-6. **연구 운영 준비:** Baseline 환경, 시나리오·과제 안내, 설문(대응 문항·LUMI 전용·NASA-TLX·SUS), 동의서(외부 모델 API 전송 안내 포함), 파일럿 2~3명, 순서·시나리오 교차 균형화.
-7. **의미 검색(선택):** 키워드 검색으로 충분하면 user study 이후로 미룬다.
+| 파트 | 맡는 것 | Issue |
+|---|---|---|
+| 1 · 질문 방식 | 방식별 질문 만들기(텍스트·이미지 선택·대조 2장·설명 이미지·복합)와 질문 화면 | [#26](https://github.com/jongrionro-debug/HCI_HANDSOME/issues/26) |
+| 2 · 답 해석·반영 | 방식별 답의 반영 규칙, PI v3 점수·색 거리·예산을 쓰는 반영, v3 값 검수 | [#27](https://github.com/jongrionro-debug/HCI_HANDSOME/issues/27) |
+| 3 · 언제 어떤 방식 | 물을 축·시점·멈춤 판정, 규칙+LLM 방식 선택, 결정 로그, 루프 기본 on과 통합 시나리오 | [#28](https://github.com/jongrionro-debug/HCI_HANDSOME/issues/28) |
 
-미결정: 질문 설계 담당·일정, 실행 사전에 넣을 품목 범위(아우터 포함 여부), 참가자 20~24명 모집 시점.
+세 파트 뒤에 남는 일: 실제 DeepSeek로 써 보기(ADR 0015 수치), 연구 운영 준비(Baseline 환경, 시나리오·과제 안내, 설문, 동의서, 파일럿 2~3명), 의미 검색(선택).
+
+미결정: 파트 담당자와 확인 지점 날짜(각 Issue), 실행 사전에 아우터 포함 여부, 참가자 20~24명 모집 시점.
 
 ### 선행연구에서 가져오는 범위
 
