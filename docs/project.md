@@ -432,7 +432,7 @@ LUMI_GRAPH_PYTHON=~/.venvs/lumi-graph/bin/python node tests/check_graph_browser.
 | 운영 자료 이관 | 원래 의미·대상·동의·기간 보존, 합성 이관/rollback과 실제 자료 승인을 구분 |
 | 상의 첫 빌드 써 보기([ADR 0015](adr/0015-top-memory-warm-start.md)) | 실제 DeepSeek로 요청 3~4회를 직접 써 보고 사전값 세기·새로움 칸 비율·프로필 말투·영어 값 라벨의 한국어 표시·자유 상황 연결 정확도를 정한다. 최종 상품 문장은 그 상품을 그리드에서 고른 근거가 있을 때만 제안된다. 새 화면(시작 옵션·요약 동의)은 각본 통합 테스트와 수동 화면 확인만 했고 브라우저 자동 검사는 없다 |
 | 사용자 연구 | 보고서 기준 파일럿·동의/과제 안내·설문·분석 준비. 참여자 자료는 저장소 밖 관리 |
-| 대화형 에이전트 전환 | [합친 파이프라인 제안](specs/agent-pipeline.md)(턴당 LLM 1회 + tool 8개)과 [시나리오](specs/agent-scenario.md)의 팀 결정. 결정되면 ADR로 남기고 graph 엔진에 반영한다. 미구현 |
+| 대화형 에이전트 전환 | [합친 파이프라인 제안](specs/agent-pipeline.md)(턴당 LLM 1회 + tool 8개)과 [시나리오](specs/agent-scenario.md)의 팀 결정. 질문 방식·상황 매핑·답 반영 규칙은 [질문 설계 작업 공간](../research/question-design/README.md)에서 근거 기반으로 정한다. 결정되면 ADR로 남기고 graph 엔진에 반영한다. 미구현 |
 
 ### user study 전 진행 현황 (2026-11-12 추정)
 
