@@ -117,7 +117,9 @@ p { line-height: 1.65; overflow-wrap: anywhere; }
 .liked-label { width: 100%; font-size: .75rem; color: var(--muted); }
 .liked button { min-height: 32px; padding: .25rem .7rem; font-size: .8rem; font-weight: 500; border-radius: 999px; }
 .liked button[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: white; }
-.liked button.quiet { border-radius: 8px; padding-inline: .4rem; }
+.liked button.applied { cursor: default; opacity: .75; }
+.liked button.decide { width: 100%; min-height: 44px; margin-top: .3rem; border: 1.5px solid var(--accent); border-radius: 12px; background: var(--tint); color: var(--accent-dark); font-size: .95rem; font-weight: 700; }
+.liked button.decide:hover:not(:disabled) { background: var(--accent); border-color: var(--accent); color: white; }
 
 /* Sticky decision bar under the grid */
 .grid-bar { position: sticky; bottom: 0; z-index: 10; margin-top: 1.5rem; padding: .85rem 1rem; display: flex; flex-wrap: wrap; align-items: center; gap: .6rem;
