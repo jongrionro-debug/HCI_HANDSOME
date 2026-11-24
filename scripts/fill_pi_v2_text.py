@@ -40,7 +40,8 @@ GUIDE = {
     "Fit": "how loose the garment is (ease), not its shape",
     "Silhouette": "leg shape of trousers/shorts/skirts (Straight, Tapered, Wide, Flare); Boxy only for tops",
     "Length": "sleeve length for tops, leg length for bottoms",
-    "Texture": "visible surface/weave of the fabric",
+    "Texture": "visible surface/weave of the fabric; Smooth = flat, plain or sleek woven surface with no visible "
+               "rib, knit, pile, twill line or denim (e.g. suiting, poplin, nylon, satin)",
     "Fabric": "fibre content",
     "Detail": "construction or design details",
     "Style": "overall style/mood the text describes",

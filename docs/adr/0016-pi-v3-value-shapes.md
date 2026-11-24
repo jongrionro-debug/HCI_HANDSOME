@@ -55,6 +55,7 @@
         - `Classic`은 무늬·장식(Graphic·Logo·Stripe·Embroidery·Washed 등)이 없으면 Minimal, 있으면 Casual로 나눈다.
         - `Tailored`는 Formal로 넓힌다. Outdoor·Formal·Minimal·Casual은 판매자 문구 키워드로도 채운다.
         - 구체적인 스타일을 Minimal·Casual보다 먼저 남긴다.
+    - **Texture에 `Smooth` 추가(2026-11-24 사용자 결정):** 골·짜임·기모·능선·데님이 보이지 않는 평직·매끈한 표면(슬랙스 원단, 포플린, 나일론, 새틴)이다. 하의 바지 확대 뒤 Texture 빈 칸 대부분이 "고를 값이 없음"이어서 더했다. 이미 이미지 보완을 거친 상품은 `fill_pi_v2_image.py --axes Texture`로 빈 Texture만 다시 묻는다.
 4. **채우는 경로.** chat이 먼저 묻는 축은 Type, 예산, Fabric, Weight, Color다. 이미지 선택으로 채우는 축은 Fit(상대 조정), Silhouette(하의), Pattern, Texture, Detail, Style, Tone이다. Fabric은 이미지로 갱신하지 않는다(ADR 0013 결정 8 유지).
 5. **드문 값 병합.** 범주형 축에서 품목군(상의·하의)별로 채워진 상품의 1% 미만인 값은 비슷한 값과 합치고, 그 품목군에 해당하지 않는 값은 뺀다. 상품에는 `merged`로 기록한다.
     - Type: Knit vest→Sleeveless, Cargo pants→Trousers(+Detail Pockets), Zip hoodie→Hoodie(+Detail Zip)
