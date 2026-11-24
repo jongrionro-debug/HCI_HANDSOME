@@ -145,6 +145,8 @@ PI 7개 축과 FEA 분류를 차용한 출처는 Park, H., Kim, S., Choi, Y., & 
 
 [build_lumi_pi_v3.py](../scripts/build_lumi_pi_v3.py)가 v2 채움 결과를 읽어 `data/catalog/lumi-pi-v3.jsonl`과 `-report.json`을 만든다. 모델 호출은 없고, 대표색 추출에만 Pillow가 필요하다. 2026-11-23 실행에서 1,748개를 만들었다. `--review-sample 30`이 사람 검수 시트를 만들며, 검수 일치율은 아직 없다. 실행 사전과 graph 엔진은 아직 v2(`lumi-pi-v2-top`)를 쓴다.
 
+**PI v4 아우터([ADR 0017](adr/0017-pi-v4-outer.md), Proposed).** [build_lumi_pi_v4.py](../scripts/build_lumi_pi_v4.py)가 v3 위에 품목군 `outer`(29CM 남성 아우터)를 더한다. Type은 소분류 24개에서 19개 값으로 정하고(후드 집업은 별도 `Zip hoodie`, 기타 아우터는 비움), Length는 몸판 기장 5단계(Cropped~Long), Weight는 아우터 키워드·품목 규칙, Fabric에 Leather·Fur, Texture에 Suede·Quilted·Shearling·Melton·Ripstop·Tweed를 더한다. Silhouette은 아우터에서 쓰지 않는다. `--schema`로 스키마를 출력하고 `outer_pi`가 규칙으로 채운다. 실제 아우터 수집·빌드와 실측 기장 경계값 조정은 남았다.
+
 ### 현재 실행 사전
 
 실행 사전은 세 가지이며 `--registry`/`STYLEMATE_REGISTRY`로 명시적으로 고른다. 기본값은 Park 사전이다.
