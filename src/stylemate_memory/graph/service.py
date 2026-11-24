@@ -17,6 +17,7 @@ from .. import contracts as c
 from ..errors import V1_ERROR_CODES, StyleMateError
 from . import intent as it
 from . import memory as mem
+from . import questions
 from . import scoring
 from .labels import VALUE_LABELS_KO, value_label
 from .summary_text import POLISH_INSTRUCTIONS, polish_payload, polish_schema, validate_polish
@@ -159,7 +160,9 @@ class GraphBridge:
                                   "image_id": image["image_id"] if image else None,
                                   "image_version": image_versions.get(image["image_id"]) if image else None,
                                   "facts": facts, "price": price if type(price) is int else None,
-                                  "gender": record["raw_metadata"].get("gender")})
+                                  "gender": record["raw_metadata"].get("gender"),
+                                  # PI v3 shapes (ordinal scores, colour Lab, price_krw) for answer reflection; None before v3.
+                                  "v3": record["raw_metadata"].get("pi_v3")})
             self._cache = {key: views}
             return views
         return run()
@@ -238,6 +241,9 @@ def graph_view(service: Any, request_id: str) -> dict[str, Any] | None:
         "musts": [{"quote": n["quote"], "content": n["content"]} for n in intent["fea_needs"] if n["strength"] == "hard"],
         "profile_rewrite": profile_rewrite_enabled(),
         "taste": _taste(service, request_id),
+        # Question loop seam (graph/questions.py)
+        "ask": questions.public(intent.get("ask")),
+        "question_loop": questions.loop_enabled(),
     }
 
 
@@ -618,7 +624,8 @@ def handle_command(service: Any, snapshot: dict[str, Any], command: dict[str, An
     request_id = snapshot["request"]["id"]
     if snapshot["request"]["mode"] != "shopping":
         return False
-    if op in ("submit_feedback", "grid_feedback", "explore", "adjust_intent", "retry_extraction", "graph_summary") and request_id in service._jobs:
+    if op in ("submit_feedback", "grid_feedback", "explore", "adjust_intent", "retry_extraction", "graph_summary",
+              "answer_question") and request_id in service._jobs:
         raise StyleMateError("context_blocked")
     if op == "submit_feedback":
         if service._latest_pending(snapshot):
@@ -679,6 +686,13 @@ def handle_command(service: Any, snapshot: dict[str, Any], command: dict[str, An
                 raise StyleMateError("invalid_input")
         run_turn(service, request_id, command_id, {"type": "adjust", "action": action["action"], "key": action["key"],
                                                    "feature": action["feature"]})
+        return True
+    if op == "answer_question":
+        intent = service._graph.intent(request_id)
+        answer = {k: action[k] for k in ("question_id", "choice", "option_ids", "switch_to")}
+        if not intent or not questions.valid_answer(intent.get("ask"), answer):
+            raise StyleMateError("invalid_input")
+        run_turn(service, request_id, command_id, {"type": "answer", "answer": answer})
         return True
     if op == "explore":
         run_turn(service, request_id, command_id, {"type": "explore"})

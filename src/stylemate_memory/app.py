@@ -462,7 +462,7 @@ class ConsumerService:
                     handled = graph_command(self, snapshot, command, command_id)
                 if handled:
                     pass
-                elif op in ("grid_feedback", "adjust_intent", "graph_summary"):
+                elif op in ("grid_feedback", "adjust_intent", "graph_summary", "answer_question"):
                     raise StyleMateError("invalid_input")
                 elif op == "resume_request":
                     if self._journal.active() != request_id:
@@ -540,6 +540,7 @@ class ConsumerService:
         shapes["grid_feedback"] = c.GridFeedbackUI
         shapes["adjust_intent"] = c.AdjustIntentUI
         shapes["graph_summary"] = c.GraphSummaryUI
+        shapes["answer_question"] = c.AnswerQuestionUI
         if not isinstance(action.get("op"), str) or action["op"] not in shapes:
             raise StyleMateError("invalid_input")
         optional = {"text"} if action["op"] == "respond_comparison" and "text" in action else set()
@@ -557,6 +558,11 @@ class ConsumerService:
         if action["op"] == "respond_review" and action["decision"] not in ("accept", "decline", "skip"):
             raise StyleMateError("invalid_input")
         if action["op"] == "respond_comparison" and action["decision"] not in ("choose", "neither", "unsure"):
+            raise StyleMateError("invalid_input")
+        if action["op"] == "answer_question" and (
+                not isinstance(action["question_id"], str) or not isinstance(action["option_ids"], list)
+                or not all(isinstance(o, str) for o in action["option_ids"])
+                or not (action["switch_to"] is None or isinstance(action["switch_to"], str))):
             raise StyleMateError("invalid_input")
 
     @staticmethod

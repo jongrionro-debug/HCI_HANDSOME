@@ -3,6 +3,9 @@
  */
 const esc = value => String(value ?? "").replace(/[&<>"']/g, ch => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[ch]));
 const clone = value => structuredClone(value);
+// Question loop seam: label of the "다른 방식으로 볼게요" buttons per mode (graph/questions.py MODE_NAMES).
+const MODE_SWITCH_LABEL = { text_options: "글로 고를게요", select_images: "사진으로 볼게요", contrast_pair: "두 장 비교로 볼게요",
+  explain_images: "예시 사진으로 볼게요", propose_compare: "후보 비교로 넘어갈게요" };
 const blankDraft = () => ({ text: "", selections: [], reaction: "text_only", question: null, hypothesis: null,
   dislikes: [], similar: null, allBad: false, liked: {}, version: 0 });
 const purposeLabel = {
@@ -211,6 +214,16 @@ export function mountConsumer(root, adapter, { fixture = false, scenarios = {} }
       <div class="actions">${button("adjust", "네", 'data-adjust="novelty_yes"', off)}${button("adjust", "아니요", 'data-adjust="novelty_no" class="quiet"', off)}</div></section>`);
     if (m.taste_prompt) banners.push(`<section class="banner" aria-label="취향 변화"><p>“${esc(m.taste_prompt.text)}”와 다르게 고르고 계세요. 취향이 바뀌었나요?</p>
       <div class="actions">${button("adjust", "네, 이번엔 빼 주세요", 'data-adjust="taste_yes"', off)}${button("adjust", "아니요", 'data-adjust="taste_no" class="quiet"', off)}</div></section>`);
+    if (g.ask) {
+      // Question loop seam (graph/questions.py). v0 renders text options; image modes extend this block (① Issue).
+      const allow = g.ask.allow ?? [];
+      banners.push(`<section class="banner ask" aria-label="질문" data-mode="${esc(g.ask.mode)}"><p>${esc(g.ask.prompt)}</p>
+        <div class="actions">${g.ask.options.map(o => button("answer-q", esc(o.label), `data-choice="options" data-option="${esc(o.id)}"`, off)).join("")}
+        ${allow.includes("neither") ? button("answer-q", "둘 다 아니에요", 'data-choice="neither" class="quiet"', off) : ""}
+        ${allow.includes("unsure") ? button("answer-q", "잘 모르겠어요", 'data-choice="unsure" class="quiet"', off) : ""}
+        ${(g.ask.switch_to ?? []).map(m => button("answer-q", MODE_SWITCH_LABEL[m] ?? m, `data-choice="switch" data-mode="${esc(m)}" class="quiet"`, off)).join("")}
+        ${button("answer-q", "건너뛰기", 'data-choice="skip" class="quiet"', off)}</div></section>`);
+    }
     if (g.question && !g.reason_prompt) banners.push(`<section class="banner" aria-label="질문"><p>${esc(questionLabel(g.question))}</p>
       <div class="actions">${button("compose-toggle", "말로 답하기", "", off)}</div></section>`);
     return banners[0] ?? "";
@@ -762,6 +775,10 @@ export function mountConsumer(root, adapter, { fixture = false, scenarios = {} }
         d.version += 1; render(); root.querySelector('[data-action="all-bad"]')?.focus(); break;
       case "adjust":
         await send({ op: "adjust_intent", action: b.dataset.adjust, key: b.dataset.key ?? null, feature: b.dataset.feature ?? null }); break;
+      case "answer-q":
+        if (!state.graph?.ask) return;
+        await send({ op: "answer_question", question_id: state.graph.ask.question_id, choice: b.dataset.choice,
+          option_ids: b.dataset.option ? [b.dataset.option] : [], switch_to: b.dataset.mode ?? null }); break;
       case "reaction": d.hypothesis = null; d.reaction = b.dataset.reaction; d.selections = []; d.question = null; d.version += 1; render(); root.querySelector("#free-text")?.focus(); break;
       case "part": d.hypothesis = null; part = { cardId: card.candidate_id, imageId: card.image_id, imageVersion: card.image_version, box: [0.15, 0.4, 0.85, 0.9] }; render(); root.querySelector('[data-coordinate="0"]')?.focus(); break;
       case "cancel-part": part = null; render(); break;

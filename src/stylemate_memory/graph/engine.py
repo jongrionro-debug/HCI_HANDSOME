@@ -24,6 +24,7 @@ from ..errors import StyleMateError
 from . import grid as grid_plan
 from . import intent as it
 from . import memory as mem
+from . import questions
 from . import scoring
 from .clarify import CLARIFY_INSTRUCTIONS, clarify_payload, clarify_schema, validate_clarify
 from .hypotheses import (HYPOTHESIS_INSTRUCTIONS, NON_HYPOTHESIS_AXES, build_hypothesis_payload, hypothesis_schema,
@@ -183,6 +184,8 @@ class GraphEngine:
                     intent["clarify"] = self._clarify(cards, selected, axes)
         elif event["type"] == "adjust":
             self._adjust(intent, event, scope)
+        elif event["type"] == "answer":
+            self._answer(intent, event, scope)
         if event.get("novel_hint"):
             mem.ask_novelty(intent)
         if event.get("feedback_ref"):
@@ -235,6 +238,31 @@ class GraphEngine:
             if a and a != b:
                 axes.append(axis)
         return axes
+
+    def _answer(self, intent: dict[str, Any], event: dict[str, Any], scope: str) -> None:
+        """Question loop (graph/questions.py): apply an answer, or rebuild the question in the mode the user chose."""
+        question, answer = intent.get("ask"), event["answer"]
+        intent["answer_changed"] = False
+        if not questions.valid_answer(question, answer):
+            return
+        if answer["choice"] == "switch":
+            target = question["target_id"]
+            pool = grid_plan.eligible(self.bridge.products(), target, intent, scope)[0]
+            candidate = {"id": f"{target}:{question['axis']}", "target_id": target, "axis": question["axis"], "kind": "switch",
+                         "values": [o["value"] for o in question["options"] if "value" in o]}
+            modes, built = questions.allowed(candidate, pool, self._labels())
+            if answer["switch_to"] in built:
+                questions.log(intent, {"turn": intent["turn"], "event": "switch", "question_id": question["question_id"],
+                                       "decision": {"candidate_id": candidate["id"], "mode": answer["switch_to"],
+                                                    "decided_by": "user", "reason": "user_switch", "allowed": modes}})
+                intent["ask"] = question | built[answer["switch_to"]] | {
+                    "mode": answer["switch_to"], "switch_to": [m for m in modes if m != answer["switch_to"]]}
+            return
+        intent["answer_changed"] = bool(questions.interpret(intent, question, answer, scope))
+        intent["ask"] = None
+
+    def _labels(self) -> dict[str, str]:
+        return {k: v["label_ko"] for k, v in self.bridge.registry.describe()["product_information"].items()}
 
     def _adjust(self, intent: dict[str, Any], event: dict[str, Any], scope: str) -> None:
         action, key = event["action"], event.get("key")
@@ -405,6 +433,8 @@ class GraphEngine:
             return "hold"
         if intent.get("compare_mode"):
             return it.route(intent)
+        if intent["event"]["type"] == "answer" and not intent.get("answer_changed"):
+            return "hold"  # unsure / skip / switch / an invalid answer keeps the grid
         if intent["event"]["type"] == "adjust" and intent["event"].get("action") in (
                 "reason", "reason_skip", "novelty_no", "taste_no", "shortlist_remove"):
             return "hold"  # a liked-axis answer, a "no" or a shortlist removal keeps the grid
@@ -462,7 +492,22 @@ class GraphEngine:
             intent["top_history"] = (intent["top_history"] + [converge_ids])[-5:]
             intent["converged"] = grid_plan.converged(intent["top_history"], plan["shortage"])
             intent["shortage"] = plan["shortage"]
+            if questions.loop_enabled():
+                self._plan_question(intent)
         return {"intent": intent}
+
+    def _plan_question(self, intent: dict[str, Any]) -> None:
+        if intent.get("ask"):  # a new grid replaces an unanswered question; ASK_GAP keeps it from coming straight back
+            questions.log(intent, {"turn": intent["turn"], "event": "ignored", "question_id": intent["ask"]["question_id"]})
+            intent["ask"] = None
+        scope = it.scope_of(intent)
+        products = self.bridge.products()
+        pools = {t["target_id"]: grid_plan.eligible(products, t["target_id"], intent, scope)[0] for t in intent["targets"]}
+        fixed = it.fixed_axes(intent)
+        for pin in intent["pinned"]:
+            target_id, _, axis, _ = scoring.split_key(pin["key"])
+            fixed.setdefault(target_id, []).append(axis)
+        intent["ask"] = questions.plan(intent, pools, fixed, self._labels())
 
     def _wait_user(self, state: GraphState) -> dict[str, Any]:
         from langgraph.types import interrupt

@@ -163,7 +163,8 @@ class GraphEngineTests(unittest.TestCase):
         picked = []
         for _ in range(3):
             cards = self.service._graph.intent(self.service.state()["request"]["id"])["last_grid"]["cards"]
-            fresh = next(c for c in cards if c["slot"] != "kept")
+            # An earlier pick may come back in a non-kept slot two turns later; pick a product not picked yet.
+            fresh = next(c for c in cards if c["slot"] != "kept" and c["product_id"] not in picked)
             picked.append(fresh["product_id"])
             self.send(self.grid(selections=[{"target_id": "pants", "candidate_id": fresh["candidate_id"], "part_ref": None}]))
         s = self.service.state()
@@ -539,6 +540,34 @@ class PIV3RuntimeTests(unittest.TestCase):
             facts = self.service._graph.intent(s["request"]["id"])["last_grid"]["cards"][0]["facts"]
             self.assertEqual(facts.get("Weight"), ["Heavy" if garment == "Bottom" else "Light"])
             self.send({"op": "end_request"})
+
+    def test_question_loop_asks_once_and_a_text_answer_pins_the_value(self):
+        import os
+        from unittest import mock
+        with mock.patch.dict(os.environ, {"STYLEMATE_QUESTION_LOOP": "on"}):
+            self.send({"op": "start_request", "mode": "shopping", "timezone": "Asia/Seoul",
+                       "targets": [{"target_id": "t", "garment_type": "Top"}], "text": None, "gender": "men",
+                       "situation": None})
+            s = self.service.state()
+            ask = s["graph"]["ask"]
+            self.assertTrue(s["graph"]["question_loop"])
+            self.assertEqual(ask["mode"], "text_options")
+            self.assertNotIn("value", ask["options"][0])
+            set_id = s["graph"]["set_id"]
+            self.send({"op": "answer_question", "question_id": "q-unknown", "choice": "skip", "option_ids": [],
+                       "switch_to": None}, ok=False)
+            option = ask["options"][0]
+            self.send({"op": "answer_question", "question_id": ask["question_id"], "choice": "options",
+                       "option_ids": [option["id"]], "switch_to": None})
+            s = self.service.state()
+            intent = self.service._graph.intent(s["request"]["id"])
+            self.assertIsNone(s["graph"]["ask"])
+            self.assertNotEqual(s["graph"]["set_id"], set_id)  # a pinned value redraws the grid
+            pinned = [p["key"].split("|") for p in intent["pinned"]]
+            self.assertEqual([(k[2], k[3]) for k in pinned], [(ask["axis"], intent["question_log"][0]["candidate"]["values"][0])])
+            axis, value = pinned[0][2], pinned[0][3]
+            self.assertTrue(all(value in card["facts"].get(axis, []) for card in intent["last_grid"]["cards"]))
+            self.assertEqual([e["event"] for e in intent["question_log"]], ["ask", "answer"])
 
 
 if __name__ == "__main__":

@@ -762,6 +762,15 @@ class AdjustIntentUI(TypedDict):
     feature: str | None
 
 
+class AnswerQuestionUI(TypedDict):
+    """Question loop seam (graph/questions.py): the answer to the open question of the graph view."""
+    op: Literal["answer_question"]
+    question_id: str
+    choice: Literal["options", "neither", "unsure", "skip", "switch"]
+    option_ids: list[str]
+    switch_to: str | None  # a mode listed in the question's switch_to, only with choice="switch"
+
+
 class SummaryChoice(TypedDict):
     id: str          # proposal ID (save) or long-term memory ID (profile)
     choice: Literal["baseline", "situation", "skip", "accept", "keep"]
