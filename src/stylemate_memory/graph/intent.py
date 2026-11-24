@@ -27,6 +27,9 @@ def new_intent(request_id: str, targets: list[dict[str, Any]]) -> dict[str, Any]
         "memory_mode": "normal", "links": [], "novel_turns": [], "novelty_prompt": None,
         "contra": {}, "taste_prompt": None, "taste_asked": [],
         "kept": [],  # earlier picks shown first in the next grid
+        # jaehyun_work: shortlist (F8), pick history for chip evidence (F11), hypothesis refresh (F1),
+        # shortlist comparison grid, LLM clarify question (F4). Older checkpoints read these with .get().
+        "shortlist": [], "pick_history": [], "hyp_turn": 0, "compare_mode": False, "clarify": None,
     }
 
 

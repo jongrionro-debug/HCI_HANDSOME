@@ -14,6 +14,7 @@ from typing import Any
 from ..errors import StyleMateError
 from ..model_io import _nullable, _object, _string
 from . import scoring
+from .labels import value_label
 from .situations import other_value, situation_dictionary
 
 PRIOR_WEIGHT = 2.0
@@ -229,13 +230,14 @@ def _josa(word: str, pair: tuple[str, str]) -> str:
 
 
 def chip_sentence(label: str, value: str) -> str:
-    return f"{label}{_josa(label, ('은', '는'))} {value} 쪽이 좋아요."
+    """U1: name the Korean value label only ("여유 핏 쪽이 좋아요."); the axis stays in the binding."""
+    return f"{value} 쪽이 좋아요."
 
 
 def final_sentence(facts: dict[str, list[str]], labels: dict[str, str]) -> tuple[str, list[tuple[str, list[str]]]]:
     axes = [(a, facts[a]) for a in ("Color", "Fit", "Type") if facts.get(a)]
-    body = " · ".join(f"{labels.get(a, a)} {'/'.join(v)}" for a, v in axes)
-    return f"이번에 고른 상의처럼 {body}이(가) 좋아요.", axes
+    body = " · ".join('/'.join(value_label(a, x) for x in v) for a, v in axes)
+    return f"이번에 고른 상의처럼 {body}{_josa(body, ('이', '가'))} 좋아요.", axes
 
 
 def situation_conditions(intent: dict[str, Any]) -> dict[str, str]:
@@ -277,7 +279,7 @@ def proposals(intent: dict[str, Any], final: dict[str, Any] | None, labels: dict
     scope = _scope(intent)
     chips = sorted(scoring.chips(intent, scope, labels), key=lambda c: -(c["mean"] or 1.0))
     for chip in chips:
-        add({"text": chip_sentence(chip["label_ko"], chip["value"]), "source": "chip", "polarity": "prefer",
+        add({"text": chip_sentence(chip["label_ko"], value_label(chip["feature"], chip["value"])), "source": "chip", "polarity": "prefer",
              "target_id": chip["target_id"], "pi": [(chip["feature"], [chip["value"]])], "evidence_ids": [],
              "baseline": False})
     if final:

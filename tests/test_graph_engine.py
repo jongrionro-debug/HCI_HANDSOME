@@ -144,7 +144,9 @@ class GraphEngineTests(unittest.TestCase):
         self.send({"op": "adjust_intent", "action": "bogus", "key": None, "feature": None}, ok=False)
         snapshot = self.service.inspect_request(s["request"]["id"])["snapshot"]
         active = next(r for r in snapshot["rounds"] if r["status"] == "active")
-        self.send({"op": "select_final", "candidate_set_ref": active["candidate_set_ref"], "candidate_id": s["cards"][0]["candidate_id"]})
+        shortlisted = {i["product_id"] for i in s["graph"]["shortlist"]}  # F8: the final comes from the shortlist
+        final = next(c for c in s["cards"] if c["product_id"] in shortlisted)
+        self.send({"op": "select_final", "candidate_set_ref": active["candidate_set_ref"], "candidate_id": final["candidate_id"]})
         self.send({"op": "end_request"})
         self.assertEqual(self.service.state()["request"]["status"], "closed")
 
@@ -153,6 +155,47 @@ class GraphEngineTests(unittest.TestCase):
         self.assertIsNotNone(self.service._graph.intent(request_id))
         self.service._graph.forget(request_id)
         self.assertIsNone(self.service._graph.intent(request_id))
+
+    def test_shortlist_collects_every_pick_and_final_comes_from_its_comparison(self):
+        """F8/F9: picks of every turn stay in the shortlist; the final product is decided on the shortlist grid."""
+        self.send({"op": "start_request", "mode": "shopping", "timezone": "Asia/Seoul",
+                   "targets": [{"target_id": "pants", "garment_type": "Pants"}], "text": None})
+        picked = []
+        for _ in range(3):
+            cards = self.service._graph.intent(self.service.state()["request"]["id"])["last_grid"]["cards"]
+            fresh = next(c for c in cards if c["slot"] != "kept")
+            picked.append(fresh["product_id"])
+            self.send(self.grid(selections=[{"target_id": "pants", "candidate_id": fresh["candidate_id"], "part_ref": None}]))
+        s = self.service.state()
+        shortlist = s["graph"]["shortlist"]
+        self.assertEqual([i["product_id"] for i in shortlist], picked)
+        self.assertEqual([i["turn"] for i in shortlist], [1, 2, 3])
+        self.assertTrue(all(i["title"] and i["image_url"] for i in shortlist))
+        self.assertEqual(s["graph"]["progress"]["shortlist_count"], 3)
+        self.assertEqual(len(s["memories"]), 0)  # collecting picks stores no memory
+
+        # A card that was never picked cannot become the final product.
+        intent = self.service._graph.intent(s["request"]["id"])
+        stranger = next(c for c in intent["last_grid"]["cards"] if c["product_id"] not in picked)
+        snapshot = self.service.inspect_request(s["request"]["id"])["snapshot"]
+        active = next(r for r in snapshot["rounds"] if r["status"] == "active")
+        self.send({"op": "select_final", "candidate_set_ref": active["candidate_set_ref"],
+                   "candidate_id": stranger["candidate_id"]}, ok=False)
+
+        self.send({"op": "adjust_intent", "action": "shortlist_remove", "key": picked[0], "feature": None})
+        self.assertEqual([i["product_id"] for i in self.service.state()["graph"]["shortlist"]], picked[1:])
+        before = dict(self.service._graph.intent(s["request"]["id"])["scores"])
+        self.send({"op": "adjust_intent", "action": "shortlist_compare", "key": None, "feature": None})
+        s = self.service.state()
+        self.assertTrue(s["graph"]["compare"])
+        self.assertEqual(sorted(c["product_id"] for c in s["cards"]), sorted(picked[1:]))
+        self.assertEqual(self.service._graph.intent(s["request"]["id"])["scores"], before)  # comparing is not a probe
+        snapshot = self.service.inspect_request(s["request"]["id"])["snapshot"]
+        active = next(r for r in snapshot["rounds"] if r["status"] == "active")
+        self.send({"op": "select_final", "candidate_set_ref": active["candidate_set_ref"], "candidate_id": s["cards"][0]["candidate_id"]})
+        self.assertEqual(self.service.state()["request"]["final_selection"]["product_id"], s["cards"][0]["product_id"])
+        self.send({"op": "explore"})  # "계속 보기" returns to a normal probe grid
+        self.assertFalse(self.service.state()["graph"]["compare"])
 
     def test_picks_stay_first_and_liked_axis_is_credited_per_image(self):
         self.send({"op": "start_request", "mode": "shopping", "timezone": "Asia/Seoul",
@@ -416,15 +459,15 @@ class TopMemoryTests(unittest.TestCase):
         self.send({"op": "select_final", "candidate_set_ref": active["candidate_set_ref"], "candidate_id": final["candidate_id"]})
         summary = self.summary("prepare")
         texts = [p["text"] for p in summary["proposals"]]
-        self.assertIn("색상은 Navy 쪽이 좋아요.", texts)
+        self.assertIn("네이비 쪽이 좋아요.", texts)
         self.assertEqual(summary["situation_label"], "데이트")
         self.assertTrue(all(p["suggested"] == "situation" for p in summary["proposals"]))
-        choices = [{"id": p["id"], "choice": "situation" if p["text"].startswith("색상") else "skip"} for p in summary["proposals"]]
+        choices = [{"id": p["id"], "choice": "situation" if p["text"] == "네이비 쪽이 좋아요." else "skip"} for p in summary["proposals"]]
         saved = self.summary("save", choices)
-        self.assertEqual(saved["saved"], ["색상은 Navy 쪽이 좋아요."])
+        self.assertEqual(saved["saved"], ["네이비 쪽이 좋아요."])
         self.service.wait_idle()
         situational = [m for m in self.long_term() if m["conditions"]]
-        self.assertEqual([(m["content"], m["conditions"]) for m in situational], [("색상은 Navy 쪽이 좋아요.", {"occasion": "데이트"})])
+        self.assertEqual([(m["content"], m["conditions"]) for m in situational], [("네이비 쪽이 좋아요.", {"occasion": "데이트"})])
 
     def test_skip_saves_nothing_and_women_filter(self):
         s = self.start("평소 네이비 상의 좋아해요", None, gender="women")

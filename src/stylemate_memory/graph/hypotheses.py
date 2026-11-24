@@ -37,14 +37,19 @@ offer several plausible interpretations. One FEA need may yield hypotheses on di
 from registry_values for that target's axis, a short Korean reason, and fea_keys citing the
 supplied fea_needs it explains. Never use an axis listed in fixed_axes for that target, never
 use a value listed in excluded, and never invent values. Do not judge which hypothesis is
-true; they are explored with images afterwards."""
+true; they are explored with images afterwards.
+When selection_summary is present, the user's image picks so far share common_values on axes that
+current_hypotheses do not explore. Keep useful current hypotheses and add hypotheses on those axes
+when they plausibly explain an FEA need. selection_summary only lists what the user picked; it is
+not the catalog distribution."""
 
 
 def build_hypothesis_payload(fea_needs: list[dict[str, Any]], situations: list[dict[str, Any]],
                              targets: list[dict[str, Any]], registry: Any,
-                             fixed_axes: dict[str, list[str]], excluded: list[dict[str, Any]]) -> dict[str, Any]:
+                             fixed_axes: dict[str, list[str]], excluded: list[dict[str, Any]],
+                             selection: dict[str, Any] | None = None) -> dict[str, Any]:
     canonical = registry.describe()["product_information"]
-    return {
+    payload = {
         "fea_needs": [{k: n[k] for k in ("key", "target_id", "fea", "quote", "content")} for n in fea_needs],
         "situations": [{k: s[k] for k in ("key", "value", "raw")} for s in situations],
         "targets": [{"target_id": t["target_id"], "garment_type": t["garment_type"]} for t in targets],
@@ -52,6 +57,47 @@ def build_hypothesis_payload(fea_needs: list[dict[str, Any]], situations: list[d
         "fixed_axes": deepcopy(fixed_axes),
         "excluded": deepcopy(excluded),
     }
+    if selection is not None:
+        payload["selection_summary"] = deepcopy(selection)
+    return payload
+
+
+REFRESH_TURNS = 3  # F1: earliest refresh after the last hypothesis call (pilot assumption)
+REFRESH_SHARE = 0.6  # share of picks that must carry the common value
+REFRESH_MIN_PICKS = 2
+REFRESH_SKIP_AXES = NON_HYPOTHESIS_AXES + ("Fabric",)  # Fabric is not visible in a photo (ADR 0013 decision 8)
+
+
+def refresh_selection(intent: dict[str, Any]) -> dict[str, Any] | None:
+    """Selection summary for an F1 refresh, or None when no refresh is due.
+
+    Due when FEA needs exist, REFRESH_TURNS grids passed since the last call, and the picks since
+    then share a value (>= REFRESH_SHARE of picks) on an axis no current hypothesis explores.
+    """
+    if not intent["fea_needs"] or intent["turn"] - intent.get("hyp_turn", 0) < REFRESH_TURNS:
+        return None
+    since = [p for p in intent.get("pick_history", []) if p["turn"] >= intent.get("hyp_turn", 0)]
+    explored = {(h["target_id"], h["axis"]) for h in intent["hypotheses"]}
+    common = []
+    for target_id in sorted({p["target_id"] for p in since}):
+        picks = [p for p in since if p["target_id"] == target_id]
+        if len(picks) < REFRESH_MIN_PICKS:
+            continue
+        counts: dict[tuple[str, str], int] = {}
+        for pick in picks:
+            for axis, values in pick["facts"].items():
+                if axis in REFRESH_SKIP_AXES or (target_id, axis) in explored:
+                    continue
+                for value in values:
+                    counts[(axis, value)] = counts.get((axis, value), 0) + 1
+        for (axis, value), count in sorted(counts.items()):
+            if count >= max(REFRESH_MIN_PICKS, REFRESH_SHARE * len(picks)):
+                common.append({"target_id": target_id, "axis": axis, "value": value, "count": count, "picked": len(picks)})
+    if not common:
+        return None
+    return {"common_values": common[:12],
+            "current_hypotheses": [{"target_id": h["target_id"], "axis": h["axis"], "values": list(h["values"])}
+                                   for h in intent["hypotheses"]]}
 
 
 def validate_hypotheses(raw: Any, payload: dict[str, Any], registry: Any) -> tuple[list[dict[str, Any]], list[str]]:

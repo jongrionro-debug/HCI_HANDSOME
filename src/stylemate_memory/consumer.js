@@ -48,6 +48,15 @@ export function mountConsumer(root, adapter, { fixture = false, scenarios = {} }
   let startSituation = null;
   let freeSituation = "";
   let summaryHidden = false;
+  // jaehyun_work UI: composer on demand (U2), previous grid while the next is computed (U9),
+  // chips that appeared on the latest turn (U3).
+  let composerOpen = false;
+  let ghostCards = null;
+  let seenChips = { request: null, keys: new Set() };
+  let freshChips = new Set();
+  const storedGender = () => { try { return localStorage.getItem("lumi.gender") ?? ""; } catch { return ""; } };
+  const storeGender = value => { try { localStorage.setItem("lumi.gender", value); } catch { /* per-viewer convenience only */ } };
+  startGender = storedGender();
   const summaryChoices = new Map();
   const profileChoices = new Map();
   const drafts = new Map();
@@ -76,11 +85,6 @@ export function mountConsumer(root, adapter, { fixture = false, scenarios = {} }
   // ADR 0013 graph engine: 8-card multi-select grid with product-level "별로".
   const graphMode = () => Boolean(state?.graph) && isOpen();
   const isKept = id => state?.graph?.slots?.[id] === "kept";
-  // Liked axes already reflected for a kept card stay visibly pressed; they are shown only, never re-sent.
-  // candidate_id changes every turn, so the key uses the product image, which is stable within a request.
-  const appliedLiked = new Map();
-  const stableKey = card => `${requestId()}:${card.target_id}:${card.image_id ?? card.title}`;
-  const applied = card => (card && isKept(card.candidate_id) ? appliedLiked.get(stableKey(card)) : null) ?? [];
   const keptIds = () => Object.keys(state?.graph?.slots ?? {}).filter(isKept);
   const gridSignal = d => d.selections.some(s => !isKept(s.candidate_id)) || keptIds().some(id => !d.selections.some(s => s.candidate_id === id))
     || Object.values(d.liked).some(axes => axes.length) || d.dislikes.length || d.similar || d.allBad;
@@ -124,35 +128,6 @@ export function mountConsumer(root, adapter, { fixture = false, scenarios = {} }
           <textarea id="memory-edit" maxlength="4000" ${busy ? "readonly" : ""}>${esc(editing.text)}</textarea><div class="actions"><button class="primary" ${disabled() ? "disabled" : ""}>수정 내용 검토</button>${button("cancel-edit", "취소")}</div></form>` : ""}
       </div>`).join("") : '<p class="hint">아직 없어요.</p>'}</section>`).join("");
   }
-  function graphMarkup() {
-    const g = state.graph;
-    if (!g || !isOpen()) return "";
-    const chips = g.chips.map(chip => `<li class="chip ${chip.pinned ? "pinned" : ""}"><span>${esc(chip.label_ko)} · ${esc(chip.value)}</span>
-      ${button("adjust", chip.pinned ? "고정 해제" : "고정", `data-adjust="${chip.pinned ? "unpin" : "pin"}" data-key="${esc(chip.key)}" aria-pressed="${chip.pinned}" class="quiet"`, !canFeedback())}
-      ${button("adjust", "빼기", `data-adjust="remove" data-key="${esc(chip.key)}" class="quiet" aria-label="${esc(chip.label_ko)} ${esc(chip.value)} 빼기"`, !canFeedback())}</li>`).join("");
-    const m = g.memory ?? { chips: [], links: [], mode: "normal" };
-    const memoryBlock = m.chips.length || m.links.length ? `<section class="memory-start ${m.mode === "dim" ? "dim" : ""}" aria-label="기억으로 시작"><h3>기억에서 이렇게 시작했어요</h3>
-      ${m.links.map(link => `<p class="hint">비슷한 상황: ${esc(link.past)} ${button("adjust", link.enabled ? "연결 끄기" : "다시 연결", `data-adjust="${link.enabled ? "link_off" : "link_on"}" class="quiet"`, !canFeedback())}</p>`).join("")}
-      ${m.chips.length ? `<ul class="chips">${m.chips.map(chip => `<li class="chip memory-chip ${chip.enabled ? "" : "off"}"><span>${esc(chip.text)}</span>
-        ${button("adjust", chip.enabled ? "×" : "다시 켜기", `data-adjust="${chip.enabled ? "memory_off" : "memory_on"}" data-key="${esc(chip.memory_id)}" class="quiet" aria-label="${chip.enabled ? "이 기억 끄기" : "이 기억 다시 켜기"}"`, !canFeedback())}</li>`).join("")}</ul>
-      ${m.mode === "dim" ? `<p class="hint">이번엔 기억을 약하게 반영하고 있어요.</p>${button("adjust", "기억 다시 반영", 'data-adjust="memory_full" class="quiet"', !canFeedback())}`
-        : button("adjust", "이번엔 다르게", 'data-adjust="differ" class="quiet"', !canFeedback())}` : '<p class="hint">이번 상황에 맞는 기억은 쓰지 않아요.</p>'}</section>` : "";
-    const novelty = m.novelty_prompt ? `<section class="question" aria-label="새로운 스타일"><h3>이번엔 새로운 스타일로 볼까요?</h3><p class="hint">예를 고르면 기억을 약하게 반영해요.</p>
-      <div class="actions">${button("adjust", "예", 'data-adjust="novelty_yes"', !canFeedback())}${button("adjust", "아니요", 'data-adjust="novelty_no"', !canFeedback())}</div></section>` : "";
-    const taste = m.taste_prompt ? `<section class="question" aria-label="취향 변화"><h3>취향이 바뀌었나요?</h3><p class="hint">“${esc(m.taste_prompt.text)}”와 반대로 고르고 있어요. 예를 고르면 이번 요청에서 이 기억을 꺼요.</p>
-      <div class="actions">${button("adjust", "예", 'data-adjust="taste_yes"', !canFeedback())}${button("adjust", "아니요", 'data-adjust="taste_no"', !canFeedback())}</div></section>` : "";
-    const reason = g.reason_prompt ? `<section class="question" aria-label="좋았던 점"><h3>고른 이미지에서 어떤 점이 좋았나요?</h3><p class="hint">선택 사항이에요. 하나를 누르면 그 속성만 반영해요.</p>
-      <div class="actions">${g.reason_prompt.axes.map(axis => button("adjust", esc(axis.label_ko), `data-adjust="reason" data-feature="${esc(axis.feature)}"`, !canFeedback())).join("")}</div></section>` : "";
-    const directions = g.hypotheses.length ? `<p class="hint">살펴보는 방향: ${g.hypotheses.map(h => `${esc(h.label_ko)} ${esc(h.values.join("·"))}`).join(" / ")}</p>` : "";
-    return `<section class="graph-panel" aria-label="LUMI가 이해한 것"><h3>LUMI가 이해한 것</h3>
-      ${g.situations.length ? `<p class="hint">상황: ${g.situations.map(s => esc(s.raw || s.value)).join(", ")}</p>` : ""}
-      ${chips ? `<ul class="chips">${chips}</ul>` : '<p class="hint">이미지를 몇 번 고르면 반복해서 고른 특징이 여기에 나타나요.</p>'}
-      ${directions}
-      ${g.converged ? '<p class="converged">비슷한 후보가 계속 나오고 있어요. 마음에 드는 상품을 골라 결정하거나 조건을 바꿔 보세요.</p>' : ""}
-      ${g.shortage ? '<p class="hint">조건에 맞는 상품이 많지 않아 8장보다 적게 보여요.</p>' : ""}
-      ${g.hidden_count ? `<p class="hint">별로라고 한 상품 ${g.hidden_count}개를 숨겼어요.</p>${button("adjust", "숨김 해제", 'data-adjust="unhide" class="quiet"', !canFeedback())}` : ""}
-    </section>${memoryBlock}${novelty}${taste}${reason}`;
-  }
   function reviewMarkup() {
     return state.reviews.map(review => {
       const meaning = review.snapshot.meaning;
@@ -173,6 +148,7 @@ export function mountConsumer(root, adapter, { fixture = false, scenarios = {} }
     }).join("");
   }
   function statusMarkup() {
+    if (state?.graph && state.request?.mode === "shopping" && !panel) return graphStatusMarkup();
     let text = notice;
     let tone = "";
     if (busy || state?.operation === "running") { text = "처리 중이에요. 적고 있던 내용은 그대로 둘게요."; tone = "pending"; }
@@ -194,6 +170,133 @@ export function mountConsumer(root, adapter, { fixture = false, scenarios = {} }
        ${["stale", "error", "blocked"].includes(state?.operation) || error ? button("refresh", "최신 화면 확인", "", busy) : ""}`;
     return `<div id="operation-status" class="status" data-tone="${tone}" role="status" aria-live="polite" aria-atomic="true">${esc(text)}${controls.trim() ? `<div class="actions">${controls}</div>` : ""}</div>`;
   }
+  function graphStatusMarkup() {
+    let text = notice;
+    let tone = "";
+    if (state.operation === "interpretation_pending") { text = "읽고 있어요…"; tone = "pending"; }
+    if (["stale", "blocked", "error"].includes(state.operation)) { text = "화면이 바뀌었어요. 최신 화면을 불러와 주세요."; tone = "error"; }
+    const error = localError ?? state.error;
+    if (error) { text = error.local ? error.message : safeError(error.code); tone = "error"; }
+    if (uncertain) { text = "보낸 내용이 반영됐는지 확인하지 못했어요. 다시 보내 확인해 주세요."; tone = "error"; }
+    const retryRef = uniqueRef("feedback");
+    const controls = uncertain ? button("retry-command", "다시 보내기", "", busy) :
+      `${state.operation === "interpretation_pending" && retryRef && state.error ? button("retry-extraction", "다시 읽기", "", busy) : ""}
+       ${["stale", "error", "blocked"].includes(state.operation) || error ? button("refresh", "최신 화면 불러오기", "", busy) : ""}`;
+    return `<div id="operation-status" class="status" data-tone="${tone}" role="status" aria-live="polite" aria-atomic="true">${esc(text)}${controls.trim() ? `<div class="actions">${controls}</div>` : ""}</div>`;
+  }
+  const valueLabel = (feature, value) => state?.graph?.value_labels?.[feature]?.[value] ?? value;
+  function graphChipsMarkup(g) {
+    const off = !canFeedback();
+    const chips = g.chips.map(chip => `<li class="chip ${chip.pinned ? "pinned" : ""} ${freshChips.has(chip.key) ? "fresh" : ""}">
+      ${button("adjust", `${chip.pinned ? '<span class="pin" aria-hidden="true">●</span>' : ""}${esc(chip.value_label_ko ?? chip.value)}${freshChips.has(chip.key) ? ' <span class="new-mark">새로</span>' : ""}`,
+        `data-adjust="${chip.pinned ? "unpin" : "pin"}" data-key="${esc(chip.key)}" aria-pressed="${chip.pinned}" class="chip-main" title="${chip.pinned ? "고정 풀기" : "누르면 고정해요"}"`, off)}
+      ${button("adjust", "×", `data-adjust="remove" data-key="${esc(chip.key)}" class="chip-x" aria-label="${esc(chip.value_label_ko ?? chip.value)} 빼기"`, off)}</li>`);
+    const memory = (g.memory?.chips ?? []).map(chip => `<li class="chip memory ${chip.enabled ? "" : "off"}">
+      ${button("adjust", `<span class="memory-tag">기억</span>${esc(chip.text)}`, `data-adjust="${chip.enabled ? "memory_off" : "memory_on"}" data-key="${esc(chip.memory_id)}" class="chip-main" aria-pressed="${chip.enabled}" title="${chip.enabled ? "누르면 이번 요청에서 꺼요" : "누르면 다시 켜요"}"`, off)}</li>`);
+    const evidence = g.chips.filter(chip => freshChips.has(chip.key) && chip.evidence).slice(0, 2)
+      .map(chip => `<p class="evidence">고르신 ${chip.evidence.of}장 중 ${chip.evidence.with}장이 ${esc(chip.value_label_ko ?? chip.value)}</p>`).join("");
+    if (!chips.length && !memory.length) return "";
+    return `<div class="g-understood" aria-label="LUMI가 이해한 것"><ul class="chips">${chips.join("")}${memory.join("")}</ul>${evidence}</div>`;
+  }
+  function graphBannerMarkup(g) {
+    const off = !canFeedback();
+    const m = g.memory ?? {};
+    const banners = [];
+    if (g.reason_prompt) {
+      const options = g.reason_prompt.options ?? g.reason_prompt.axes.map(a => ({ feature: a.feature, label: a.label_ko }));
+      banners.push(`<section class="banner" aria-label="좋았던 점"><p>${esc(g.reason_prompt.question ?? "고르신 옷의 어떤 점이 좋았나요?")}</p>
+        <div class="actions">${options.map(o => button("adjust", esc(o.label), `data-adjust="reason" data-feature="${esc(o.feature)}"`, off)).join("")}${button("adjust", "건너뛰기", 'data-adjust="reason_skip" class="quiet"', off)}</div></section>`);
+    }
+    if (m.novelty_prompt) banners.push(`<section class="banner" aria-label="새로운 스타일"><p>이번엔 새로운 스타일로 볼까요?</p>
+      <div class="actions">${button("adjust", "네", 'data-adjust="novelty_yes"', off)}${button("adjust", "아니요", 'data-adjust="novelty_no" class="quiet"', off)}</div></section>`);
+    if (m.taste_prompt) banners.push(`<section class="banner" aria-label="취향 변화"><p>“${esc(m.taste_prompt.text)}”와 다르게 고르고 계세요. 취향이 바뀌었나요?</p>
+      <div class="actions">${button("adjust", "네, 이번엔 빼 주세요", 'data-adjust="taste_yes"', off)}${button("adjust", "아니요", 'data-adjust="taste_no" class="quiet"', off)}</div></section>`);
+    if (g.question && !g.reason_prompt) banners.push(`<section class="banner" aria-label="질문"><p>${esc(questionLabel(g.question))}</p>
+      <div class="actions">${button("compose-toggle", "말로 답하기", "", off)}</div></section>`);
+    return banners[0] ?? "";
+  }
+  function memoryNoticeMarkup(g) {
+    const n = g.memory_notice;
+    if (!n || g.compare) return "";
+    const from = n.situations.length ? `지난번 ${n.situations.map(esc).join(" · ")} 때 고른 취향` : "평소 취향";
+    return `<p class="notice-line">${from}으로 골랐어요 <span class="hint">· ${n.lines.map(esc).join(" · ")}</span>
+      ${button("memory-all-off", "기억 없이 보기", 'class="link"', !canFeedback())}</p>`;
+  }
+  function shortlistMarkup(g) {
+    if (g.compare) return "";
+    const items = g.shortlist ?? [];
+    return `<section class="shortlist" aria-label="후보함"><div class="shortlist-head"><strong>후보함 <span class="count">${items.length}</span></strong>
+      ${items.length ? "" : '<span class="hint">고른 옷이 여기에 모여요</span>'}</div>
+      <ul class="thumbs">${items.slice(-6).map(item => `<li title="${esc(item.title)}">${item.image_url ? `<img src="${esc(item.image_url)}" alt="${esc(item.title)}">` : `<span>${esc(item.title)}</span>`}</li>`).join("")}</ul>
+      ${button("adjust", "후보함에서 고르기", 'data-adjust="shortlist_compare" class="secondary"', !canFeedback() || !items.length)}</section>`;
+  }
+  function graphGridCard(card, d, refs) {
+    const g = state.graph;
+    const ghost = !state.cards.includes(card);
+    if (g.compare) {
+      return `<article class="card grid-card compare-card">${image(card)}<div class="compare-body"><h3 class="card-title">${esc(card.title)}</h3>
+        <div class="actions">${button("preview-final", "이걸로 결정", `data-card="${esc(card.candidate_id)}" class="primary"`, ghost || !canFeedback() || !refs.set)}
+        ${button("adjust", "빼기", `data-adjust="shortlist_remove" data-key="${esc(card.product_id)}" class="quiet"`, ghost || !canFeedback())}</div></div></article>`;
+    }
+    const selected = !ghost && d.selections.some(s => s.candidate_id === card.candidate_id);
+    const off = ghost || !canFeedback() || !refs.set || !refs.round;
+    const badge = g.slots?.[card.candidate_id] === "kept" ? '<span class="badge dark">고른 상품</span>'
+      : g.slots?.[card.candidate_id] === "novel" ? '<span class="badge light" title="기억을 반영하지 않은 후보">새로움</span>' : "";
+    return `<article class="card grid-card ${selected ? "selected" : ""} ${isKept(card.candidate_id) ? "kept" : ""}">
+      <button type="button" class="image-pick" data-action="select" data-card="${esc(card.candidate_id)}" aria-pressed="${selected}" aria-label="${esc(card.title)} ${selected ? "선택 해제" : "선택"}" ${off ? "disabled" : ""}>${image(card)}
+        ${badge}<span class="pick-mark" aria-hidden="true">✓</span></button></article>`;
+  }
+  function graphWorkspace() {
+    const g = state.graph;
+    const d = draft();
+    const refs = comparison();
+    if (!isOpen()) return graphDoneMarkup();
+    const shown = state.cards.length ? state.cards : ghostCards ?? [];
+    const loading = !state.cards.length && Boolean(ghostCards) && state.operation === "running";
+    const cards = shown.map(card => graphGridCard(card, d, refs)).join("");
+    const final = state.request.final_selection;
+    const title = g.compare ? "후보함에서 골라 주세요" : "마음에 드는 걸 골라 주세요";
+    const ready = g.progress?.ready && !g.compare && !final ? `<p class="ready-badge">취향이 꽤 좁혀졌어요 · ${button("adjust", "후보함에서 고르기", 'data-adjust="shortlist_compare" class="link"', !canFeedback())}</p>` : "";
+    const empty = state.operation === "running" ? '<p class="hint loading-line">다음 8장을 고르고 있어요…</p>'
+      : `<div class="empty-state"><h2>${g.compare ? "후보함이 비었어요" : g.outcome === "hidden_empty" ? "별로라고 한 상품을 빼니 남은 옷이 없어요" : state.operation === "no_results" ? "조건에 맞는 옷이 없어요" : "아직 보여 드릴 옷이 없어요"}</h2>
+        <div class="actions">${g.outcome === "hidden_empty" ? button("adjust", "숨긴 옷 다시 보기", 'data-adjust="unhide"', !canFeedback()) : ""}${button("compose-toggle", "말로 조건 바꾸기", "", !canFeedback())}${g.compare ? button("explore", "계속 보기", "", !canFeedback()) : ""}</div></div>`;
+    const counts = [g.shortage ? "조건에 맞는 옷이 8장보다 적어요" : "", g.hidden_count ? `숨긴 옷 ${g.hidden_count}` : ""].filter(Boolean);
+    const composer = composerOpen || d.text ? `<form data-form="feedback" id="feedback-form" class="g-composer"><label for="free-text">말로 덧붙이기</label>
+        <textarea id="free-text" maxlength="4000" placeholder="예: 색은 좋은데 조금 더 여유 있었으면 해요.">${esc(d.text)}</textarea></form>` : '<form data-form="feedback" id="feedback-form" hidden></form>';
+    const picked = d.selections.length;
+    const primary = g.compare ? button("explore", "계속 보기", 'class="secondary"', !canFeedback())
+      : canSubmit(d) ? `<button type="submit" form="feedback-form" class="primary" data-submit="grid">${d.allBad ? "다른 방향으로 8장" : "다음 8장"}</button>`
+      : button("explore", "다른 후보 보기", 'class="primary"', !canFeedback() || Boolean(d.text));
+    const bar = `<div class="grid-bar" role="group" aria-label="이번 화면"><p class="grid-bar-summary" aria-live="polite">${d.allBad ? "이번 화면은 다 별로" : picked ? `${picked}장 골랐어요` : "마음에 드는 옷을 눌러 주세요"}</p>
+      ${g.compare ? "" : button("all-bad", d.allBad ? "다 별로 취소" : "다 별로예요", `aria-pressed="${d.allBad}" class="secondary"`, !canFeedback())}
+      ${g.compare ? "" : button("compose-toggle", composerOpen ? "덧붙이기 닫기" : "말로 덧붙이기", `aria-expanded="${composerOpen || Boolean(d.text)}" class="secondary"`, !canFeedback())}
+      ${primary}</div>`;
+    return `${reviewMarkup()}<div class="g-head"><div><h1>${title}</h1>${counts.length ? `<p class="hint">${counts.map(esc).join(" · ")}</p>` : ""}</div>${graphChipsMarkup(g)}</div>
+      ${memoryNoticeMarkup(g)}${ready}${graphBannerMarkup(g)}
+      <div class="workspace graph ${loading ? "is-loading" : ""}"><section aria-label="이미지 고르기"><h2 class="visually-hidden">이미지 고르기</h2>
+        <div class="candidates grid" aria-busy="${loading}">${cards}</div>${cards ? "" : empty}
+        ${cards && !ghostCards && (!refs.round || !refs.set) ? `<p class="selection-note">화면 정보를 확인하지 못했어요.</p>${button("refresh", "최신 화면 불러오기")}` : ""}
+        ${composer}${final ? graphFinalMarkup() : shortlistMarkup(g)}${final ? "" : bar}${graphSummaryMarkup()}${wrapMarkup()}</section></div>`;
+  }
+  function graphFinalMarkup() {
+    const final = state.request.final_selection;
+    const item = state.graph.shortlist?.find(s => s.product_id === final.product_id);
+    return `<section class="wrap-up final-line" aria-label="결정한 상품"><h2>${esc(item?.title ?? "고른 상품")}으로 결정했어요</h2>
+      <div class="actions">${button("explore", "계속 보기", 'class="secondary"')}${button("end", "마치기", 'class="primary"')}</div></section>`;
+  }
+  function graphDoneMarkup() {
+    const sm = state.graph.summary;
+    const saved = sm?.saved ?? [];
+    const profile = sm?.profile ?? { status: "skipped", changes: [] };
+    const changes = profile.status === "ready" ? `<h3>문장을 이렇게 다듬어 봤어요</h3><p class="hint">바꿀 문장만 골라 주세요. 원래 문장도 보관해요.</p>
+      ${profile.changes.map(change => `<div class="proposal"><p><s>${esc(change.old)}</s><br>${esc(change.text)}</p><div class="actions seg">${[["accept", "바꾸기"], ["keep", "그대로"]].map(([value, label]) =>
+        button("profile-choice", label, `data-memory="${esc(change.memory_id)}" data-choice="${value}" aria-pressed="${profileChoices.get(change.memory_id) === value}"`)).join("")}</div></div>`).join("")}
+      <div class="actions">${button("profile-save", "반영하기", 'class="primary"')}</div>` : "";
+    return `<section class="done graph-summary" aria-label="마친 요청"><h1>${saved.length ? "다음 요청에서 이 취향으로 시작할게요" : "저장 없이 마쳤어요"}</h1>
+      ${saved.length ? `<ul class="saved">${saved.map(line => `<li>${esc(line)}</li>`).join("")}</ul><p class="hint">저장한 문장은 평소 취향에서 볼 수 있어요.</p>` : ""}
+      ${profile.status === "running" ? '<p class="hint">문장을 짧게 다듬고 있어요…</p>' : ""}${changes}
+      <div class="actions">${button("preferences", "평소 취향 보기", 'class="secondary"')}${button("new", "새 요청", 'class="primary"')}</div></section>`;
+  }
   function garmentOptions() {
     return state?.garment_types?.length ? state.garment_types : [{ value: "Pants", label_ko: "바지" }];
   }
@@ -211,6 +314,20 @@ export function mountConsumer(root, adapter, { fixture = false, scenarios = {} }
     return state.memories.filter(m => m.scope === "long_term" && !["withdrawn", "superseded"].includes(m.status));
   }
   function prefsMarkup() {
+    const taste = state.graph?.taste;
+    if (taste) {
+      const groups = new Map();
+      for (const item of taste) {
+        const label = item.situation ? `${item.situation}할 때` : "평소에도";
+        if (!groups.has(label)) groups.set(label, []);
+        groups.get(label).push(item.text);
+      }
+      const ordered = [...groups.entries()].sort(([a], [b]) => (a === "평소에도" ? -1 : b === "평소에도" ? 1 : 0));
+      return `<section class="prefs" aria-labelledby="prefs-title"><h1 id="prefs-title">평소 취향</h1>
+        ${ordered.length ? ordered.map(([label, lines]) => `<section class="pref-group"><h2>${esc(label)}</h2><ul>${lines.map(line => `<li>${esc(line)}</li>`).join("")}</ul></section>`).join("")
+          : '<div class="empty-state"><h2>아직 기억하는 취향이 없어요</h2><p>요청을 마칠 때 고른 문장이 여기에 쌓여요.</p></div>'}
+        <div class="actions">${button("teach-preferences", "한마디로 더하기", 'class="secondary"')}${button("close-preferences", state.request ? "보던 화면으로" : "새 요청", 'class="primary"')}</div></section>`;
+    }
     const items = longTermMemories();
     return `<section class="prefs" aria-labelledby="prefs-title"><div><h1 id="prefs-title">평소 취향</h1>
       <p class="section-intro">이후 활용에 동의한 문장만 여기에 있어요. 다음 요청을 시작할 때 이 문장으로 시작해요.</p></div>
@@ -219,6 +336,7 @@ export function mountConsumer(root, adapter, { fixture = false, scenarios = {} }
       <p class="hint">적은 내용은 내용 확인과 이후 활용 동의를 따로 거친 뒤에 저장돼요.</p></section>`;
   }
   function startMarkup() {
+    if (state.engine === "graph" && startMode === "shopping") return graphStartScreen();
     const onboarding = startMode === "onboarding";
     const requests = state.requests.filter(r => r.mode === "shopping" && r.status !== "expired");
     const remembered = onboarding ? [] : longTermMemories().slice(0, 3);
@@ -238,14 +356,29 @@ export function mountConsumer(root, adapter, { fixture = false, scenarios = {} }
       ${requests.length ? `<section class="request-list"><h2>이어서 보기</h2><p class="hint">열린 요청은 이어서 탐색하고, 종료한 요청은 요약을 볼 수 있어요.</p>${requests.map((r, index) => button("resume", `${esc(garmentLabel(r.targets?.[0]?.garment_type ?? "Pants"))} 요청 ${index + 1} · ${r.status === "open" ? "탐색 이어하기" : "종료 요약"}`, `data-request="${esc(r.id)}"`)).join("")}</section>` : ""}
       </aside>` : ""}</div>`;
   }
+  function graphStartScreen() {
+    const remembered = longTermMemories().slice(0, 3);
+    const requests = state.requests.filter(r => r.mode === "shopping" && r.status === "open");
+    const options = garmentOptions();
+    const target = options.length === 1 ? `<input type="hidden" id="target" name="target" value="${esc(options[0].value)}">`
+      : `<div><label for="target">찾을 옷</label><select id="target" name="target">${options.map(g => `<option value="${esc(g.value)}">${esc(g.label_ko)}</option>`).join("")}</select></div>`;
+    return `<div class="start g-start"><section class="start-main"><h1>오늘은 어디에 입을 옷을 찾을까요?</h1>
+      <form class="start-form" data-form="start">${target}${graphStartMarkup()}
+        <div><label for="initial-text">원하는 느낌 <span class="sit-hint">(선택)</span></label>
+          <textarea id="initial-text" maxlength="4000" placeholder="예: 깔끔한 네이비 셔츠">${esc(initialText.shopping)}</textarea></div>
+        ${remembered.length ? `<section class="remembered" aria-label="기억하는 취향"><h2>이렇게 기억하고 있어요</h2><ul>${remembered.map(m => `<li>${esc(m.content)}</li>`).join("")}</ul><p class="hint">시작한 뒤에 하나씩 끌 수 있어요.</p></section>` : ""}
+        <div class="actions"><button class="primary" ${disabled() ? "disabled" : ""}>첫 8장 보기</button>
+          ${state.request ? button("cancel-start", "보던 화면으로", 'class="quiet"') : ""}</div>
+      </form></section>
+      ${requests.length ? `<aside class="start-aside"><section class="request-list"><h2>이어서 보기</h2>${requests.map((r, index) => button("resume", `요청 ${index + 1} 이어서 보기`, `data-request="${esc(r.id)}"`)).join("")}</section></aside>` : ""}</div>`;
+  }
   function graphStartMarkup() {
     const situations = [["출근", "출근", "단정하게"], ["데이트", "데이트", "조금 신경 써서"], ["주말", "주말", "편하게"], ["free", "나의 상황", "직접 적기"]];
     return `<fieldset class="start-gender"><legend>누구 옷을 볼까요?</legend><div class="actions">${[["", "전체"], ["men", "남성"], ["women", "여성"]].map(([value, label]) =>
         button("gender", label, `data-gender="${value}" aria-pressed="${startGender === value}"`)).join("")}</div></fieldset>
       <fieldset class="start-situation"><legend>어떤 상황에 입나요? <span class="sit-hint">(선택)</span></legend><div class="actions">${situations.map(([value, label, hint]) =>
         button("situation", `${label} <span class="sit-hint">${hint}</span>`, `data-situation="${value}" aria-pressed="${startSituation === value}"`)).join("")}</div>
-        ${startSituation === "free" ? `<label for="free-situation">나의 상황을 짧게 적어 주세요</label><input id="free-situation" maxlength="200" placeholder="예: 팀 회식, 친구 결혼식 뒤풀이" value="${esc(freeSituation)}">` : ""}
-        <p class="hint">적은 상황은 그대로 저장해 두었다가, 다음에 비슷한 상황이 오면 연결해서 보여 드려요.</p></fieldset>`;
+        ${startSituation === "free" ? `<label for="free-situation">어떤 상황인가요?</label><input id="free-situation" maxlength="200" placeholder="예: 팀 회식, 친구 결혼식 뒤풀이" value="${esc(freeSituation)}">` : ""}</fieldset>`;
   }
   function startSituationValue() {
     if (startSituation === null) return null;
@@ -255,16 +388,17 @@ export function mountConsumer(root, adapter, { fixture = false, scenarios = {} }
   function graphSummaryMarkup() {
     const sm = state.graph?.summary;
     if (!sm || (sm.status === "draft" && (!isOpen() || summaryHidden))) return "";
-    if (sm.status === "draft") {
-      const rows = sm.proposals.map(p => `<div class="proposal"><p>${esc(p.text)}</p><div class="actions" role="group" aria-label="저장 범위">${[
-        ["baseline", "평소에도"], ["situation", sm.situation_label ? `이 상황만 (${esc(sm.situation_label)})` : "이 상황만"], ["skip", "저장 안 함"]].map(([value, label]) =>
-        button("summary-choice", label, `data-proposal="${esc(p.id)}" data-choice="${value}" aria-pressed="${summaryChoices.get(p.id) === value}"`,
-          disabled() || (value === "situation" && !sm.situation_label))).join("")}</div></div>`).join("");
-      return `<div class="sheet-backdrop"><section class="wrap-up graph-summary sheet" role="dialog" aria-modal="true" aria-labelledby="summary-title"><h2 id="summary-title">이번 요청에서 알게 된 점</h2>
-        <p class="section-intro">다음 요청에도 쓸 문장만 골라 주세요. 고르지 않은 문장은 저장하지 않아요.</p>
-        ${rows || '<p class="hint">이번에는 저장할 만한 문장이 없어요.</p>'}
-        <p class="hint">[평소에도]나 [이 상황만]을 고르면 이 문장 그대로 다음 요청을 시작할 때 써요.</p>
-        <div class="actions">${button("summary-cancel", "계속 탐색")}${button("summary-save", "저장하고 마치기", 'class="primary"')}</div></section></div>`;
+    if (sm.status === "draft" || sm.status === "polishing") {
+      const polishing = sm.status === "polishing";
+      const situationButton = sm.situation_label ? `${esc(sm.situation_label)}할 때만` : null;
+      const rows = sm.proposals.map(p => `<div class="proposal"><p>${esc(p.text)}</p><div class="actions seg" role="group" aria-label="기억할 범위">${[
+        ["baseline", "평소에도"], ...(situationButton ? [["situation", situationButton]] : [])].map(([value, label]) =>
+        button("summary-choice", label, `data-proposal="${esc(p.id)}" data-choice="${value}" aria-pressed="${summaryChoices.get(p.id) === value}"`, disabled() || polishing)).join("")}</div></div>`).join("");
+      const count = sm.proposals.filter(p => ["baseline", "situation"].includes(summaryChoices.get(p.id))).length;
+      return `<div class="sheet-backdrop"><section class="wrap-up graph-summary sheet" role="dialog" aria-modal="true" aria-labelledby="summary-title"><h2 id="summary-title">다음에도 기억할까요?</h2>
+        ${polishing ? '<p class="hint">문장을 다듬고 있어요…</p>' : rows || '<p class="hint">이번에는 기억할 만한 문장이 없어요.</p>'}
+        <p class="hint">고르지 않은 문장은 저장하지 않아요.</p>
+        <div class="actions">${button("summary-cancel", "계속 보기", 'class="secondary"')}${button("summary-save", count ? `${count}개 저장하고 마치기` : "저장 없이 마치기", 'class="primary"', disabled() || polishing)}</div></section></div>`;
     }
     const profile = sm.profile ?? { status: "skipped", changes: [] };
     const view = sm.profile_view;
@@ -298,13 +432,14 @@ export function mountConsumer(root, adapter, { fixture = false, scenarios = {} }
     const show = request.status !== "open" || final || request.mode === "onboarding";
     if (!show && !finalPreview) return "";
     const previewCard = state.cards.find(c => c.candidate_id === finalPreview);
+    if (state.graph && request.mode === "shopping" && !(previewCard && !final)) return "";
     if (previewCard && !final) {
       const facts = (previewCard.facts ?? []).filter(f => f.values?.length);
       return `<div class="sheet-backdrop"><section class="wrap-up sheet decide" role="dialog" aria-modal="true" aria-labelledby="decide-title">${image(previewCard)}
         <div class="decide-body"><h2 id="decide-title">이 상품으로 결정할까요?</h2><p class="product">${esc(previewCard.title)}</p>
-        ${facts.length ? `<dl class="card-facts">${facts.map(f => `<div><dt>${esc(f.label_ko)}</dt><dd>${esc(f.values.join(", "))}</dd></div>`).join("")}</dl>` : ""}
-        <div class="actions">${button("cancel-final", "계속 탐색")}${button("confirm-final", "이 상품 확정", 'class="primary"', !canFeedback() || !comparison().set)}</div>
-        <p class="hint">확정해도 취향이 저장되지는 않아요. 저장은 마칠 때 문장별로 따로 골라요.</p></div></section></div>`;
+        ${facts.length ? `<dl class="card-facts">${facts.filter(f => !LIKE_HIDDEN.has(f.feature)).map(f => `<div><dt>${esc(f.label_ko)}</dt><dd>${esc(f.values.map(v => valueLabel(f.feature, v)).join(", "))}</dd></div>`).join("")}</dl>` : ""}
+        <div class="actions">${button("cancel-final", state.graph ? "다시 보기" : "계속 탐색", 'class="secondary"')}${button("confirm-final", state.graph ? "이걸로 결정" : "이 상품 확정", 'class="primary"', !canFeedback() || !comparison().set)}</div>
+        <p class="hint">결정해도 취향은 저장되지 않아요.</p></div></section></div>`;
     }
     return `<section class="wrap-up" aria-label="선택과 마무리"><h2>${request.status === "closed" ? "탐색을 마쳤어요" : previewCard ? "이 상품으로 결정할까요?" : final ? "상품을 선택했어요" : "평소 취향을 확인해 주세요"}</h2>
       <p class="section-intro">${previewCard ? esc(previewCard.title) : final ? `${esc(selected?.title ?? "선택한 상품")} · ${request.status === "open" ? "탐색은 아직 열려 있어요." : "선택 내용은 요약에 남아요."}` : request.status === "closed" ? "상품 선택 없이 종료했어요." : "내용 확인과 이후 활용 선택을 각각 진행할 수 있어요."}</p>
@@ -318,10 +453,11 @@ export function mountConsumer(root, adapter, { fixture = false, scenarios = {} }
     </section>`;
   }
   function workspaceMarkup() {
+    if (state.graph && state.request.mode === "shopping") return graphWorkspace();
     const d = draft();
     const refs = comparison();
     const activeQuestion = state.questions.find(q => q.ref.id === d.question && q.status === "open");
-    const cards = state.cards.map(card => graphMode() && state.graph.set_id ? gridCard(card, d, refs) : listCard(card, d, refs)).join("");
+    const cards = state.cards.map(card => listCard(card, d, refs)).join("");
     function listCard(card, d, refs) {
       const selection = d.selections.find(s => s.candidate_id === card.candidate_id);
       const interpretation = state.comparison?.options.find(o => o.candidate_id === card.candidate_id);
@@ -337,20 +473,6 @@ export function mountConsumer(root, adapter, { fixture = false, scenarios = {} }
         ${graphMode() && state.graph.set_id ? `${button("dislike", d.dislikes.includes(card.candidate_id) ? "별로 취소" : "별로", `data-card="${esc(card.candidate_id)}" aria-pressed="${d.dislikes.includes(card.candidate_id)}"`, !canFeedback() || d.allBad)}
           ${button("similar", d.similar === card.candidate_id ? "비슷한 거 취소" : "이거랑 비슷한 거", `data-card="${esc(card.candidate_id)}" aria-pressed="${d.similar === card.candidate_id}"`, !canFeedback() || d.allBad)}` : ""}
         ${state.request.mode === "shopping" ? button("preview-final", "최종 상품으로 살펴보기", `data-card="${esc(card.candidate_id)}" class="quiet"`, !canFeedback() || !refs.set) : ""}</div></article>`;
-    }
-    function gridCard(card, d, refs) {
-      const selected = d.selections.some(s => s.candidate_id === card.candidate_id);
-      const off = !canFeedback() || !refs.set || !refs.round;
-      const liked = d.liked[card.candidate_id] ?? [];
-      const done = applied(card);
-      const facts = (card.facts ?? []).filter(f => !LIKE_HIDDEN.has(f.feature) && f.values?.length);
-      return `<article class="card grid-card ${selected ? "selected" : ""} ${isKept(card.candidate_id) ? "kept" : ""}">
-        <button type="button" class="image-pick" data-action="select" data-card="${esc(card.candidate_id)}" aria-pressed="${selected}" aria-label="${esc(card.title)} ${selected ? "선택 해제" : "선택"}" ${off ? "disabled" : ""}>${image(card)}
-          ${isKept(card.candidate_id) ? '<span class="kept-mark">고른 상품</span>' : state.graph.slots?.[card.candidate_id] === "novel" ? '<span class="novel-mark" title="기억을 반영하지 않은 후보">새로움</span>' : ""}<span class="pick-mark" aria-hidden="true">✓</span></button>
-        ${selected && facts.length ? `<div class="liked" role="group" aria-label="이 상품에서 좋았던 점"><span class="liked-label" aria-hidden="true">좋았던 점 (선택)</span>${facts.map(f => done.includes(f.feature)
-          ? button("like", esc(f.label_ko), `data-card="${esc(card.candidate_id)}" data-feature="${esc(f.feature)}" class="applied" aria-pressed="true" aria-disabled="true" title="이미 반영한 좋았던 점이에요"`, false)
-          : button("like", esc(f.label_ko), `data-card="${esc(card.candidate_id)}" data-feature="${esc(f.feature)}" aria-pressed="${liked.includes(f.feature)}" title="${esc(f.values.join(", "))}"`, off)).join("")}
-          ${state.request.mode === "shopping" ? button("preview-final", "이 상품으로 결정", `data-card="${esc(card.candidate_id)}" class="decide"`, off) : ""}</div>` : ""}</article>`;
     }
     const noCards = !isOpen() ? "" : graphMode() && state.operation === "running" ? '<p class="hint">다음 후보를 고르고 있어요.</p>' : `<div class="empty-state"><h2>${state.graph?.outcome === "hidden_empty" ? "별로라고 한 상품을 빼니 남은 후보가 없어요" : state.operation === "no_results" ? "조건에 맞는 상품이 없어요" : "아직 비교할 후보가 없어요"}</h2><p>조건을 그대로 두거나 글로 조정할 수 있어요. 상품을 고르지 않고 탐색을 마쳐도 괜찮아요.</p>${state.graph?.outcome === "hidden_empty" ? button("adjust", "숨김 해제", 'data-adjust="unhide"', !canFeedback()) : ""}</div>`;
     const questionItems = (isOpen() ? state.questions : []).filter(q => q.status === "open").map(q => `<section class="question"><h3>${esc(questionLabel(q.text))}</h3>
@@ -376,7 +498,7 @@ export function mountConsumer(root, adapter, { fixture = false, scenarios = {} }
         <div class="actions">${button("explore", "다른 후보 보기", "", !canFeedback() || Boolean(d.text || gridSignal(d)))}${button("end", "상품 선택 없이 종료", 'class="quiet"')}</div>
         ${d.text || d.selections.length ? '<p class="hint">작성 중인 선택과 글을 먼저 반영하거나, 그대로 둔 채 탐색을 마칠 수 있어요.</p>' : ""}</div>` : ""}
         ${partMarkup()}${graphSummaryMarkup()}${wrapMarkup()}</section>
-        <aside class="conversation" aria-label="대화와 반영 내용">${reviewMarkup()}${graphMarkup()}${graphMode() && state.graph.question ? `<section class="question graph-question"><h3>${esc(state.graph.question)}</h3><p class="hint">아래에 답을 적거나, 이미지만 골라도 괜찮아요.</p></section>` : ""}${questions}
+        <aside class="conversation" aria-label="대화와 반영 내용">${reviewMarkup()}${questions}
           <section><details id="reflected-info" ${detailsOpen ? "open" : ""}><summary>반영 내용 보기</summary><p class="hint">이번 요청과 평소 취향은 구분해요. 평소 취향 수정은 별도 검토가 필요해요.</p>${memories()}</details></section>
           <section class="composer"><form data-form="feedback" id="feedback-form"><label for="free-text">${!isOpen() ? "종료 전에 작성하던 글" : grid && !activeQuestion ? "말로 덧붙이기" : state.comparison ? "좋은 이유나 바꾸고 싶은 점 (선택)" : activeQuestion ? "질문에 대한 답과 덧붙일 이야기" : "선택에 덧붙이거나, 글로 이야기해 주세요"}</label>
             <textarea id="free-text" maxlength="4000" placeholder="예: A의 색은 좋지만, 더 여유 있는 형태가 좋아요." ${isOpen() ? "" : "readonly"}>${esc(d.text)}</textarea>
@@ -395,7 +517,7 @@ export function mountConsumer(root, adapter, { fixture = false, scenarios = {} }
     const focusAction = focused?.dataset.action;
     const focusData = focused ? { ...focused.dataset } : {};
     const selection = focused?.selectionStart !== undefined ? [focused.selectionStart, focused.selectionEnd] : null;
-    root.innerHTML = `<header class="topbar"><span class="wordmark" aria-label="LUMI">LUMI</span>${contextMarkup()}<nav aria-label="주요 메뉴">${graphMode() && !panel ? `<span class="turn">${esc(state.graph.turn)}번째 화면</span>` : ""}${button("preferences", "평소 취향", panel === "preferences" ? 'aria-current="page"' : "")}${button("new", "새 요청")}</nav></header>
+    root.innerHTML = `<header class="topbar"><span class="wordmark" aria-label="LUMI">LUMI</span>${contextMarkup()}<nav aria-label="주요 메뉴">${graphMode() && !panel ? `<span class="turn">${esc(state.graph.turn)}번째 화면${state.graph.progress ? ` · 후보함 ${esc(state.graph.progress.shortlist_count)}` : ""}</span>${button("end", "마치기", 'class="link"')}` : ""}${button("preferences", "평소 취향", panel === "preferences" ? 'aria-current="page"' : "")}${button("new", "새 요청")}</nav></header>
       ${fixture ? `<div class="fixture-strip"><strong>화면 연습</strong><span>합성 자료 · 실제 저장·모델 호출 없음 · 새로고침하면 초기화</span><label>상태 연습<select id="fixture-scenario" ${busy ? "disabled" : ""}>${Object.entries(scenarios).map(([key, label]) => `<option value="${key}" ${adapter.scenario === key ? "selected" : ""}>${esc(label)}</option>`).join("")}</select></label></div>` : ""}
       <main class="shell" id="workspace" tabindex="-1" aria-busy="${busy || state?.operation === "running"}">${statusMarkup()}${state ? panel === "preferences" ? prefsMarkup() : panel === "start" || !state.request ? startMarkup() : workspaceMarkup() : '<p class="boot-message">화면을 불러오고 있어요.</p>'}</main>`;
     root.querySelectorAll("img[data-image]").forEach(img => {
@@ -444,8 +566,16 @@ export function mountConsumer(root, adapter, { fixture = false, scenarios = {} }
       const updated = next.memories.find(m => m.ref.id === id);
       if (!previous || !updated || !sameRef(previous.ref, updated.ref) || previous.content !== updated.content) saveItems.delete(id);
     }
+    if (next.graph && next.operation === "running" && !next.cards.length) ghostCards = state?.cards?.length ? state.cards : ghostCards;
+    else ghostCards = null;
     state = next;
-    if (previousRequest !== requestId()) { generation += 1; part = null; editing = null; finalPreview = null; }
+    if (previousRequest !== requestId()) { generation += 1; part = null; editing = null; finalPreview = null; composerOpen = false; ghostCards = null; }
+    if (state.graph) {
+      const keys = new Set(state.graph.chips.map(chip => chip.key));
+      if (seenChips.request === requestId() && state.operation !== "running") freshChips = new Set([...keys].filter(k => !seenChips.keys.has(k)));
+      else if (seenChips.request !== requestId()) freshChips = new Set();
+      if (state.operation !== "running") seenChips = { request: requestId(), keys };
+    }
     const nextSet = uniqueRef("candidate_set");
     if (!sameRef(previousSet, nextSet)) {
       const d = draft();
@@ -453,8 +583,6 @@ export function mountConsumer(root, adapter, { fixture = false, scenarios = {} }
       if (d.selections.length && !kept.length) notice = "후보가 바뀌어 이미지 선택을 해제했어요. 작성하던 글은 그대로예요.";
       else if (kept.length) notice = "";
       d.selections = kept; d.hypothesis = null; d.dislikes = []; d.similar = null; d.allBad = false; d.liked = {};
-      const keptKeys = new Set(state.cards.filter(c => isKept(c.candidate_id)).map(stableKey));
-      for (const key of [...appliedLiked.keys()]) if (!keptKeys.has(key)) appliedLiked.delete(key);
       d.reaction = kept.length ? "selected" : d.reaction === "selected" ? "text_only" : d.reaction;
       part = null; finalPreview = null;
     }
@@ -504,10 +632,6 @@ export function mountConsumer(root, adapter, { fixture = false, scenarios = {} }
     };
     readSequence += 1;
     busy = true; localError = null; notice = ""; clearTimeout(pollTimer); render();
-    const sentLiked = outgoing.action.op === "grid_feedback" ? Object.entries(outgoing.action.liked ?? {}).flatMap(([id, axes]) => {
-      const card = state?.cards.find(c => c.candidate_id === id);
-      return card ? [[stableKey(card), axes]] : [];
-    }) : [];
     try {
       const result = await adapter.command(clone(outgoing));
       if (disposed) return null;
@@ -515,17 +639,14 @@ export function mountConsumer(root, adapter, { fixture = false, scenarios = {} }
       updateState(result.state);
       if (result.outcome === "rejected") localError = result.error ?? result.state.error ?? { code: "invalid_input" };
       else {
-        notice = fixture ? "화면 연습에 반영했어요. 실제 저장이나 처리는 하지 않았어요." : result.outcome === "accepted" ? "입력을 접수했어요. 해석 완료와 내용 확인은 별도예요." : "변경 내용을 반영했어요.";
+        notice = state?.graph && state.request?.mode === "shopping" ? "" : fixture ? "화면 연습에 반영했어요. 실제 저장이나 처리는 하지 않았어요." : result.outcome === "accepted" ? "입력을 접수했어요. 해석 완료와 내용 확인은 별도예요." : "변경 내용을 반영했어요.";
+        if (["grid_feedback", "submit_feedback"].includes(outgoing.action.op)) composerOpen = false;
         if (outgoing.action.op === "start_request") {
           panel = null;
           const mode = outgoing.action.mode;
           if (initialText[mode] === (outgoing.action.text ?? "")) initialText[mode] = "";
         }
         if (outgoing.action.op === "select_final") finalPreview = null;
-        if (outgoing.action.op === "grid_feedback" && outgoing.request_id === requestId()) {
-          // The next grid may arrive later by polling; entries for cards that are not kept are dropped when it does.
-          for (const [key, axes] of sentLiked) appliedLiked.set(key, [...new Set([...(appliedLiked.get(key) ?? []), ...axes])]);
-        }
         if (["submit_feedback", "respond_comparison", "grid_feedback"].includes(outgoing.action.op)) {
           const d = drafts.get(outgoing.request_id);
           if (d && submitted?.version === d.version) drafts.set(outgoing.request_id, blankDraft());
@@ -622,7 +743,7 @@ export function mountConsumer(root, adapter, { fixture = false, scenarios = {} }
         break;
       }
       case "like": {
-        if (!card || !d.selections.some(s => s.candidate_id === card.candidate_id) || applied(card).includes(b.dataset.feature)) return;
+        if (!card || !d.selections.some(s => s.candidate_id === card.candidate_id)) return;
         const axes = d.liked[card.candidate_id] ?? [];
         d.liked[card.candidate_id] = axes.includes(b.dataset.feature) ? axes.filter(a => a !== b.dataset.feature) : [...axes, b.dataset.feature];
         d.version += 1; render(); break;
@@ -679,12 +800,26 @@ export function mountConsumer(root, adapter, { fixture = false, scenarios = {} }
         if (state.graph && isOpen()) { summaryHidden = false; summaryChoices.clear(); await send({ op: "graph_summary", step: "prepare", choices: [] }); root.querySelector(".graph-summary button")?.focus(); }
         else await send({ op: "end_request" });
         break;
-      case "gender": startGender = b.dataset.gender; render(); break;
+      case "gender": startGender = b.dataset.gender; storeGender(startGender); render(); break;
       case "situation":
         startSituation = startSituation === b.dataset.situation ? null : b.dataset.situation; render();
         if (startSituation === "free") root.querySelector("#free-situation")?.focus();
         break;
-      case "summary-choice": summaryChoices.set(b.dataset.proposal, b.dataset.choice); render(); break;
+      case "summary-choice":
+        if (summaryChoices.get(b.dataset.proposal) === b.dataset.choice) summaryChoices.delete(b.dataset.proposal);
+        else summaryChoices.set(b.dataset.proposal, b.dataset.choice);
+        render(); break;
+      case "compose-toggle":
+        composerOpen = !(composerOpen || draft().text); render();
+        if (composerOpen) root.querySelector("#free-text")?.focus();
+        break;
+      case "memory-all-off": {
+        for (const chip of (state.graph?.memory?.chips ?? []).filter(c => c.enabled)) {
+          const result = await send({ op: "adjust_intent", action: "memory_off", key: chip.memory_id, feature: null });
+          if (!result || result.outcome === "rejected") break;
+        }
+        break;
+      }
       case "summary-cancel": summaryHidden = true; render(); break;
       case "summary-save": {
         const proposals = state.graph?.summary?.proposals ?? [];
@@ -712,6 +847,7 @@ export function mountConsumer(root, adapter, { fixture = false, scenarios = {} }
       const d = draft(); d.text = t.value; d.version += 1;
       root.querySelectorAll('[data-form="feedback"] button.primary, [data-submit="grid"]').forEach(submit => { submit.disabled = !canSubmit(d); });
       root.querySelectorAll('[data-action="explore"]').forEach(b => { b.disabled = !canFeedback() || Boolean(d.text || gridSignal(d)); });
+      if (graphMode() && Boolean(root.querySelector('[data-submit="grid"]')) !== canSubmit(d)) render();
     }
     if (t.id === "initial-text") initialText[startMode] = t.value;
     if (t.id === "free-situation") freeSituation = t.value;

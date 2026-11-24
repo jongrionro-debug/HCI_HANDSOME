@@ -25,8 +25,9 @@ from . import grid as grid_plan
 from . import intent as it
 from . import memory as mem
 from . import scoring
+from .clarify import CLARIFY_INSTRUCTIONS, clarify_payload, clarify_schema, validate_clarify
 from .hypotheses import (HYPOTHESIS_INSTRUCTIONS, NON_HYPOTHESIS_AXES, build_hypothesis_payload, hypothesis_schema,
-                         validate_hypotheses)
+                         refresh_selection, validate_hypotheses)
 from .parse import PARSE_INSTRUCTIONS, build_payload, parse_schema_v2, to_v1_extraction, validate_parse_v2
 
 
@@ -143,6 +144,9 @@ class GraphEngine:
         intent["route_question"] = None
         if event.get("command_id") and event["command_id"] in intent["processed"]:
             return {"intent": intent}
+        # The shortlist grid is (re)drawn on "후보함에서 고르기" and on a removal made while comparing.
+        intent["compare_mode"] = event["type"] == "adjust" and (event.get("action") == "shortlist_compare" or (
+            event.get("action") == "shortlist_remove" and bool((intent["last_grid"] or {}).get("compare"))))
         if event.get("start") and not intent.get("started"):
             self._start(intent, event["start"])
         scope = it.scope_of(intent)
@@ -154,9 +158,12 @@ class GraphEngine:
             by_id = {c["candidate_id"]: c for c in cards}
             liked = signal.get("liked") or {}
             intent["all_bad"] = bool(signal["all_bad"])
+            compare = bool(last.get("compare"))  # the shortlist comparison grid is not a probe
             extra = {t["target_id"]: mem.prior_values(intent, t["target_id"]) for t in intent["targets"]}
             before = {k: dict(v) for k, v in intent["scores"].items()}
-            changed = [] if signal["all_bad"] else scoring.attribute_grid(intent, cards, selected, scope, extra)
+            changed = [] if signal["all_bad"] or compare else scoring.attribute_grid(intent, cards, selected, scope, extra)
+            if not compare:
+                self._note_picks(intent, cards, selected)
             for candidate_id, axes in sorted(liked.items()):
                 for axis in axes:  # "이 상품의 이 점이 좋았어요": credit only that card's axis
                     scoring.apply_reason_axis(intent, cards, {candidate_id}, axis, scope)
@@ -168,10 +175,12 @@ class GraphEngine:
             intent["kept"] = [{"product_id": c["product_id"], "target_id": c["target_id"]}
                               for c in cards if c["candidate_id"] in selected][:grid_plan.MAX_KEPT]
             intent["reason_prompt"] = None
-            if selected and not changed and not liked and not signal["all_bad"]:
+            intent["clarify"] = None
+            if selected and not changed and not liked and not signal["all_bad"] and not compare:
                 axes = self._differing_axes(cards, selected)
                 if axes:
                     intent["reason_prompt"] = {"set_id": last["set_id"], "selected": sorted(selected), "axes": axes}
+                    intent["clarify"] = self._clarify(cards, selected, axes)
         elif event["type"] == "adjust":
             self._adjust(intent, event, scope)
         if event.get("novel_hint"):
@@ -183,6 +192,37 @@ class GraphEngine:
         if event.get("command_id"):
             intent["processed"] = (intent["processed"] + [event["command_id"]])[-200:]
         return {"intent": intent}
+
+    def _note_picks(self, intent: dict[str, Any], cards: list[dict[str, Any]], selected: set[str]) -> None:
+        """F8 shortlist (every fresh pick of the request) and F11 pick history. No score change."""
+        fresh = [c for c in cards if c["candidate_id"] in selected and c["slot"] != "kept"]
+        if not fresh:
+            return
+        views = {(v["product_id"], v["target_id"]): v for v in self.bridge.products()}
+        shortlist = intent.setdefault("shortlist", [])
+        known = {(s["product_id"], s["target_id"]) for s in shortlist}
+        history = intent.setdefault("pick_history", [])
+        for card in fresh:
+            key = (card["product_id"], card["target_id"])
+            view = views.get(key)
+            history.append({"turn": intent["turn"], "target_id": card["target_id"], "facts": card["facts"]})
+            if key in known or view is None:
+                continue
+            known.add(key)
+            shortlist.append({"product_id": card["product_id"], "target_id": card["target_id"], "turn": intent["turn"],
+                              "image_id": view["image_id"], "image_version": view["image_version"]})
+        intent["shortlist"] = shortlist[-grid_plan.MAX_SHORTLIST:]
+        intent["pick_history"] = history[-grid_plan.MAX_PICK_HISTORY:]
+
+    def _clarify(self, cards: list[dict[str, Any]], selected: set[str], axes: list[str]) -> dict[str, Any] | None:
+        """F4: one model-written question with 2-3 options over the differing axes. None -> chip fallback."""
+        labels = {k: v["label_ko"] for k, v in self.bridge.registry.describe()["product_information"].items()}
+        payload = clarify_payload(cards, selected, axes, labels)
+        try:
+            raw = self.bridge.complete(CLARIFY_INSTRUCTIONS, payload, clarify_schema(tuple(axes)))
+            return validate_clarify(raw, axes, labels)
+        except Exception:
+            return None
 
     @staticmethod
     def _differing_axes(cards: list[dict[str, Any]], selected: set[str]) -> list[str]:
@@ -216,6 +256,13 @@ class GraphEngine:
             if event.get("feature") in prompt["axes"] and prompt["set_id"] == intent["last_grid"]["set_id"]:
                 scoring.apply_reason_axis(intent, intent["last_grid"]["cards"], set(prompt["selected"]), event["feature"], scope)
             intent["reason_prompt"] = None
+            intent["clarify"] = None
+        elif action == "reason_skip":
+            intent["reason_prompt"] = None
+            intent["clarify"] = None
+        elif action == "shortlist_remove" and key:  # F8: leaves value scores untouched
+            intent["shortlist"] = [s for s in intent.get("shortlist", []) if s["product_id"] != key]
+            intent["kept"] = [k for k in intent["kept"] if k["product_id"] != key]
         elif action in ("memory_off", "memory_on") and key:
             off = [m for m in intent["memory_off"] if m != key]
             intent["memory_off"] = off + [key] if action == "memory_off" else off
@@ -314,8 +361,14 @@ class GraphEngine:
     def _propose_hypotheses(self, state: GraphState) -> dict[str, Any]:
         intent = deepcopy(state["intent"])
         signature = it.fea_signature(intent)
-        if signature == intent["fea_signature"] or intent["pending_error"]:
+        if intent["pending_error"]:
             return {"intent": intent}
+        selection = None
+        if signature == intent["fea_signature"]:
+            # F1: also refresh when picks share a value on an axis no hypothesis explores.
+            selection = refresh_selection(intent)
+            if selection is None:
+                return {"intent": intent}
         intent["fea_signature"] = signature
         if not intent["fea_needs"]:
             intent["hypotheses"] = []
@@ -328,14 +381,19 @@ class GraphEngine:
                 excluded.setdefault((target_id, axis), []).append(value)
         payload = build_hypothesis_payload(intent["fea_needs"], intent["situations"], intent["targets"], self.bridge.registry,
                                            it.fixed_axes(intent),
-                                           [{"target_id": t, "axis": a, "values": v} for (t, a), v in excluded.items()])
+                                           [{"target_id": t, "axis": a, "values": v} for (t, a), v in excluded.items()],
+                                           selection)
+        intent["hyp_turn"] = intent["turn"]
         try:
             raw = self.bridge.complete(HYPOTHESIS_INSTRUCTIONS, payload, hypothesis_schema(tuple(payload["registry_values"])))
             hypotheses, warnings = validate_hypotheses(raw, payload, self.bridge.registry)
         except Exception:
             intent["warnings"] = (intent["warnings"] + ["hypotheses_unavailable"])[-50:]
-            intent["fea_signature"] = ""  # retry on the next turn
+            if selection is None:
+                intent["fea_signature"] = ""  # retry on the next turn; a failed refresh keeps the old space
             return {"intent": intent}
+        if selection is not None and not hypotheses:
+            return {"intent": intent}  # an empty refresh never wipes the current exploration space
         intent["hypotheses"] = hypotheses
         intent["warnings"] = (intent["warnings"] + warnings)[-50:]
         return {"intent": intent}
@@ -345,8 +403,11 @@ class GraphEngine:
         intent = state["intent"]
         if intent["pending_error"]:
             return "hold"
-        if intent["event"]["type"] == "adjust" and intent["event"].get("action") in ("reason", "novelty_no", "taste_no"):
-            return "hold"  # a liked-axis answer or a "no" keeps the grid
+        if intent.get("compare_mode"):
+            return it.route(intent)
+        if intent["event"]["type"] == "adjust" and intent["event"].get("action") in (
+                "reason", "reason_skip", "novelty_no", "taste_no", "shortlist_remove"):
+            return "hold"  # a liked-axis answer, a "no" or a shortlist removal keeps the grid
         return it.route(intent)
 
     def _ask_clarify(self, state: GraphState) -> dict[str, Any]:
@@ -366,6 +427,10 @@ class GraphEngine:
         scope = it.scope_of(intent)
         turn = intent["turn"] + 1
         products = self.bridge.products()
+        if intent.get("compare_mode"):
+            intent["planned"] = grid_plan.shortlist_grid(products, intent)
+            intent["outcome"] = "grid" if intent["planned"]["status"] == "results" else "no_results"
+            return {"intent": intent}
         plan = grid_plan.plan_grid(products, intent["targets"], intent, scope, turn,
                                    seed=f"{intent['request_id']}:{turn}", anchor=intent["anchor"],
                                    kept=grid_plan.kept_products(products, intent))
@@ -390,6 +455,9 @@ class GraphEngine:
                 return {"intent": intent}
             intent["turn"] += 1
             intent["last_grid"] = published
+            if plan.get("compare"):
+                published["compare"] = True
+                return {"intent": intent}
             converge_ids = sorted(c["product_id"] for c in published["cards"] if c["slot"] == "converge")
             intent["top_history"] = (intent["top_history"] + [converge_ids])[-5:]
             intent["converged"] = grid_plan.converged(intent["top_history"], plan["shortage"])
