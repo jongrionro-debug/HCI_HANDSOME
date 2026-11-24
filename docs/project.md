@@ -143,7 +143,7 @@ PI 7개 축과 FEA 분류를 차용한 출처는 Park, H., Kim, S., Choi, Y., & 
 - Silhouette은 하의 전용이다. Style은 9개 값 중 최대 2개이고, Weight(Light·Mid·Heavy)를 새로 둔다.
 - 반드시 걸러내는 조건은 Type, 예산, 명시적 제외뿐이고 나머지는 점수로 반영한다.
 
-[build_lumi_pi_v3.py](../scripts/build_lumi_pi_v3.py)가 v2 채움 결과를 읽어 `data/catalog/lumi-pi-v3.jsonl`과 `-report.json`을 만든다. 모델 호출은 없고, 대표색 추출에만 Pillow가 필요하다. 2026-11-23 실행에서 1,748개를 만들었다. `--review-sample 30`이 사람 검수 시트를 만들며, 검수 일치율은 아직 없다. 실행 사전과 graph 엔진은 아직 v2(`lumi-pi-v2-top`)를 쓴다.
+[build_lumi_pi_v3.py](../scripts/build_lumi_pi_v3.py)가 v2 채움 결과를 읽어 `data/catalog/lumi-pi-v3.jsonl`과 `-report.json`을 만든다. 모델 호출은 없고, 대표색 추출에만 Pillow가 필요하다. 2026-11-23 실행에서 1,748개를 만들었다. 2026-11-24에는 원격 Linux 서버(`~/data/lumi-pi-v3/`, 저장소 밖)에서 29CM 바지를 더해 3,600개(상의 1,098·하의 2,502, 29CM 2,805)를 만들었다. 첫 이미지가 없는 29CM 195개는 빠졌다. 텍스트 보완 2,436회, 이미지 보완(하의 포함) 2,278회, Texture `Smooth` 추가 뒤 빈 Texture 재질문 867회를 호출했다. 하의 채움은 Fit 99.4%, Silhouette 99.5%, Texture 99.6%, Style 97.0%, Detail 93.3%, Fabric 86.2%이고 모델 값은 사람이 검수하지 않았다. `--review-sample 30`이 사람 검수 시트를 만들며, 검수 일치율은 아직 없다. 실행 사전과 graph 엔진은 아직 v2(`lumi-pi-v2-top`)를 쓴다.
 
 ### 현재 실행 사전
 

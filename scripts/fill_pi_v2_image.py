@@ -11,6 +11,7 @@ Run ``build_lumi_pi_v2.py`` afterwards to merge accepted values as ``inferred`` 
 The API key is read from OPENCODE_API_KEY and is never printed or written.
 
     python3 scripts/fill_pi_v2_image.py --data data --limit 20
+    python3 scripts/fill_pi_v2_image.py --data data --axes Texture   # ask again only for still-empty Texture
 """
 from __future__ import annotations
 
@@ -144,7 +145,11 @@ def main() -> int:
     parser.add_argument("--model", default=DEEPSEEK_DEFAULT_MODEL)
     parser.add_argument("--interval-s", type=float, default=0.3)
     parser.add_argument("--retry-errors", action="store_true")
+    parser.add_argument("--axes", default=None,
+                        help="comma list; ask only these still-empty axes, also for products already called once "
+                             "(new fills are merged into the cached file)")
     args = parser.parse_args()
+    only = set(args.axes.split(",")) if args.axes else None
     key = os.environ.get("OPENCODE_API_KEY", "")
     if not key.strip():
         print("OPENCODE_API_KEY가 설정되지 않아 중단합니다(다른 provider로 대체하지 않음).", file=sys.stderr)
@@ -159,12 +164,17 @@ def main() -> int:
     calls = errors = accepted_axes = 0
     for record in records:
         axes = requested_axes(record) if record["group"] in GUIDES else []
+        if only is not None:
+            axes = [a for a in axes if a in only]
         target = out_dir / f"{record['id']}.json"
         if not axes:
             continue
-        if target.exists():
-            previous = json.loads(target.read_text(encoding="utf-8"))
-            if not (args.retry_errors and previous.get("error")):
+        previous = json.loads(target.read_text(encoding="utf-8")) if target.exists() else None
+        if previous is not None:
+            if only is not None:
+                if set(axes) <= set(previous.get("refilled", [])):
+                    continue
+            elif not (args.retry_errors and previous.get("error")):
                 continue
         if args.limit is not None and calls >= args.limit:
             break
@@ -188,9 +198,23 @@ def main() -> int:
             out["error"] = "image_read_failed"
             errors += 1
         out["elapsed_s"] = round(time.monotonic() - started, 1)
-        target.write_text(json.dumps(out, ensure_ascii=False, indent=1), encoding="utf-8")
+        new_fills = len(out["fills"])
+        if only is not None and previous is not None and not previous.get("error"):
+            # refill: keep the earlier call's fills, add the new axes; a failed refill leaves the file unchanged
+            if out["error"]:
+                out = None
+            else:
+                previous["fills"].update(out["fills"])
+                previous["rejected"] = {a: r for a, r in {**previous["rejected"], **out["rejected"]}.items()
+                                        if a not in previous["fills"]}
+                previous["refilled"] = sorted(set(previous.get("refilled", [])) | set(axes))
+                previous.setdefault("refill_calls", []).append(
+                    {k: out[k] for k in ("called_at", "model", "requested", "elapsed_s")})
+                out = previous
+        if out is not None:
+            target.write_text(json.dumps(out, ensure_ascii=False, indent=1), encoding="utf-8")
         calls += 1
-        accepted_axes += len(out["fills"])
+        accepted_axes += new_fills
         if calls % 20 == 0:
             print(f"calls={calls} errors={errors} accepted_axes={accepted_axes}", flush=True)
         time.sleep(args.interval_s)
