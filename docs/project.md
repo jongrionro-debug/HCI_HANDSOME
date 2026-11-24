@@ -143,19 +143,20 @@ PI 7개 축과 FEA 분류를 차용한 출처는 Park, H., Kim, S., Choi, Y., & 
 - Silhouette은 하의 전용이다. Style은 9개 값 중 최대 2개이고, Weight(Light·Mid·Heavy)를 새로 둔다.
 - 반드시 걸러내는 조건은 Type, 예산, 명시적 제외뿐이고 나머지는 점수로 반영한다.
 
-[build_lumi_pi_v3.py](../scripts/build_lumi_pi_v3.py)가 v2 채움 결과를 읽어 `data/catalog/lumi-pi-v3.jsonl`과 `-report.json`을 만든다. 모델 호출은 없고, 대표색 추출에만 Pillow가 필요하다. 2026-11-23 실행에서 1,748개를 만들었다. 2026-11-24에는 원격 Linux 서버(`~/data/lumi-pi-v3/`, 저장소 밖)에서 29CM 바지를 더해 3,600개(상의 1,098·하의 2,502, 29CM 2,805)를 만들었다. 첫 이미지가 없는 29CM 195개는 빠졌다. 텍스트 보완 2,436회, 이미지 보완(하의 포함) 2,278회, Texture `Smooth` 추가 뒤 빈 Texture 재질문 867회를 호출했다. 하의 채움은 Fit 99.4%, Silhouette 99.5%, Texture 99.6%, Style 97.0%, Detail 93.3%, Fabric 86.2%이고 모델 값은 사람이 검수하지 않았다. `--review-sample 30`이 사람 검수 시트를 만들며, 검수 일치율은 아직 없다. 실행 사전과 graph 엔진은 아직 v2(`lumi-pi-v2-top`)를 쓴다.
+[build_lumi_pi_v3.py](../scripts/build_lumi_pi_v3.py)가 v2 채움 결과를 읽어 `data/catalog/lumi-pi-v3.jsonl`과 `-report.json`을 만든다. 모델 호출은 없고, 대표색 추출에만 Pillow가 필요하다. 2026-11-23 실행에서 1,748개를 만들었다. 2026-11-24에는 원격 Linux 서버(`~/data/lumi-pi-v3/`, 저장소 밖)에서 29CM 바지를 더해 3,600개(상의 1,098·하의 2,502, 29CM 2,805)를 만들었다. 첫 이미지가 없는 29CM 195개는 빠졌다. 텍스트 보완 2,436회, 이미지 보완(하의 포함) 2,278회, Texture `Smooth` 추가 뒤 빈 Texture 재질문 867회를 호출했다. 하의 채움은 Fit 99.4%, Silhouette 99.5%, Texture 99.6%, Style 97.0%, Detail 93.3%, Fabric 86.2%이고 모델 값은 사람이 검수하지 않았다. `--review-sample 30`이 사람 검수 시트를 만들며, 검수 일치율은 아직 없다. `--export-runtime`이 상·하의 실행 사전 `lumi-pi-v3`와 가져오기 파일을 만든다(아래 [현재 실행 사전](#현재-실행-사전)). 실행 비교는 아직 라벨 일치이며, 순서형 점수·대표색 Lab·`price_krw`는 상품의 `raw_metadata.pi_v3`에만 담겨 있다.
 
 **PI v4 아우터([ADR 0018](adr/0018-pi-v4-outer.md), Proposed).** [build_lumi_pi_v4.py](../scripts/build_lumi_pi_v4.py)가 v3 위에 품목군 `outer`(29CM 남성 아우터)를 더한다. Type은 소분류 24개에서 19개 값으로 정하고(후드 집업은 별도 `Zip hoodie`, 기타 아우터는 비움), Length는 몸판 기장 5단계(Cropped~Long), Weight는 아우터 키워드·품목 규칙, Fabric에 Leather·Fur, Texture에 Suede·Quilted·Shearling·Melton·Ripstop·Tweed를 더한다. Silhouette은 아우터에서 쓰지 않는다. `--schema`로 스키마를 출력하고 `outer_pi`가 규칙으로 채운다. 실제 아우터 수집·빌드와 실측 기장 경계값 조정은 남았다.
 
 ### 현재 실행 사전
 
-실행 사전은 세 가지이며 `--registry`/`STYLEMATE_REGISTRY`로 명시적으로 고른다. 기본값은 Park 사전이다.
+실행 사전은 네 가지이며 `--registry`/`STYLEMATE_REGISTRY`로 명시적으로 고른다. 기본값은 Park 사전이다.
 
 | 버전 | 정본 | 범위 |
 |---|---|---|
 | `park-2025-source-v1` (기본) | [park-2025-feature-map.json](../output/feature-map/park-2025-feature-map.json) | 논문 차용 값, Pants만, confirmed 상품 값만 비교 |
 | `lumi-29cm-v1` | [lumi-29cm-v1.json](../output/feature-map/lumi-29cm-v1.json) | 29CM 수집 기반 한국어 value, 상·하의 10개 품목, 모델 보완값도 비교([ADR 0012](adr/0012-collected-29cm-value-dictionary.md)) |
 | `lumi-pi-v2-top` | [lumi-pi-v2-top.json](../output/feature-map/lumi-pi-v2-top.json) | PI v2 11축(+Brand) 영어 value, 상의만(품목 `Top` 1개), 모델 보완값도 비교([ADR 0014](adr/0014-crawled-catalog-pi-v2.md)). graph 엔진의 가설·이유 축은 사전의 축을 그대로 읽는다 |
+| `lumi-pi-v3` | [lumi-pi-v3.json](../output/feature-map/lumi-pi-v3.json) | PI v3 12축(+Brand, Weight 추가) 영어 value, 상·하의(품목 `Top`·`Bottom`), 모델 보완값도 비교([ADR 0016](adr/0016-pi-v3-value-shapes.md)). Silhouette은 하의 전용. 축마다 `value_shape`(형태·채우는 경로)를 둔다. 2026-11-25 로컬 1,748개(상의 1,098·하의 650)로 적재·Map과 graph 시작 그리드(상·하의 각 8장)를 확인했다 |
 
 [registry.py](../src/stylemate_memory/registry.py)의 `load_registry(version)`이 실행 사전을 공급한다. [패키지 resources](../src/stylemate_memory/resources)의 JSON은 정본의 생성 사본이다. `python3 scripts/sync_feature_registry.py`로 동기화하며 수동 편집하지 않는다. 전체 enum을 이 문서에 복제하지 않는다.
 
@@ -262,6 +263,15 @@ PYTHONPATH=src python3 -m stylemate_memory.cli catalog-map
 PYTHONPATH=src python3 -m stylemate_memory.consumer --engine graph --provider opencode-go --endpoint <확인한 https 주소>
 ```
 
+**PI v3 상·하의(`lumi-pi-v3`).** v2 채움 결과에서 v3를 만들고 실행 사전·가져오기 파일까지 내보낸다. 모델 호출은 없다.
+
+```sh
+python3 scripts/build_lumi_pi_v3.py --data data --export-runtime && python3 scripts/sync_feature_registry.py
+export STYLEMATE_REGISTRY=lumi-pi-v3 STYLEMATE_IMAGE_ROOT=<저장소 밖>/images   # data/images를 같은 상대 경로로 복사
+PYTHONPATH=src python3 -m stylemate_memory.cli catalog-import --file data/catalog/lumi-pi-v3-import.jsonl
+PYTHONPATH=src python3 -m stylemate_memory.cli catalog-map
+```
+
 **상의 첫 빌드 써 보기([ADR 0015](adr/0015-top-memory-warm-start.md)).** 위 적재 뒤 graph 엔진을 띄운다. 실행 DB를 지우지 않으면 앞 요청에서 동의한 기억이 다음 요청에 이어진다. 한 세션에서 상황을 바꿔 가며 요청 3~4회(예: 출근 → 데이트 → 나의 상황 "팀 회식" → 비슷한 나의 상황)를 해 보고, 매 요청 끝의 [평소에도]/[이 상황만]으로 저장한다. 실제 DeepSeek 호출은 사용자가 이 명령을 실행할 때만 일어난다(OpenCode Go 키는 기존 설정 방식 그대로).
 
 ```sh
@@ -301,7 +311,7 @@ graph 모드 흐름: 시작 화면에서 성별(전체·남성·여성, 원본 `
 | OPENCODE_API_KEY | opencode-go를 명시적으로 선택할 때만 조회 |
 | STYLEMATE_OPENAI_MODEL | openai 경로의 `--model`, 기본 gpt-6-luna. 새 실제 평가에는 사용하지 않음 |
 | STYLEMATE_PORT | `--port`, 기본 8766 |
-| STYLEMATE_REGISTRY | `--registry park-2025-source-v1 / lumi-29cm-v1 / lumi-pi-v2-top`, 기본 park. 카탈로그 적재·Map·서버에 같은 값을 쓴다 |
+| STYLEMATE_REGISTRY | `--registry park-2025-source-v1 / lumi-29cm-v1 / lumi-pi-v2-top / lumi-pi-v3`, 기본 park. 카탈로그 적재·Map·서버에 같은 값을 쓴다 |
 | OPENAI_API_KEY | openai를 명시적으로 선택할 때만 조회 |
 | STYLEMATE_PROFILE_REWRITE | graph 종료 요약 뒤 프로필 다시 쓰기. 기본 on, `off`면 고른 문장을 그대로 두고 다시 묻지 않음 |
 | STYLEMATE_ENGINE | `--engine legacy / graph`, 기본 legacy. graph는 선택 의존성 `pip install -e '.[graph]'`(langgraph)이 필요하며, 체크포인트는 메모리 DB 옆 `<이름>.graph.sqlite3`에 둔다 |

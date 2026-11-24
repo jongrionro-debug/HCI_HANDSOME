@@ -485,5 +485,61 @@ class TopMemoryTests(unittest.TestCase):
         self.assertEqual(result["outcome"], "rejected")
 
 
+def v3_product(index, garment, kind, fit, weight):
+    pid = f"v{index:02}"
+    return {"format_version": c.CATALOG_FORMAT_VERSION, "product_id": pid,
+            "source": {"source_id": "synthetic-v3", "url": f"https://example.invalid/{pid}", "collected_at": "2026-11-25T09:00:00+09:00"},
+            "title": f"합성 v3 {pid}", "description": None, "garment_type": garment,
+            "raw_metadata": {"gender": "men", "type": [kind], "color": ["Navy" if index % 2 else "Black"], "fit": [fit],
+                             "weight": [weight], "pi_v3": {"price_krw": 50000 + index, "axes": {"Fit": {"score": 2.0}}}},
+            "labels": [], "images": [{"image_id": f"image-{pid}", "kind": "local", "location": f"{pid}.png",
+                                      "source_revision": "synthetic-v1", "sha256": None, "regions": []}]}
+
+
+@unittest.skipUnless(graph_available(), "optional graph dependency (langgraph) is not installed")
+class PIV3RuntimeTests(unittest.TestCase):
+    """lumi-pi-v3 (ADR 0016): one runtime dictionary serves top and bottom requests; Weight is a mapped axis."""
+
+    def setUp(self):
+        from stylemate_memory.app import ConsumerService
+        from stylemate_memory.registry import load_registry
+        self.temp = tempfile.TemporaryDirectory(prefix="lumi-v3-")
+        self.addCleanup(self.temp.cleanup)
+        root = Path(self.temp.name)
+        images = root / "images"
+        images.mkdir()
+        fits = ["Slim", "Regular", "Relaxed", "Oversized"]
+        records = ([v3_product(i, "Top", "T-shirt" if i % 2 else "Shirt", fits[i % 4], "Light") for i in range(10)]
+                   + [v3_product(i, "Bottom", "Trousers" if i % 2 else "Jeans", fits[i % 4], "Heavy") for i in range(10, 20)])
+        for record in records:
+            (images / record["images"][0]["location"]).write_bytes(PNG)
+        (root / "catalog.json").write_text(json.dumps(records), encoding="utf-8")
+        self.service = ConsumerService(root / "memory.sqlite3", root / "catalog.sqlite3", FakeModelGateway(),
+                                       user_id="synthetic-user", image_root=images, engine="graph",
+                                       registry=load_registry(c.LUMI_PI_V3_REGISTRY_VERSION))
+        self.addCleanup(self.service.close)
+        self.service.import_catalog(root / "catalog.json")
+        self.service.build_catalog_maps()
+        self.serial = 0
+        self.garment = {r["product_id"]: r["garment_type"] for r in records}
+
+    send = GraphEngineTests.send
+
+    def test_top_and_bottom_requests_use_their_own_products(self):
+        garments = [g["value"] for g in self.service.state()["garment_types"]]
+        self.assertEqual(garments, ["Top", "Bottom"])
+        for garment in ("Bottom", "Top"):
+            self.send({"op": "start_request", "mode": "shopping", "timezone": "Asia/Seoul",
+                       "targets": [{"target_id": "t", "garment_type": garment}], "text": None, "gender": "men",
+                       "situation": None})
+            s = self.service.state()
+            self.assertEqual(s["operation"], "idle", s["error"])
+            self.assertEqual(len(s["cards"]), 8)
+            self.assertTrue(all(self.garment[card["product_id"]] == garment for card in s["cards"]))
+            facts = self.service._graph.intent(s["request"]["id"])["last_grid"]["cards"][0]["facts"]
+            self.assertEqual(facts.get("Weight"), ["Heavy" if garment == "Bottom" else "Light"])
+            self.send({"op": "end_request"})
+
+
 if __name__ == "__main__":
     unittest.main()

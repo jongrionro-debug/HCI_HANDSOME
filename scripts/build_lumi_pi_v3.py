@@ -12,17 +12,20 @@ No model is called. Colour extraction needs Pillow, which is imported only when 
     python3 scripts/build_lumi_pi_v3.py --data data
     python3 scripts/build_lumi_pi_v3.py --data data --review-sample 30      # human review sheet
     python3 scripts/build_lumi_pi_v3.py --data data --score-review data/catalog/lumi-pi-v3-review.csv
+    python3 scripts/build_lumi_pi_v3.py --data data --export-runtime   # runtime dictionary + import file
 """
 from __future__ import annotations
 
 import argparse
 import csv
+import hashlib
 import json
 import math
 import random
 import re
 import sys
 from collections import Counter
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
@@ -603,12 +606,107 @@ def score_review(path: Path) -> dict[str, Any]:
     }
 
 
+RUNTIME_GARMENTS = {"top": ("Top", "상의"), "bottom": ("Bottom", "하의")}
+RUNTIME_LABEL_KO = v2.LABEL_KO | {"Weight": "두께"}
+
+
+def export_runtime(records: list[dict[str, Any]], data: Path, registry_path: Path) -> dict[str, Any]:
+    """Tops + bottoms runtime dictionary (lumi-pi-v3) and a lumi-catalog-v1 import file.
+
+    Same split as the v2 tops export: confirmed/derived labels go to ``raw_metadata.<axis>``, inferred labels go to
+    ``labels`` as model_interpretation. The v3 value shapes that the runtime does not compare yet (ordinal
+    ``score``, colour Lab, ``price_krw``) are kept under ``raw_metadata.pi_v3`` for the answer-reflection work.
+    """
+    park = json.loads((v2.ROOT / "output/feature-map/park-2025-feature-map.json").read_text(encoding="utf-8"))
+    counts = {axis: Counter(v for r in records if axis in r["pi"] for v in r["pi"][axis]["values"]) for axis in AXES}
+    counts["Brand"] = Counter(r["brand"] for r in records if r.get("brand"))
+    order = ("Type", "Brand") + AXES[1:]
+    pi = {}
+    for axis in order:
+        values = sorted(counts[axis]) if axis == "Brand" else [v for v in SCHEMA[axis]["values"] if counts[axis][v]]
+        pi[axis] = {"label_ko": RUNTIME_LABEL_KO[axis], "values": values, "reported_count": len(values),
+                    "enumeration_complete": True, "distribution": {v: counts[axis][v] for v in values}}
+        if axis in SCHEMA:
+            pi[axis]["value_shape"] = {k: SCHEMA[axis][k] for k in ("kind", "fill", "condition", "scale", "groups")
+                                       if k in SCHEMA[axis]}
+    pi["Type"]["values_by_garment_type"] = {
+        garment: [v for v in pi["Type"]["values"] if any(r["group"] == group and v in r["pi"]["Type"]["values"]
+                                                         for r in records)]
+        for group, (garment, _) in RUNTIME_GARMENTS.items()}
+    registry = {
+        "name": "LUMI PI v3 tops and bottoms (ADR 0016) + Park FEA taxonomy",
+        "version": VERSION, "status": "Generated", "runtime_implemented": True,
+        "scope": "29CM·Cole Buxton·Wax London 상·하의를 담은 PI v3 실행 사전이다. 값 라벨은 영어다(ADR 0014·0016).",
+        "lumi_use": "PI 축은 ADR 0016의 12축(+Brand), FEA 30개 태그는 Park 사전을 그대로 쓴다. 실행 비교는 라벨 일치이며, "
+                    "점수·Lab·price_krw는 상품 raw_metadata.pi_v3에만 둔다.",
+        "generated_by": "scripts/build_lumi_pi_v3.py --export-runtime",
+        "axis_order": list(order),
+        "product_information": pi,
+        "consumer_needs_taxonomy": park["consumer_needs_taxonomy"],
+        "garment_types": [{"value": garment, "label_ko": label} for garment, label in RUNTIME_GARMENTS.values()],
+        "execution": {"supported_garment_types": [garment for garment, _ in RUNTIME_GARMENTS.values()],
+                      "accept_inferred_product_pi": True, "price_currency": None, "price_boundary_inclusion": None},
+        "counts": {"products": len(records), "product_information_categories": len(pi),
+                   "consumer_needs_attributes": park["counts"]["consumer_needs_attributes"],
+                   "values": {a: len(pi[a]["values"]) for a in order}},
+        "source_boundaries": [
+            "confirmed는 구조화 필드·판매자 문구 키워드, derived는 고정 규칙·이미지 색 추출, inferred는 DeepSeek 텍스트·이미지 해석이다.",
+            "inferred 값은 상품 Map에서 status=inferred·model_interpretation으로 남는다. accept_inferred_product_pi=true는 실행 선택이며 검증 라벨이 아니다.",
+            "Silhouette은 하의 전용이다. Fabric은 사진으로 갱신하지 않는다(ADR 0013 결정 8).",
+        ],
+    }
+    registry_path.parent.mkdir(parents=True, exist_ok=True)
+    registry_path.write_text(json.dumps(registry, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    lines = []
+    for r in records:
+        shapes = {axis: {k: entry[k] for k in ("score", "scale", "colors") if k in entry}
+                  for axis, entry in r["pi"].items() if any(k in entry for k in ("score", "colors"))}
+        raw_md: dict[str, Any] = {"group": r["group"], "gender": r["gender"], "brand_text": r.get("brand"),
+                                  "price_text": r["price"]["amount"], "currency": r["price"]["currency"],
+                                  "pi_inferred": {},
+                                  "pi_v3": {"price_krw": r["price"].get("price_krw"), "axes": shapes}}
+        if r.get("brand"):
+            raw_md["brand"] = r["brand"]
+        labels = []
+        for axis in AXES:
+            entry = r["pi"].get(axis)
+            if not entry or not entry["values"]:
+                continue
+            if entry["status"] in ("confirmed", "derived"):
+                raw_md[axis.lower()] = entry["values"]
+            else:
+                evidence = " | ".join(str(e) for e in entry.get("evidence", []) if e)[:4000] or ", ".join(entry["values"])
+                raw_md["pi_inferred"][axis] = {"values": entry["values"], "method": entry["method"], "evidence": evidence}
+                labels.append({"observation": {"domain": "PI", "feature": axis, "values": entry["values"]},
+                               "status": "inferred",
+                               "provenance": [{"kind": "model_interpretation",
+                                               "source_field": f"raw_metadata.pi_inferred.{axis}.evidence",
+                                               "quote": evidence, "verifier": None, "evidence_ref": None,
+                                               "verified_at": None}]})
+        image = data / r["image"]
+        digest = hashlib.sha256(image.read_bytes()).hexdigest()
+        url = r["url_handle"] if r["source"] == "29cm" else v2.SHOP_URL[r["source"]] + r["url_handle"]
+        collected = datetime.fromtimestamp(image.stat().st_mtime, timezone.utc).isoformat(timespec="seconds")
+        lines.append(json.dumps({
+            "format_version": "lumi-catalog-v1", "product_id": r["id"],
+            "source": {"source_id": r["source"], "url": url, "collected_at": collected},
+            "title": r["title"], "description": None, "garment_type": RUNTIME_GARMENTS[r["group"]][0],
+            "raw_metadata": raw_md,
+            "images": [{"image_id": f"{r['id']}-0", "kind": "local", "location": r["image"].removeprefix("images/"),
+                        "source_revision": f"sha256:{digest}", "sha256": digest, "regions": []}],
+            "labels": labels}, ensure_ascii=False))
+    (data / "catalog" / f"{VERSION}-import.jsonl").write_text("\n".join(lines) + "\n", encoding="utf-8")
+    return {"products": len(records), "by_garment": dict(Counter(RUNTIME_GARMENTS[r["group"]][0] for r in records))}
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument("--data", type=Path, default=Path("data"))
     parser.add_argument("--no-images", action="store_true", help="skip palette extraction (Color falls back to seller words)")
     parser.add_argument("--review-sample", type=int, default=0, help="write a stratified human review sheet of N products")
     parser.add_argument("--score-review", type=Path, help="score a filled review CSV and exit")
+    parser.add_argument("--export-runtime", action="store_true",
+                        help="also write output/feature-map/lumi-pi-v3.json and data/catalog/lumi-pi-v3-import.jsonl")
     args = parser.parse_args()
     if args.score_review:
         print(json.dumps(score_review(args.score_review), ensure_ascii=False, indent=1))
@@ -638,6 +736,8 @@ def main() -> int:
             print(f"{group:6s} {axis:10s} {entry['filled']:4d}/{entry['of']} {entry['values']}")
     if args.review_sample:
         print("review sheet:", write_review(records, args.data, args.review_sample))
+    if args.export_runtime:
+        print(json.dumps(export_runtime(records, args.data, v2.ROOT / "output/feature-map" / f"{VERSION}.json")))
     return 0
 
 

@@ -9,7 +9,8 @@ import unittest.mock
 
 from scripts import build_29cm_registry as build
 from stylemate_memory.catalog_mapping import build_product_map
-from stylemate_memory.contracts import COLLECTED_29CM_REGISTRY_VERSION, LUMI_PI_V2_TOP_REGISTRY_VERSION, V1_REGISTRY_VERSION
+from stylemate_memory.contracts import (COLLECTED_29CM_REGISTRY_VERSION, LUMI_PI_V2_TOP_REGISTRY_VERSION,
+                                        LUMI_PI_V3_REGISTRY_VERSION, V1_REGISTRY_VERSION)
 from stylemate_memory.graph.hypotheses import HYPOTHESIS_AXES, hypothesis_axes
 from stylemate_memory.errors import StyleMateError
 from stylemate_memory.product_search import _evaluate
@@ -167,6 +168,28 @@ class PIV2TopRegistryTests(unittest.TestCase):
         self.assertEqual(statuses["Tone"], ("confirmed", ["Dark"]))
         self.assertEqual(statuses["Fit"], ("inferred", ["Oversized"]))
         self.assertNotIn("Price", statuses)
+
+
+class PIV3RegistryTests(unittest.TestCase):
+    """lumi-pi-v3 (ADR 0016): tops and bottoms, Weight added, Silhouette for bottoms only."""
+
+    def test_axes_garments_and_type_split(self):
+        registry = load_registry(LUMI_PI_V3_REGISTRY_VERSION)
+        description = registry.describe()
+        pi = description["product_information"]
+        self.assertEqual(list(pi), ["Type", "Brand", "Color", "Tone", "Pattern", "Fit", "Silhouette", "Length", "Weight",
+                                    "Texture", "Fabric", "Detail", "Style"])
+        self.assertEqual(description["execution"]["supported_garment_types"], ["Top", "Bottom"])
+        self.assertEqual(pi["Silhouette"]["value_shape"]["groups"], ["bottom"])
+        by_type = pi["Type"]["values_by_garment_type"]
+        self.assertIn("Jeans", by_type["Bottom"])
+        self.assertNotIn("Jeans", by_type["Top"])
+        binding = {"domain": "PI", "feature": "Weight", "values": ["Light"], "match": "any",
+                   "polarity": "prefer", "strength": "soft"}
+        registry.validate_binding(binding, "Bottom")
+        with self.assertRaises(StyleMateError):
+            registry.validate_binding(binding, "Pants")
+        self.assertEqual(product_fact_statuses(LUMI_PI_V3_REGISTRY_VERSION), ("confirmed", "inferred"))
 
 
 if __name__ == "__main__":

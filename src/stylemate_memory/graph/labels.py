@@ -1,6 +1,6 @@
-"""Korean display labels for PI v2 values (UI U1). Display only: stored values stay as in the registry.
+"""Korean display labels for PI v2/v3 values (UI U1). Display only: stored values stay as in the registry.
 
-A value without an entry is shown as stored. The registry (lumi-pi-v2-top) remains the
+A value without an entry is shown as stored. The registry (lumi-pi-v2-top / lumi-pi-v3) remains the
 source of truth for which values exist; this table never adds or renames a value.
 """
 
@@ -23,14 +23,17 @@ VALUE_LABELS_KO: dict[str, dict[str, str]] = {
     "Length": {"Short sleeve": "반소매", "Long sleeve": "긴소매", "Sleeveless": "민소매", "Cropped": "크롭",
                "Shorts": "짧은 기장", "Full": "긴 기장"},
     "Texture": {"Jersey": "저지", "Knit": "니트", "Ribbed": "골지", "Fleece": "플리스", "Denim": "데님",
-                "Corduroy": "코듀로이", "Twill": "트윌", "Seersucker": "시어서커", "Waffle": "와플", "Boucle": "부클"},
+                "Corduroy": "코듀로이", "Twill": "트윌", "Seersucker": "시어서커", "Waffle": "와플", "Boucle": "부클",
+                "Smooth": "매끈한 표면"},
     "Fabric": {"Cotton": "면", "Wool": "울", "Cashmere": "캐시미어", "Linen": "린넨", "Polyester": "폴리에스터",
                "Nylon": "나일론", "Viscose": "비스코스", "Elastane": "스판", "Acrylic": "아크릴", "Silk": "실크"},
     "Detail": {"Pockets": "포켓", "Zip": "지퍼", "Buttons": "단추", "Collar": "칼라", "Hood": "후드", "Drawcord": "스트링",
                "Elastic waist": "밴딩 허리", "Pleats": "주름", "Embroidery": "자수", "Patch": "패치", "Washed": "워싱",
                "Distressed": "디스트레스드", "Slit": "트임"},
     "Style": {"Vintage": "빈티지", "Sporty": "스포티", "Workwear": "워크웨어", "Tailored": "테일러드", "Classic": "클래식",
-              "Preppy": "프레피", "Street": "스트리트"},
+              "Preppy": "프레피", "Street": "스트리트", "Minimal": "미니멀", "Casual": "캐주얼", "Formal": "포멀",
+              "Outdoor": "아웃도어"},
+    "Weight": {"Light": "얇은 두께", "Mid": "중간 두께", "Heavy": "두꺼운 두께"},
 }
 
 
