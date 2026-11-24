@@ -340,7 +340,7 @@ def records_29cm(data: Path) -> list[dict[str, Any]]:
         fill_common(pi, type_value, seller, model_text)
         out.append({"id": record["product_id"], "source": "29cm", "source_product_id": record["product_id"].removeprefix("29cm-"),
                     "group": "top" if type_value in TOPS else "bottom", "gender": md.get("gender"), "title": record["title"],
-                    "brand": md.get("brand"), "price": {"amount": md.get("price_amount"), "currency": "KRW"},
+                    "brand": md.get("brand"), "price": {"amount": md.get("price"), "currency": "KRW"},
                     "image": str(image.relative_to(data)), "url_handle": record["source"]["url"], "pi": pi})
     return out
 
@@ -370,13 +370,13 @@ def apply_text_fills(records: list[dict[str, Any]], data: Path) -> int:
 
 
 def apply_image_fills(records: list[dict[str, Any]], data: Path) -> int:
-    """Step 6: top axes still empty after text fills take image+text model values from fill_pi_v2_image.py, as inferred."""
+    """Step 6: axes still empty after text fills take image+text model values from fill_pi_v2_image.py, as inferred."""
     fill_dir, applied = data / "raw" / "fills_image", 0
     if not fill_dir.is_dir():
         return 0
     for record in records:
         path = fill_dir / f"{record['id']}.json"
-        if record["group"] != "top" or not path.exists():
+        if not path.exists():
             continue
         for axis, fill in json.loads(path.read_text(encoding="utf-8")).get("fills", {}).items():
             if axis in record["pi"] or fill["confidence"] < TEXT_FILL_MIN_CONFIDENCE:

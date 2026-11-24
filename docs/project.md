@@ -133,6 +133,18 @@ PI 7개 축과 FEA 분류를 차용한 출처는 Park, H., Kim, S., Choi, Y., & 
 
 수집 경로·PI별 필드·실행법·중간 레코드·정규화·파일럿 검증의 상세 계약은 [crawling.md](specs/crawling.md)에서 관리한다. SmartStore는 합성 자동 수집과 실제 상품 1건 추출을 확인했으며 [수집 스크립트](../scripts/crawl_naver.mjs)의 실제 URL 직접 접근은 429였다. [유니클로·자라 원문 PI 파일럿](specs/crawling.md#유니클로자라-원문-pi-파일럿)의 여성 셔츠·블라우스와 팬츠 표본에서 유니클로 18/20개, 자라 6/20개의 PI 7축을 원문에서 확보했다.
 
+### PI v3 값 형태
+
+[ADR 0016](adr/0016-pi-v3-value-shapes.md)에 따라 축마다 상품에 저장할 값과 대화에 쓸 라벨을 분리한다.
+
+- 순서형 축(Fit·Tone·Length·Weight)은 `score`를 둔다.
+- Color는 첫 이미지의 옷 영역에서 뽑은 대표색(최대 3개)을 rgb·lab·비율로 저장하고 CIEDE2000으로 비교한다.
+- Price는 `price_krw`를 둔다.
+- Silhouette은 하의 전용이다. Style은 9개 값 중 최대 2개이고, Weight(Light·Mid·Heavy)를 새로 둔다.
+- 반드시 걸러내는 조건은 Type, 예산, 명시적 제외뿐이고 나머지는 점수로 반영한다.
+
+[build_lumi_pi_v3.py](../scripts/build_lumi_pi_v3.py)가 v2 채움 결과를 읽어 `data/catalog/lumi-pi-v3.jsonl`과 `-report.json`을 만든다. 모델 호출은 없고, 대표색 추출에만 Pillow가 필요하다. 2026-11-23 실행에서 1,748개를 만들었다. `--review-sample 30`이 사람 검수 시트를 만들며, 검수 일치율은 아직 없다. 실행 사전과 graph 엔진은 아직 v2(`lumi-pi-v2-top`)를 쓴다.
+
 ### 현재 실행 사전
 
 실행 사전은 세 가지이며 `--registry`/`STYLEMATE_REGISTRY`로 명시적으로 고른다. 기본값은 Park 사전이다.

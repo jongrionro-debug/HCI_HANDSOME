@@ -51,3 +51,4 @@ ADR은 구조·계약·운영·연구 방향에 오래 영향을 주는 선택�
 - [0013 · LangGraph 기반 의도 순환 추천으로 흐름 제어를 재구성한다](0013-langgraph-intent-loop.md)
 - [0014 · 29CM와 Shopify 크롤링 상품으로 PI v2(11축) 카탈로그를 만든다](0014-crawled-catalog-pi-v2.md)
 - [0015 · 상의 첫 빌드: 동의한 기억으로 시작하고 종료 요약에서 다시 동의받는다](0015-top-memory-warm-start.md)
+- [0016 · PI v3: 축마다 저장 값과 대화 라벨을 분리하고 값의 형태를 나눈다](0016-pi-v3-value-shapes.md)

@@ -230,11 +230,14 @@ async function gotoChecked(page, url, state) {
   return status;
 }
 
-async function discover(page, root, intervalMs, state) {
-  const path = join(root, 'discovery.json');
+/** Pants only: bottom seeds without skirts. */
+export const PANTS_SEEDS = SEEDS.filter(s => s.group === 'bottom' && !/스커트/.test(s.name));
+
+async function discover(page, root, intervalMs, state, { seeds = SEEDS, pages = 1, name = 'discovery.json' } = {}) {
+  const path = join(root, name);
   if (await exists(path)) return JSON.parse(await readFile(path, 'utf8'));
   const lists = [];
-  for (const seed of SEEDS) {
+  for (const seed of seeds) {
     if (state.stopped) break;
     await pause(intervalMs);
     if (await gotoChecked(page, listingUrl(seed), state) === null && state.stopped) break;
@@ -243,16 +246,21 @@ async function discover(page, root, intervalMs, state) {
     const smalls = parseSmallCategories(anchors, seed.medium);
     for (const small of smalls) {
       if (small.excluded) { lists.push({ ...seed, small: small.code, small_name: small.name, excluded: true, ids: [] }); continue; }
+      const ids = [];
+      for (let n = 1; n <= pages && !state.stopped; n++) {
+        await pause(intervalMs);
+        const url = listingUrl({ ...seed, small: small.code, page: n });
+        if (await gotoChecked(page, url, state) === null && state.stopped) break;
+        await page.waitForSelector('a[href*="/catalog/"]', { timeout: 15000 }).catch(() => {});
+        const snap = await page.evaluate(() => ({ hrefs: [...document.querySelectorAll('a')].map(a => a.href), blocked: /자동입력 방지|보안문자|captcha/i.test(document.body?.innerText?.slice(0, 3000) || '') }));
+        if (snap.blocked) { state.stopped = 'blocked_page'; state.log.push({ url, event: 'stopped' }); break; }
+        const fresh = parseProductIds(snap.hrefs).filter(id => !ids.includes(id));
+        ids.push(...fresh);
+        console.error(`listing ${seed.name} > ${small.name} p${n}: +${fresh.length}`);
+        if (!fresh.length) break; // past the last page
+      }
       if (state.stopped) break;
-      await pause(intervalMs);
-      const url = listingUrl({ ...seed, small: small.code });
-      if (await gotoChecked(page, url, state) === null && state.stopped) break;
-      await page.waitForSelector('a[href*="/catalog/"]', { timeout: 15000 }).catch(() => {});
-      const snap = await page.evaluate(() => ({ hrefs: [...document.querySelectorAll('a')].map(a => a.href), blocked: /자동입력 방지|보안문자|captcha/i.test(document.body?.innerText?.slice(0, 3000) || '') }));
-      if (snap.blocked) { state.stopped = 'blocked_page'; state.log.push({ url, event: 'stopped' }); break; }
-      const ids = parseProductIds(snap.hrefs);
       lists.push({ ...seed, small: small.code, small_name: small.name, ids });
-      console.error(`listing ${seed.name} > ${small.name}: ${ids.length}`);
     }
   }
   const discovery = { discovered_at: new Date().toISOString(), lists };
@@ -355,10 +363,17 @@ export async function main(args = process.argv.slice(2)) {
   const get = (flag, fallback) => { const i = args.indexOf(flag); return i >= 0 ? args[i + 1] : fallback; };
   const outArg = get('--out');
   if (!outArg) {
-    console.log('node scripts/crawl_29cm.mjs --out <저장소 밖 경로> [--per-group 110] [--limit <상품 방문 상한>] [--interval-ms 2000] [--no-images] [--details [--max-detail 8]] [--headed] [--browser-path <chromium>]');
+    console.log('node scripts/crawl_29cm.mjs --out <저장소 밖 경로> [--per-group 110] [--pants-only] [--gender men|women] [--pages 1] [--new <새 상품 수>] [--limit <상품 방문 상한>] [--interval-ms 2000] [--no-images] [--details [--max-detail 8]] [--headed] [--browser-path <chromium>]');
     return 2;
   }
-  const perGroup = Number(get('--per-group', 110));
+  const newOnly = args.includes('--new') ? Number(get('--new')) : null; // count only products not saved before
+  const perGroup = newOnly ?? Number(get('--per-group', 110));
+  const pantsOnly = args.includes('--pants-only');
+  const pages = Math.max(1, Number(get('--pages', 1)));
+  const gender = get('--gender', null); // men | women: only that gender's seeds
+  if (gender !== null && !['men', 'women'].includes(gender)) { console.error('--gender must be men or women'); return 2; }
+  const runTag = pantsOnly || pages > 1 || gender ? `-${pantsOnly ? 'pants' : 'all'}${gender ? `-${gender}` : ''}-p${pages}` : '';
+  const seeds = (pantsOnly ? PANTS_SEEDS : SEEDS).filter(s => !gender || s.gender === gender);
   const limit = Number(get('--limit', Infinity));
   const intervalMs = Math.max(2000, Number(get('--interval-ms', 2000)));
   const browserPath = get('--browser-path', process.env.LUMI_CHROMIUM_PATH || undefined);
@@ -385,7 +400,8 @@ export async function main(args = process.argv.slice(2)) {
   const records = []; let visits = 0;
   try {
     const page = await (await browser.newContext({ locale: 'ko-KR' })).newPage();
-    const discovery = await discover(page, root, intervalMs, state);
+    const discovery = await discover(page, root, intervalMs, state,
+      { seeds, pages, name: `discovery${runTag}.json` });
     const queue = { top: [], bottom: [] };
     for (const g of ['top', 'bottom']) {
       queue[g] = roundRobin(discovery.lists.filter(l => l.group === g && !l.excluded).map(l => ({
@@ -401,6 +417,7 @@ export async function main(args = process.argv.slice(2)) {
         seen.add(item.id);
         const path = join(root, 'products', `${item.id}.json`);
         if (await exists(path)) {
+          if (newOnly !== null) continue; // already collected in an earlier run; not part of this quota
           const saved = JSON.parse(await readFile(path, 'utf8'));
           if (args.includes('--no-images') || saved.images.every(i => i.download_status === 'downloaded')) { records.push(saved); have += 1; continue; }
           await downloadImages(root, saved, intervalMs, state, fetch); await writeJson(path, saved); records.push(saved); have += 1; continue;
@@ -429,8 +446,8 @@ export async function main(args = process.argv.slice(2)) {
   } finally { await browser.close(); }
   const summary = { collector_version: COLLECTOR_VERSION, started_at: startedAt, finished_at: new Date().toISOString(), wall_ms: Date.now() - started,
     visits, interval_ms: intervalMs, stopped: state.stopped, ...summarizeRecords(records), log: state.log };
-  await writeJson(join(root, 'run.json'), summary);
-  await writeJson(join(root, 'summary.json'), summarizeRecords(records));
+  await writeJson(join(root, `run${runTag}.json`), summary);
+  await writeJson(join(root, `summary${runTag}.json`), summarizeRecords(records));
   console.log(JSON.stringify({ total: summary.total, by_group: summary.by_group, visits, stopped: state.stopped, wall_s: Math.round(summary.wall_ms / 1000), images: summary.images_downloaded, failures: state.log.length }, null, 1));
   return state.stopped ? 1 : 0;
 }
