@@ -436,11 +436,11 @@ LUMI_GRAPH_PYTHON=~/.venvs/lumi-graph/bin/python node tests/check_graph_browser.
 
 ### 지금 할 일 (2026-11-25 기준)
 
-순서는 의존 관계 기준이다. 구체적인 완료 조건은 Issue 또는 해당 PR에서 관리한다.
+순서는 의존 관계 기준이다. 완료 조건과 진행은 각 Issue에서 관리하고 이 목록은 요약만 둔다.
 
-1. **main 밖 브랜치 정리:** 원격에 main 미반영 브랜치가 있다. `claude/pi-v3-pants-texture`(Texture Smooth·`--axes` 재질문), `feat/pi-v4-outer`(남성 아우터 품목군), `jaehyun_work`(graph 엔진 개선안 F·U 항목), `feat/grid-decide-button`(결정 버튼·칩 표시). 각각 PR로 검토해 반영하거나 닫는다. `feat/pi-v4-outer`의 ADR 번호 0017은 main의 [ADR 0017](adr/0017-question-design-research-workspace.md)과 겹치므로 반영 전에 0018로 바꾼다.
-2. **질문 설계 킥오프:** [작업 공간](../research/question-design/README.md)의 파트 ①②③ 담당자, 확인 지점 A·B·C 날짜, 채택 기준을 정하고 [ADR 0017](adr/0017-question-design-research-workspace.md) 승인 여부를 정한다.
-3. **카탈로그 실행 전환:** v3 검수 시트로 모델 채움값 일치율을 재고, 상·하의(필요하면 아우터) 실행 사전을 만들어 graph 엔진에 연결한다.
+1. **main 밖 브랜치 정리([#23](https://github.com/jongrionro-debug/HCI_HANDSOME/issues/23)):** 원격에 main 미반영 브랜치가 있다. `claude/pi-v3-pants-texture`(Texture Smooth·`--axes` 재질문), `feat/pi-v4-outer`(남성 아우터 품목군), `jaehyun_work`(graph 엔진 개선안 F·U 항목), `feat/grid-decide-button`(결정 버튼·칩 표시). 각각 PR로 검토해 반영하거나 닫는다. `feat/pi-v4-outer`의 ADR 번호 0017은 main의 [ADR 0017](adr/0017-question-design-research-workspace.md)과 겹치므로 반영 전에 0018로 바꾼다.
+2. **질문 설계 킥오프([#24](https://github.com/jongrionro-debug/HCI_HANDSOME/issues/24)):** [작업 공간](../research/question-design/README.md)의 파트 ①②③ 담당자, 확인 지점 A·B·C 날짜, 채택 기준을 정하고 [ADR 0017](adr/0017-question-design-research-workspace.md) 승인 여부를 정한다.
+3. **카탈로그 실행 전환([#25](https://github.com/jongrionro-debug/HCI_HANDSOME/issues/25), 검수는 [#20](https://github.com/jongrionro-debug/HCI_HANDSOME/issues/20)):** v3 검수 시트로 모델 채움값 일치율을 재고, 상·하의(필요하면 아우터) 실행 사전을 만들어 graph 엔진에 연결한다.
 4. **실제 모델로 써 보기:** DeepSeek로 상의 첫 빌드와 하의 흐름을 직접 써 보고 ADR 0015 결정 8의 수치·라벨 한국어 표시·가설 품질을 정한다.
 5. **에이전트 파이프라인 결정:** 질문 설계 확인 지점 B·C 결과로 [agent-pipeline.md](specs/agent-pipeline.md)를 확정하고 ADR로 남긴 뒤 구현 이슈로 나눈다.
 6. **연구 운영 준비:** Baseline 환경, 시나리오·과제 안내, 설문(대응 문항·LUMI 전용·NASA-TLX·SUS), 동의서(외부 모델 API 전송 안내 포함), 파일럿 2~3명, 순서·시나리오 교차 균형화.

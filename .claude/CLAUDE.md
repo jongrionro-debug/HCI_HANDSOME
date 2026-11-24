@@ -7,7 +7,9 @@
 ## 먼저 읽을 곳
 
 - 현재 구현·실행·남은 일: [docs/project.md](../docs/project.md) (유일한 현재 상태 정본)
-- 결정 이유: [docs/adr/](../docs/adr/README.md) · 수집 계약: [docs/specs/crawling.md](../docs/specs/crawling.md)
+- 결정 이유: [docs/adr/](../docs/adr/README.md) · 수집 계약: [docs/specs/crawling.md](../docs/specs/crawling.md) · 에이전트 제안: [docs/specs/agent-pipeline.md](../docs/specs/agent-pipeline.md)
+- 할 일: GitHub Issue(`gh issue list`). project.md "지금 할 일"이 Issue 번호를 가리킨다
+- 질문 설계 초안·근거 카드: [research/question-design/](../research/question-design/README.md) (`qd/<파트>-<이름>` 브랜치, [ADR 0017](../docs/adr/0017-question-design-research-workspace.md))
 - 루트에 새 `.md`를 만들지 않는다. `scripts/check_context.py`가 `README.md`·`AGENTS.md` 외 루트 Markdown을 실패로 처리하므로 Claude 전용 안내는 이 `.claude/` 아래에 둔다.
 
 ## 코드 지도
@@ -18,8 +20,10 @@
   - 조회·목표: `retrieval.py`, `inference.py`, `context.py`
   - 상품·비교: `catalog*.py`, `product_search.py`, `comparison.py`, `hypotheses.py`
   - 모델: `llm.py`, `model_io.py`, `codex_llm.py`, `settings.py`
-  - 계약·사전: `contracts.py`, `errors.py`, `registry.py`, `resources/park-2025-feature-map.json`(생성 사본, 직접 편집 금지)
-- 수집 스크립트: `scripts/crawl_naver.mjs`, `scripts/probe_sites.mjs` (Node, Playwright)
+  - 계약·사전: `contracts.py`, `errors.py`, `registry.py`, `resources/*.json`(`output/feature-map/` 정본의 생성 사본, 직접 편집 금지)
+  - 의도 순환 엔진(선택, `STYLEMATE_ENGINE=graph`, langgraph 필요): `graph/`(`engine.py`, `service.py`, `grid.py`, `scoring.py`, `parse.py`, `intent.py`, `hypotheses.py`, `memory.py`, `situations.py`)
+- 수집 스크립트: `scripts/crawl_29cm.mjs`, `scripts/crawl_naver.mjs`, `scripts/probe_sites.mjs` (Node, Playwright), `scripts/fetch_shopify_first_images.py`
+- 카탈로그 빌드: `scripts/build_lumi_pi_v2.py` → `fill_pi_v2_text.py`·`fill_pi_v2_image.py`(DeepSeek, 실행 요청 시만) → `build_lumi_pi_v3.py`(Pillow). 29CM 7축 사전은 `build_29cm_registry.py`·`fill_pi_deepseek.py`
 - 테스트: `tests/test_*.py`(unittest), `tests/*.mjs`(node --test / Playwright 브라우저 검사)
 - `archive/`는 동결 자료다. 링크 검사 대상이 아니며 수정하지 않는다.
 
@@ -35,11 +39,14 @@ PYTHONPATH=src python3 scripts/evaluate_offline.py
 node --test tests/test_naver_crawler.mjs tests/test_probe_sites.mjs
 node tests/check_consumer_http_browser.mjs                    # Playwright 필요
 node tests/check_hypothesis_browser.mjs
+# graph 엔진(저장소 밖 venv)
+PYTHONPATH=src ~/.venvs/lumi-graph/bin/python -m unittest tests.test_graph_engine tests.test_graph_logic -q
+LUMI_GRAPH_PYTHON=~/.venvs/lumi-graph/bin/python node tests/check_graph_browser.mjs
 ```
 
 - 단일 테스트: `PYTHONPATH=src python3 -m unittest tests.test_store -q`
 - 브라우저 검사는 `playwright`를 import한다. 전역 설치만 있는 환경에서는 ESM이 `NODE_PATH`를 무시하므로 `node_modules/playwright`를 전역 설치로 symlink한다(`node_modules/`는 gitignore).
-- CI(`.github/workflows/`)는 Python 3.11/3.14 unittest·demo·`check_repository.py`만 돌린다. Node 테스트는 로컬 전용이다.
+- CI(`.github/workflows/`)는 Python 3.11/3.14 unittest(graph 의존성 포함)·demo·`check_repository.py`만 돌린다. Node 테스트는 로컬 전용이다.
 
 ## 실행
 
@@ -55,5 +62,5 @@ PYTHONPATH=src python3 -m stylemate_memory.consumer --provider fake   # http://1
 
 ## 데이터 위치
 
-- 수집 원본·첫 이미지는 저장소 안 `data/`(커밋 제외)에 둔다: `data/raw/<출처>/`, `data/images/<출처>/`, `data/catalog/lumi-pi-v2.jsonl`(+ `-report.json` 축별 채움률). 만드는 명령은 `scripts/fetch_shopify_first_images.py`, `scripts/build_lumi_pi_v2.py`.
+- 수집 원본·첫 이미지는 저장소 안 `data/`(커밋 제외)에 둔다: `data/raw/<출처>/`, `data/images/<출처>/`, `data/catalog/lumi-pi-v2.jsonl`·`lumi-pi-v3.jsonl`(+ `-report.json` 축별 채움률). 만드는 명령은 위 카탈로그 빌드 순서를 따른다.
 - 저장소에는 스크립트와 요약만 올린다. 참여자 정보·동의서·원시 응답·실행 DB는 커밋하지 않는다.
