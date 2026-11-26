@@ -1,6 +1,6 @@
 # 0012 · 29CM 완전 채움 상품으로 수집 기반 실행 사전(lumi-29cm-v1)을 만든다
 
-- Status: Accepted
+- Status: Superseded (2026-11-26). 실행 사전 `lumi-29cm-v1`은 [#33](https://github.com/jongrionro-debug/HCI_HANDSOME/issues/33)에서 삭제했고 PI v2·v3([ADR 0014](0014-crawled-catalog-pi-v2.md)·[0016](0016-pi-v3-value-shapes.md))로 대체됐다. 29CM 원문 정규화 규칙은 `scripts/build_29cm_registry.py`에 남아 v2 빌드가 쓴다
 - Date: 2026-11-18
 - Related Work: 현재 대화의 “feature 맵에 채워야 하는 값들이 다 채워져있는 데이터만 가지고 전체 시스템을 개발” 요청, PR #11(29CM 수집·DeepSeek 보완)
 - Approval: 완전 채움 상품으로 전체 시스템을 만드는 방향은 사용자 요청. 결정 3(모델 보완값을 상품 비교에 사용)은 2026-11-18 사용자가 “그냥 계속 넣으면 될거 같은데”라고 승인
