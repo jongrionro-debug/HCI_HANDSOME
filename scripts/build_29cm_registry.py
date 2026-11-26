@@ -1,42 +1,16 @@
 #!/usr/bin/env python3
-"""29CM 수집 결과에서 PI value 사전(lumi-29cm-v1)과 완전 채움 상품 카탈로그를 만든다.
+"""29CM 수집 원문 PI를 고정 규칙으로 정규화한다(build_lumi_pi_v2.py가 resolve를 쓴다).
 
-ADR 0010: PI 7개 축은 유지하고 value는 수집 데이터에서 정한다. 이 스크립트는
-``fill_pi_deepseek.py export``가 만든 ``lumi-catalog-v1.jsonl``(원문 ``pi_raw``와
-DeepSeek 보완 ``pi_model_interpretation`` 포함)을 읽어 다음을 수행한다.
-
-1. 각 축의 원문/모델 값을 아래 고정 규칙으로 정규화한다. 규칙에 맞지 않는 값
-   (예: "상세설명참조", 본문 조각, "DETAIL")은 채워지지 않은 것으로 본다.
-2. 7개 축이 모두 정규화 value를 가진 상품만 남긴다.
-3. 남은 상품의 value 분포로 사전 JSON을 만들고(Brand는 남은 상품의 브랜드 전체,
-   Price는 고정 KRW 구간), 상품 레코드를 canonical value와 근거를 포함해 내보낸다.
-
-공급 원문에서 정규화한 값은 ``raw_metadata.<축>``의 canonical 목록으로 두어 기존
-매핑 경로가 exact metadata로 읽는다. DeepSeek 보완값은 ``labels``의
-``status=inferred``·``model_interpretation``으로 두어 출처를 구분한다.
-
-    python3 scripts/build_29cm_registry.py --catalog-dir ~/Documents/LUMI-data/29cm-catalog
-    python3 scripts/build_29cm_registry.py --catalog-dir DIR --check   # 사전이 정본과 같은지
+원래는 lumi-29cm-v1 실행 사전도 만들었으나 그 사전은 PI v3(lumi-pi-v3)로 대체되어 지웠다(#33).
+남은 것은 축별 정규화 규칙(normalize)과 원문·모델 보완값에서 canonical 값을 고르는 resolve다.
 """
 
 from __future__ import annotations
 
-import argparse
-from collections import Counter
-from copy import deepcopy
-import json
-from pathlib import Path
 import re
-import sys
 from typing import Any
 
-ROOT = Path(__file__).resolve().parents[1]
-PARK = ROOT / "output/feature-map/park-2025-feature-map.json"
-REGISTRY = ROOT / "output/feature-map/lumi-29cm-v1.json"
-VERSION = "lumi-29cm-v1"
 AXES = ("Type", "Brand", "Price", "Color", "Fit", "Fabric", "Detail")
-FIELD = {"Type": "type", "Brand": "brand", "Price": "price_range", "Color": "color",
-         "Fit": "fit", "Fabric": "fabric", "Detail": "detail"}
 
 GARMENT_LABELS = {
     "Pants": "바지", "Skirt": "스커트", "T-shirt": "티셔츠", "Shirt": "셔츠", "Blouse": "블라우스",
@@ -174,14 +148,6 @@ def normalize(feature: str, text: str, garment: str) -> list[str]:
     return _match(text, rules)
 
 
-def allowed_values(feature: str, garment: str) -> list[str]:
-    """Canonical values a gap fill may choose from (the normalization rules' vocabulary)."""
-    if feature == "Type":
-        return sorted(set(TYPE_BY_GARMENT.get(garment, {}).values()))
-    rules = {"Color": COLOR_RULES, "Fit": FIT_RULES, "Fabric": FABRIC_RULES, "Detail": DETAIL_RULES}.get(feature, [])
-    return [canonical for canonical, _ in rules]
-
-
 def resolve(record: dict[str, Any]) -> dict[str, dict[str, Any]]:
     """축별 canonical 값과 출처(raw|model). 값이 없으면 그 축은 빠진다."""
     raw_md = record["raw_metadata"]
@@ -205,152 +171,3 @@ def resolve(record: dict[str, Any]) -> dict[str, dict[str, Any]]:
             if values:
                 result[feature] = {"values": values, "origin": "model", "quote": model["value"]}
     return result
-
-
-def export_record(record: dict[str, Any], resolved: dict[str, dict[str, Any]]) -> dict[str, Any]:
-    raw_md = deepcopy(record["raw_metadata"])
-    # 원문 문자열 필드를 canonical 축 필드와 겹치지 않는 이름으로 옮긴다.
-    for old, new in (("brand", "brand_text"), ("price", "price_amount"), ("color", "color_text"),
-                     ("fabric", "fabric_text")):
-        if old in raw_md:
-            raw_md[new] = raw_md.pop(old)
-    labels = []
-    for feature in AXES:
-        entry = resolved[feature]
-        if entry["origin"] == "raw":
-            raw_md[FIELD[feature]] = entry["values"]
-        else:
-            labels.append({
-                "observation": {"domain": "PI", "feature": feature, "values": entry["values"]},
-                "status": "inferred",
-                "provenance": [{"kind": "model_interpretation",
-                                "source_field": f"raw_metadata.pi_model_interpretation.{feature}.value",
-                                "quote": entry["quote"], "verifier": None, "evidence_ref": None,
-                                "verified_at": None}],
-            })
-    raw_md["lumi_normalization"] = {"registry_version": VERSION,
-                                    "origin": {f: resolved[f]["origin"] for f in AXES}}
-    result = deepcopy(record)
-    result["raw_metadata"] = raw_md
-    result["labels"] = labels
-    return result
-
-
-def build_registry(complete: list[tuple[dict[str, Any], dict[str, dict[str, Any]]]]) -> dict[str, Any]:
-    park = json.loads(PARK.read_text(encoding="utf-8"))
-    counts: dict[str, Counter] = {feature: Counter() for feature in AXES}
-    types: dict[str, set[str]] = {}
-    for record, resolved in complete:
-        for feature in AXES:
-            counts[feature].update(resolved[feature]["values"])
-        types.setdefault(record["garment_type"], set()).update(resolved["Type"]["values"])
-
-    def ordered(feature: str) -> list[str]:
-        if feature == "Price":
-            return [label for _, _, label in PRICE_BUCKETS]
-        if feature == "Brand":
-            return sorted(counts[feature])
-        rules = {"Color": COLOR_RULES, "Fit": FIT_RULES, "Fabric": FABRIC_RULES, "Detail": DETAIL_RULES}.get(feature)
-        if rules:
-            return [c for c, _ in rules if c in counts[feature]]
-        return sorted(counts[feature])
-
-    labels = {"Type": "아이템 종류", "Brand": "브랜드", "Price": "가격 구간", "Color": "색상", "Fit": "핏",
-              "Fabric": "소재 원료", "Detail": "디테일"}
-    pi = {}
-    for feature in AXES:
-        values = ordered(feature)
-        pi[feature] = {"label_ko": labels[feature], "values": values, "reported_count": len(values),
-                       "enumeration_complete": True,
-                       "distribution": {v: counts[feature][v] for v in values}}
-    pi["Type"]["values_by_garment_type"] = {g: sorted(v) for g, v in sorted(types.items())}
-    pi["Price"]["currency"] = "KRW"
-    pi["Price"]["boundaries"] = [{"label": label, "min_inclusive": low, "max_exclusive": high}
-                                 for low, high, label in PRICE_BUCKETS]
-    garments = sorted(types)
-    return {
-        "name": "LUMI 29CM collected PI values + Park FEA taxonomy",
-        "version": VERSION,
-        "status": "Generated",
-        "runtime_implemented": True,
-        "scope": "29CM 상·하의 수집 상품 중 PI 7개 축이 모두 정규화된 상품에서 만든 value 사전이다.",
-        "lumi_use": "ADR 0010에 따라 PI 축은 Park et al. (2025)를 유지하고 value만 수집 데이터에서 정한다. FEA 30개 태그는 Park 사전을 그대로 쓴다.",
-        "generated_by": "scripts/build_29cm_registry.py",
-        "product_information": pi,
-        "consumer_needs_taxonomy": park["consumer_needs_taxonomy"],
-        "garment_types": [{"value": g, "label_ko": GARMENT_LABELS.get(g, g)} for g in garments],
-        "execution": {
-            "supported_garment_types": garments,
-            "accept_inferred_product_pi": True,
-            "price_currency": "KRW",
-            "price_boundary_inclusion": "min_inclusive_max_exclusive",
-        },
-        "counts": {"products": len(complete), "product_information_categories": len(pi),
-                   "consumer_needs_attributes": park["counts"]["consumer_needs_attributes"],
-                   "values": {f: len(pi[f]["values"]) for f in AXES}},
-        "source_boundaries": [
-            "Type은 29CM 소분류, Brand는 표시 브랜드, Price는 판매가의 고정 KRW 구간이다.",
-            "Color·Fit·Fabric·Detail은 원문 또는 DeepSeek 보완 문장에서 이 스크립트의 고정 키워드 규칙으로 찾은 값이다. 규칙에 없는 표현은 값으로 만들지 않는다.",
-            "DeepSeek 보완값은 상품 Map에서 status=inferred·model_interpretation으로 남는다. accept_inferred_product_pi=true는 이 사전 버전에서 그 값을 상품 비교에 쓰도록 한 실행 선택이며 검증 라벨이 아니다.",
-            "FEA 성능 태그를 상품 사진·문구만으로 확정하지 않는다.",
-        ],
-    }
-
-
-def main() -> int:
-    parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    parser.add_argument("--catalog-dir", required=True, type=Path)
-    parser.add_argument("--input", default="lumi-catalog-v1.jsonl")
-    parser.add_argument("--output", default="lumi-catalog-complete-v1.jsonl")
-    parser.add_argument("--report", default="complete_report.json")
-    parser.add_argument("--gaps", default="pi_gaps.json",
-                        help="빈 축 목록과 허용 value(fill_pi_deepseek.py --gaps 입력)")
-    parser.add_argument("--registry", type=Path, default=REGISTRY)
-    parser.add_argument("--check", action="store_true", help="사전 파일을 쓰지 않고 정본과 같은지 확인")
-    args = parser.parse_args()
-    directory = args.catalog_dir.expanduser()
-    if ROOT in directory.resolve().parents or directory.resolve() == ROOT:
-        print("FAIL: 수집 데이터 경로는 저장소 밖이어야 합니다.", file=sys.stderr)
-        return 2
-    records = [json.loads(line) for line in (directory / args.input).read_text(encoding="utf-8").splitlines() if line.strip()]
-    complete, missing, gaps = [], Counter(), {}
-    for record in records:
-        resolved = resolve(record)
-        absent = [f for f in AXES if f not in resolved]
-        missing.update(absent)
-        if not absent:
-            complete.append((record, resolved))
-        else:
-            gaps[record["product_id"].removeprefix("29cm-")] = {
-                "garment_type": record["garment_type"], "features": absent,
-                "allowed_values": {f: allowed_values(f, record["garment_type"]) for f in absent}}
-    registry = build_registry(complete)
-    text = json.dumps(registry, ensure_ascii=False, indent=2) + "\n"
-    if args.check:
-        if not args.registry.is_file() or args.registry.read_text(encoding="utf-8") != text:
-            print(f"FAIL: {args.registry}가 현재 데이터로 만든 사전과 다릅니다.")
-            return 1
-        print("OK: registry matches collected data")
-        return 0
-    args.registry.write_text(text, encoding="utf-8")
-    out = directory / args.output
-    out.write_text("".join(json.dumps(export_record(r, v), ensure_ascii=False) + "\n" for r, v in complete),
-                   encoding="utf-8")
-    origin = Counter((f, v[f]["origin"]) for _, v in complete for f in AXES)
-    report = {
-        "registry_version": VERSION, "input_records": len(records), "complete_records": len(complete),
-        "by_group": dict(Counter(r["raw_metadata"]["group"] for r, _ in complete)),
-        "by_garment_type": dict(Counter(r["garment_type"] for r, _ in complete)),
-        "missing_by_axis": {f: missing[f] for f in AXES},
-        "origin_by_axis": {f: {"raw": origin[(f, "raw")], "model": origin[(f, "model")]} for f in AXES},
-        "value_counts": registry["counts"]["values"],
-    }
-    (directory / args.gaps).write_text(json.dumps({"registry_version": VERSION, "products": gaps},
-                                                  ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
-    (directory / args.report).write_text(json.dumps(report, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
-    print(json.dumps(report, ensure_ascii=False, indent=2))
-    return 0
-
-
-if __name__ == "__main__":
-    raise SystemExit(main())

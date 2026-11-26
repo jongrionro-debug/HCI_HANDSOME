@@ -148,8 +148,10 @@ def main(argv: list[str] | None = None) -> int:
                 return serve(settings)
             # Importing/building supplied product facts is always offline,
             # including when a shell happens to configure an OpenAI provider.
+            # It runs no turns, so it never needs the optional graph engine.
+            from dataclasses import replace
             from .model_io import FakeModelGateway
-            with settings.open_service(gateway=FakeModelGateway()) as service:
+            with replace(settings, engine="legacy").open_service(gateway=FakeModelGateway()) as service:
                 result = (service.import_catalog(args.file) if args.command == "catalog-import" else service.build_catalog_maps())
         else:
             # Credentials are read only for an explicit future openai command,

@@ -1,19 +1,13 @@
-"""lumi-29cm-v1: collected PI value dictionary, complete-record filter, inferred matching."""
+"""29CM normalization rules and the lumi-pi-v3 runtime dictionary (ADR 0014, 0016)."""
 
 from copy import deepcopy
-import json
-from pathlib import Path
-from tempfile import TemporaryDirectory
 import unittest
-import unittest.mock
 
 from scripts import build_29cm_registry as build
 from stylemate_memory.catalog_mapping import build_product_map
-from stylemate_memory.contracts import (COLLECTED_29CM_REGISTRY_VERSION, LUMI_PI_V2_TOP_REGISTRY_VERSION,
-                                        LUMI_PI_V3_REGISTRY_VERSION, V1_REGISTRY_VERSION)
+from stylemate_memory.contracts import LUMI_PI_V3_REGISTRY_VERSION, V1_REGISTRY_VERSION
 from stylemate_memory.graph.hypotheses import HYPOTHESIS_AXES, hypothesis_axes
 from stylemate_memory.errors import StyleMateError
-from stylemate_memory.product_search import _evaluate
 from stylemate_memory.registry import load_registry, product_fact_statuses
 
 
@@ -55,87 +49,16 @@ class NormalizationTests(unittest.TestCase):
         self.assertEqual([build.price_bucket(v) for v in (39999, 40000, 129999, 130000)],
                          ["4만원 미만", "4만~6만원", "9만~13만원", "13만원 이상"])
 
-    def test_only_records_with_all_seven_axes_are_exported(self):
-        with TemporaryDirectory() as temp:
-            root = Path(temp)
-            rows = [record("1"), record("2", color="상세설명참조")]
-            (root / "lumi-catalog-v1.jsonl").write_text("".join(json.dumps(r, ensure_ascii=False) + "\n" for r in rows),
-                                                        encoding="utf-8")
-            argv = ["build", "--catalog-dir", str(root), "--registry", str(root / "registry.json")]
-            with unittest.mock.patch("sys.argv", argv), unittest.mock.patch("builtins.print"):
-                self.assertEqual(build.main(), 0)
-            report = json.loads((root / "complete_report.json").read_text(encoding="utf-8"))
-            self.assertEqual((report["input_records"], report["complete_records"]), (2, 1))
-            self.assertEqual(report["missing_by_axis"]["Color"], 1)
-            exported = [json.loads(line) for line in (root / "lumi-catalog-complete-v1.jsonl").read_text().splitlines()]
-            self.assertEqual([r["product_id"] for r in exported], ["29cm-1"])
-            raw = exported[0]["raw_metadata"]
-            self.assertEqual((raw["color"], raw["color_text"], raw["price_range"]), (["차콜", "블랙"], "Charcoal / Black", ["4만~6만원"]))
-            self.assertNotIn("fit", raw)  # model value stays a labelled inference
-            label = exported[0]["labels"][0]
-            self.assertEqual((label["observation"]["feature"], label["status"], label["provenance"][0]["kind"]),
-                             ("Fit", "inferred", "model_interpretation"))
-            gaps = json.loads((root / "pi_gaps.json").read_text(encoding="utf-8"))["products"]
-            self.assertEqual(list(gaps), ["2"])
-            self.assertEqual(gaps["2"]["features"], ["Color"])
-            self.assertIn("네이비", gaps["2"]["allowed_values"]["Color"])
-            registry = json.loads((root / "registry.json").read_text(encoding="utf-8"))
-            self.assertEqual(registry["product_information"]["Brand"]["values"], ["합성브랜드"])
 
-
-class CollectedRegistryTests(unittest.TestCase):
-    def setUp(self):
-        self.registry = load_registry(COLLECTED_29CM_REGISTRY_VERSION)
-        self.pi = self.registry.describe()["product_information"]
-
-    def test_axes_fea_and_garment_scoped_type(self):
-        description = self.registry.describe()
-        self.assertEqual(list(self.pi), ["Type", "Brand", "Price", "Color", "Fit", "Fabric", "Detail"])
-        self.assertIn("Knit/Sweater", description["execution"]["supported_garment_types"])
-        self.assertTrue(description["execution"]["accept_inferred_product_pi"])
-        pants_type = self.pi["Type"]["values_by_garment_type"]["Pants"][0]
-        binding = {"domain": "PI", "feature": "Type", "values": [pants_type], "match": "any",
-                   "polarity": "prefer", "strength": "soft"}
-        self.registry.validate_binding(binding, "Pants")
-        with self.assertRaises(StyleMateError):
-            self.registry.validate_binding(binding, "Knit/Sweater")
-        with self.assertRaises(StyleMateError):
-            self.registry.validate_binding(binding | {"feature": "Color", "values": ["Navy"]}, "Pants")
-        # The Park dictionary and its confirmed-only matching are unchanged.
-        self.assertEqual(load_registry(V1_REGISTRY_VERSION).describe()["execution"]["supported_garment_types"], ["Pants"])
-        self.assertEqual(product_fact_statuses(V1_REGISTRY_VERSION), ("confirmed",))
-        self.assertEqual(product_fact_statuses(COLLECTED_29CM_REGISTRY_VERSION), ("confirmed", "inferred"))
-
-    def test_exported_record_imports_maps_and_inferred_fit_matches(self):
-        row = record("1")
-        resolved = build.resolve(row)
-        exported = build.export_record(row, resolved)
-        brand = self.pi["Brand"]["values"][0]
-        exported["raw_metadata"]["brand"] = [brand]
-        product_map = build_product_map(deepcopy(exported), raw_version=1, registry=self.registry, pi_only=True)
-        statuses = {a["observation"]["feature"]: (a["status"], a["observation"]["values"]) for a in product_map["assertions"]}
-        self.assertEqual(statuses["Color"], ("confirmed", ["차콜", "블랙"]))
-        self.assertEqual(statuses["Brand"], ("confirmed", [brand]))
-        self.assertEqual(statuses["Fit"], ("inferred", ["와이드", "루즈·릴랙스"]))
-        constraint = {"id": "fit", "confirmed": True, "binding": {"domain": "PI", "feature": "Fit", "values": ["와이드"],
-                      "match": "any", "polarity": "prefer", "strength": "soft"}}
-        hit = _evaluate(product_map, [constraint], self.registry, "Pants")
-        self.assertEqual((hit["matched_constraint_ids"], hit["score"]), (["fit"], 1.0))
-
-
-class PIV2TopRegistryTests(unittest.TestCase):
-    """lumi-pi-v2-top (ADR 0014): tops only, 11 English PI axes + Brand, axes read from the registry."""
+class PIV3MappingTests(unittest.TestCase):
+    """lumi-pi-v3 (ADR 0014, 0016): English PI axes read from the registry, inferred model values kept apart."""
 
     @classmethod
     def setUpClass(cls):
-        cls.registry = load_registry(LUMI_PI_V2_TOP_REGISTRY_VERSION)
+        cls.registry = load_registry(LUMI_PI_V3_REGISTRY_VERSION)
         cls.pi = cls.registry.describe()["product_information"]
 
     def test_axes_and_hypothesis_space_follow_the_registry(self):
-        self.assertEqual(list(self.pi), ["Type", "Brand", "Color", "Tone", "Pattern", "Fit", "Silhouette", "Length",
-                                         "Texture", "Fabric", "Detail", "Style"])
-        self.assertEqual(self.registry.describe()["execution"]["supported_garment_types"], ["Top"])
-        self.assertEqual(product_fact_statuses(LUMI_PI_V2_TOP_REGISTRY_VERSION), ("confirmed", "inferred"))
         self.assertEqual(hypothesis_axes(self.registry), tuple(a for a in self.pi if a != "Brand"))
         self.assertEqual(hypothesis_axes(load_registry(V1_REGISTRY_VERSION)), HYPOTHESIS_AXES)
         binding = {"domain": "PI", "feature": "Pattern", "values": ["Stripe"], "match": "any",

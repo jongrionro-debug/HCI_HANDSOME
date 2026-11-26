@@ -16,13 +16,11 @@ Only the best available tier is kept per axis. Products without a first image ar
 from __future__ import annotations
 
 import argparse
-import hashlib
 import html
 import json
 import re
 import sys
 from collections import Counter
-from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
@@ -398,99 +396,15 @@ def validate(records: list[dict[str, Any]]) -> None:
                 raise SystemExit(f"{record['id']} {axis}: values outside schema {bad}")
 
 
-TOP_REGISTRY_VERSION = "lumi-pi-v2-top"
-TOP_GARMENT = "Top"
 LABEL_KO = {"Type": "종류", "Brand": "브랜드", "Color": "색상", "Tone": "색 톤", "Pattern": "패턴", "Fit": "핏(여유)",
             "Silhouette": "실루엣", "Length": "기장·소매", "Texture": "표면감", "Fabric": "소재", "Detail": "디테일",
             "Style": "스타일"}
 SHOP_URL = {"colebuxton": "https://colebuxton.com/products/", "waxlondon": "https://waxlondon.com/products/"}
 
 
-def export_top(records: list[dict[str, Any]], data: Path, registry_path: Path) -> dict[str, int]:
-    """Tops only: runtime value dictionary (lumi-pi-v2-top) and a lumi-catalog-v1 import file.
-
-    confirmed/derived axes go to ``raw_metadata.<axis>`` as canonical lists (the mapping reads them as
-    exact metadata); inferred axes go to ``labels`` as model_interpretation quoting
-    ``raw_metadata.pi_inferred.<axis>.evidence``. Images stay under ``data/images``; the import file
-    refers to them relative to that root.
-    """
-    park = json.loads((ROOT / "output/feature-map/park-2025-feature-map.json").read_text(encoding="utf-8"))
-    tops = [r for r in records if r["group"] == "top"]
-    counts = {axis: Counter(v for r in tops if axis in r["pi"] for v in r["pi"][axis]["values"]) for axis in AXES}
-    counts["Brand"] = Counter(r["brand"] for r in tops if r.get("brand"))
-    order = ("Type", "Brand") + AXES[1:]
-    pi = {}
-    for axis in order:
-        values = sorted(counts[axis]) if axis == "Brand" else [v for v in SCHEMA[axis] if counts[axis][v]]
-        pi[axis] = {"label_ko": LABEL_KO[axis], "values": values, "reported_count": len(values),
-                    "enumeration_complete": True, "distribution": {v: counts[axis][v] for v in values}}
-    pi["Type"]["values_by_garment_type"] = {TOP_GARMENT: list(pi["Type"]["values"])}
-    registry = {
-        "name": "LUMI PI v2 tops (ADR 0014) + Park FEA taxonomy",
-        "version": TOP_REGISTRY_VERSION, "status": "Generated", "runtime_implemented": True,
-        "scope": "29CM·Cole Buxton·Wax London 상의만 담은 PI v2 실행 사전이다. 값 라벨은 영어다(ADR 0014).",
-        "lumi_use": "PI 축은 ADR 0014의 11축(+Brand), FEA 30개 태그는 Park 사전을 그대로 쓴다. Price는 통화가 섞여 조건에서 뺀다.",
-        "generated_by": "scripts/build_lumi_pi_v2.py --export-top",
-        "axis_order": list(order),
-        "product_information": pi,
-        "consumer_needs_taxonomy": park["consumer_needs_taxonomy"],
-        "garment_types": [{"value": TOP_GARMENT, "label_ko": "상의"}],
-        "execution": {"supported_garment_types": [TOP_GARMENT], "accept_inferred_product_pi": True,
-                      "price_currency": None, "price_boundary_inclusion": None},
-        "counts": {"products": len(tops), "product_information_categories": len(pi),
-                   "consumer_needs_attributes": park["counts"]["consumer_needs_attributes"],
-                   "values": {a: len(pi[a]["values"]) for a in order}},
-        "source_boundaries": [
-            "confirmed는 구조화 필드·판매자 문구 키워드, derived는 고정 규칙, inferred는 DeepSeek 텍스트·이미지 해석이다.",
-            "inferred 값은 상품 Map에서 status=inferred·model_interpretation으로 남는다. accept_inferred_product_pi=true는 실행 선택이며 검증 라벨이 아니다.",
-            "Fabric은 사진으로 갱신하지 않는다(ADR 0013 결정 8).",
-        ],
-    }
-    registry_path.parent.mkdir(parents=True, exist_ok=True)
-    registry_path.write_text(json.dumps(registry, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
-    lines = []
-    for r in tops:
-        raw_md: dict[str, Any] = {"group": r["group"], "gender": r["gender"], "brand_text": r.get("brand"),
-                                  "price_text": r["price"]["amount"], "currency": r["price"]["currency"],
-                                  "pi_inferred": {}}
-        if r.get("brand"):
-            raw_md["brand"] = r["brand"]
-        labels = []
-        for axis in AXES:
-            entry = r["pi"].get(axis)
-            if not entry:
-                continue
-            if entry["status"] in ("confirmed", "derived"):
-                raw_md[axis.lower()] = entry["values"]
-            else:
-                evidence = " | ".join(e for e in entry["evidence"] if e)[:4000] or ", ".join(entry["values"])
-                raw_md["pi_inferred"][axis] = {"values": entry["values"], "method": entry["method"], "evidence": evidence}
-                labels.append({"observation": {"domain": "PI", "feature": axis, "values": entry["values"]},
-                               "status": "inferred",
-                               "provenance": [{"kind": "model_interpretation",
-                                               "source_field": f"raw_metadata.pi_inferred.{axis}.evidence",
-                                               "quote": evidence, "verifier": None, "evidence_ref": None,
-                                               "verified_at": None}]})
-        image = data / r["image"]
-        digest = hashlib.sha256(image.read_bytes()).hexdigest()
-        url = r["url_handle"] if r["source"] == "29cm" else SHOP_URL[r["source"]] + r["url_handle"]
-        collected = datetime.fromtimestamp(image.stat().st_mtime, timezone.utc).isoformat(timespec="seconds")
-        lines.append(json.dumps({
-            "format_version": "lumi-catalog-v1", "product_id": r["id"],
-            "source": {"source_id": r["source"], "url": url, "collected_at": collected},
-            "title": r["title"], "description": None, "garment_type": TOP_GARMENT, "raw_metadata": raw_md,
-            "images": [{"image_id": f"{r['id']}-0", "kind": "local", "location": r["image"].removeprefix("images/"),
-                        "source_revision": f"sha256:{digest}", "sha256": digest, "regions": []}],
-            "labels": labels}, ensure_ascii=False))
-    (data / "catalog" / f"{TOP_REGISTRY_VERSION}-import.jsonl").write_text("\n".join(lines) + "\n", encoding="utf-8")
-    return {"tops": len(tops), "all_axes_filled": sum(all(a in r["pi"] for a in AXES if a != "Silhouette") for r in tops)}
-
-
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument("--data", type=Path, default=Path("data"))
-    parser.add_argument("--export-top", action="store_true",
-                        help="also write output/feature-map/lumi-pi-v2-top.json and data/catalog/lumi-pi-v2-top-import.jsonl")
     args = parser.parse_args()
     records = shopify_records(args.data, "colebuxton") + shopify_records(args.data, "waxlondon") + records_29cm(args.data)
     text_fills = apply_text_fills(records, args.data)
@@ -511,8 +425,6 @@ def main() -> int:
                      ensure_ascii=False))
     for axis in AXES:
         print(f"{axis:10s} {fill[axis]['filled']:4d}/{len(records)} {fill[axis]['by_status']}")
-    if args.export_top:
-        print(json.dumps(export_top(records, args.data, ROOT / "output/feature-map" / f"{TOP_REGISTRY_VERSION}.json")))
     return 0
 
 

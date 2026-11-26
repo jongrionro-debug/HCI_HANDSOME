@@ -23,8 +23,8 @@ class ConsumerSettings:
     model: str = "gpt-6-luna"
     port: int = 8766
     endpoint: str | None = None
-    registry: str = "park-2025-source-v1"
-    engine: str = "legacy"  # ADR 0013: STYLEMATE_ENGINE=graph selects the LangGraph intent loop
+    registry: str = "lumi-pi-v3"  # ADR 0016 runtime dictionary; park-2025-source-v1 stays selectable
+    engine: str = "graph"  # ADR 0013 LangGraph intent loop; legacy keeps the earlier comparison flow
 
     @classmethod
     def from_options(cls, options: Any, settings: Mapping[str, str] | None = None) -> ConsumerSettings:
@@ -58,11 +58,11 @@ class ConsumerSettings:
         else:
             model = pick("model", "STYLEMATE_OPENAI_MODEL", "gpt-6-luna")
         endpoint = pick("endpoint", "STYLEMATE_OPENCODE_ENDPOINT") if provider == "opencode-go" else None
-        from .contracts import V1_REGISTRY_VERSION, V1_REGISTRY_VERSIONS
-        registry = pick("registry", "STYLEMATE_REGISTRY", V1_REGISTRY_VERSION)
+        from .contracts import LUMI_PI_V3_REGISTRY_VERSION, V1_REGISTRY_VERSIONS
+        registry = pick("registry", "STYLEMATE_REGISTRY", LUMI_PI_V3_REGISTRY_VERSION)
         if registry not in V1_REGISTRY_VERSIONS:
             raise StyleMateError("invalid_input", "registry는 " + " 또는 ".join(V1_REGISTRY_VERSIONS) + "로 지정해 주세요.")
-        engine = pick("engine", "STYLEMATE_ENGINE", "legacy")
+        engine = pick("engine", "STYLEMATE_ENGINE", "graph")
         if engine not in ("legacy", "graph"):
             raise StyleMateError("invalid_input", "engine은 legacy 또는 graph로 지정해 주세요.")
         return cls(db_path, catalog_path, image_path, pick("user", "STYLEMATE_USER_ID", "local-tester"),

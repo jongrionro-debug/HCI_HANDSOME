@@ -324,7 +324,7 @@ class TopMemoryTests(unittest.TestCase):
         self.gateway = MemoryGateway()
         self.service = ConsumerService(root / "memory.sqlite3", root / "catalog.sqlite3", self.gateway,
                                        user_id="synthetic-user", image_root=images, engine="graph",
-                                       registry=load_registry(c.LUMI_PI_V2_TOP_REGISTRY_VERSION))
+                                       registry=load_registry(c.LUMI_PI_V3_REGISTRY_VERSION))
         self.addCleanup(self.service.close)
         self.service.import_catalog(root / "catalog.json")
         self.service.build_catalog_maps()

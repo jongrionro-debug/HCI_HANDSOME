@@ -304,7 +304,7 @@ def image_fill_one(gateway: VisionGateway, model: str, data: Path, record: dict[
     return out
 
 
-# ---- Gap pass: only axes that are still empty after normalization (build_29cm_registry.py --gaps) ----
+# ---- Gap pass: only axes still empty after normalization (pi_gaps.json; its generator left with lumi-29cm-v1, #33) ----
 
 GAP_FILL_VERSION = "29cm-pi-gap-fill-v1"
 GAP_INSTRUCTIONS = IMAGE_INSTRUCTIONS.replace(

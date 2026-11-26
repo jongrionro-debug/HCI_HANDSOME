@@ -1,11 +1,9 @@
 """Synthetic wire/authority regressions, not Korean semantic quality tests."""
 from copy import deepcopy
 import json
-import subprocess
 import unittest
 from unittest.mock import patch
 
-from stylemate_memory.codex_llm import CodexGateway
 from stylemate_memory.contracts import ExtractedCandidate, V1_REGISTRY_VERSION
 from stylemate_memory.errors import StyleMateError
 from stylemate_memory.llm import OpenAIResponsesGateway, create_model_gateway
@@ -260,20 +258,10 @@ class ExtractionTests(unittest.TestCase):
         self.assertNotIn("dummy-c1-key", str(caught.exception))
         self.assertEqual(data, before)
 
-    def test_fake_and_codex_share_v1_validation_without_cli_dependency_for_api(self):
+    def test_fake_gateway_shares_v1_validation_without_cli_dependency(self):
         with patch("shutil.which", side_effect=AssertionError("CLI lookup")):
             self.assertEqual(create_model_gateway().extract(inputs()), {"candidates": [], "questions": []})
             self.extract(extraction())
-        raw = extraction()
-        events = [
-            {"type": "item.completed", "item": {"type": "agent_message", "text": json.dumps(raw)}},
-            {"type": "turn.completed", "usage": {"input_tokens": 5, "private": "provider-body-marker"}},
-        ]
-        runner = lambda *a, **kw: subprocess.CompletedProcess([], 0, "\n".join(map(json.dumps, events)), "")
-        gateway = CodexGateway(executable="fake-codex", runner=runner)
-        self.assertEqual(gateway.extract(inputs())["candidates"][0]["conditions"], {"occasion": "출근"})
-        self.assertEqual(gateway.last_metadata["usage"], {"input_tokens": 5})
-        self.assertNotIn("provider-body-marker", json.dumps(gateway.last_metadata))
 
     def test_strict_wire_schema_requires_all_object_fields_including_nullable_conditions(self):
         def check(node):

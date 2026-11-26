@@ -338,7 +338,8 @@ def rehearse_replacement(fixtures, directory, registry):
     replacement = read_jsonl(fixtures / "catalog_replacement.jsonl")
     source = directory / "replacement.jsonl"
     source.write_text("".join(canonical(record) + "\n" for record in replacement), encoding="utf-8")
-    flags = ["--db", str(directory / "memory.sqlite3"), "--catalog-db", str(directory / "catalog.sqlite3"), "--user", "synthetic-d4"]
+    flags = ["--db", str(directory / "memory.sqlite3"), "--catalog-db", str(directory / "catalog.sqlite3"), "--user", "synthetic-d4",
+             "--registry", registry.version]  # the fixtures are Park-dictionary Pants; the runtime default is lumi-pi-v3
     imported, _ = cli_call(["catalog-import", *flags, "--file", str(source)], meter)
     mapped, map_report = cli_call(["catalog-map", *flags], meter)
     maps = map_report if isinstance(map_report, list) else []
