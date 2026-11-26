@@ -1,6 +1,8 @@
-# 네이버 상품·PI 수집
+# 상품·PI 수집
 
-상의·하의 상품과 상품별 **Type·Brand·Price·Color·Fit·Fabric·Detail** 값을 확보하기 위한 수집 설계다. feature 축은 유지하고 value 목록은 실제 수집 결과로 정한다는 [ADR 0010](../adr/0010-derive-pi-values-from-collected-products.md)을 따른다. 이후 수집 경로·필드·정규화·품질 기준은 이 문서를 직접 갱신한다.
+**지금 쓰는 경로:** 현재 카탈로그는 [29CM 카테고리 수집](#29cm-카테고리-수집과-pi-보완)과 Shopify(Cole Buxton·Wax London, `scripts/fetch_shopify_first_images.py`)에서 만들고, PI v2 → v3 빌드는 [project.md](../project.md#수집)를 따른다. 네이버 SmartStore는 [#8](https://github.com/jongrionro-debug/HCI_HANDSOME/issues/8)에서 제외했다. 아래 네이버 실행·계획 절과 유니클로·자라 파일럿은 당시 기록으로 남긴다. `crawl_naver.mjs`의 공용 함수(`prepareOutputRoot`)는 29CM 수집기와 사이트 비교 스크립트가 쓴다.
+
+상의·하의 상품과 상품별 **Type·Brand·Price·Color·Fit·Fabric·Detail** 값을 확보하기 위한 수집 설계로 시작했다(현재 축은 PI v3, [ADR 0016](../adr/0016-pi-v3-value-shapes.md)). feature 축은 유지하고 value 목록은 실제 수집 결과로 정한다는 [ADR 0010](../adr/0010-derive-pi-values-from-collected-products.md)을 따른다. 이후 수집 경로·필드·정규화·품질 기준은 이 문서를 직접 갱신한다.
 
 **현재 상태:** [수집 스크립트](../../scripts/crawl_naver.mjs)는 SmartStore 상품 URL 목록 또는 사용자가 연 Chromium 상품 탭에서 PI 원문·옵션·이미지를 저장한다. 앞선 상품 1건 추출과 합성 페이지의 자동 수집은 확인했지만, 새 스크립트의 실제 URL 직접 접근은 HTTP 429로 종료했다. 새 스크립트의 실제 상품 전체 수집·수동 시작의 사용자 탐색·다른 스토어/상의·60건 파일럿은 미검증이다. 판매자 API·앱 사전 연결·검색 목록 자동 탐색은 아직 구현하지 않았다. 현재 앱 구현은 [project.md](../project.md#상품과-이미지)를 따른다.
 

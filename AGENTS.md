@@ -19,7 +19,7 @@
 ## 프로젝트별 기준
 
 - 시스템 이름은 **LUMI**다. 현재 구현·실행·검증은 [project.md](docs/project.md), 시스템·연구 설계 원문은 [중간보고서](docs/sources/Team4_mid-term_report.pdf)가 기준이다. 보고서의 RQ·평가·이미지 선택·메모리 흐름은 유지한다. 발표·Figma·보관 자료는 보조 근거다.
-- Feature Map의 PI value는 [ADR 0010](docs/adr/0010-derive-pi-values-from-collected-products.md)에 따라 수집 데이터의 원문·품목별 분포·정규화를 바탕으로 확정한다. 수집 카탈로그의 축 구성은 [ADR 0014](docs/adr/0014-crawled-catalog-pi-v2.md)(PI v2 11축), 값 형태는 [ADR 0016](docs/adr/0016-pi-v3-value-shapes.md)(PI v3)을 따른다. [ADR 0004](docs/adr/0004-adopt-park-2025-feature-map.md)의 논문 값과 현재 고정 실행 사전은 수집 후 확정할 value 사전과 구분한다. 직접 PI·FEA→PI 가설·상품 PI 비교는 [ADR 0006](docs/adr/0006-fea-to-pi-hypothesis-comparison.md)을 따른다.
+- Feature Map의 PI value는 [ADR 0010](docs/adr/0010-derive-pi-values-from-collected-products.md)에 따라 수집 데이터의 원문·품목별 분포·정규화를 바탕으로 확정한다. 수집 카탈로그는 [ADR 0014](docs/adr/0014-crawled-catalog-pi-v2.md), 축 구성과 값 형태는 [ADR 0016](docs/adr/0016-pi-v3-value-shapes.md)(PI v3, 실행 사전 `lumi-pi-v3`)을 따른다. [ADR 0004](docs/adr/0004-adopt-park-2025-feature-map.md)의 논문 값과 현재 고정 실행 사전은 수집 후 확정할 value 사전과 구분한다. 직접 PI·FEA→PI 가설·상품 PI 비교는 [ADR 0006](docs/adr/0006-fea-to-pi-hypothesis-comparison.md)을 따른다.
 - [ADR 0007](docs/adr/0007-joint-feedback-and-end-consent.md): 선택 이유는 선택 사항이며 장기 활용 동의는 세션 종료 요약에서 별도로 받는다. 직접 선택·이유 해석·내용 확인·동의를 구분한다.
 - 원본 PDF·승인된 ADR의 직접 근거·재현/라이선스 자료를 보존한다. 참여자 정보·동의서·원시 응답·실행 DB는 저장소 밖에 둔다.
 - Markdown과 HTML을 함께 수정하면 표시 본문·내장 원문과 화면을 확인한다. 실행 HTML은 앱 자원이다.

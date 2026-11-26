@@ -8,8 +8,8 @@
 
 | 데이터 | 이 시나리오에서 쓰는 것 |
 |---|---|
-| 상품 카탈로그 `lumi-pi-v2-top` | 상의 1,098개(29CM 476, Wax London 396, Cole Buxton 226). 상품마다 대표 이미지 1장. 지훈이 [남성]을 골라 성별이 남성인 상품만 본다 ([ADR 0014](../adr/0014-crawled-catalog-pi-v2.md)) |
-| PI 11축 | Type, Color, Tone, Pattern, Fit, Silhouette, Length, Texture, Fabric, Detail, Style. 축마다 근거 상태(confirmed·derived·inferred)가 있다. Brand·Price는 저장만 하고 조건에는 쓰지 않는다 |
+| 상품 카탈로그 `lumi-pi-v3`의 상의 | 상의 1,098개(29CM 476, Wax London 396, Cole Buxton 226). 상품마다 대표 이미지 1장. 지훈이 [남성]을 골라 성별이 남성인 상품만 본다 ([ADR 0014](../adr/0014-crawled-catalog-pi-v2.md)) |
+| PI v3 축 | Type, Color, Tone, Pattern, Fit, Length, Weight, Texture, Fabric, Detail, Style(Silhouette은 하의 전용, [ADR 0016](../adr/0016-pi-v3-value-shapes.md)). 축마다 근거 상태(confirmed·derived·inferred)가 있다. Brand·Price는 저장만 하고 조건에는 쓰지 않는다 |
 | FEA 사전 | Park et al.(2025)의 소비자 요구 태그 30개(Functional 8·Expressive 13·Aesthetic 9). 예: Expressive › TPO › Business wear(업무복) |
 | 상황 사전 | 출근, 발표/미팅, 면접 등 + 계절·활동 |
 | 지훈의 장기 기억 | "여유 있는 핏을 좋아해요" [평소에도] → Fit=Relaxed / "어두운 톤을 자주 골라요" [평소에도] → Tone=Dark |

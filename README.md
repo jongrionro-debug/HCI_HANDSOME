@@ -6,14 +6,14 @@ LUMI는 장·단기 메모리와 이미지 선택·대화를 활용해 사용자
 
 ## 시작하기
 
-- [현재 구현](docs/project.md#현재-구현과-실행): 소비자 서비스와 구현 범위
-- [메모리 계약](docs/project.md#메모리-실행-계약) · [Feature Map](docs/project.md#feature-map): PI 7개 축·수집 데이터 기반 value 확정 방향과 현재 실행 사전
+- [현재 시스템](docs/project.md#현재-시스템): graph 엔진 흐름·구현 범위·질문 루프
+- [메모리 계약](docs/project.md#메모리-실행-계약) · [Feature Map](docs/project.md#feature-map): PI v3 축과 실행 사전 `lumi-pi-v3`, FEA 30개 태그
 - [로컬 실행](docs/project.md#로컬-실행): 외부 DB·상품·이미지 설정과 시작 명령
 - [검증](docs/project.md#오프라인-실행과-검증): 오프라인·브라우저 검사와 한계
 - [연구와 평가](docs/project.md#연구와-평가): 보고서의 RQ·과제·측정 기준
 - [다음 작업](docs/project.md#다음-작업): 미구현·미검증 범위
 
-폐기한 설명 HTML·중복 문서는 Git 이력에서 확인한다. 실행 화면인 `src/stylemate_memory/consumer.html`·`inspector.html`은 앱 자원으로 유지한다.
+폐기한 설명 HTML·중복 문서와 지운 실행 경로는 Git 이력에서 확인한다. 실행 화면인 `src/stylemate_memory/consumer.html`은 앱 자원이다.
 
 ## 검증
 

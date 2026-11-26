@@ -1,14 +1,14 @@
 # LUMI 현재 시스템 구현과 실행
 
-현재 시스템의 구현 범위·동작·실행·검증을 설명하는 **유일한 문서 정본**이다. 과거 선택의 이유·승인·대체 관계는 [ADR](adr), 개발 작업 규칙은 [AGENTS.md](../AGENTS.md)에서 관리한다. 다른 설명 문서나 HTML 사본을 함께 유지하지 않는다. 문서 관리 기준은 [ADR 0009](adr/0009-common-context-layout.md)을 따른다.
+현재 시스템의 구현 범위·동작·실행·검증을 설명하는 **유일한 문서 정본**이다. 과거 선택의 이유·승인·대체 관계는 [ADR](adr), 개발 작업 규칙은 [AGENTS.md](../AGENTS.md)에서 관리한다. 다른 설명 문서나 HTML 사본을 함께 유지하지 않는다. 문서 관리 기준은 [ADR 0009](adr/0009-common-context-layout.md)을 따른다. 지난 작업 기록·폐기한 경로의 설명은 Git 이력에서 찾는다.
 
 - [기준과 자료](#기준과-자료)
-- [현재 구현과 실행](#현재-구현과-실행)
+- [현재 시스템](#현재-시스템)
 - [메모리 실행 계약](#메모리-실행-계약)
 - [Feature Map](#feature-map)
 - [상품과 이미지](#상품과-이미지)
 - [로컬 실행](#로컬-실행)
-- [기존 CLI와 개발자 관찰 도구](#기존-cli와-개발자-관찰-도구)
+- [호환 경로](#호환-경로)
 - [연구와 평가](#연구와-평가)
 - [오프라인 실행과 검증](#오프라인-실행과-검증)
 - [다음 작업](#다음-작업)
@@ -22,48 +22,56 @@
 | [Team4_mid-term_report.pdf](sources/Team4_mid-term_report.pdf) | 시스템·연구 설계 원문. 3.2~3.6: 메모리·조회·목표 Map·상품 검색·피드백, 3.7: UI, 2장·4~5장: RQ·평가 |
 | [Team4_mid-term_presentation.pdf](sources/Team4_mid-term_presentation.pdf) | 발표용 보조 자료. 보고서와 승인된 결정을 덮어쓰지 않음 |
 | [Feature Map JSON](../output/feature-map/park-2025-feature-map.json) | 논문에서 차용한 값·FEA 분류·출처·라이선스와 현재 실행 사전의 기계 판독 정본. 수집 후 확정할 PI value 사전과 구분. [CSV](../output/feature-map/park-2025-feature-map.csv)는 보기용 |
-| [ADR 0001](adr/0001-memory-boundaries.md)·[0002](adr/0002-memory-prototype-storage.md)·[0003](adr/0003-consumer-shopping-prototype.md) | 로컬 메모리·저장·기존 17개 사전의 결정 기록 |
-| [ADR 0004](adr/0004-adopt-park-2025-feature-map.md)·[0005](adr/0005-evidence-linked-memory.md) | Park 사전 차용, 자연어 기억·근거·확인/동의 분리의 결정 기록 |
-| [ADR 0006](adr/0006-fea-to-pi-hypothesis-comparison.md)·[0007](adr/0007-joint-feedback-and-end-consent.md) | PI 중심 상품 비교·FEA→PI 가설, 선택 사항인 이유와 종료 후 장기 동의의 결정 기록 |
-| [ADR 0010](adr/0010-derive-pi-values-from-collected-products.md) | PI 7개 feature 축을 유지하고 value를 상·하의 수집 데이터에서 정하는 후속 결정 |
+| [ADR 목록](adr/README.md) | 결정 이유·승인·대체 관계. 현재 시스템의 직접 근거는 0006(FEA→PI 가설)·0007(종료 후 동의)·0010(수집 기반 value)·0013(graph 엔진)·0014·0016(PI v2·v3)·0015(기억 warm start)·0017(질문 설계 작업 공간) |
 
 두 PDF는 인계된 원본을 보존한다. 중간보고서는 20쪽·737,007 bytes·SHA-256 `97cdd6791d4aed737d3faae93d46e26ef112d06346ecef34b3a3c3af4b8a69f5`, 발표자료는 14쪽·41,281,335 bytes·SHA-256 `5b708cbef817a999fec1b1ee5ba0c2119ed7d07e9d08164b53146521bf1d2248`다.
 
 [Figma · LUMI.WEB · 298:2](https://www.figma.com/design/LAU2SC2gHCR1jlCh41K7PD/?node-id=298-2)는 화면 배치·조작의 보조 자료다. 이번 정리에서 Figma의 현재 화면은 새로 검증하지 않았다. [남긴 보관 자료](../archive/README.md)는 ADR의 직접 인용 근거·원본 과제·재현 자료에 한정하며 현재 구현 기준으로 사용하지 않는다. 삭제한 설명과 작업 스냅샷은 Git 이력에서 확인한다.
 
-## 현재 구현과 실행
+## 현재 시스템
 
-현재 주 실행 경로는 **`lumi-memory-v1` 로컬 소비자 서비스**다. Python 3.11+ 표준 라이브러리, 메모리 SQLite와 별도 상품 SQLite, 로컬 HTML/CSS/JavaScript로 구성한다. 기본 provider는 외부 호출 없는 `fake`다. 기존 `ShoppingApp`·CLI·개발자 관찰 서버는 `consumer-17-v1` 호환 경로로 남아 있다. 패키지·환경변수의 `stylemate_memory`·`STYLEMATE_` 이름도 유지한다.
+주 실행 경로는 **graph 엔진([ADR 0013](adr/0013-langgraph-intent-loop.md))이 돌리는 로컬 소비자 서비스**다. Python 3.11+, 메모리 SQLite·상품 SQLite·graph 체크포인트 SQLite, 로컬 HTML/CSS/JavaScript로 구성한다. 기본값은 엔진 `graph`(선택 의존성 langgraph), 실행 사전 `lumi-pi-v3`, provider `fake`(외부 호출 없음)다. 패키지·환경변수의 `stylemate_memory`·`STYLEMATE_` 이름은 유지한다.
 
 ```text
-입력/이미지 선택 + 이유(선택 사항)
-→ 최소 근거·Feedback 접수 → 모델 후보 추출 → 내용·binding 확인
-→ 유효한 현재 요청 기억 + 동의한 장기 기억 조회
-→ 직접 PI·FEA 요구 + 별도 FEA→PI 가설
-→ 사용자 목표 PI와 상품 PI 비교 → 가설 포함/비포함 이미지 비교 ↺
-→ 최종 상품 선택(선택 사항) → 세션 종료
-→ 종료 요약에서 기존 후보 확인 → 별도 이후 활용 동의 → 장기 기억
+시작: 성별·상황 칩 → 동의한 장기 기억으로 warm start(ADR 0015)
+→ 글 해석(parse_turn) → 의도 갱신: 직접 PI · FEA 요구 → FEA→PI 가설
+→ 8장 이미지 그리드 (+ 질문 루프가 켜지면 질문 하나) ↺ 값별 점수·이해 칩·후보함
+→ 후보함에서 최종 선택(선택 사항) → 종료 요약의 제안 문장
+→ 내용 확인 → 별도 이후 활용 동의 → 장기 기억
 ```
 
 ### 구현 상태
 
 | 경계 | 현재 코드·동작 | 남은 범위 |
 |---|---|---|
-| 입력 해석 | [model_io.py](../src/stylemate_memory/model_io.py)·[llm.py](../src/stylemate_memory/llm.py): complete/extract/propose, 인용·출처 alias 검사, pending 재처리 | 실제 한국어·선택 이유 해석 품질, 실제 provider 검증 |
+| 글 해석 | [graph/parse.py](../src/stylemate_memory/graph/parse.py)(parse_turn v2), [model_io.py](../src/stylemate_memory/model_io.py)·[llm.py](../src/stylemate_memory/llm.py): 인용·출처 alias 검사, 실패 시 pending 재처리 | 실제 한국어·선택 이유 해석 품질 |
+| 의도·가설·그리드 | [graph/](../src/stylemate_memory/graph/): [engine.py](../src/stylemate_memory/graph/engine.py) 턴 루프(parse_turn → 의도 갱신 → 가설 → route → 그리드 → interrupt), [scoring.py](../src/stylemate_memory/graph/scoring.py) 값별 Beta 점수·대비 귀속, [grid.py](../src/stylemate_memory/graph/grid.py) hard 필터·8장 구성, [hypotheses.py](../src/stylemate_memory/graph/hypotheses.py), 상황 사전 [situation-dictionary-v1.json](../src/stylemate_memory/resources/situation-dictionary-v1.json) | 실제 카탈로그의 대조 칸 구성률·수렴 판정, PI v3 점수·색 거리를 쓰는 비교 |
+| 질문 루프 | [graph/questions.py](../src/stylemate_memory/graph/questions.py) v0: 후보 → 허용 방식 → 방식 선택 → 질문 → 답 반영, 결정 로그. `text_options`만 있고 기본 off(`STYLEMATE_QUESTION_LOOP=on`) | 세 파트의 방식·반영·선택([질문 설계 작업 공간](../research/question-design/README.md)) |
+| 기억 warm start·종료 요약 | [graph/memory.py](../src/stylemate_memory/graph/memory.py)([ADR 0015](adr/0015-top-memory-warm-start.md)): 기억을 Beta 사전값으로, 새로움 칸, 취향 변화 질문, 제안 문장 → 기존 확인·동의 계약, LLM 프로필 다시 쓰기 | ADR 0015 결정 8의 수치·새로움 칸 비율·프로필 말투(써 보고 정함) |
 | 메모리 저장 | [store.py](../src/stylemate_memory/store.py)·[store_v1.py](../src/stylemate_memory/store_v1.py)·[store_feedback.py](../src/stylemate_memory/store_feedback.py)·[store_cleanup.py](../src/stylemate_memory/store_cleanup.py): 근거·문장·선택적 binding, 확인·동의·교체·철회·삭제 | 실제 사용자 DB 이관·운영 자료 검증 |
-| 조회·목표 생성 | [retrieval.py](../src/stylemate_memory/retrieval.py)·[inference.py](../src/stylemate_memory/inference.py): 유효성/대상/요청 필터, 구조+키워드 검색, PI/FEA 목표·최신성 검사 | 실제 의미 검색 모델 선정·관련성 평가 |
-| 상품·이미지 비교 | [catalog.py](../src/stylemate_memory/catalog.py)·[catalog_mapping.py](../src/stylemate_memory/catalog_mapping.py)·[product_search.py](../src/stylemate_memory/product_search.py)·[comparison.py](../src/stylemate_memory/comparison.py)·[hypotheses.py](../src/stylemate_memory/hypotheses.py): 가져오기·PI Map·필수 조건 필터·가설 비교 | 수집 사전(`lumi-29cm-v1`) 연결 완료. 모델 보완값 표본 검수, 상품 수 확대, 추천 품질 |
-| 의도 순환 엔진(선택) | [graph/](../src/stylemate_memory/graph/): [ADR 0013](adr/0013-langgraph-intent-loop.md)의 LangGraph 턴 루프(parse_turn v2 → 의도 갱신 → FEA→PI 가설 → route → 8장 그리드 → interrupt), 값별 Beta 점수·대비 귀속, 이미지만 보이는 그리드(이미지를 눌러 선택, 고른 상품은 다음 그리드 맨 앞에 최대 4장 유지·선택 상태로 시작, 상단 요청 맥락 칩·화면 차례와 하단 고정 반영 바(다 별로·반영하고 다음 8장), 최종 결정 확인과 종료 요약은 화면 위 시트로 표시, 설명·부분 선택·상품별 "별로"·"이거랑 비슷한 거" 버튼은 화면에서 제외), 이해 칩 고정/해제/빼기, 질문 루프 v0([questions.py](../src/stylemate_memory/graph/questions.py), `STYLEMATE_QUESTION_LOOP=on`일 때 그리드 위 텍스트 선택지 질문 → 고른 값 고정, 결정 로그), 상황 사전 [situation-dictionary-v1.json](../src/stylemate_memory/resources/situation-dictionary-v1.json). `STYLEMATE_ENGINE=graph`일 때 쇼핑 요청만 사용하며 온보딩은 기존 흐름. 상의 첫 빌드([ADR 0015](adr/0015-top-memory-warm-start.md), [graph/memory.py](../src/stylemate_memory/graph/memory.py)): 시작 시 성별·상황 칩(출근·데이트·주말·나의 상황), 동의한 장기 기억을 Beta 사전값으로 넣는 warm start와 "이렇게 시작할게요" 문장 칩(최대 3개, x로 끄기), 새로움 칸 1~2장·"이번엔 다르게"·취향 변화 질문, 종료 요약 제안 문장 최대 3개 [평소에도][이 상황만][저장 안 함] → 기존 확인·동의 계약으로 장기 기억, LLM 프로필 다시 쓰기(바뀐 문장만 재동의), 자유 상황의 LLM 과거 상황 연결 | 실제 모델 응답 품질, 실제 카탈로그의 대조 칸 구성률·수렴 판정, legacy 전환 기준([ADR 0013](adr/0013-langgraph-intent-loop.md) 15번), 최종 선택 단위, ADR 0015 결정 8의 수치·새로움 칸 비율·프로필 말투·값 라벨 한국어 표시(써 보고 정함) |
-| 서비스·소비자 UI | [app.py](../src/stylemate_memory/app.py)의 `ConsumerService`, [consumer.py](../src/stylemate_memory/consumer.py)·[consumer.js](../src/stylemate_memory/consumer.js)·[consumer-http.js](../src/stylemate_memory/consumer-http.js): 온보딩·피드백·확인·재탐색·종료·별도 장기 동의·삭제 | 공개 인증/배포, 실제 참가자 사용성·기기 검증 |
+| 조회·목표 | [retrieval.py](../src/stylemate_memory/retrieval.py)·[inference.py](../src/stylemate_memory/inference.py): 유효성/대상/요청 필터, 구조+키워드 검색, PI/FEA 목표·최신성 검사 | 실제 의미 검색 모델 선정·관련성 평가 |
+| 상품 | [catalog.py](../src/stylemate_memory/catalog.py)·[catalog_mapping.py](../src/stylemate_memory/catalog_mapping.py): 가져오기·PI Map·provenance | 모델 보완값 사람 검수, 원격 3,600개의 로컬 반영 |
+| 서비스·UI | [app.py](../src/stylemate_memory/app.py)의 `ConsumerService`, [consumer.py](../src/stylemate_memory/consumer.py)·[consumer.js](../src/stylemate_memory/consumer.js)·[consumer-http.js](../src/stylemate_memory/consumer-http.js), [graph/service.py](../src/stylemate_memory/graph/service.py): 온보딩·그리드·이해 칩·후보함·종료·별도 장기 동의·삭제 | 공개 인증/배포, 실제 참가자 사용성·기기 검증 |
 
-### 이미지·텍스트 인터랙션
+온보딩("한마디로 알려 주기")은 엔진과 무관하게 기존 흐름(내용 확인·이후 활용 동의 분리)을 쓴다. 쇼핑 요청만 graph 엔진이 처리한다.
 
-- 온보딩과 쇼핑 요청을 구분한다. 같은 요청 재개는 SQLite 상태를 복원하고, 새 요청에는 이전 단기·가설을 자동 적용하지 않는다.
-- 초기 입력과 일반 선택·부분 선택은 근거로 접수한 뒤 기억 후보를 만든다. 현재 서비스의 초기 추출은 명시적 검토 전까지 단기 미확인 후보이며, 직접 발화라는 이유로 자동 확인하지 않는다.
-- 이미지 선택은 로컬 초안이다. 이유·수정 사항을 적거나 비운 채 같은 반영 버튼으로 제출한다. 후보 없음·모르겠음·텍스트만 응답도 가능하며 이유 입력은 필수가 아니다.
-- 일반 이미지 선택만으로 모든 속성 선호·미선택 후보 비선호를 만들지 않는다. 가설 비교의 명확한 응답과 일반 선택 근거의 해석을 구분한다.
-- 확인한 조건으로 재탐색할 수 있고, 모든 속성을 채우거나 상품을 고르기 전에 종료할 수 있다. `select_final`은 최종 선택만 기록하며 요청을 닫지 않는다. `end_request`가 별도로 세션을 닫는다.
-- 장기 활용 선택은 종료 요약에서만 노출한다. 종료 전에 접수·해석한 후보는 종료 후에도 내용/binding을 확인할 수 있다. 종료 후 새 입력·늦은 추출은 거부한다. 항목 선택과 동의 체크는 기본 해제다.
+### 흐름과 화면
+
+시작 화면에서 성별(전체·남성·여성, 원본 `gender`로 필터, 값 없는 상품은 전체에서만)과 상황 칩을 고른다. "나의 상황" 원문은 그대로 상황이 되고, 과거에 저장한 자유 상황이 있으면 LLM이 비슷한 하나를 골라 "비슷한 상황"으로 연결한다(끌 수 있음). 동의한 장기 기억 중 상황이 맞는 상황별 선호와 평소 취향이 PI 값별 Beta 사전값(세기 2.0)으로 들어간다. 같은 축은 상황별 기억이 우선하고 평소 취향은 남는 축(예: 색)에만 적용한다. 기억을 적용한 그리드에는 기억 없이 고른 "새로움" 칸 2장(흐림 때 1장)이 있다. 새로움 칸을 두 턴 고르거나 "평소랑 다르게"를 적으면 "이번엔 새로운 스타일로 볼까요?"를 한 번 묻고, 예면 기억을 흐리게(0.3배) 반영한다. 기억 값이 대조에서 두 턴 반대로 갱신되면 "취향이 바뀌었나요?"를 묻고 예면 이번 요청에서 그 기억을 끈다. "상품 선택 없이 종료"·"탐색 종료"는 요청을 닫기 전에 제안 문장(말한 선호 → 이유 있는 거절 → 이해 칩 → 최종 상품, 최대 3개)을 보이고, 고른 문장만 단기 생성 → 종료 → 내용·binding 확인 → 이후 활용 동의 순서로 기존 표시·이벤트 계약을 거쳐 장기 기억이 된다. 이미지 근거 문장은 한 비교 회차의 선택 근거만 연결한다. 저장 뒤 LLM이 동의한 기억 전체를 짧게 다시 쓰고, 바뀐 문장만 [바꾸기][그대로]로 받는다. 바꾸면 `replace`로 새 장기 기억을 만들고 원래 기억은 `superseded`로 남는다. 제안·프로필 초안은 graph 체크포인트 DB(`lumi_summaries`)에 두고 요청 삭제 때 지운다. 상단 "평소 취향"은 동의한 장기 기억 목록 페이지를 열고, "한마디로 알려 주기"로 기존 온보딩(내용 확인·이후 활용 동의 분리)에 들어간다. 목록에서 끄기·지우기는 아직 없다.
+
+화면과 보조 기능은 다음과 같다. 저장 계약(`apply_batch`, 확인·동의 분리, 표시·이벤트 증거)은 legacy 흐름과 같다.
+
+- 후보함(F8·U6): 요청 동안 새로 고른 상품을 모두 모은다(최대 24). "후보함에서 고르기"는 최근 8개를 일반 후보 집합으로 다시 표시하고, 최종 결정은 그 화면에서만 받는다(`select_final`은 후보함 상품만 허용). 후보함 빼기는 값 점수를 바꾸지 않는다.
+- 진행·기억·근거(F9·F10·F11): `graph_view`가 후보함 수·수렴·"이제 후보함에서 골라도 돼요" 조건(수렴, 또는 후보함 3개 이상과 이해 칩 2개 이상), 첫 grid의 기억 안내(적용 문장·출처 상황), 칩별 근거(고른 장 수 중 그 값을 가진 장 수)를 낸다.
+- 모델 보조(F1·F2·F4): 고른 상품이 가설 밖 축의 값을 공유하면(고른 장의 60% 이상, 최소 2장) 직전 호출 3턴 뒤 가설을 다시 만든다. 빈 결과·실패는 기존 가설을 유지한다. 종료 요약 문장은 모델이 다듬되 모든 값 이름과 거절 표현이 남은 문장만 받고, 아니면 규칙 문장을 쓴다(저장 binding은 항상 규칙 제안). 값 귀속이 안 될 때 모델이 질문 1개·선택지 2~3개(실제로 다른 축만)를 쓰고, 실패하면 축 칩 최대 3개로 묻는다. fake provider에서는 셋 다 기존 동작이다.
+- 꼭 필요한 FEA(F5): hard FEA 요구에서 나온 가설 값에 Beta 사전값 2.0을 더한다. hard 필터는 아니다.
+- 프로필 다시 쓰기(F3): `STYLEMATE_PROFILE_REWRITE=off`로 끌 수 있다. 기본은 켜짐이며, user study에서 끌지는 팀 합의·ADR 대상이다.
+- 화면(U1~U7·U9): 값은 한국어 라벨(`graph/labels.py`, 표시 전용)로 보인다. 오른쪽 패널·카드별 좋았던 점·가설 표시를 없애고, 이해 칩은 제목 줄(누르면 고정, ×는 빼기, 새 칩에 "새로"·근거 한 줄), 질문은 grid 위 배너 한 줄, 입력은 "말로 덧붙이기"를 누를 때만 연다. 종료 요약은 문장별 [평소에도]/[OO할 때만] 두 버튼이고 누르지 않은 문장은 저장하지 않는다. 다음 grid를 고르는 동안 이전 grid를 흐리게 남긴다. 평소 취향 페이지는 상황별로 묶어 보인다(끄기·지우기는 아직 없음). 디자인은 개선안의 흑백·각진 모서리·입체 버튼 값을 쓰고 웹폰트는 요청하지 않는다.
+- 미반영: F6(VLM), F7(수치 확정), F12·U8(이미지 온보딩)과 평소 취향 끄기·지우기. 화면 확인은 `tests/check_graph_browser.mjs`(합성)와 실제 상의 1,098개·fake provider 수동 캡처까지이며, 실제 DeepSeek 응답의 질문·요약 문장 품질은 확인하지 않았다.
+
+### 질문 루프
+
+[질문 설계 작업 공간](../research/question-design/README.md)의 세 파트(1 질문 방식·2 답 해석·3 언제 어떤 방식)가 [questions.py](../src/stylemate_memory/graph/questions.py)의 같은 계약을 채운다([ADR 0017](adr/0017-question-design-research-workspace.md)). 지금 코드는 v0(`text_options` 선택 → 그 값 고정)이고 기본 off다. 켜면 그리드 위 배너에 질문 하나를 띄우고 답을 반영하며, 질문·결정·답을 결정 로그로 남긴다. 방식 목록·반영 규칙·선택 규칙은 파트 결정 문서가 확정되면 이 절을 고친다.
 
 ## 메모리 실행 계약
 
@@ -100,7 +108,7 @@
 
 `build_context_v1`은 소유권·활성/확인·장기 동의·요청/대상·기간·조건을 먼저 검사한 뒤 직접 조건과 관련 근거를 묶는다. 상황의 `occasion|activity|goal`은 확인된 facts로 취급하고 미확인 조건은 충족으로 보지 않는다. 같은 우선순위 충돌은 임의로 한 값을 고르지 않고 질문으로 남긴다. 현재 요구가 장기 취향과 충돌하면 이번 목표에서만 우선하고 장기 원본은 보존한다.
 
-구조·키워드 검색과 교체 가능한 의미 검색 포트가 있으며 실제 임베딩 모델은 연결하지 않았다. 기본 문자 예산은 6,000자이고 근거 참조 상한도 검사한다. 필수 조건을 담지 못하면 조용히 누락하지 않고 context를 보류한다. 장기12/단기20개 예산은 아래 기존 17개 사전 경로의 설정이며 v1의 고정 항목 수로 적용하지 않는다.
+구조·키워드 검색과 교체 가능한 의미 검색 포트가 있으며 실제 임베딩 모델은 연결하지 않았다. 기본 문자 예산은 6,000자이고 근거 참조 상한도 검사한다. 필수 조건을 담지 못하면 조용히 누락하지 않고 context를 보류한다. 장기12/단기20개 예산은 [17개 속성 CLI](#17개-속성-cli)의 설정이며 v1의 고정 항목 수로 적용하지 않는다.
 
 모델에는 최소 근거의 호출별 source alias와 사전·대상만 제공한다. 실제 사용자 ID·raw DB snapshot·동의 원문·내부 basis를 보내지 않는다. 목표 `TargetMap`은 직접 constraints와 검증된 soft 제안을 조합한 파생 결과이며 새 사용자 발화나 장기 취향으로 재저장하지 않는다.
 
@@ -123,15 +131,18 @@
 
 ## Feature Map
 
-PI는 **Type·Brand·Price·Color·Fit·Fabric·Detail의 7개 feature 축을 유지하고, 각 value는 실제 수집한 상품 데이터를 바탕으로 확정한다.** [ADR 0010](adr/0010-derive-pi-values-from-collected-products.md)이 기존 논문 목록을 최종 PI 허용값으로 고정한 결정을 부분 대체한다. FEA의 Functional 8·Expressive 13·Aesthetic 9, 총 30개 태그와 PI/FEA 역할은 유지한다. 두 영역을 37개의 동등한 상품 속성으로 합치지 않는다.
+PI는 상품에 붙는 속성, FEA는 사용자의 기능(Functional 8)·표현(Expressive 13)·미적(Aesthetic 9) 요구 30개 태그다. 두 영역을 하나의 상품 속성 목록으로 합치지 않는다. 사용자 목표에는 직접 PI·FEA 요구·FEA→PI 가설을, 상품에는 PI를 둔다([ADR 0006](adr/0006-fea-to-pi-hypothesis-comparison.md)). 축 구성은 [ADR 0014](adr/0014-crawled-catalog-pi-v2.md)(11축) → [ADR 0016](adr/0016-pi-v3-value-shapes.md)(v3, Weight 추가)이고, value는 [ADR 0010](adr/0010-derive-pi-values-from-collected-products.md)에 따라 수집 데이터의 원문·분포·정규화로 정한다.
 
-PI 7개 축과 FEA 분류를 차용한 출처는 Park, H., Kim, S., Choi, Y., & An, H. (2025), *Application of the FEA consumer needs model in e-commerce: a conversational recommendation system for fashion products*, Fashion and Textiles, 12, 24의 Table 1·2다. [논문 원문](https://doi.org/10.1186/s40691-025-00435-w), 출처·CC BY 4.0·변환/승인 메타데이터는 JSON에 기록한다.
+PI 분류와 FEA 30개 태그의 출처는 Park, H., Kim, S., Choi, Y., &amp; An, H. (2025), *Application of the FEA consumer needs model in e-commerce: a conversational recommendation system for fashion products*, Fashion and Textiles, 12, 24의 Table 1·2다. [논문 원문](https://doi.org/10.1186/s40691-025-00435-w), 출처·CC BY 4.0·변환/승인 메타데이터는 [Park 사전 JSON](../output/feature-map/park-2025-feature-map.json)에 기록한다.
 
-### 수집 데이터 기반 PI value 확정
+### 실행 사전
 
-**상의·하의** 상품에서 원본 속성명·값·출처를 수집하고, 품목별 분포·누락 확인→동의어 정규화→PI value·사전 버전 확정 순서로 진행한다. 기존 논문 enum 밖의 값도 보존하고 미기재·추론값·직접 근거를 구분한다. 가격은 숫자 원값과 조건을 확보한 뒤 구간화 여부를 정한다.
+| 버전 | 정본 | 범위 |
+|---|---|---|
+| `lumi-pi-v3` (기본) | [lumi-pi-v3.json](../output/feature-map/lumi-pi-v3.json) | PI v3 12축(+Brand) 영어 value, 상·하의(품목 `Top`·`Bottom`), 모델 보완값도 비교. Silhouette은 하의 전용. 축마다 `value_shape`(형태·채우는 경로)를 둔다. 2026-11-25 로컬 1,748개(상의 1,098·하의 650)로 적재·Map과 graph 시작 그리드(상·하의 각 8장)를 확인했다 |
+| `park-2025-source-v1` | [park-2025-feature-map.json](../output/feature-map/park-2025-feature-map.json) | 논문 차용 값, Pants만, confirmed 상품 값만 비교. 단위 테스트·오프라인 평가의 fixture 사전이자 FEA 분류의 출처 정본 |
 
-수집 경로·PI별 필드·실행법·중간 레코드·정규화·파일럿 검증의 상세 계약은 [crawling.md](specs/crawling.md)에서 관리한다. SmartStore는 합성 자동 수집과 실제 상품 1건 추출을 확인했으며 [수집 스크립트](../scripts/crawl_naver.mjs)의 실제 URL 직접 접근은 429였다. [유니클로·자라 원문 PI 파일럿](specs/crawling.md#유니클로자라-원문-pi-파일럿)의 여성 셔츠·블라우스와 팬츠 표본에서 유니클로 18/20개, 자라 6/20개의 PI 7축을 원문에서 확보했다.
+[registry.py](../src/stylemate_memory/registry.py)의 `load_registry(version)`이 실행 사전을 공급한다. [패키지 resources](../src/stylemate_memory/resources)의 JSON은 정본의 생성 사본이다. `python3 scripts/sync_feature_registry.py`로 동기화하며 수동 편집하지 않는다. 전체 enum을 이 문서에 복제하지 않는다. graph 엔진의 가설·이유 축은 사전의 축을 그대로 읽는다.
 
 ### PI v3 값 형태
 
@@ -143,42 +154,19 @@ PI 7개 축과 FEA 분류를 차용한 출처는 Park, H., Kim, S., Choi, Y., & 
 - Silhouette은 하의 전용이다. Style은 9개 값 중 최대 2개이고, Weight(Light·Mid·Heavy)를 새로 둔다.
 - 반드시 걸러내는 조건은 Type, 예산, 명시적 제외뿐이고 나머지는 점수로 반영한다.
 
-[build_lumi_pi_v3.py](../scripts/build_lumi_pi_v3.py)가 v2 채움 결과를 읽어 `data/catalog/lumi-pi-v3.jsonl`과 `-report.json`을 만든다. 모델 호출은 없고, 대표색 추출에만 Pillow가 필요하다. 2026-11-23 실행에서 1,748개를 만들었다. 2026-11-24에는 원격 Linux 서버(`~/data/lumi-pi-v3/`, 저장소 밖)에서 29CM 바지를 더해 3,600개(상의 1,098·하의 2,502, 29CM 2,805)를 만들었다. 첫 이미지가 없는 29CM 195개는 빠졌다. 텍스트 보완 2,436회, 이미지 보완(하의 포함) 2,278회, Texture `Smooth` 추가 뒤 빈 Texture 재질문 867회를 호출했다. 하의 채움은 Fit 99.4%, Silhouette 99.5%, Texture 99.6%, Style 97.0%, Detail 93.3%, Fabric 86.2%이고 모델 값은 사람이 검수하지 않았다. `--review-sample 30`이 사람 검수 시트를 만들며, 검수 일치율은 아직 없다. `--export-runtime`이 상·하의 실행 사전 `lumi-pi-v3`와 가져오기 파일을 만든다(아래 [현재 실행 사전](#현재-실행-사전)). 실행 비교는 아직 라벨 일치이며, 순서형 점수·대표색 Lab·`price_krw`는 상품의 `raw_metadata.pi_v3`에만 담겨 있다.
+[build_lumi_pi_v3.py](../scripts/build_lumi_pi_v3.py)가 v2 채움 결과를 읽어 `data/catalog/lumi-pi-v3.jsonl`과 `-report.json`을 만든다. 모델 호출은 없고, 대표색 추출에만 Pillow가 필요하다. 2026-11-23 실행에서 1,748개를 만들었다. 2026-11-24에는 원격 Linux 서버(`~/data/lumi-pi-v3/`, 저장소 밖)에서 29CM 바지를 더해 3,600개(상의 1,098·하의 2,502, 29CM 2,805)를 만들었다. 첫 이미지가 없는 29CM 195개는 빠졌다. 텍스트 보완 2,436회, 이미지 보완(하의 포함) 2,278회, Texture `Smooth` 추가 뒤 빈 Texture 재질문 867회를 호출했다. 하의 채움은 Fit 99.4%, Silhouette 99.5%, Texture 99.6%, Style 97.0%, Detail 93.3%, Fabric 86.2%이고 모델 값은 사람이 검수하지 않았다. `--review-sample 30`이 사람 검수 시트를 만들며, 검수 일치율은 아직 없다. `--export-runtime`이 상·하의 실행 사전 `lumi-pi-v3`와 가져오기 파일을 만든다(아래 [현재 실행 사전](#실행-사전)). 실행 비교는 아직 라벨 일치이며, 순서형 점수·대표색 Lab·`price_krw`는 상품의 `raw_metadata.pi_v3`에만 담겨 있다.
 
 **PI v4 아우터([ADR 0018](adr/0018-pi-v4-outer.md), Proposed).** [build_lumi_pi_v4.py](../scripts/build_lumi_pi_v4.py)가 v3 위에 품목군 `outer`(29CM 남성 아우터)를 더한다. Type은 소분류 24개에서 19개 값으로 정하고(후드 집업은 별도 `Zip hoodie`, 기타 아우터는 비움), Length는 몸판 기장 5단계(Cropped~Long), Weight는 아우터 키워드·품목 규칙, Fabric에 Leather·Fur, Texture에 Suede·Quilted·Shearling·Melton·Ripstop·Tweed를 더한다. Silhouette은 아우터에서 쓰지 않는다. `--schema`로 스키마를 출력하고 `outer_pi`가 규칙으로 채운다. 실제 아우터 수집·빌드와 실측 기장 경계값 조정은 남았다.
 
-### 현재 실행 사전
+### 수집
 
-실행 사전은 네 가지이며 `--registry`/`STYLEMATE_REGISTRY`로 명시적으로 고른다. 기본값은 Park 사전이다.
-
-| 버전 | 정본 | 범위 |
-|---|---|---|
-| `park-2025-source-v1` | [park-2025-feature-map.json](../output/feature-map/park-2025-feature-map.json) | 논문 차용 값, Pants만, confirmed 상품 값만 비교 |
-| `lumi-pi-v3` (기본) | [lumi-pi-v3.json](../output/feature-map/lumi-pi-v3.json) | PI v3 12축(+Brand, Weight 추가) 영어 value, 상·하의(품목 `Top`·`Bottom`), 모델 보완값도 비교([ADR 0016](adr/0016-pi-v3-value-shapes.md)). Silhouette은 하의 전용. 축마다 `value_shape`(형태·채우는 경로)를 둔다. 2026-11-25 로컬 1,748개(상의 1,098·하의 650)로 적재·Map과 graph 시작 그리드(상·하의 각 8장)를 확인했다 |
-
-[registry.py](../src/stylemate_memory/registry.py)의 `load_registry(version)`이 실행 사전을 공급한다. [패키지 resources](../src/stylemate_memory/resources)의 JSON은 정본의 생성 사본이다. `python3 scripts/sync_feature_registry.py`로 동기화하며 수동 편집하지 않는다. 전체 enum을 이 문서에 복제하지 않는다.
-
-**lumi-29cm-v1.** [build_29cm_registry.py](../scripts/build_29cm_registry.py)가 `lumi-catalog-v1.jsonl`의 원문(`pi_raw`)과 DeepSeek 보완값을 고정 규칙으로 정규화하고, 7개 PI 축이 모두 값을 가진 상품만 `lumi-catalog-complete-v1.jsonl`로 내보낸 뒤 그 분포로 사전을 만든다. 2026-11-18 데이터 기준 빈 축을 DeepSeek로 한 번 더 채운 뒤(gap 보완, 144회 호출) 230개 중 187개(상의 99·하의 88)가 남았다. 남은 제외 사유는 Fabric 30·Detail 6·Fit 5·Type 4·Color 1개(중복 포함)다. Type은 29CM 소분류(“기타 팬츠”·“하의” 같은 일반 분류 제외), Brand는 남은 상품의 93개 브랜드, Price는 KRW 5구간(하한 포함·상한 미포함)이다. 원문에서 정규화한 값은 confirmed, 모델 보완값은 inferred·model_interpretation이며 화면에 “추정”으로 표시한다. 빈 축은 `pi_gaps.json`(축별 허용 value 포함)으로 남고, `fill_pi_deepseek.py --gaps`가 그 축만 DeepSeek로 다시 채운다(허용 value 밖 응답은 거부, `pi_fills_gap/`에 저장, 기존 보완값보다 우선). 사전을 다시 만들면 `--check`로 정본과 같은지 확인한다.
-
-Park 사전의 값 있는 매핑은 **Pants만 지원**한다. 원문의 값은 무신사 여성 바지 기준이며 이 실행 한계가 수집 대상을 바지로 제한하지는 않는다. Brand는 원문의 전체 419개 값이 미공개여서 현재 실행 enum을 지원하지 않는다. Price는 원문 구간 문자열 일치만 지원하고 수치 변환·통화·경계 포함·range는 미정이다. 다른 품목, `Relaxed→Wide`, 원단 종류→섬유 원료 같은 자동 치환은 지원하지 않는다. 이 한계는 `lumi-29cm-v1`에는 적용되지 않는다. 다만 두 사전 모두 모델 지시상 사용자 Brand·숫자 가격 조건은 만들지 않는다.
+수집 경로·PI별 필드·실행법·중간 레코드·정규화의 상세 계약은 [crawling.md](specs/crawling.md)에서 관리한다. 현재 카탈로그는 29CM·Cole Buxton·Wax London 상품이다. 네이버는 제외했다(#8). 빌드 순서는 `build_lumi_pi_v2.py`(규칙) → `fill_pi_v2_text.py`·`fill_pi_v2_image.py`(DeepSeek, 실행 요청 시만) → `build_lumi_pi_v3.py --export-runtime`이다.
 
 ### 직접 PI와 FEA→PI 가설
 
 사용자 목표 Map은 **직접/확인 PI + FEA 요구 + 별도 FEA→PI 가설**, 소비자 상품 Map은 **PI**를 사용한다. 직접 표현한 PI는 원래 근거·대상·조건·방향·강도와 함께 반영하며 FEA를 거쳐 재생성하지 않는다.
 
-`infer_with_hypotheses`는 TargetMap과 별도 가설 목록을 반환한다. FEA 기반 제안은 같은 target의 긍정 FEA 제약·source IDs를 참조하고 **Type·Color·Fit·Detail 중 한 값, prefer/soft**만 허용한다. 직접 PI가 있는 축의 가설은 제외한다. 예를 들어 “편하게”에서 `Fit=Wide`를 제안해도 그 연결은 해당 사용자·요청의 미확인 가설이며 필수 조건이 아니다.
-
-### 가설 비교 실행 확장
-
-[hypotheses.py](../src/stylemate_memory/hypotheses.py)와 ConsumerService가 다음 흐름을 연결한다.
-
-1. 실제 로컬 이미지가 있고 가설 PI 값의 포함/비포함이 확인된 상품을 비교한다. 미확인 PI를 비포함 사례로 사용하지 않는다. 비교 가능한 가설부터 하나 제시하고 대안이 없으면 일반 탐색을 유지한다.
-2. `consumer_comparisons`를 CandidateSet에 FK로 연결해 가설·질문·옵션별 표시 의미와 binding을 저장한다. 사용자 응답은 서버의 표시 snapshot을 기준으로 처리한다.
-3. `respond_comparison`은 `candidate_set_ref`, `candidate_id`(없으면 null), `decision=choose|neither|unsure`, 선택적인 `text`를 받는다. 비교 선택과 이유는 내부 `record_comparison` 한 batch의 Feedback/Evidence로 접수한다.
-4. 텍스트 없이 명확하게 고르면 표시된 PI 해석만 확인하며 `origin=inferred`, `strength=soft`를 보존한다. 이유가 있으면 수정·상충 가능성을 함께 해석해 독립 미확인 후보를 만들고 원래 PI를 즉시 확정하지 않는다. 실패 시 같은 근거를 pending으로 재처리한다.
-5. 없음·모르겠음·건너뛰기는 확정이나 다른 속성의 비선호가 아니다. 내용/binding 확인과 장기 활용 동의도 별개다. 종료 후 후보 확인에는 당시 상품/이미지 버전을 다시 검사한다.
-
-PI 7항목이 모든 FEA 성능을 검증하지는 못한다. Wide를 골라도 실제 착용 편안함을 입증한 것은 아니다. 미해결 필수 FEA가 있으면 비교는 허용하되 현재 소비자 서비스의 최종 상품 선택을 보류한다. 추가 상품 근거나 사용자 조정 없이 충족 처리하지 않는다.
+graph 엔진의 가설([graph/hypotheses.py](../src/stylemate_memory/graph/hypotheses.py))은 FEA 요구마다 사전 축의 값 후보를 recall 우선으로 제안한다(ADR 0013 결정 7). 직접 PI가 있는 축에는 만들지 않고, 사용자가 확인하기 전에는 hard 조건이 아니다. 예를 들어 "편하게"에서 `Fit=Wide`를 제안해도 그 연결은 해당 사용자·요청의 미확인 가설이다.
 
 ### PI·FEA binding과 목표 출력
 
@@ -218,82 +206,23 @@ TargetMap은 사전의 모든 PI/FEA 항목을 반환하며 미정 PI `values`�
 
 ## 로컬 실행
 
-저장소 루트에서 Python 3.11+로 실행한다. 추가 Python 의존성은 없다. 메모리 DB·상품 DB는 서로 다른 **저장소 밖** 파일이어야 하며 이미지 root도 저장소 밖에 둔다.
+저장소 루트에서 Python 3.11+로 실행한다. 기본 엔진 graph에는 선택 의존성 langgraph가 필요하므로 저장소 밖 venv에 설치한다. 메모리 DB·상품 DB는 서로 다른 **저장소 밖** 파일이어야 하며 이미지 root도 저장소 밖에 둔다.
 
 ```sh
+python3 -m venv ~/.venvs/lumi-graph && ~/.venvs/lumi-graph/bin/pip install -e '.[graph]'
 export STYLEMATE_DB=/private/tmp/lumi-local/memory.sqlite3
 export STYLEMATE_CATALOG_DB=/private/tmp/lumi-local/catalog.sqlite3
-# 로컬 이미지를 준비한 경우 STYLEMATE_IMAGE_ROOT를 해당 외부 디렉터리로 설정
+export STYLEMATE_IMAGE_ROOT=<저장소 밖>/images   # data/images를 같은 상대 경로로 복사
 
-PYTHONPATH=src python3 -m stylemate_memory.cli catalog-import --file tests/fixtures/catalog/valid.jsonl
-PYTHONPATH=src python3 -m stylemate_memory.cli catalog-map
-PYTHONPATH=src python3 -m stylemate_memory.consumer --provider fake
-```
-
-소비자 화면은 [http://127.0.0.1:8766](http://127.0.0.1:8766)이다. `python3 -m stylemate_memory.cli serve`도 같은 서버를 실행한다. 합성 fixture의 이미지 바이트는 자동 공급하지 않는다. 기본 fake는 빈 추출/제안을 반환하는 연결용 adapter이므로 자연어 해석·상품 추천 데모로 사용하지 않는다. 확인된 기억이 없는 context는 blocked이며 통합 검사는 별도의 명시적 합성 추출을 공급한다.
-
-### 29CM 완전 채움 상품으로 실행
-
-수집 폴더(예: `~/Documents/LUMI-data/29cm-catalog`)에 `lumi-catalog-v1.jsonl`이 있을 때, 새 DB 두 개를 쓰고 같은 사전 버전으로 적재·Map·서버를 실행한다. 자연어 해석에는 실제 모델이 필요하므로 `--provider opencode-go`는 실행이 요청된 경우에만 사용한다.
-
-```sh
-DATA=~/Documents/LUMI-data/29cm-catalog
-python3 scripts/build_29cm_registry.py --catalog-dir "$DATA"   # 사전 갱신 시 이어서 sync_feature_registry.py
-# 빈 축 보완(실제 DeepSeek 호출, OPENCODE_API_KEY 필요) 후 다시 내보내고 사전을 재생성
-# python3 scripts/fill_pi_deepseek.py --data "$DATA" --gaps "$DATA/pi_gaps.json" --export "$DATA/lumi-catalog-v1.jsonl"
-export STYLEMATE_REGISTRY=lumi-29cm-v1 STYLEMATE_IMAGE_ROOT="$DATA/images"
-export STYLEMATE_DB=/private/tmp/lumi-29cm/memory.sqlite3 STYLEMATE_CATALOG_DB=/private/tmp/lumi-29cm/catalog.sqlite3
-PYTHONPATH=src python3 -m stylemate_memory.cli catalog-import --file "$DATA/lumi-catalog-complete-v1.jsonl"
-PYTHONPATH=src python3 -m stylemate_memory.cli catalog-map
-PYTHONPATH=src python3 -m stylemate_memory.consumer --provider opencode-go --endpoint <확인한 https 주소>
-```
-
-**PI v2 상의(`lumi-pi-v2-top`).** 저장소 안 `data/`(커밋 제외)의 수집 결과로 상의 카탈로그를 만든다. 빈 축은 규칙 → DeepSeek 텍스트 보완 → DeepSeek 첫 이미지+텍스트 보완 순으로 채우고, 모델 값은 inferred로 남는다. Fabric은 사진으로 채우지 않는다. 실행 DB와 이미지 root는 저장소 밖이어야 하므로 이미지를 실행 폴더로 복사한다.
-
-```sh
-python3 scripts/fill_pi_v2_text.py --data data      # 실제 DeepSeek 호출, OPENCODE_API_KEY 필요
-python3 scripts/build_lumi_pi_v2.py --data data
-python3 scripts/fill_pi_v2_image.py --data data     # 상의 빈 축만, 이미지 768px 축소(Pillow 있을 때), data/raw/fills_image/에 캐시
-python3 scripts/build_lumi_pi_v2.py --data data --export-top && python3 scripts/sync_feature_registry.py
-export STYLEMATE_REGISTRY=lumi-pi-v2-top STYLEMATE_IMAGE_ROOT=<저장소 밖>/images   # data/images의 상의 이미지를 같은 상대 경로로 복사
-PYTHONPATH=src python3 -m stylemate_memory.cli catalog-import --file data/catalog/lumi-pi-v2-top-import.jsonl
-PYTHONPATH=src python3 -m stylemate_memory.cli catalog-map
-PYTHONPATH=src python3 -m stylemate_memory.consumer --engine graph --provider opencode-go --endpoint <확인한 https 주소>
-```
-
-**PI v3 상·하의(`lumi-pi-v3`).** v2 채움 결과에서 v3를 만들고 실행 사전·가져오기 파일까지 내보낸다. 모델 호출은 없다.
-
-```sh
-python3 scripts/build_lumi_pi_v3.py --data data --export-runtime && python3 scripts/sync_feature_registry.py
-export STYLEMATE_REGISTRY=lumi-pi-v3 STYLEMATE_IMAGE_ROOT=<저장소 밖>/images   # data/images를 같은 상대 경로로 복사
+python3 scripts/build_lumi_pi_v3.py --data data --export-runtime && python3 scripts/sync_feature_registry.py   # 모델 호출 없음, Pillow 필요
 PYTHONPATH=src python3 -m stylemate_memory.cli catalog-import --file data/catalog/lumi-pi-v3-import.jsonl
 PYTHONPATH=src python3 -m stylemate_memory.cli catalog-map
+PYTHONPATH=src ~/.venvs/lumi-graph/bin/python -m stylemate_memory.consumer --provider fake
 ```
 
-**상의 첫 빌드 써 보기([ADR 0015](adr/0015-top-memory-warm-start.md)).** 위 적재 뒤 graph 엔진을 띄운다. 실행 DB를 지우지 않으면 앞 요청에서 동의한 기억이 다음 요청에 이어진다. 한 세션에서 상황을 바꿔 가며 요청 3~4회(예: 출근 → 데이트 → 나의 상황 "팀 회식" → 비슷한 나의 상황)를 해 보고, 매 요청 끝의 [평소에도]/[이 상황만]으로 저장한다. 실제 DeepSeek 호출은 사용자가 이 명령을 실행할 때만 일어난다(OpenCode Go 키는 기존 설정 방식 그대로).
+소비자 화면은 [http://127.0.0.1:8766](http://127.0.0.1:8766)이다. `python3 -m stylemate_memory.cli serve`도 같은 서버를 실행한다. 기본 fake는 빈 해석을 돌려주는 연결용 adapter라 화면 흐름만 확인한다. 자연어 해석에는 실제 모델이 필요하며 `--provider opencode-go --endpoint <확인한 https 주소>`는 실행이 요청된 경우에만 쓴다(OpenCode Go 키는 기존 설정 방식 그대로). [합성 fixture](../tests/fixtures/catalog/valid.jsonl)는 가져오기 형식 예시이며 Park 사전(`--registry park-2025-source-v1`)의 Pants 값으로 되어 있다.
 
-```sh
-export STYLEMATE_DB=<저장소 밖>/memory.sqlite3 STYLEMATE_CATALOG_DB=<저장소 밖>/catalog.sqlite3
-export STYLEMATE_REGISTRY=lumi-pi-v2-top STYLEMATE_IMAGE_ROOT=<저장소 밖>/images STYLEMATE_ENGINE=graph
-PYTHONPATH=src <graph venv>/bin/python -m stylemate_memory.consumer --engine graph --provider opencode-go --endpoint <확인한 https 주소>
-# 모델 호출 없이 화면만: --provider fake (해석·프로필 다시 쓰기·상황 연결이 비어 있음)
-```
-
-graph 모드 흐름: 시작 화면에서 성별(전체·남성·여성, 원본 `gender`로 필터, 값 없는 상품은 전체에서만)과 상황 칩을 고른다. "나의 상황" 원문은 그대로 상황이 되고, 과거에 저장한 자유 상황이 있으면 LLM이 비슷한 하나를 골라 "비슷한 상황"으로 연결한다(끌 수 있음). 동의한 장기 기억 중 상황이 맞는 상황별 선호와 평소 취향이 PI 값별 Beta 사전값(세기 2.0)으로 들어간다. 같은 축은 상황별 기억이 우선하고 평소 취향은 남는 축(예: 색)에만 적용한다. 기억을 적용한 그리드에는 기억 없이 고른 "새로움" 칸 2장(흐림 때 1장)이 있다. 새로움 칸을 두 턴 고르거나 "평소랑 다르게"를 적으면 "이번엔 새로운 스타일로 볼까요?"를 한 번 묻고, 예면 기억을 흐리게(0.3배) 반영한다. 기억 값이 대조에서 두 턴 반대로 갱신되면 "취향이 바뀌었나요?"를 묻고 예면 이번 요청에서 그 기억을 끈다. "상품 선택 없이 종료"·"탐색 종료"는 요청을 닫기 전에 제안 문장(말한 선호 → 이유 있는 거절 → 이해 칩 → 최종 상품, 최대 3개)을 보이고, 고른 문장만 단기 생성 → 종료 → 내용·binding 확인 → 이후 활용 동의 순서로 기존 표시·이벤트 계약을 거쳐 장기 기억이 된다. 이미지 근거 문장은 한 비교 회차의 선택 근거만 연결한다. 저장 뒤 LLM이 동의한 기억 전체를 짧게 다시 쓰고, 바뀐 문장만 [바꾸기][그대로]로 받는다. 바꾸면 `replace`로 새 장기 기억을 만들고 원래 기억은 `superseded`로 남는다. 제안·프로필 초안은 graph 체크포인트 DB(`lumi_summaries`)에 두고 요청 삭제 때 지운다. 상단 "평소 취향"은 동의한 장기 기억 목록 페이지를 열고, "한마디로 알려 주기"로 기존 온보딩(내용 확인·이후 활용 동의 분리)에 들어간다. 목록에서 끄기·지우기는 아직 없다.
-
-**개선안 반영(`jaehyun_work`, 2026-11-25 main 병합).** 위 흐름에 다음이 더해졌다. 카드별 좋았던 점 칩은 화면에서 빠졌다(`feat/grid-decide-button`의 칩 표시·결정 버튼 변경은 이 화면으로 대체). 저장 계약(`apply_batch`, 확인·동의 분리, 표시·이벤트 증거)은 그대로다.
-
-- 후보함(F8·U6): 요청 동안 새로 고른 상품을 모두 모은다(최대 24). "후보함에서 고르기"는 최근 8개를 일반 후보 집합으로 다시 표시하고, 최종 결정은 그 화면에서만 받는다(`select_final`은 후보함 상품만 허용). 후보함 빼기는 값 점수를 바꾸지 않는다.
-- 진행·기억·근거(F9·F10·F11): `graph_view`가 후보함 수·수렴·"이제 후보함에서 골라도 돼요" 조건(수렴, 또는 후보함 3개 이상과 이해 칩 2개 이상), 첫 grid의 기억 안내(적용 문장·출처 상황), 칩별 근거(고른 장 수 중 그 값을 가진 장 수)를 낸다.
-- 모델 보조(F1·F2·F4): 고른 상품이 가설 밖 축의 값을 공유하면(고른 장의 60% 이상, 최소 2장) 직전 호출 3턴 뒤 가설을 다시 만든다. 빈 결과·실패는 기존 가설을 유지한다. 종료 요약 문장은 모델이 다듬되 모든 값 이름과 거절 표현이 남은 문장만 받고, 아니면 규칙 문장을 쓴다(저장 binding은 항상 규칙 제안). 값 귀속이 안 될 때 모델이 질문 1개·선택지 2~3개(실제로 다른 축만)를 쓰고, 실패하면 축 칩 최대 3개로 묻는다. fake provider에서는 셋 다 기존 동작이다.
-- 꼭 필요한 FEA(F5): hard FEA 요구에서 나온 가설 값에 Beta 사전값 2.0을 더한다. hard 필터는 아니다.
-- 프로필 다시 쓰기(F3): `STYLEMATE_PROFILE_REWRITE=off`로 끌 수 있다. 기본은 켜짐이며, user study에서 끌지는 팀 합의·ADR 대상이다.
-- 화면(U1~U7·U9): 값은 한국어 라벨(`graph/labels.py`, 표시 전용)로 보인다. 오른쪽 패널·카드별 좋았던 점·가설 표시를 없애고, 이해 칩은 제목 줄(누르면 고정, ×는 빼기, 새 칩에 "새로"·근거 한 줄), 질문은 grid 위 배너 한 줄, 입력은 "말로 덧붙이기"를 누를 때만 연다. 종료 요약은 문장별 [평소에도]/[OO할 때만] 두 버튼이고 누르지 않은 문장은 저장하지 않는다. 다음 grid를 고르는 동안 이전 grid를 흐리게 남긴다. 평소 취향 페이지는 상황별로 묶어 보인다(끄기·지우기는 아직 없음). 디자인은 개선안의 흑백·각진 모서리·입체 버튼 값을 쓰고 웹폰트는 요청하지 않는다.
-- 미반영: F6(VLM), F7(수치 확정), F12·U8(이미지 온보딩)과 평소 취향 끄기·지우기. 화면 확인은 `tests/check_graph_browser.mjs`(합성)와 실제 상의 1,098개·fake provider 수동 캡처까지이며, 실제 DeepSeek 응답의 질문·요약 문장 품질은 확인하지 않았다.
-
-시작 화면은 사전이 지원하는 품목을 고르게 하고, 상품 카드는 현재 Map의 PI 값을 보여준다. 이 흐름은 실제 86개 상품과 각본 모델 응답으로 적재→Map→검색→FEA→Fit 가설 비교→선택→종료→장기 동의까지 확인했다. 실제 DeepSeek 응답 품질은 별도 평가 대상이다.
-
-고정 한국어 요청 8개(바지 3·니트·티셔츠·스커트·셔츠·후디)를 새 요청→내용·조건 확인 수락→탐색→종료로 돌려 해석 문구·조건·카드·비교를 JSON으로 남기는 점검은 `PYTHONPATH=src python3 scripts/smoke_real_flow.py --catalog "$DATA/lumi-catalog-complete-v1.jsonl" --image-root "$DATA/images" --output <저장소 밖 경로>.json`이다. 기본 `--provider fake`는 호출 없이 배선만 확인하고, `--provider opencode-go`는 실제 호출이다. 품질 벤치마크가 아니라 끝까지 도는지 보는 점검이다. `--trace`는 시나리오별 모델 원 응답·검증 오류·탐색 보류 이유를 같은 JSON에 남긴다. 탐색 중 근거 없는 일반 PI 제안이나 직접 조건과 충돌하는 제안 하나는 실행 조건이 되지 않고 버려지며, 나머지 제안으로 탐색을 계속한다. 같은 이유로 `questions` 누락은 빈 질문으로, FEA 제약이 아닌 id를 단 가설 제안은 그 제안만 버린다(권한·hard·인용 위반은 여전히 응답 전체 거부). 후보 카드의 차이 비교는 조건 일치 점수가 카드 수 번째 후보 이상인 상품 안에서만 고르고, 내부 메모(`[q001]`·상태 코드)는 새 질문으로 다시 보이지 않는다.
+**써 보기([ADR 0015](adr/0015-top-memory-warm-start.md)).** 실행 DB를 지우지 않으면 앞 요청에서 동의한 기억이 다음 요청에 이어진다. 한 세션에서 상황을 바꿔 가며 요청 3~4회(예: 출근 → 데이트 → 나의 상황 "팀 회식" → 비슷한 나의 상황)를 해 보고, 매 요청 끝의 [평소에도]/[이 상황만]으로 저장한다.
 
 ### 설정
 
@@ -309,11 +238,11 @@ graph 모드 흐름: 시작 화면에서 성별(전체·남성·여성, 원본 `
 | OPENCODE_API_KEY | opencode-go를 명시적으로 선택할 때만 조회 |
 | STYLEMATE_OPENAI_MODEL | openai 경로의 `--model`, 기본 gpt-6-luna. 새 실제 평가에는 사용하지 않음 |
 | STYLEMATE_PORT | `--port`, 기본 8766 |
-| STYLEMATE_REGISTRY | `--registry park-2025-source-v1 / lumi-29cm-v1 / lumi-pi-v2-top / lumi-pi-v3`, 기본 park. 카탈로그 적재·Map·서버에 같은 값을 쓴다 |
+| STYLEMATE_REGISTRY | `--registry lumi-pi-v3 / park-2025-source-v1`, 기본 `lumi-pi-v3`. 카탈로그 적재·Map·서버에 같은 값을 쓴다 |
 | OPENAI_API_KEY | openai를 명시적으로 선택할 때만 조회 |
 | STYLEMATE_PROFILE_REWRITE | graph 종료 요약 뒤 프로필 다시 쓰기. 기본 on, `off`면 고른 문장을 그대로 두고 다시 묻지 않음 |
 | STYLEMATE_QUESTION_LOOP | graph 엔진의 질문 루프([questions.py](../src/stylemate_memory/graph/questions.py)). 기본 off, `on`이면 그리드 위에 질문 하나를 띄우고 답을 반영한다 |
-| STYLEMATE_ENGINE | `--engine legacy / graph`, 기본 legacy. graph는 선택 의존성 `pip install -e '.[graph]'`(langgraph)이 필요하며, 체크포인트는 메모리 DB 옆 `<이름>.graph.sqlite3`에 둔다 |
+| STYLEMATE_ENGINE | `--engine graph / legacy`, 기본 graph. graph는 선택 의존성 `pip install -e '.[graph]'`(langgraph)이 필요하고, 없으면 안내 오류로 멈춘다. 체크포인트는 메모리 DB 옆 `<이름>.graph.sqlite3`에 둔다. `catalog-import`·`catalog-map`은 엔진과 무관하게 의존성 없이 돈다 |
 
 [settings.py](../src/stylemate_memory/settings.py)가 경로·설정·gateway를 구성한다. 실제 API 실행이 요청된 경우에만 사용자가 로컬 환경에 `OPENCODE_API_KEY`를 설정하고 `PYTHONPATH=src python3 -m stylemate_memory.consumer --provider opencode-go --endpoint <확인한 https 주소>`로 시작한다. 기존 `--provider openai`는 호환 경로다. 키를 CLI 인자·예제 파일·로그에 넣지 않는다. import·기본 fake·상품 가져오기/Map 생성·읽기 관찰에는 키가 필요 없다.
 
@@ -337,11 +266,40 @@ graph 모드 흐름: 시작 화면에서 성별(전체·남성·여성, 원본 `
 
 요청·근거·후보·확인·동의는 SQLite에서 복원한다. 서비스 journal은 명령 본문·전체 대화·전체 화면 대신 fingerprint·참조·처리 상태를 저장한다. 삭제 시 관련 journal을 비우고 재시도 응답은 현재 화면을 다시 조회해 삭제 전 내용을 되살리지 않는다.
 
-## 기존 CLI와 개발자 관찰 도구
+## 호환 경로
 
-### 현재 실행 중인 17개 속성
+현재 흐름이 아니지만 코드·테스트가 남아 있는 경로다. 새 기능은 여기에 더하지 않는다.
 
-기존 CLI의 인자 없는 `features`, 기본 추론과 기존 관찰 서버는 `consumer-17-v1`이다. 현재 소비자 서비스의 Park 사전과 구분한다. 17개 속성과 허용값은 [registry.py](../src/stylemate_memory/registry.py) 또는 아래 명령으로 확인한다. metadata의 과거 `pdf`/source 표시는 중간보고서·Park 사전의 상품 스키마가 아니다.
+- **legacy 엔진(`--engine legacy`)**: graph 이전의 쇼핑 흐름(`lumi-memory-v1`). 직접 PI·FEA 목표를 만들고 가설 포함/비포함 상품을 2장 비교한다. graph 엔진도 온보딩·기억 저장·종료 동의에 같은 `ConsumerService`·저장 계층을 쓴다.
+- **Park 사전(`park-2025-source-v1`)**: 위 [실행 사전](#실행-사전) 표 참고. 값 있는 매핑은 Pants만 지원하고 Brand enum과 Price 수치 변환은 지원하지 않는다.
+- **`--provider openai`**: 기존 Responses adapter. 새 실제 평가에는 `opencode-go`를 쓴다([ADR 0011](adr/0011-use-deepseek-api-for-real-model.md)).
+
+### 이미지·텍스트 인터랙션
+
+legacy 엔진의 요청·선택·종료 규칙이다. 요청 분리·종료 후 장기 활용 동의는 graph 엔진에도 같다.
+
+- 온보딩과 쇼핑 요청을 구분한다. 같은 요청 재개는 SQLite 상태를 복원하고, 새 요청에는 이전 단기·가설을 자동 적용하지 않는다.
+- 초기 입력과 일반 선택·부분 선택은 근거로 접수한 뒤 기억 후보를 만든다. 현재 서비스의 초기 추출은 명시적 검토 전까지 단기 미확인 후보이며, 직접 발화라는 이유로 자동 확인하지 않는다.
+- 이미지 선택은 로컬 초안이다. 이유·수정 사항을 적거나 비운 채 같은 반영 버튼으로 제출한다. 후보 없음·모르겠음·텍스트만 응답도 가능하며 이유 입력은 필수가 아니다.
+- 일반 이미지 선택만으로 모든 속성 선호·미선택 후보 비선호를 만들지 않는다. 가설 비교의 명확한 응답과 일반 선택 근거의 해석을 구분한다.
+- 확인한 조건으로 재탐색할 수 있고, 모든 속성을 채우거나 상품을 고르기 전에 종료할 수 있다. `select_final`은 최종 선택만 기록하며 요청을 닫지 않는다. `end_request`가 별도로 세션을 닫는다.
+- 장기 활용 선택은 종료 요약에서만 노출한다. 종료 전에 접수·해석한 후보는 종료 후에도 내용/binding을 확인할 수 있다. 종료 후 새 입력·늦은 추출은 거부한다. 항목 선택과 동의 체크는 기본 해제다.
+
+### legacy 가설 비교 흐름
+
+[hypotheses.py](../src/stylemate_memory/hypotheses.py)와 ConsumerService가 다음 흐름을 연결한다.
+
+1. 실제 로컬 이미지가 있고 가설 PI 값의 포함/비포함이 확인된 상품을 비교한다. 미확인 PI를 비포함 사례로 사용하지 않는다. 비교 가능한 가설부터 하나 제시하고 대안이 없으면 일반 탐색을 유지한다.
+2. `consumer_comparisons`를 CandidateSet에 FK로 연결해 가설·질문·옵션별 표시 의미와 binding을 저장한다. 사용자 응답은 서버의 표시 snapshot을 기준으로 처리한다.
+3. `respond_comparison`은 `candidate_set_ref`, `candidate_id`(없으면 null), `decision=choose|neither|unsure`, 선택적인 `text`를 받는다. 비교 선택과 이유는 내부 `record_comparison` 한 batch의 Feedback/Evidence로 접수한다.
+4. 텍스트 없이 명확하게 고르면 표시된 PI 해석만 확인하며 `origin=inferred`, `strength=soft`를 보존한다. 이유가 있으면 수정·상충 가능성을 함께 해석해 독립 미확인 후보를 만들고 원래 PI를 즉시 확정하지 않는다. 실패 시 같은 근거를 pending으로 재처리한다.
+5. 없음·모르겠음·건너뛰기는 확정이나 다른 속성의 비선호가 아니다. 내용/binding 확인과 장기 활용 동의도 별개다. 종료 후 후보 확인에는 당시 상품/이미지 버전을 다시 검사한다.
+
+PI 7항목이 모든 FEA 성능을 검증하지는 못한다. Wide를 골라도 실제 착용 편안함을 입증한 것은 아니다. 미해결 필수 FEA가 있으면 비교는 허용하되 현재 소비자 서비스의 최종 상품 선택을 보류한다. 추가 상품 근거나 사용자 조정 없이 충족 처리하지 않는다.
+
+### 17개 속성 CLI
+
+기존 CLI의 인자 없는 `features`·기본 추론·`demo --synthetic`은 `consumer-17-v1`이다. 현재 소비자 서비스의 Park 사전과 구분한다. 17개 속성과 허용값은 [registry.py](../src/stylemate_memory/registry.py) 또는 아래 명령으로 확인한다. metadata의 과거 `pdf`/source 표시는 중간보고서·Park 사전의 상품 스키마가 아니다.
 
 ```sh
 PYTHONPATH=src python3 -m stylemate_memory.cli features
@@ -380,7 +338,7 @@ RQ의 초점을 나눈 것이 메모리·이미지·질문의 독립 효과를 �
 
 ### 개발과 평가의 경계
 
-[현재 구현과 실행](#현재-구현과-실행)에 명시한 범위와 연구에서 평가할 효과를 구분한다.
+[현재 구현과 실행](#현재-시스템)에 명시한 범위와 연구에서 평가할 효과를 구분한다.
 
 파일럿·과제 안내·실험 환경·설문 구현은 별도 연구 준비 작업이다. 보고서 인용만으로 연구 수행·참여자 동의·실제 설문 배포를 완료했다고 보고하지 않는다. 참여자 정보·동의서·원시 응답은 저장소 밖에서 관리한다.
 
@@ -423,34 +381,23 @@ LUMI_GRAPH_PYTHON=~/.venvs/lumi-graph/bin/python node tests/check_graph_browser.
 
 | 미구현·미검증 범위 | 필요한 확인 |
 |---|---|
-| 상품 카탈로그 | 29CM·Shopify 수집, PI v2 채움, v3 변환과 상·하의 실행 사전 `lumi-pi-v3`까지 했다(로컬 1,748개, 원격 서버 3,600개). v3 사람 검수 일치율, 원격 3,600개의 로컬 반영, 점수·색 거리를 쓰는 비교는 미완([#27](https://github.com/jongrionro-debug/HCI_HANDSOME/issues/27)) |
-| DeepSeek(OpenCode Go) 품질·한도 평가 | 합성 한국어 추출 16개×2회: 검증 통과 31/32, 중앙 지연 약 3초([ADR 0011](adr/0011-use-deepseek-api-for-real-model.md)). 새 발화·참가자 말투 재평가, 선택 이유·FEA→PI 가설 품질, 참가자 규모의 사용량 한도는 미평가 |
-| 실제 모델·가설 비교 | DeepSeek로 명시적 실행 후 한국어 표현·선택 이유·실제 비교 축과 대안·FEA 성능 판단 경계 평가 |
+| 질문 루프 | 세 파트의 결정 문서 v1 → 구현 → 루프 기본 on과 [시나리오](specs/agent-scenario.md) T1~T5 통합([#26](https://github.com/jongrionro-debug/HCI_HANDSOME/issues/26)~[#30](https://github.com/jongrionro-debug/HCI_HANDSOME/issues/30)) |
+| 상품 카탈로그 | v3 사람 검수 일치율, 원격 3,600개의 로컬 반영, 점수·색 거리·`price_krw` 예산을 쓰는 비교([#27](https://github.com/jongrionro-debug/HCI_HANDSOME/issues/27)) |
+| DeepSeek(OpenCode Go) 품질·한도 | 합성 한국어 추출 16개×2회: 검증 통과 31/32, 중앙 지연 약 3초([ADR 0011](adr/0011-use-deepseek-api-for-real-model.md)). 참가자 말투·선택 이유·FEA→PI 가설 품질과 사용량 한도는 미평가 |
+| 써 보기 | 실제 DeepSeek로 요청 3~4회를 써 보고 ADR 0015의 수치·새로움 칸 비율·프로필 말투·값 라벨을 정한다 |
 | 실제 의미 검색 | 모델 선정 후 관련 근거 회수·오탐·근거 완전성·삭제/재색인·비용 비교 |
-| 운영 자료 이관 | 원래 의미·대상·동의·기간 보존, 합성 이관/rollback과 실제 자료 승인을 구분 |
-| 상의 첫 빌드 써 보기([ADR 0015](adr/0015-top-memory-warm-start.md)) | 실제 DeepSeek로 요청 3~4회를 직접 써 보고 사전값 세기·새로움 칸 비율·프로필 말투·영어 값 라벨의 한국어 표시·자유 상황 연결 정확도를 정한다. 최종 상품 문장은 그 상품을 그리드에서 고른 근거가 있을 때만 제안된다. 새 화면(시작 옵션·요약 동의)은 각본 통합 테스트와 수동 화면 확인만 했고 브라우저 자동 검사는 없다 |
-| 사용자 연구 | 보고서 기준 파일럿·동의/과제 안내·설문·분석 준비. 참여자 자료는 저장소 밖 관리 |
-| 대화형 에이전트 전환 | [합친 파이프라인 제안](specs/agent-pipeline.md)(턴당 LLM 1회 + tool 8개)과 [시나리오](specs/agent-scenario.md)의 팀 결정. 질문 방식·답 반영·방식 선택은 [질문 설계 작업 공간](../research/question-design/README.md)의 세 파트가 근거 기반으로 정하고 [questions.py](../src/stylemate_memory/graph/questions.py)에 구현한다. v0 질문 루프(`text_options`만)는 있고 기본 off다 |
-| Proposed ADR 승인 | 0013·0014·0015·0016·0018이 Proposed다. 구현이 들어간 0013~0016은 써 보기 결과와 함께 승인·수정 여부를 정한다 |
+| 사용자 연구 | 보고서 기준 파일럿·동의/과제 안내·설문·Baseline 환경·분석 준비. 참여자 자료는 저장소 밖 관리 |
+| Proposed ADR | 0013·0014·0015·0016·0018이 Proposed다. 구현이 들어간 0013~0016은 써 보기 결과와 함께 승인·수정 여부를 정한다 |
 
-### 지금 할 일 (2026-11-25 기준)
+### 지금 할 일 (2026-11-26 기준)
 
-남은 핵심 작업은 질문 설계 세 파트다. 세 파트가 main에 합쳐지면 질문 루프가 켜진 1차 시스템이 된다. 공통 계약은 [graph/questions.py](../src/stylemate_memory/graph/questions.py), 진행 방법은 [질문 설계 작업 공간](../research/question-design/README.md)에 있고, 완료 조건은 각 Issue에서 관리한다.
+핵심은 질문 설계 세 파트다. 세 파트가 main에 합쳐지면 질문 루프가 켜진 1차 시스템이 된다. 공통 계약은 [graph/questions.py](../src/stylemate_memory/graph/questions.py), 진행 방법은 [질문 설계 작업 공간](../research/question-design/README.md)에 있고, 완료 조건은 각 Issue에서 관리한다.
 
 | 파트 | 맡는 것 | Issue |
 |---|---|---|
-| 1 · 질문 방식 | 방식별 질문 만들기(텍스트·이미지 선택·대조 2장·설명 이미지·복합)와 질문 화면 | [#26](https://github.com/jongrionro-debug/HCI_HANDSOME/issues/26) |
+| 1 · 질문 방식 | 방식별 질문 만들기와 질문 화면 | [#26](https://github.com/jongrionro-debug/HCI_HANDSOME/issues/26) |
 | 2 · 답 해석·반영 | 방식별 답의 반영 규칙, PI v3 점수·색 거리·예산을 쓰는 반영, v3 값 검수 | [#27](https://github.com/jongrionro-debug/HCI_HANDSOME/issues/27) |
 | 3 · 언제 어떤 방식 | 물을 축·시점·멈춤 판정, 규칙+LLM 방식 선택, 결정 로그, 루프 기본 on과 통합 시나리오 | [#28](https://github.com/jongrionro-debug/HCI_HANDSOME/issues/28) |
+| 공통 | 계약 변경(여러 축 칩·정도·사용자 단어·글 답) · 사건 기반 질문의 시점 | [#29](https://github.com/jongrionro-debug/HCI_HANDSOME/issues/29) · [#30](https://github.com/jongrionro-debug/HCI_HANDSOME/issues/30) |
 
-세 파트 뒤에 남는 일: 실제 DeepSeek로 써 보기(ADR 0015 수치), 연구 운영 준비(Baseline 환경, 시나리오·과제 안내, 설문, 동의서, 파일럿 2~3명), 의미 검색(선택).
-
-미결정: 파트 담당자와 확인 지점 날짜(각 Issue), 실행 사전에 아우터 포함 여부, 참가자 20~24명 모집 시점.
-
-### 선행연구에서 가져오는 범위
-
-메모리 연구의 적용 관점과 대안은 [ADR 0005](adr/0005-evidence-linked-memory.md)의 결정 맥락이다. 실제 학습형 관리자·임베딩 모델·자동 장기화를 구현한 것으로 보지 않는다. 현재 연결 상태는 [구현 상태](#구현-상태)를 따른다.
-
-### A0 공통 인터페이스와 담당 경계
-
-기존 ADR에서 연결한 A0 작업 분담은 과거 구현 단계다. 현재 타입·포트는 [contracts.py](../src/stylemate_memory/contracts.py), 실제 모듈 연결은 [구현 상태](#구현-상태)를 따른다. 단계별 프롬프트·작업 기록을 현재 실행 계약으로 중복 유지하지 않는다.
+미결정: 확인 지점 날짜(각 Issue), 실행 사전에 아우터 포함 여부, 참가자 20~24명 모집 시점.

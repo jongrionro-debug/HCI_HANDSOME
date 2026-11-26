@@ -2,7 +2,7 @@
 
 팀원이 낸 **tool 안**(턴당 LLM 1회 + tool)을 뼈대로 삼고, **플래너 안**(LLM 플래너가 코드가 정한 행동 중 하나를 고르는 구조)의 규칙 다섯 가지를 얹은 설계안이다. [Issue #18](https://github.com/jongrionro-debug/HCI_HANDSOME/issues/18)의 "대화형으로 바꾸기" 논의에서 나왔다.
 
-**현재 상태:** 팀 결정 전 제안이며 구현하지 않았다. 결정되면 ADR로 남기고 이 문서를 실행 계약으로 고친다. 기존 결정 중 FEA→PI 가설은 [ADR 0006](../adr/0006-fea-to-pi-hypothesis-comparison.md), 종료 후 동의는 [ADR 0007](../adr/0007-joint-feedback-and-end-consent.md), 카탈로그와 PI 11축은 [ADR 0014](../adr/0014-crawled-catalog-pi-v2.md), 기억 warm start는 [ADR 0015](../adr/0015-top-memory-warm-start.md)를 따른다. 한 사용자가 이 구조 전체를 거치는 예시는 [agent-scenario.md](agent-scenario.md)에 있다.
+**현재 상태:** 질문 방식·답 반영·방식 선택은 [질문 설계 작업 공간](../../research/question-design/README.md)([ADR 0017](../adr/0017-question-design-research-workspace.md))이 근거 기반으로 정해 graph 엔진의 [questions.py](../../src/stylemate_memory/graph/questions.py)에 구현하는 중이다. 그 결정이 이 문서의 해당 부분보다 우선한다. 나머지(tool 목록·플래너·턴당 호출 수)는 팀 결정 전 제안이며 구현하지 않았다. 결정되면 ADR로 남기고 이 문서를 실행 계약으로 고친다. 기존 결정 중 FEA→PI 가설은 [ADR 0006](../adr/0006-fea-to-pi-hypothesis-comparison.md), 종료 후 동의는 [ADR 0007](../adr/0007-joint-feedback-and-end-consent.md), 카탈로그는 [ADR 0014](../adr/0014-crawled-catalog-pi-v2.md), PI 축과 값 형태는 [ADR 0016](../adr/0016-pi-v3-value-shapes.md)(v3), 기억 warm start는 [ADR 0015](../adr/0015-top-memory-warm-start.md)를 따른다. 한 사용자가 이 구조 전체를 거치는 예시는 [agent-scenario.md](agent-scenario.md)에 있다.
 
 ## 두 안 비교
 

@@ -19,11 +19,11 @@
   - 메모리 저장: `store.py`, `store_v1.py`, `store_feedback.py`, `store_cleanup.py`
   - 조회·목표: `retrieval.py`, `inference.py`, `context.py`
   - 상품·비교: `catalog*.py`, `product_search.py`, `comparison.py`, `hypotheses.py`
-  - 모델: `llm.py`, `model_io.py`, `codex_llm.py`, `settings.py`
+  - 모델: `llm.py`, `model_io.py`, `settings.py`
   - 계약·사전: `contracts.py`, `errors.py`, `registry.py`, `resources/*.json`(`output/feature-map/` 정본의 생성 사본, 직접 편집 금지)
-  - 의도 순환 엔진(선택, `STYLEMATE_ENGINE=graph`, langgraph 필요): `graph/`(`engine.py`, `service.py`, `grid.py`, `scoring.py`, `parse.py`, `intent.py`, `hypotheses.py`, `memory.py`, `situations.py`)
+  - 의도 순환 엔진(기본 엔진, langgraph 필요. `--engine legacy`는 이전 비교 흐름): `graph/`(`engine.py`, `service.py`, `grid.py`, `scoring.py`, `parse.py`, `intent.py`, `hypotheses.py`, `memory.py`, `situations.py`)
 - 수집 스크립트: `scripts/crawl_29cm.mjs`, `scripts/crawl_naver.mjs`, `scripts/probe_sites.mjs` (Node, Playwright), `scripts/fetch_shopify_first_images.py`
-- 카탈로그 빌드: `scripts/build_lumi_pi_v2.py` → `fill_pi_v2_text.py`·`fill_pi_v2_image.py`(DeepSeek, 실행 요청 시만) → `build_lumi_pi_v3.py`(Pillow, `--export-runtime`으로 실행 사전 `lumi-pi-v3`·가져오기 파일). 29CM 7축 사전은 `build_29cm_registry.py`·`fill_pi_deepseek.py`
+- 카탈로그 빌드: `scripts/build_lumi_pi_v2.py` → `fill_pi_v2_text.py`·`fill_pi_v2_image.py`(DeepSeek, 실행 요청 시만) → `build_lumi_pi_v3.py`(Pillow, `--export-runtime`으로 실행 사전 `lumi-pi-v3`·가져오기 파일). 29CM 원문 정규화는 `build_29cm_registry.py`(v2 빌드가 import), 원문 PI 보완은 `fill_pi_deepseek.py`
 - 테스트: `tests/test_*.py`(unittest), `tests/*.mjs`(node --test / Playwright 브라우저 검사)
 - `archive/`는 동결 자료다. 링크 검사 대상이 아니며 수정하지 않는다.
 
@@ -55,10 +55,11 @@ export STYLEMATE_DB=/private/tmp/lumi-local/memory.sqlite3
 export STYLEMATE_CATALOG_DB=/private/tmp/lumi-local/catalog.sqlite3
 PYTHONPATH=src python3 -m stylemate_memory.cli catalog-import --file tests/fixtures/catalog/valid.jsonl
 PYTHONPATH=src python3 -m stylemate_memory.cli catalog-map
-PYTHONPATH=src python3 -m stylemate_memory.consumer --provider fake   # http://127.0.0.1:8766
+PYTHONPATH=src ~/.venvs/lumi-graph/bin/python -m stylemate_memory.consumer --provider fake   # http://127.0.0.1:8766, 기본 graph·lumi-pi-v3
+# 위 fixture는 Park 사전(Pants) 형식 예시다. 실제 v3 카탈로그는 docs/project.md "로컬 실행"
 ```
 
-실행 DB는 저장소 밖 경로를 쓴다. 수집 원본·이미지는 저장소 안 `data/`(gitignore, [ADR 0014](../docs/adr/0014-crawled-catalog-pi-v2.md))에 둔다. 기본 provider `fake`는 외부 호출이 없다. 실제 모델(`opencode-go`, `openai`)과 Codex 기반 관찰 도구는 사용자가 요청한 실행에서만 쓴다.
+실행 DB는 저장소 밖 경로를 쓴다. 수집 원본·이미지는 저장소 안 `data/`(gitignore, [ADR 0014](../docs/adr/0014-crawled-catalog-pi-v2.md))에 둔다. 기본 provider `fake`는 외부 호출이 없다. 실제 모델(`opencode-go`, `openai`)은 사용자가 요청한 실행에서만 쓴다.
 
 ## 데이터 위치
 
