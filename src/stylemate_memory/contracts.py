@@ -15,12 +15,9 @@ from .errors import StyleMateError
 
 CONTRACT_VERSION = "lumi-memory-v1"
 V1_REGISTRY_VERSION = "park-2025-source-v1"
-# ADR 0010: 29CM 수집 상품에서 정한 PI value 사전. 축·FEA 분류는 Park 사전과 같다.
-COLLECTED_29CM_REGISTRY_VERSION = "lumi-29cm-v1"
-LUMI_PI_V2_TOP_REGISTRY_VERSION = "lumi-pi-v2-top"  # ADR 0014: tops only, 11 PI axes + Brand
 LUMI_PI_V3_REGISTRY_VERSION = "lumi-pi-v3"  # ADR 0016: tops + bottoms, 12 PI axes (+ Weight) + Brand
-V1_REGISTRY_VERSIONS = (V1_REGISTRY_VERSION, COLLECTED_29CM_REGISTRY_VERSION, LUMI_PI_V2_TOP_REGISTRY_VERSION,
-                        LUMI_PI_V3_REGISTRY_VERSION)
+# Park (ADR 0004) stays as the paper-sourced fixture dictionary; lumi-pi-v3 is the runtime default.
+V1_REGISTRY_VERSIONS = (V1_REGISTRY_VERSION, LUMI_PI_V3_REGISTRY_VERSION)
 LEGACY_REGISTRY_VERSION = "consumer-17-v1"
 CATALOG_FORMAT_VERSION = "lumi-catalog-v1"
 
@@ -935,7 +932,7 @@ class MemoryStorePort(Protocol):
 
 
 class ModelGateway(Protocol):
-    """C1 / llm.py, codex_llm.py. No IDs, versions, authority or writes."""
+    """C1 / llm.py. No IDs, versions, authority or writes."""
 
     def complete(
         self, instructions: str, payload: dict[str, JSONValue], schema: dict[str, JSONValue],

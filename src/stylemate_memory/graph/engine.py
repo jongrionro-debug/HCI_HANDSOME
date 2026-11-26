@@ -49,7 +49,7 @@ class GraphState(TypedDict):
 class GraphEngine:
     def __init__(self, bridge: Any, checkpoint_path: str | Path) -> None:
         if not graph_available():
-            raise StyleMateError("unsupported_contract", "graph 엔진에는 선택 의존성 graph(langgraph)가 필요합니다.")
+            raise StyleMateError("unsupported_contract", "graph 엔진에는 선택 의존성 graph(langgraph)가 필요합니다. pip install -e '.[graph]'로 설치하거나 --engine legacy로 실행해 주세요.")
         from langgraph.checkpoint.sqlite import SqliteSaver
         from langgraph.graph import END, START, StateGraph
 

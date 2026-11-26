@@ -14,7 +14,6 @@ from unittest.mock import patch
 from stylemate_memory import contracts as c
 from stylemate_memory.app import ConsumerService
 from stylemate_memory.cli import main as cli_main
-from stylemate_memory.inspector import main as inspector_main
 from stylemate_memory.errors import StyleMateError
 from stylemate_memory.llm import OpenAIResponsesGateway
 from stylemate_memory.model_io import FakeModelGateway
@@ -383,7 +382,7 @@ class ConsumerServiceTests(ServiceFixture):
         self.now += timedelta(days=100)
         self.assertIsNone(self.state()["request"])
 
-    def test_configuration_cli_inspection_and_import_do_not_read_keys(self):
+    def test_configuration_cli_and_import_do_not_read_keys(self):
         class NoSecrets(dict):
             def get(self, key, default=None):
                 if key == "OPENAI_API_KEY":
@@ -396,7 +395,6 @@ class ConsumerServiceTests(ServiceFixture):
             with patch("sys.stdout", new_callable=io.StringIO):
                 self.assertEqual(cli_main(["catalog-import", *args, "--file", str(self.data)]), 0)
                 self.assertEqual(cli_main(["catalog-map", *args]), 0)
-                self.assertEqual(inspector_main(["--consumer-state", *args]), 0)
         configured = ConsumerSettings(settings.db, settings.catalog_db, provider="openai", model="dummy")
         self.assertIsInstance(configured.gateway(settings={"OPENAI_API_KEY": "dummy"}, transport=self.transport), OpenAIResponsesGateway)
 

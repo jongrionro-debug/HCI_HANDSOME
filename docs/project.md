@@ -153,10 +153,8 @@ PI 7개 축과 FEA 분류를 차용한 출처는 Park, H., Kim, S., Choi, Y., & 
 
 | 버전 | 정본 | 범위 |
 |---|---|---|
-| `park-2025-source-v1` (기본) | [park-2025-feature-map.json](../output/feature-map/park-2025-feature-map.json) | 논문 차용 값, Pants만, confirmed 상품 값만 비교 |
-| `lumi-29cm-v1` | [lumi-29cm-v1.json](../output/feature-map/lumi-29cm-v1.json) | 29CM 수집 기반 한국어 value, 상·하의 10개 품목, 모델 보완값도 비교([ADR 0012](adr/0012-collected-29cm-value-dictionary.md)) |
-| `lumi-pi-v2-top` | [lumi-pi-v2-top.json](../output/feature-map/lumi-pi-v2-top.json) | PI v2 11축(+Brand) 영어 value, 상의만(품목 `Top` 1개), 모델 보완값도 비교([ADR 0014](adr/0014-crawled-catalog-pi-v2.md)). graph 엔진의 가설·이유 축은 사전의 축을 그대로 읽는다 |
-| `lumi-pi-v3` | [lumi-pi-v3.json](../output/feature-map/lumi-pi-v3.json) | PI v3 12축(+Brand, Weight 추가) 영어 value, 상·하의(품목 `Top`·`Bottom`), 모델 보완값도 비교([ADR 0016](adr/0016-pi-v3-value-shapes.md)). Silhouette은 하의 전용. 축마다 `value_shape`(형태·채우는 경로)를 둔다. 2026-11-25 로컬 1,748개(상의 1,098·하의 650)로 적재·Map과 graph 시작 그리드(상·하의 각 8장)를 확인했다 |
+| `park-2025-source-v1` | [park-2025-feature-map.json](../output/feature-map/park-2025-feature-map.json) | 논문 차용 값, Pants만, confirmed 상품 값만 비교 |
+| `lumi-pi-v3` (기본) | [lumi-pi-v3.json](../output/feature-map/lumi-pi-v3.json) | PI v3 12축(+Brand, Weight 추가) 영어 value, 상·하의(품목 `Top`·`Bottom`), 모델 보완값도 비교([ADR 0016](adr/0016-pi-v3-value-shapes.md)). Silhouette은 하의 전용. 축마다 `value_shape`(형태·채우는 경로)를 둔다. 2026-11-25 로컬 1,748개(상의 1,098·하의 650)로 적재·Map과 graph 시작 그리드(상·하의 각 8장)를 확인했다 |
 
 [registry.py](../src/stylemate_memory/registry.py)의 `load_registry(version)`이 실행 사전을 공급한다. [패키지 resources](../src/stylemate_memory/resources)의 JSON은 정본의 생성 사본이다. `python3 scripts/sync_feature_registry.py`로 동기화하며 수동 편집하지 않는다. 전체 enum을 이 문서에 복제하지 않는다.
 
@@ -356,29 +354,6 @@ PYTHONPATH=src python3 -m stylemate_memory.cli infer --help
 기존 `apply_batch`는 feature/values·polarity·strength·match·selector·conditions·content·scope·origin/confirmed·확인/동의 참조를 받는다. formality의 range는 양끝 포함이며 any/all 연산을 보존한다. v1 계약을 생략한 호출은 이 경로를 사용하고 자동으로 Park 값에 대응시키지 않는다.
 
 기존 `build_context`는 장기12/단기20개·사용자 내용/조건6,000자 예산과 대상별 facts를 적용한다. 직접 조건을 모델이 누락해도 보존하며 혼합 any/all은 표시용 match=null과 개별 constraints로 구분한다. 이 null을 v1의 값 미정과 혼동하지 않는다. `ShoppingApp.infer_request()`는 모델 응답 후 최신 snapshot으로 재검사하며 목표 추론은 기억을 자동 저장하지 않는다.
-
-### 개발자 관찰 도구
-
-소비자 서비스의 상태·snapshot/context를 모델 호출 없이 읽으려면, 같은 외부 DB 설정에서 다음을 사용한다.
-
-```sh
-PYTHONPATH=src python3 -m stylemate_memory.inspector --consumer-state
-# 특정 요청은 --request REQUEST_ID 추가
-```
-
-기존 관찰 서버는 별도 `consumer-17-v1` 도구다. 아래 실행 뒤 텍스트 추출·목표 추론 조작에는 실제 Codex 모델 호출이 발생하므로 해당 실행을 요청받았을 때만 사용한다.
-
-```sh
-PYTHONPATH=src python3 -m stylemate_memory.inspector \
-  --port 8765 \
-  --db /private/tmp/stylemate-inspector/memory.sqlite3 \
-  --garment-type Pants \
-  --model gpt-6-luna
-```
-
-[로컬 관찰 도구](http://127.0.0.1:8765)는 Chat·Memory·Feature Map과 processing trace/raw JSON을 보여준다. 미확인 후보→테스터 확인→현재 적용/별도 장기 활용을 관찰하며 이 도구의 장기 조작은 소비자 서비스의 종료 요약 UI와 구분한다. 대상 변경은 다른 대상의 기억을 옮기지 않고 새 요청은 이전 단기를 이월하지 않는다. Infer는 목표값만 재생성한다.
-
-[codex_llm.py](../src/stylemate_memory/codex_llm.py)는 기존 로그인된 Codex CLI를 일회성 JSON 변환으로 사용한다. 별도 임시 폴더·읽기 전용 sandbox·ephemeral·출력 schema와 도구 제한을 적용하며 앱이 로그인 파일을 직접 읽지 않는다. 전체 채팅·모델 원본·trace는 프로세스 메모리에 있고 최소 기억·참조·버전만 SQLite에 남는다. 실패한 모델 결과를 성공이나 저장 rollback으로 표시하지 않는다.
 
 ## 연구와 평가
 

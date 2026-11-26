@@ -1,6 +1,6 @@
 """Korean display labels for PI v2/v3 values (UI U1). Display only: stored values stay as in the registry.
 
-A value without an entry is shown as stored. The registry (lumi-pi-v2-top / lumi-pi-v3) remains the
+A value without an entry is shown as stored. The registry (lumi-pi-v3) remains the
 source of truth for which values exist; this table never adds or renames a value.
 """
 
