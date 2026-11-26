@@ -158,6 +158,8 @@ PI 분류와 FEA 30개 태그의 출처는 Park, H., Kim, S., Choi, Y., &amp; An
 
 **PI v4 아우터([ADR 0018](adr/0018-pi-v4-outer.md), Proposed).** [build_lumi_pi_v4.py](../scripts/build_lumi_pi_v4.py)가 v3 위에 품목군 `outer`(29CM 남성 아우터)를 더한다. Type은 소분류 24개에서 19개 값으로 정하고(후드 집업은 별도 `Zip hoodie`, 기타 아우터는 비움), Length는 몸판 기장 5단계(Cropped~Long), Weight는 아우터 키워드·품목 규칙, Fabric에 Leather·Fur, Texture에 Suede·Quilted·Shearling·Melton·Ripstop·Tweed를 더한다. Silhouette은 아우터에서 쓰지 않는다. `--schema`로 스키마를 출력하고 `outer_pi`가 규칙으로 채운다. 실제 아우터 수집·빌드와 실측 기장 경계값 조정은 남았다.
 
+**PI v5 스커트([ADR 0019](adr/0019-pi-v5-skirt.md), Proposed).** [build_lumi_pi_v5.py](../scripts/build_lumi_pi_v5.py)가 v4 위에 품목군 `skirt`(29CM 여성 스커트)를 더한다. Type은 Skirt·Skort이고 Skirt는 하의 Type에서 빠진다. Length는 밑단 기장 4단계(Mini·Knee·Midi·Long)이며 상품명, 소분류, 판매자 문구, 실측 총장 순서로 정한다. Silhouette에 Pencil·H-line·A-line·Flare·Mermaid를 두고 Fit은 쓰지 않는다. Texture에 Velvet·Lace·Satin·Tulle, Detail에 Wrap·Tiered·Ruffle, Pattern에 Dot, 스커트 Style에 Feminine을 더한다. `skirt_pi`가 규칙으로 채운다. 원피스는 넣지 않았다. 800개 전체 빌드와 총장 경계값 조정은 남았다.
+
 ### 수집
 
 수집 경로·PI별 필드·실행법·중간 레코드·정규화의 상세 계약은 [crawling.md](specs/crawling.md)에서 관리한다. 현재 카탈로그는 29CM·Cole Buxton·Wax London 상품이다. 네이버는 제외했다(#8). 빌드 순서는 `build_lumi_pi_v2.py`(규칙) → `fill_pi_v2_text.py`·`fill_pi_v2_image.py`(DeepSeek, 실행 요청 시만) → `build_lumi_pi_v3.py --export-runtime`이다.
@@ -387,7 +389,7 @@ LUMI_GRAPH_PYTHON=~/.venvs/lumi-graph/bin/python node tests/check_graph_browser.
 | 써 보기 | 실제 DeepSeek로 요청 3~4회를 써 보고 ADR 0015의 수치·새로움 칸 비율·프로필 말투·값 라벨을 정한다 |
 | 실제 의미 검색 | 모델 선정 후 관련 근거 회수·오탐·근거 완전성·삭제/재색인·비용 비교 |
 | 사용자 연구 | 보고서 기준 파일럿·동의/과제 안내·설문·Baseline 환경·분석 준비. 참여자 자료는 저장소 밖 관리 |
-| Proposed ADR | 0013·0014·0015·0016·0018이 Proposed다. 구현이 들어간 0013~0016은 써 보기 결과와 함께 승인·수정 여부를 정한다 |
+| Proposed ADR | 0013·0014·0015·0016·0018·0019가 Proposed다. 구현이 들어간 0013~0016은 써 보기 결과와 함께 승인·수정 여부를 정한다 |
 
 ### 지금 할 일 (2026-11-26 기준)
 
