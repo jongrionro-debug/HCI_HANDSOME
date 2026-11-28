@@ -34,7 +34,7 @@ flowchart LR
 | 2 · 답 해석·반영 | interpret | [2-feedback.md](2-feedback.md) | `interpret`, `scoring.py`(PI v3 점수·색 거리) |
 | 3 · 언제 어떤 방식 | candidates · should_ask · choose, 루프 켜기 | [3-mapping.md](3-mapping.md) | `candidates`·`should_ask`·`choose`, 결정 로그 |
 
-v0은 `text_options` 한 방식으로 루프 전체가 돈다(`STYLEMATE_QUESTION_LOOP=on`일 때만). 각 파트는 자기 단계를 v0에서 v1으로 바꾸고, 다른 파트의 v0에 기대어 따로 테스트할 수 있다.
+**현재(2026-11-28)**: 세 파트 v1을 main에 합쳐 확인 지점 A·B·C를 마쳤다. 루프는 기본으로 켜져 있고(`STYLEMATE_QUESTION_LOOP=off`로 끈다), 방식 6개·강도 단계 반영·규칙+LLM 방식 선택이 [questions.py](../../src/stylemate_memory/graph/questions.py)에 있다. 결정 이유는 [ADR 0020](../../docs/adr/0020-question-loop-v1.md), 데이터·실제 모델로 확인할 남은 가정은 [#41](https://github.com/jongrionro-debug/HCI_HANDSOME/issues/41)에 있다.
 
 세 파트의 결정은 **같은 근거를 이어 써야 한다.** 예를 들어 1이 "선택은 절대 평가보다 상대 선호로 읽을 때 정확하다"는 근거로 대조 2장을 채택하면, 3은 "그 축만 다른 상품 쌍이 있을 때" 이 방식을 쓰고, 2는 선택을 두 장이 다른 축에 대한 상대 선호로만 반영한다. 근거 카드 하나가 세 결정을 관통한다.
 

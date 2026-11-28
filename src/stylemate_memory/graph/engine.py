@@ -21,6 +21,7 @@ from pathlib import Path
 from typing import Any, TypedDict
 
 from ..errors import StyleMateError
+from ..model_io import FakeModelGateway
 from . import grid as grid_plan
 from . import intent as it
 from . import memory as mem
@@ -145,6 +146,8 @@ class GraphEngine:
         intent["route_question"] = None
         if event.get("command_id") and event["command_id"] in intent["processed"]:
             return {"intent": intent}
+        intent["trigger"] = {}  # reactive question triggers live for one turn (3-mapping 9절)
+        self._note_hints(intent, event)
         # The shortlist grid is (re)drawn on "후보함에서 고르기" and on a removal made while comparing.
         intent["compare_mode"] = event["type"] == "adjust" and (event.get("action") == "shortlist_compare" or (
             event.get("action") == "shortlist_remove" and bool((intent["last_grid"] or {}).get("compare"))))
@@ -165,6 +168,16 @@ class GraphEngine:
             changed = [] if signal["all_bad"] or compare else scoring.attribute_grid(intent, cards, selected, scope, extra)
             if not compare:
                 self._note_picks(intent, cards, selected)
+                fresh = [c for c in cards if c["candidate_id"] in selected and c["slot"] != "kept"]
+                if len(fresh) >= 2 and not signal["all_bad"]:
+                    target = fresh[0]["target_id"]
+                    same = [c for c in fresh if c["target_id"] == target]
+                    intent["trigger"]["selection"] = {"target_id": target, "product_ids": [c["product_id"] for c in same],
+                                                      "chosen": [c["facts"] for c in same],
+                                                      "shown": [c["facts"] for c in cards if c["target_id"] == target]}
+                elif len(fresh) == 1:
+                    intent["trigger"]["base"] = {"target_id": fresh[0]["target_id"], "product_id": fresh[0]["product_id"],
+                                                 "reason": "single_pick"}
             for candidate_id, axes in sorted(liked.items()):
                 for axis in axes:  # "이 상품의 이 점이 좋았어요": credit only that card's axis
                     scoring.apply_reason_axis(intent, cards, {candidate_id}, axis, scope)
@@ -188,6 +201,8 @@ class GraphEngine:
             self._answer(intent, event, scope)
         if event.get("novel_hint"):
             mem.ask_novelty(intent)
+        if event.get("feedback_ref") and intent.get("ask") and (event.get("hints") or {}).get("text_len"):
+            self._text_answer(intent, event)
         if event.get("feedback_ref"):
             self._interpret(intent, event)
             if intent["questions"] and event.get("answers_question"):
@@ -255,10 +270,58 @@ class GraphEngine:
                 questions.log(intent, {"turn": intent["turn"], "event": "switch", "question_id": question["question_id"],
                                        "decision": {"candidate_id": candidate["id"], "mode": answer["switch_to"],
                                                     "decided_by": "user", "reason": "user_switch", "allowed": modes}})
-                intent["ask"] = question | built[answer["switch_to"]] | {
-                    "mode": answer["switch_to"], "switch_to": [m for m in modes if m != answer["switch_to"]]}
+                # 3-mapping 10절: the switched mode holds for this axis for the rest of the request.
+                intent.setdefault("mode_pref", {})[candidate["id"]] = answer["switch_to"]
+                rebuilt = dict(built[answer["switch_to"]])
+                intent["ask"] = {k: v for k, v in question.items() if k not in ("layout", "base", "term", "products")} | {
+                    "layout": rebuilt.pop("layout", None), **rebuilt, "mode": answer["switch_to"],
+                    "switch_to": [m for m in modes if m != answer["switch_to"] and m in questions.SWITCH_MODES]}
             return
-        intent["answer_changed"] = bool(questions.interpret(intent, question, answer, scope))
+        views = {(v["product_id"], v["target_id"]): v for v in self.bridge.products()}
+        base = question.get("base")
+        base_view = views.get((base["product_id"], question["target_id"])) if base else None
+        intent["answer_changed"] = bool(questions.interpret(intent, question, answer, scope, base_view))
+        if question["mode"] == "select_images" and answer["choice"] == "options":
+            picked = [o for o in question["options"] if o["id"] in answer["option_ids"]]
+            self._note_question_picks(intent, [views[(o["product_id"], question["target_id"])] for o in picked
+                                               if (o["product_id"], question["target_id"]) in views])
+        intent["ask"] = None
+
+    def _note_question_picks(self, intent: dict[str, Any], views: list[dict[str, Any]]) -> None:
+        """Products picked inside an image question join the shortlist like grid picks (F8). No extra score."""
+        shortlist = intent.setdefault("shortlist", [])
+        known = {(s["product_id"], s["target_id"]) for s in shortlist}
+        history = intent.setdefault("pick_history", [])
+        for view in views:
+            history.append({"turn": intent["turn"], "target_id": view["target_id"], "facts": view["facts"]})
+            if (view["product_id"], view["target_id"]) not in known:
+                shortlist.append({"product_id": view["product_id"], "target_id": view["target_id"], "turn": intent["turn"],
+                                  "image_id": view["image_id"], "image_version": view["image_version"]})
+        intent["shortlist"] = shortlist[-grid_plan.MAX_SHORTLIST:]
+        intent["pick_history"] = history[-grid_plan.MAX_PICK_HISTORY:]
+
+    @staticmethod
+    def _note_hints(intent: dict[str, Any], event: dict[str, Any]) -> None:
+        """Code-checked user-state facts the mode choice may cite (3-mapping 8절). Text itself stays in the store."""
+        hints = event.get("hints") or {}
+        if "text_len" in hints:
+            intent["last_text_len"] = hints["text_len"]
+        if hints.get("mode_hint"):
+            intent["mode_hint"] = hints["mode_hint"]
+        if hints.get("show"):
+            intent["show_hint"] = True
+
+    def _text_answer(self, intent: dict[str, Any], event: dict[str, Any]) -> None:
+        """A free-text reply closes the open question; parse_turn reads the text like any other (2-feedback 4절)."""
+        question = intent["ask"]
+        unknown = bool((event.get("hints") or {}).get("unknown_term"))
+        questions.log(intent, {"turn": intent["turn"], "event": "text_answer", "question_id": question["question_id"],
+                               "mode": question["mode"], "unknown_term": unknown})
+        if unknown and question.get("axis") and question["kind"] == "gap":
+            terms = intent.setdefault("term_unknown", [])
+            if question["axis"] not in terms:
+                terms.append(question["axis"])
+            intent["requeue"] = {"target_id": question["target_id"], "axis": question["axis"], "prefer": "photo_chips"}
         intent["ask"] = None
 
     def _labels(self) -> dict[str, str]:
@@ -493,12 +556,30 @@ class GraphEngine:
             intent["converged"] = grid_plan.converged(intent["top_history"], plan["shortage"])
             intent["shortage"] = plan["shortage"]
             if questions.loop_enabled():
+                self._note_top(intent, published["cards"])
                 self._plan_question(intent)
+        elif (questions.loop_enabled() and intent["event"].get("type") == "answer" and not intent.get("ask")
+              and intent.get("requeue") and intent["last_grid"]):
+            self._plan_question(intent)  # "모르겠어요" re-asks the axis in an image mode right away
         return {"intent": intent}
+
+    @staticmethod
+    def _note_top(intent: dict[str, Any], cards: list[dict[str, Any]]) -> None:
+        """3-mapping 9절: a picked product kept on screen two grids in a row is a "거의 맞음" base (1-modes 5번 "계속 유지")."""
+        top = next((c for c in cards if c["slot"] == "kept"), None)
+        history = (intent.get("top1_history", []) + [top["product_id"] if top else None])[-2:]
+        intent["top1_history"] = history
+        used = intent.setdefault("same_top_used", [])
+        if top and len(history) == 2 and history[0] == history[1] and top["product_id"] not in used:
+            used.append(top["product_id"])
+            intent.setdefault("trigger", {}).setdefault("base", {"target_id": top["target_id"],
+                                                                 "product_id": top["product_id"], "reason": "same_top"})
 
     def _plan_question(self, intent: dict[str, Any]) -> None:
         if intent.get("ask"):  # a new grid replaces an unanswered question; ASK_GAP keeps it from coming straight back
             questions.log(intent, {"turn": intent["turn"], "event": "ignored", "question_id": intent["ask"]["question_id"]})
+            if intent["ask"].get("kind", "gap") == "gap":
+                intent["ignored_turn"] = intent["turn"]
             intent["ask"] = None
         scope = it.scope_of(intent)
         products = self.bridge.products()
@@ -507,7 +588,13 @@ class GraphEngine:
         for pin in intent["pinned"]:
             target_id, _, axis, _ = scoring.split_key(pin["key"])
             fixed.setdefault(target_id, []).append(axis)
-        intent["ask"] = questions.plan(intent, pools, fixed, self._labels())
+        gateway = getattr(self.bridge.s, "gateway", None)
+        # 3-mapping 1절: a real model may choose inside the allowed list; the fake/scripted gateways keep the rule.
+        chooser = None if gateway is None or isinstance(gateway, FakeModelGateway) else self.bridge.complete
+        intent["ask"] = questions.plan(intent, pools, fixed, self._labels(), products, scope, chooser)
+        if intent["ask"] and intent["ask"]["mode"] == "reason_chips":
+            intent["reason_prompt"] = None  # one question per screen: the shared-value chips replace the F4 banner
+            intent["clarify"] = None
 
     def _wait_user(self, state: GraphState) -> dict[str, Any]:
         from langgraph.types import interrupt

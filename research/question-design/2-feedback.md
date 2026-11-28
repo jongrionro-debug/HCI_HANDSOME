@@ -1,8 +1,8 @@
 # ② 답 해석·반영
 
 - 주인: 파트 2 담당 (Issue [#27](https://github.com/jongrionro-debug/HCI_HANDSOME/issues/27))
-- 상태: **v1 초안** (확인 지점 A 리뷰용). 방식 이름은 1-modes.md v1 초안(PR #31)의 코드 이름을 쓴다. 1의 방식 목록이 고정되면 4절 표의 행을 맞춘다. 2026-11-28 팀 결정에 따라 싫어요 확인(`exclude_check`)을 빼고, 공통점 칩 정도 이름(꼭 있어야 해요 / 있으면 좋아요)과 기준 이미지 조정 채택을 반영했다.
-- 코드에서는 [graph/questions.py](../../src/stylemate_memory/graph/questions.py)의 `interpret`와 [graph/scoring.py](../../src/stylemate_memory/graph/scoring.py)가 이 문서를 구현한다. 지금 코드는 v0(`text_options` 선택 → 값 고정)만 있다.
+- 상태: **v1 확정** (2026-11-28). 방식 이름은 [1-modes.md](1-modes.md) v1의 코드 이름을 쓴다. 싫어요 확인(`exclude_check`)은 빼고, 공통점 칩 정도 이름(꼭 있어야 해요 / 있으면 좋아요)과 기준 이미지 조정 채택을 반영했다. 구현과 결정 이유는 [ADR 0020](../../docs/adr/0020-question-loop-v1.md)에 있다.
+- 코드에서는 [graph/questions.py](../../src/stylemate_memory/graph/questions.py)의 `interpret`와 [graph/scoring.py](../../src/stylemate_memory/graph/scoring.py)·[graph/grid.py](../../src/stylemate_memory/graph/grid.py)가 이 문서를 구현한다. 4절의 행마다 `tests/test_question_loop.py`에 테스트가 있다.
 - 근거 칸에는 카드 ID 또는 ADR을 적고, 근거가 없으면 `가정`이라고 적는다.
 
 ## 1. 구조
@@ -38,7 +38,7 @@
 | L1 약함 | 비교 속 선택 | α 작게 | 여러 장 중 고른 쪽(상대 선호) |
 | L0 | 값 변화 없음 | 진행 신호만 | 보류 답, 반대편 값 미확인 |
 | L−1 약한 감점 | 비교 속 미선택 | β 작게 | 고른 쪽과 차이가 확인된 미선택 값 |
-| L−2 강한 감점 | 덜 보고 싶음 | β 크게 | "덜 보여 주세요" |
+| L−2 강한 감점 | 덜 보고 싶음 | β 크게 | "덜 보여 주세요". v1 방식에는 이 답이 없다 |
 | L−3 제외 | 이번엔 빼기 | `excluded` | 칩 x, "이번엔 빼 주세요", "다음에도 빼 주세요" |
 
 **갱신 크기 α·β**: 근거 카드(`xie2022-relative-feedback` 포함)에서 옮겨 올 수 있는 숫자가 없다. 그래서 **단계 사이의 순서만 규칙으로 고정**하고 숫자는 파일럿 가정으로 둔다. 기존 상수는 유지한다(L1 = `SELECT_GAIN` 1.0, L−1 = `MISS_PENALTY` 0.3, L2 = `REASON_GAIN` 2.0). 새 값 L3 = 3.0, L−2 = β 1.0은 `가정`이다. 테스트는 숫자가 아니라 순서(L3 > L2 > L1 > 0 > L−1 > L−2)를 확인한다.
@@ -51,23 +51,25 @@
 |---|---|---|---|---|---|
 | `text_options` | 선택 | 물은 축의 그 값 L4 | | | `guo2018-natural-language-feedback`(아는 조건은 말로), `가정` |
 | `explain_images`(단어 정렬) | 해석 선택 | 고른 해석 L3. 안 고른 해석은 그 단어의 해석 목록에서만 빠짐(값은 L0) | | 이번 요청만 | ADR 0006 결정 2·5 |
-| `explain_images`(사진 붙은 선택지, 다중: Type·Style·Pattern·Detail) | 값 여러 개 선택 | 고른 값마다 L3(이해 칩, x로 풀림). 안 고른 값은 L0. 전부 선택이면 L0. 이해 칩 고정이나 글 "이것만"이면 L4 | | | P1·P3·P6, Yuan et al. WWW 2024(카드 없음), `가정` |
-| `explain_images`(사진 붙은 선택지, 단일: 순서형 축) | 값 하나 선택 | 그 값 L4(`text_options`와 같음). 안 고른 값은 L0 | | | `text_options` 행, `가정` |
-| `select_images` | 다중 선택 | 물은 축만: 고른 쪽 값 L1, 차이가 확인된 미선택 값 L−1. 미선택은 자동 제외(3연속) 횟수에 세지 않음. 전부 선택이면 L0 | 보여 준 순서를 섞고 위치를 기록 | | `joachims2005-relative-preference` |
+| `photo_chips`(사진 붙은 선택지, 다중: Type·Style·Pattern·Detail) | 값 여러 개 선택 | 고른 값마다 L3(이해 칩, x로 풀림). 안 고른 값은 L0. 전부 선택이면 L0. 이해 칩 고정이나 글 "이것만"이면 L4 | | | P1·P3·P6, Yuan et al. WWW 2024(카드 없음), `가정` |
+| `photo_chips`(사진 붙은 선택지, 단일: 나머지 축) | 값 하나 선택 | 그 값 L4(`text_options`와 같음). 안 고른 값은 L0 | | | `text_options` 행, `가정` |
+| `select_images` | 다중 선택 | 물은 축만: 고른 쪽 값 L1, 차이가 확인된 미선택 값 L−1. 미선택은 자동 제외(3연속) 횟수에 세지 않음. 전부 선택이면 L0. 고른 상품은 후보함에 들어간다 | 보여 준 순서를 섞고 위치를 기록. 한 장만 고르면 그 상품으로 기준 이미지 조정 | | `joachims2005-relative-preference` |
 | `select_images` | 다 별로 | L0 | 다음은 글로 묻기 | | ADR 0013 결정 8, `가정` |
 | `reason_chips` | 칩 + 꼭 있어야 해요(`only`) / 있으면 좋아요(`more`) | 그 칩의 축·값 L4 / L2 | 있으면 좋아요: 고른 상품 중 사용자가 기준 상품을 골라 기준 이미지 조정(`relative_adjust`)으로 비슷하게 더 둘러보기 | | `가정` |
-| `relative_adjust` | 방향 + `step_small` / `step_large` | 기준 상품 v3 점수 ±0.5 / ±1.0 범위의 값 L2 | | | ADR 0016, `가정` |
-| `contrast_pair`(후보) | 한 장 / 둘 다 아님 | 두 장이 다른 축만 L1·L−1 / L0 | | | `joachims2005-relative-preference` |
+| `relative_adjust` | 방향 + `step_small` / `step_large` | 기준 상품 v3 점수에서 ±0.5 / ±1.0(Tone은 L* ±5 / ±15) 옮긴 목표에 가장 가까운, 그 방향의 값 L2. 목표 점수에 가까운 상품을 soft로 앞에 둔다. 기준 점수가 없거나 끝 값이면 L0 | | | ADR 0016, #38, `가정` |
+| `select_images`(2장, 대조) | 한 장 / 둘 다 좋아요 / 둘 다 아님 | 두 장의 물은 축 값 L1·L−1 / L0 / L0 | 둘 다 아님: 다음은 글로 묻기 | | `joachims2005-relative-preference` |
+| `propose_compare` | 비교해 볼게요 / 더 둘러볼게요 | L0 | 후보함 비교로 넘어감 / 3턴 동안 다시 제안하지 않음 | | `가정` |
 | 공통 | 모르겠음 | L0 | 그 축을 이미지 방식으로 한 번 더 | | `가정` |
 | 공통 | 건너뛰기 | L0. "상관없음"으로 기록하지 않음 | 이번 요청에서 그 축은 다시 묻지 않음 | | P3 |
 | 공통 | 방식 바꾸기 | L0 | 바꾼 방식을 우선(`decided_by: user`) | | `가정` |
 | 공통 | 글: 물은 축의 절대값 | L4(parse가 약하게 읽으면 L2). 사전 밖 값은 가장 가까운 값을 점선 가설 칩으로 | | | ADR 0006 결정 1 |
-| 공통 | 글: 상대값 | `relative_adjust`와 같음. 기준 상품(고정 값 또는 마지막 선택)이 없으면 L0, 로그만 | | | P7 |
+| 공통 | 글: 상대값 | `relative_adjust`와 같음. 기준 상품(고정 값 또는 마지막 선택)이 없으면 L0, 로그만. v1 미구현([#41](https://github.com/jongrionro-debug/HCI_HANDSOME/issues/41)) | | | P7 |
 | 공통 | 글: 다른 축 언급 | 그 축에 평소 대화처럼 반영. 물은 축은 미응답 | 나중에 다시 물을 수 있음 | | P2 |
-| 공통 | 글: 무관한 답 | 질문을 건너뛰기로 닫음 | "보여 줘"는 비교 단계 신호 | | `가정` |
+| 공통 | 글: 무관한 답 | 질문을 닫음 | "보여 줘"는 비교 단계 신호, "그게 뭐예요?"는 용어 모름 신호(그 축을 사진 붙은 선택지로 다시) | | `가정` |
+| 공통 | 같은 답 재전송 | 열린 질문 ID에만 답할 수 있고 답하면 질문이 닫혀 두 번 반영되지 않음 | | | #38 |
 | 공통 | 선택 + 이유 글 | 선택은 위 규칙, 이유로 지목한 축은 L2 | | 대상+싫은 속성을 밝혔을 때 | ADR 0007, ADR 0013 결정 10 |
 
-글 답은 새 해석기를 만들지 않고 기존 `parse_turn`에 질문의 대상·축을 함께 넘긴다. 원문 인용이 없는 PI는 지금처럼 거절한다.
+글 답은 새 해석기를 만들지 않는다. 질문이 열려 있을 때 글이 오면 질문을 닫고(결정 로그 `text_answer`), 글은 평소처럼 `parse_turn`이 해석한다. 원문 인용이 없는 PI는 지금처럼 거절한다. 질문의 대상·축을 `parse_turn`에 함께 넘기는 것은 [#41](https://github.com/jongrionro-debug/HCI_HANDSOME/issues/41)에 남겼다.
 
 ## 5. 질문 밖 신호
 
@@ -75,7 +77,7 @@
 |---|---|---|
 | 이해 칩 고정 / x | L4 / L−3, 기억 없음 | ADR 0013 결정 9 |
 | 가설 칩(점선) 확인 / x | L3 / 그 가설만 제거하고 다시 만들지 않음(값은 L0) | ADR 0006 결정 2·5 |
-| 분위기 가설 [맞아요] / [조금 달라요] | L3 / L0 + 이미지로 다시 묻기 | `가정` |
+| 분위기 가설 [맞아요] / [조금 달라요] | L3 / L0 + 이미지로 다시 묻기. 가설을 만드는 `describe_selection`(VLM)이 아직 없어 v1에는 이 질문이 없다 | `가정` |
 | 상품 "별로"(이유 없음) | 상품 단위로만, 서로 다른 노출 2회면 숨김. 값은 L0 | ADR 0013 결정 8 |
 
 가설 칩 확인은 [agent-pipeline.md](../../docs/specs/agent-pipeline.md)와 v0 표에서 "고정"이었다. v1은 단어 정렬과 같은 원리로 L3로 낮춘다(ADR 0006 결정 2: 가설을 hard로 올리지 않는다). agent-pipeline.md는 확인 지점 C에서 확정할 때 고친다.
@@ -85,8 +87,8 @@
 - `Answer.strengths: {option_id: 강도}` + `Question.strengths`(허용 강도 목록). `Answer.strength` 하나로는 칩마다 다른 강도를 담지 못한다.
 - 강도 값: `only`(꼭 있어야 해요)·`more`(있으면 좋아요)·`step_small`·`step_large`. 강도가 없으면 4절의 방식별 기본 반영을 따른다.
 - `relative_adjust`의 방향은 강도가 아니라 Option 값에 둔다.
-- `Answer.text`(선택)와 `choice: "text"`. 글만 쓰면 `text`, 선택과 글을 함께 쓰면 `options` + `text`.
-- `Option.axis` 찬성.
+- `Answer.text`는 넣지 않았다(#29 결정). 글은 기존 피드백 경로로 보내고 열린 질문을 닫는다.
+- `Option.axis` 채택. `Answer.strengths`는 `only`·`more`만 쓰고, 상대 조정의 정도(`step_small`·`step_large`)와 방향은 Option에 둔다.
 
 ## 7. 다른 파트에 넘길 것
 
@@ -98,6 +100,7 @@
 - [x] 갱신 크기 α·β → 순서만 규칙, 숫자는 파일럿 `가정` (3절)
 - [x] 그리드 위치 영향 → 순서 무작위화와 위치 기록, 보정은 파일럿 로그로 (`joachims2005-relative-preference`)
 - [x] 방식 전환을 신호로 쓸지 → 방식 선택 신호로만, 값 신호 아님
-- [ ] 고정 때문에 적격 상품이 모자랄 때: P6에 따라 몰래 풀지 않고 이해 칩으로 무엇을 풀지 묻는 안(`가정`)
-- [ ] #29 계약 합의 후 `questions.py` 반영
-- [ ] v3 사람 검수 30개 일치율과 예산 `price_krw` 필터(#27 데이터·구현 항목)
+- [x] 고정 때문에 적격 상품이 모자랄 때 → 몰래 풀지 않는다. 빈 결과 안내와 이해 칩 x로 사용자가 풀 조건을 고른다(P6, 기존 화면)
+- [x] #29 계약 합의 후 `questions.py` 반영 → ADR 0020 결정 2
+- [x] 예산 `price_krw` 필터 → `grid.price_ok`가 `price_krw`를 먼저 읽고, 가격을 모르면 통과시키지 않는다
+- [ ] v3 사람 검수 30개 일치율 → 최종 카탈로그에서 [#41](https://github.com/jongrionro-debug/HCI_HANDSOME/issues/41)

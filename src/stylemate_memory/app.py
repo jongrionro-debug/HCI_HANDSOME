@@ -548,6 +548,8 @@ class ConsumerService:
             optional = {k for k in ("gender", "situation") if k in action}
         if action["op"] == "grid_feedback" and "liked" in action:
             optional = {"liked"}
+        if action["op"] == "answer_question" and "strengths" in action:
+            optional = {"strengths"}
         _shape(action, shapes[action["op"]].__required_keys__ | optional)
         if action["op"] == "start_request":
             if command["request_id"] is not None or command["expected"] is not None:
@@ -562,7 +564,9 @@ class ConsumerService:
         if action["op"] == "answer_question" and (
                 not isinstance(action["question_id"], str) or not isinstance(action["option_ids"], list)
                 or not all(isinstance(o, str) for o in action["option_ids"])
-                or not (action["switch_to"] is None or isinstance(action["switch_to"], str))):
+                or not (action["switch_to"] is None or isinstance(action["switch_to"], str))
+                or not isinstance(action.get("strengths", {}), dict)
+                or not all(isinstance(k, str) and isinstance(v, str) for k, v in action.get("strengths", {}).items())):
             raise StyleMateError("invalid_input")
 
     @staticmethod

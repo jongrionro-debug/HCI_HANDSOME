@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import hashlib
 import os
+import re
 from typing import Any
 from urllib.parse import quote
 
@@ -193,6 +194,35 @@ class GraphBridge:
         return self._db(run)
 
 
+SHOW_HINT = re.compile(r"(그냥|이제|일단)\s*(보여|추천해)|보여\s*(줘|주세요)")
+IMAGE_HINT = re.compile(r"사진으로|이미지로|사진\s*보여")
+TEXT_HINT = re.compile(r"(말|글)로\s*(할게|하겠|답할)")
+UNKNOWN_TERM = re.compile(r"뭐예요|뭐에요|뭔가요|무슨\s*뜻|그게\s*뭐|모르겠")
+
+
+def text_hints(text: Any) -> dict[str, Any]:
+    """Code-detected user-state facts for the question mode choice (3-mapping 7·8절). The text is not kept here."""
+    if not isinstance(text, str) or not text.strip():
+        return {}
+    return {"text_len": len(text.strip()), "show": bool(SHOW_HINT.search(text)), "unknown_term": bool(UNKNOWN_TERM.search(text)),
+            "mode_hint": "image" if IMAGE_HINT.search(text) else "text" if TEXT_HINT.search(text) else None}
+
+
+def _ask_view(question: dict[str, Any] | None) -> dict[str, Any] | None:
+    """Public question with image URLs for its photo options and base product."""
+    view = questions.public(question)
+    if not view:
+        return None
+    def url(item: dict[str, Any]) -> str | None:
+        if not item.get("image_id"):
+            return None
+        return f"/api/images/{quote(item['image_id'], safe='')}?version={item['image_version']}"
+    view["options"] = [o | ({"image_url": url(o)} if o.get("image_id") else {}) for o in view["options"]]
+    if view.get("base"):
+        view["base"] = view["base"] | {"image_url": url(view["base"])}
+    return view
+
+
 def _labels(service: Any) -> dict[str, str]:
     return {k: v["label_ko"] for k, v in service.registry.describe()["product_information"].items()}
 
@@ -242,7 +272,7 @@ def graph_view(service: Any, request_id: str) -> dict[str, Any] | None:
         "profile_rewrite": profile_rewrite_enabled(),
         "taste": _taste(service, request_id),
         # Question loop seam (graph/questions.py)
-        "ask": questions.public(intent.get("ask")),
+        "ask": _ask_view(intent.get("ask")),
         "question_loop": questions.loop_enabled(),
     }
 
@@ -633,7 +663,8 @@ def handle_command(service: Any, snapshot: dict[str, Any], command: dict[str, An
         receipt = service._apply(request_id, service._step(command_id, "intake"), [action], command["expected"])
         run_turn(service, request_id, command_id, {"type": "feedback", "feedback_ref": service._feedback_ref(receipt),
                                                    "grid": None, "answers_question": action["question_id"] is not None,
-                                                   "novel_hint": bool(action["text"] and mem.NOVEL_HINT.search(action["text"]))})
+                                                   "novel_hint": bool(action["text"] and mem.NOVEL_HINT.search(action["text"])),
+                                                   "hints": text_hints(action["text"])})
         return True
     if op == "grid_feedback":
         intent = service._graph.intent(request_id)
@@ -664,7 +695,8 @@ def handle_command(service: Any, snapshot: dict[str, Any], command: dict[str, An
                 command["expected"])
             feedback_ref = service._feedback_ref(receipt)
         run_turn(service, request_id, command_id, {"type": "feedback", "feedback_ref": feedback_ref,
-            "answers_question": bool(text), "novel_hint": bool(text and mem.NOVEL_HINT.search(text)), "grid": {"set_id": action["candidate_set_id"], "selected": selected,
+            "answers_question": bool(text), "novel_hint": bool(text and mem.NOVEL_HINT.search(text)), "hints": text_hints(text),
+            "grid": {"set_id": action["candidate_set_id"], "selected": selected,
             "dislikes": list(action["dislikes"]), "similar": action["similar"], "all_bad": action["all_bad"],
             "liked": {cid: list(axes) for cid, axes in liked.items() if axes}}})
         return True
@@ -690,6 +722,8 @@ def handle_command(service: Any, snapshot: dict[str, Any], command: dict[str, An
     if op == "answer_question":
         intent = service._graph.intent(request_id)
         answer = {k: action[k] for k in ("question_id", "choice", "option_ids", "switch_to")}
+        if "strengths" in action:
+            answer["strengths"] = action["strengths"]
         if not intent or not questions.valid_answer(intent.get("ask"), answer):
             raise StyleMateError("invalid_input")
         run_turn(service, request_id, command_id, {"type": "answer", "answer": answer})

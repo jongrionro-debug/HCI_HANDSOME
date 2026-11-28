@@ -24,7 +24,11 @@ def _has(product: dict[str, Any], axis: str, value: str) -> bool:
 
 
 def price_ok(product: dict[str, Any], price: dict[str, Any]) -> bool:
-    amount = product.get("price")
+    # PI v3 price_krw first (ADR 0016); the raw price_amount only for catalogs built before v3.
+    v3 = product.get("v3") or {}
+    amount = v3.get("price_krw") if "price_krw" in v3 else product.get("price")
+    if type(amount) is not int and type(amount) is not float:
+        amount = None
     if amount is None:
         return False  # a hard numeric limit needs a known price
     op, low, high = price["op"], price["min_krw"], price["max_krw"]
@@ -77,10 +81,34 @@ def _soft(product: dict[str, Any], intent: dict[str, Any], target_id: str) -> fl
     return total
 
 
+def _main_lab(product: dict[str, Any]) -> list[float] | None:
+    colors = ((((product.get("v3") or {}).get("axes") or {}).get("Color") or {}).get("colors")) or []
+    lab = colors[0].get("lab") if colors and isinstance(colors[0], dict) else None
+    return lab if isinstance(lab, list) and len(lab) == 3 else None
+
+
 def _similar(product: dict[str, Any], anchor: dict[str, Any] | None) -> float:
     if not anchor or anchor["product_id"] == product["product_id"]:
         return 0.0
-    return sum(len(set(product["facts"].get(a) or []) & set(anchor["facts"].get(a) or [])) for a in anchor["facts"])
+    shared = sum(len(set(product["facts"].get(a) or []) & set(anchor["facts"].get(a) or [])) for a in anchor["facts"])
+    a, b = _main_lab(product), _main_lab(anchor)
+    if a and b:  # CIEDE2000 closeness of the main colours (ADR 0016); 0 at 20 or more
+        shared += max(0.0, 1.0 - scoring.delta_e2000(a, b) / 20.0)
+    return shared
+
+
+def _v3_target(product: dict[str, Any], intent: dict[str, Any], target_id: str) -> float:
+    """Relative answers ("조금 더 여유롭게") move a v3 score target; closer products rank higher (soft only)."""
+    total = 0.0
+    for t in intent.get("v3_targets", []):
+        if t["target_id"] != target_id:
+            continue
+        entry = (((product.get("v3") or {}).get("axes") or {}).get(t["axis"]) or {})
+        score = entry.get("score")
+        if isinstance(score, (int, float)) and not isinstance(score, bool):
+            scale = 30.0 if t["axis"] == "Tone" else 1.0
+            total -= abs(score - t["score"]) / scale
+    return total
 
 
 def plan_target(pool: list[dict[str, Any]], target_id: str, intent: dict[str, Any], scope: str, size: int,
@@ -111,7 +139,7 @@ def plan_target(pool: list[dict[str, Any]], target_id: str, intent: dict[str, An
             plain[(axis, value)] = scoring.sample(scoring.get(intent["scores"], key), rng)
 
     def converge_score(product: dict[str, Any]) -> float:
-        total = _soft(product, intent, target_id) + 0.5 * _similar(product, anchor)
+        total = _soft(product, intent, target_id) + 0.5 * _similar(product, anchor) + _v3_target(product, intent, target_id)
         for (axis, value), drawn in samples.items():
             if _has(product, axis, value):
                 total += drawn
