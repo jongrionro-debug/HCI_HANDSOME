@@ -39,7 +39,7 @@
 
 - [현재 구현·실행·연구 평가](project.md)
 - [상품·PI 수집](specs/crawling.md): 29CM·Shopify 상품의 PI 원문 값·이미지 수집 경로, value 정리·저장 위치 계약
-- [대화형 에이전트 파이프라인](specs/agent-pipeline.md): tool 안과 플래너 안의 비교, 2026-11-24 결정 사항, 합친 파이프라인·tool 목록·상품 고르기·검증 방법. 질문 부분은 질문 설계 작업 공간이 정하고, 나머지는 결정됐지만 미구현·ADR 전
+- [대화형 에이전트 파이프라인](specs/agent-pipeline.md): tool 안과 플래너 안의 비교, 2026-11-24·28 결정 사항, 질문 설계 v1을 반영한 최종 파이프라인·tool 목록·상품 고르기·검증 방법. 시스템 작업의 기준. 질문 루프는 구현, 에이전트 틀은 미구현·ADR 전
 - [에이전트 시나리오](specs/agent-scenario.md): 합친 파이프라인을 한 사용자의 열 턴으로 따라가는 가상 시나리오와 구현 점검표
 - [질문 설계 작업 공간](../research/question-design/README.md): 1 질문 방식·2 답 해석·반영·3 언제 어떤 방식을 근거 카드로 정하고 [questions.py](../src/stylemate_memory/graph/questions.py) 계약에 구현하는 파트별 작업 공간과 브랜치 협업 규칙([ADR 0017](adr/0017-question-design-research-workspace.md)). 결정 문서는 확정 전 초안
 - [연구 설계 원문](sources/Team4_mid-term_report.pdf) · [발표 원문](sources/Team4_mid-term_presentation.pdf)
