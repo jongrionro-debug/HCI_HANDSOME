@@ -1,7 +1,7 @@
 # ② 답 해석·반영
 
 - 주인: 파트 2 담당 (Issue [#27](https://github.com/jongrionro-debug/HCI_HANDSOME/issues/27))
-- 상태: **v1 초안** (확인 지점 A 리뷰용). 방식 이름은 1-modes.md v1 초안(PR #31)의 코드 이름을 쓴다. 1의 방식 목록이 고정되면 4절 표의 행을 맞춘다.
+- 상태: **v1 초안** (확인 지점 A 리뷰용). 방식 이름은 1-modes.md v1 초안(PR #31)의 코드 이름을 쓴다. 1의 방식 목록이 고정되면 4절 표의 행을 맞춘다. 2026-11-28 팀 결정에 따라 싫어요 확인(`exclude_check`)을 빼고, 공통점 칩 정도 이름(꼭 있어야 해요 / 있으면 좋아요)과 기준 이미지 조정 채택을 반영했다.
 - 코드에서는 [graph/questions.py](../../src/stylemate_memory/graph/questions.py)의 `interpret`와 [graph/scoring.py](../../src/stylemate_memory/graph/scoring.py)가 이 문서를 구현한다. 지금 코드는 v0(`text_options` 선택 → 값 고정)만 있다.
 - 근거 칸에는 카드 ID 또는 ADR을 적고, 근거가 없으면 `가정`이라고 적는다.
 
@@ -53,11 +53,9 @@
 | `explain_images`(단어 정렬) | 해석 선택 | 고른 해석 L3. 안 고른 해석은 그 단어의 해석 목록에서만 빠짐(값은 L0) | | 이번 요청만 | ADR 0006 결정 2·5 |
 | `select_images` | 다중 선택 | 물은 축만: 고른 쪽 값 L1, 차이가 확인된 미선택 값 L−1. 미선택은 자동 제외(3연속) 횟수에 세지 않음. 전부 선택이면 L0 | 보여 준 순서를 섞고 위치를 기록 | | `joachims2005-relative-preference` |
 | `select_images` | 다 별로 | L0 | 다음은 글로 묻기 | | ADR 0013 결정 8, `가정` |
-| `reason_chips` | 칩 + `only` / `more` | 그 칩의 축·값 L4 / L2 | | | `가정` |
-| `relative_adjust`(후보) | 방향 + `step_small` / `step_large` | 기준 상품 v3 점수 ±0.5 / ±1.0 범위의 값 L2 | | | ADR 0016, `가정` |
+| `reason_chips` | 칩 + 꼭 있어야 해요(`only`) / 있으면 좋아요(`more`) | 그 칩의 축·값 L4 / L2 | 있으면 좋아요: 고른 상품 중 사용자가 기준 상품을 골라 기준 이미지 조정(`relative_adjust`)으로 비슷하게 더 둘러보기 | | `가정` |
+| `relative_adjust` | 방향 + `step_small` / `step_large` | 기준 상품 v3 점수 ±0.5 / ±1.0 범위의 값 L2 | | | ADR 0016, `가정` |
 | `contrast_pair`(후보) | 한 장 / 둘 다 아님 | 두 장이 다른 축만 L1·L−1 / L0 | | | `joachims2005-relative-preference` |
-| `exclude_check`(후보) | 칩 + `this_request` / `less` / `never` | L−3 / L−2 / L−3 | | `never`만: soft, 품목+상황 조건 | ADR 0013 결정 10 |
-| `exclude_check`(후보) | 이 옷만 | 그 상품을 바로 숨김, 값은 L0 | | | `가정` |
 | 공통 | 모르겠음 | L0 | 그 축을 이미지 방식으로 한 번 더 | | `가정` |
 | 공통 | 건너뛰기 | L0. "상관없음"으로 기록하지 않음 | 이번 요청에서 그 축은 다시 묻지 않음 | | P3 |
 | 공통 | 방식 바꾸기 | L0 | 바꾼 방식을 우선(`decided_by: user`) | | `가정` |
@@ -83,14 +81,13 @@
 ## 6. 계약 변경 의견 (#29)
 
 - `Answer.strengths: {option_id: 강도}` + `Question.strengths`(허용 강도 목록). `Answer.strength` 하나로는 칩마다 다른 강도를 담지 못한다.
-- 강도 값: `only`·`more`·`step_small`·`step_large`·`less`·`this_request`·`never`. 강도가 없으면 4절의 방식별 기본 반영을 따른다.
+- 강도 값: `only`(꼭 있어야 해요)·`more`(있으면 좋아요)·`step_small`·`step_large`. 강도가 없으면 4절의 방식별 기본 반영을 따른다.
 - `relative_adjust`의 방향은 강도가 아니라 Option 값에 둔다.
 - `Answer.text`(선택)와 `choice: "text"`. 글만 쓰면 `text`, 선택과 글을 함께 쓰면 `options` + `text`.
 - `Option.axis` 찬성.
 
 ## 7. 다른 파트에 넘길 것
 
-- 1: `exclude_check`의 `never` 문구를 "다음에도 빼 주세요"로. 저장은 무조건 비선호가 아니라 품목+상황 조건의 soft 감점이다(ADR 0013 결정 10).
 - 3: 4절의 진행 신호(모르겠음 → 이미지로 다시, 건너뛰기 → 다시 묻지 않음, 바꾸기 → 우선, 다 별로 → 글로 묻기)를 `candidates`·`choose`에 반영.
 
 ## B 전에 답할 것
