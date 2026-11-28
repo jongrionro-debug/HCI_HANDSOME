@@ -16,8 +16,9 @@ from .errors import StyleMateError
 CONTRACT_VERSION = "lumi-memory-v1"
 V1_REGISTRY_VERSION = "park-2025-source-v1"
 LUMI_PI_V3_REGISTRY_VERSION = "lumi-pi-v3"  # ADR 0016: tops + bottoms, 12 PI axes (+ Weight) + Brand
+LUMI_PI_V51_REGISTRY_VERSION = "lumi-pi-v5.1"  # ADR 0021: unified 29CM tops, bottoms, outer, skirts (runtime default)
 # Park (ADR 0004) stays as the paper-sourced fixture dictionary; lumi-pi-v3 is the runtime default.
-V1_REGISTRY_VERSIONS = (V1_REGISTRY_VERSION, LUMI_PI_V3_REGISTRY_VERSION)
+V1_REGISTRY_VERSIONS = (V1_REGISTRY_VERSION, LUMI_PI_V3_REGISTRY_VERSION, LUMI_PI_V51_REGISTRY_VERSION)
 LEGACY_REGISTRY_VERSION = "consumer-17-v1"
 CATALOG_FORMAT_VERSION = "lumi-catalog-v1"
 

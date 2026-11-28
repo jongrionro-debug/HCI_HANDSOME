@@ -7,7 +7,7 @@ LUMI는 장·단기 메모리와 이미지 선택·대화를 활용해 사용자
 ## 시작하기
 
 - [현재 시스템](docs/project.md#현재-시스템): graph 엔진 흐름·구현 범위·질문 루프
-- [메모리 계약](docs/project.md#메모리-실행-계약) · [Feature Map](docs/project.md#feature-map): PI v3 축과 실행 사전 `lumi-pi-v3`, FEA 30개 태그
+- [메모리 계약](docs/project.md#메모리-실행-계약) · [Feature Map](docs/project.md#feature-map): PI 축과 실행 사전 `lumi-pi-v5.1`(상·하의·아우터·스커트), FEA 30개 태그
 - [로컬 실행](docs/project.md#로컬-실행): 외부 DB·상품·이미지 설정과 시작 명령
 - [검증](docs/project.md#오프라인-실행과-검증): 오프라인·브라우저 검사와 한계
 - [연구와 평가](docs/project.md#연구와-평가): 보고서의 RQ·과제·측정 기준

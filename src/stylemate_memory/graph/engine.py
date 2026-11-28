@@ -280,7 +280,7 @@ class GraphEngine:
         views = {(v["product_id"], v["target_id"]): v for v in self.bridge.products()}
         base = question.get("base")
         base_view = views.get((base["product_id"], question["target_id"])) if base else None
-        intent["answer_changed"] = bool(questions.interpret(intent, question, answer, scope, base_view))
+        intent["answer_changed"] = bool(questions.interpret(intent, question, answer, scope, base_view, self._scales()))
         if question["mode"] == "select_images" and answer["choice"] == "options":
             picked = [o for o in question["options"] if o["id"] in answer["option_ids"]]
             self._note_question_picks(intent, [views[(o["product_id"], question["target_id"])] for o in picked
@@ -323,6 +323,12 @@ class GraphEngine:
                 terms.append(question["axis"])
             intent["requeue"] = {"target_id": question["target_id"], "axis": question["axis"], "prefer": "photo_chips"}
         intent["ask"] = None
+
+    def _scales(self) -> dict[str, Any]:
+        """Ordinal score tables from the runtime dictionary (value_shape.scale; Length per garment group)."""
+        pi = self.bridge.registry.describe()["product_information"]
+        return {axis: entry["value_shape"]["scale"] for axis, entry in pi.items()
+                if isinstance(entry.get("value_shape"), dict) and isinstance(entry["value_shape"].get("scale"), dict)}
 
     def _labels(self) -> dict[str, str]:
         return {k: v["label_ko"] for k, v in self.bridge.registry.describe()["product_information"].items()}
@@ -591,7 +597,7 @@ class GraphEngine:
         gateway = getattr(self.bridge.s, "gateway", None)
         # 3-mapping 1절: a real model may choose inside the allowed list; the fake/scripted gateways keep the rule.
         chooser = None if gateway is None or isinstance(gateway, FakeModelGateway) else self.bridge.complete
-        intent["ask"] = questions.plan(intent, pools, fixed, self._labels(), products, scope, chooser)
+        intent["ask"] = questions.plan(intent, pools, fixed, self._labels(), products, scope, chooser, self._scales())
         if intent["ask"] and intent["ask"]["mode"] == "reason_chips":
             intent["reason_prompt"] = None  # one question per screen: the shared-value chips replace the F4 banner
             intent["clarify"] = None

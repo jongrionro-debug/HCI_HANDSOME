@@ -311,6 +311,49 @@ class PlanTests(unittest.TestCase):
             self.assertFalse(q.loop_enabled())
 
 
+class GroupScaleTests(unittest.TestCase):
+    """PI v5.1: Length has one score table per garment group; the product's Length.scale picks it."""
+    SCALES = {"Length": {"bottom": {"Shorts": 1.0, "Cropped": 2.0, "Full": 3.0},
+                         "outer": {"Cropped": 1.0, "Short": 2.0, "Hip": 3.0, "Half": 4.0, "Long": 5.0},
+                         "skirt": {"Mini": 1.0, "Knee": 2.0, "Midi": 3.0, "Long": 4.0}},
+              "Fit": {"Slim": 1.0, "Regular": 2.0, "Relaxed": 3.0, "Oversized": 4.0}}
+
+    def test_same_value_name_scores_by_group(self):
+        self.assertEqual(q.value_scores("Length", "outer", self.SCALES)["Cropped"], 1.0)
+        self.assertEqual(q.value_scores("Length", "bottom", self.SCALES)["Cropped"], 2.0)
+        self.assertEqual(q.value_scores("Length", None, self.SCALES), {})
+        self.assertEqual(q.value_scores("Fit", "skirt", self.SCALES)["Relaxed"], 3.0)
+        self.assertEqual(q.value_scores("Length", "outer"), {})  # no flat Length fallback
+
+    def test_relative_length_moves_inside_the_product_group(self):
+        outer = q.value_scores("Length", "outer", self.SCALES)
+        skirt = q.value_scores("Length", "skirt", self.SCALES)
+        self.assertEqual(q.relative_values("Length", 4.0, 1, "step_small", outer), (4.5, ["Long"]))
+        self.assertEqual(q.relative_values("Length", 3.0, 1, "step_small", skirt), (3.5, ["Long"]))
+        self.assertEqual(q.relative_values("Length", 1.0, -1, "step_small", outer), (1.0, []))  # already shortest
+
+    def test_relative_adjust_options_and_answer_use_the_group_table(self):
+        skirt = view("k1", {"Type": ["Skirt"], "Length": ["Midi"]},
+                     {"price_krw": 1, "axes": {"Length": {"score": 3.0, "scale": "skirt"}}})
+        candidate = {"id": "t:relative", "target_id": "t", "axis": None, "kind": "reactive", "trigger": "near_match",
+                     "values": [], "base": skirt, "scales": self.SCALES}
+        _, built = q.allowed(candidate, [skirt], LABELS)
+        longer = next(o for o in built["relative_adjust"]["options"] if o["label"] == "조금 더 길게")
+        quest = question("relative_adjust", None, [longer], kind="reactive",
+                         base={"product_id": "k1", "image_id": "i", "image_version": 1})
+        intent = new_intent()
+        changed = q.interpret(intent, quest, answer([longer["id"]]), "request", skirt, self.SCALES)
+        self.assertIn(key("Length", "Long"), changed)
+        self.assertEqual(q.allowed(candidate | {"scales": {}}, [skirt], LABELS)[0], [])  # no table, no Length chip
+
+    def test_unisex_products_show_for_either_gender(self):
+        intent = new_intent()
+        intent["gender"] = "women"
+        products = [view(p, {"Type": ["Coat"]}) | {"gender": g} for p, g in (("a", "women"), ("b", "unisex"), ("c", "men"), ("d", None))]
+        pool, _ = grid.eligible(products, "t", intent, "request")
+        self.assertEqual([p["product_id"] for p in pool], ["a", "b"])
+
+
 class V3RuntimeTests(unittest.TestCase):
     def test_ciede2000_matches_sharma_pairs(self):
         pairs = [((50, 2.6772, -79.7751), (50, 0, -82.7485), 2.0425),

@@ -23,7 +23,7 @@
   - 계약·사전: `contracts.py`, `errors.py`, `registry.py`, `resources/*.json`(`output/feature-map/` 정본의 생성 사본, 직접 편집 금지)
   - 의도 순환 엔진(기본 엔진, langgraph 필요. `--engine legacy`는 이전 비교 흐름): `graph/`(`engine.py`, `service.py`, `grid.py`, `scoring.py`, `questions.py`(질문 루프, ADR 0020), `parse.py`, `intent.py`, `hypotheses.py`, `memory.py`, `situations.py`)
 - 수집 스크립트: `scripts/crawl_29cm.mjs`, `scripts/crawl_naver.mjs`, `scripts/probe_sites.mjs` (Node, Playwright), `scripts/fetch_shopify_first_images.py`
-- 카탈로그 빌드: `scripts/build_lumi_pi_v2.py` → `fill_pi_v2_text.py`·`fill_pi_v2_image.py`(DeepSeek, 실행 요청 시만) → `build_lumi_pi_v3.py`(Pillow, `--export-runtime`으로 실행 사전 `lumi-pi-v3`·가져오기 파일). 29CM 원문 정규화는 `build_29cm_registry.py`(v2 빌드가 import), 원문 PI 보완은 `fill_pi_deepseek.py`
+- 카탈로그 빌드: `scripts/build_lumi_pi_v2.py` → `fill_pi_v2_text.py`·`fill_pi_v2_image.py`(DeepSeek, 실행 요청 시만) → `build_lumi_pi_v3.py`(Pillow, 이전 실행 사전 `lumi-pi-v3`). 최종 통합 map은 `build_lumi_pi_unified.py`(+`fill_pi_unified.py`, DeepSeek)가 만들고 `--export-runtime`으로 기본 실행 사전 `lumi-pi-v5.1`·가져오기 조각 파일을 쓴다(ADR 0021). 29CM 원문 정규화는 `build_29cm_registry.py`(v2 빌드가 import), 원문 PI 보완은 `fill_pi_deepseek.py`
 - 테스트: `tests/test_*.py`(unittest), `tests/*.mjs`(node --test / Playwright 브라우저 검사)
 - `archive/`는 동결 자료다. 링크 검사 대상이 아니며 수정하지 않는다.
 
@@ -55,7 +55,7 @@ export STYLEMATE_DB=/private/tmp/lumi-local/memory.sqlite3
 export STYLEMATE_CATALOG_DB=/private/tmp/lumi-local/catalog.sqlite3
 PYTHONPATH=src python3 -m stylemate_memory.cli catalog-import --file tests/fixtures/catalog/valid.jsonl
 PYTHONPATH=src python3 -m stylemate_memory.cli catalog-map
-PYTHONPATH=src ~/.venvs/lumi-graph/bin/python -m stylemate_memory.consumer --provider fake   # http://127.0.0.1:8766, 기본 graph·lumi-pi-v3
+PYTHONPATH=src ~/.venvs/lumi-graph/bin/python -m stylemate_memory.consumer --provider fake   # http://127.0.0.1:8766, 기본 graph·lumi-pi-v5.1
 # 위 fixture는 Park 사전(Pants) 형식 예시다. 실제 v3 카탈로그는 docs/project.md "로컬 실행"
 ```
 
@@ -63,5 +63,5 @@ PYTHONPATH=src ~/.venvs/lumi-graph/bin/python -m stylemate_memory.consumer --pro
 
 ## 데이터 위치
 
-- 수집 원본·첫 이미지는 저장소 안 `data/`(커밋 제외)에 둔다: `data/raw/<출처>/`, `data/images/<출처>/`, `data/catalog/lumi-pi-v2.jsonl`·`lumi-pi-v3.jsonl`(+ `-report.json` 축별 채움률). 만드는 명령은 위 카탈로그 빌드 순서를 따른다.
+- 수집 원본·첫 이미지는 저장소 안 `data/`(커밋 제외)에 둔다: `data/raw/<출처>/`, `data/images/<출처>/`, `data/catalog/lumi-pi-v2.jsonl`·`lumi-pi-v3.jsonl`·통합 `lumi-pi-unified.jsonl`(+ `-report.json` 축별 채움률, 이미지 `data/images/lumi-pi-unified/`). 만드는 명령은 위 카탈로그 빌드 순서를 따른다.
 - 저장소에는 스크립트와 요약만 올린다. 참여자 정보·동의서·원시 응답·실행 DB는 커밋하지 않는다.

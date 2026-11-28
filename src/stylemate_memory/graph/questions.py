@@ -60,12 +60,12 @@ LOG_LIMIT = 100
 IMPORTANCE = {"Type": 1.0, "Fit": 0.9, "Color": 0.9, "Style": 0.8, "Silhouette": 0.7, "Length": 0.6, "Tone": 0.6,
               "Pattern": 0.6, "Texture": 0.5, "Detail": 0.5, "Weight": 0.5, "Fabric": 0.4}
 MENTION_BOOST = 1.5
-# PI v3 ordinal value scores (ADR 0016). Tone is L* of the main colour; label centres are 가정.
+# Fallback ordinal value scores (ADR 0016). The runtime dictionary's value_shape.scale wins (scales argument);
+# Length has one table per garment group there (top/bottom/outer/skirt), so it has no flat fallback.
+# Tone is L* of the main colour; its label centres are 가정.
 VALUE_SCORE = {"Fit": {"Slim": 1.0, "Regular": 2.0, "Relaxed": 3.0, "Oversized": 4.0},
                "Weight": {"Light": 1.0, "Mid": 2.0, "Heavy": 3.0},
-               "Tone": {"Dark": 25.0, "Medium": 55.0, "Light": 80.0},
-               "Length": {"Sleeveless": 0.0, "Short sleeve": 1.0, "Long sleeve": 2.0, "Shorts": 1.0, "Cropped": 2.0,
-                          "Full": 3.0}}
+               "Tone": {"Dark": 25.0, "Medium": 55.0, "Light": 80.0}}
 STEP = {"step_small": 0.5, "step_large": 1.0}
 TONE_STEP = {"step_small": 5.0, "step_large": 15.0}  # L* is 0-100, not the 1-4 ordinal scale (Issue #38, 가정)
 DIRECTION_WORDS = {"Fit": ("슬림하게", "여유롭게"), "Length": ("짧게", "길게"), "Tone": ("어둡게", "밝게"),
@@ -88,6 +88,19 @@ def josa(word: str, pair: tuple[str, str] = ("은", "는")) -> str:
     if "가" <= last <= "힣":
         return pair[0] if (ord(last) - 0xAC00) % 28 else pair[1]
     return pair[1]
+
+
+def value_scores(axis: str, group: str | None, scales: dict[str, Any] | None = None) -> dict[str, float]:
+    """Value -> score for one axis. A per-group table (Length) is picked by the product's scale (group) name."""
+    shape = (scales or {}).get(axis) or VALUE_SCORE.get(axis) or {}
+    if shape and all(isinstance(v, dict) for v in shape.values()):
+        return dict(shape.get(group or "", {}))
+    return {k: float(v) for k, v in shape.items() if isinstance(v, (int, float))}
+
+
+def v3_group(product: dict[str, Any] | None, axis: str) -> str | None:
+    entry = (((product or {}).get("v3") or {}).get("axes") or {}).get(axis) or {}
+    return entry.get("scale") if isinstance(entry.get("scale"), str) else None
 
 
 def v3_score(product: dict[str, Any] | None, axis: str) -> float | None:
@@ -356,9 +369,10 @@ def _relative_adjust(candidate: dict[str, Any], pool: list[dict[str, Any]], labe
     options: list[dict[str, Any]] = []
     for axis in sorted(ORDINAL_AXES, key=lambda a: (-IMPORTANCE.get(a, 0.5), a)):
         score = v3_score(base, axis)
-        if score is None or axis in candidate.get("fixed", []):
+        table = value_scores(axis, v3_group(base, axis), candidate.get("scales"))
+        if score is None or axis in candidate.get("fixed", []) or not table:
             continue
-        low, high = (0.0, 100.0) if axis == "Tone" else (min(VALUE_SCORE[axis].values()), max(VALUE_SCORE[axis].values()))
+        low, high = (0.0, 100.0) if axis == "Tone" else (min(table.values()), max(table.values()))
         for direction, word in ((1, DIRECTION_WORDS[axis][1]), (-1, DIRECTION_WORDS[axis][0])):
             if (direction > 0 and score >= high) or (direction < 0 and score <= low):
                 continue
@@ -498,14 +512,14 @@ def choose(options: list[dict[str, Any]], intent: dict[str, Any],
 
 def plan(intent: dict[str, Any], pools: dict[str, list[dict[str, Any]]], fixed: dict[str, list[str]],
          labels: dict[str, str], products: list[dict[str, Any]] | None = None, scope: str = "request",
-         chooser: Callable[..., Any] | None = None) -> dict[str, Any] | None:
+         chooser: Callable[..., Any] | None = None, scales: dict[str, Any] | None = None) -> dict[str, Any] | None:
     """Pick at most one question for this turn and log the decision (3-mapping 11절)."""
     if not should_ask(intent):
         return None
     options = []
     for candidate in candidates(intent, pools, fixed, products, scope):
         if candidate.get("trigger") == "near_match":
-            candidate = candidate | {"fixed": fixed.get(candidate["target_id"], [])}
+            candidate = candidate | {"fixed": fixed.get(candidate["target_id"], []), "scales": scales or {}}
         modes, built = allowed(candidate, pools.get(candidate["target_id"], []), labels)
         if modes:
             options.append({"candidate": candidate, "modes": modes, "built": built})
@@ -530,7 +544,7 @@ def plan(intent: dict[str, Any], pools: dict[str, list[dict[str, Any]]], fixed: 
                 "target_id": candidate["target_id"], "axis": candidate.get("axis"), "layout": built.pop("layout", None),
                 "switch_to": [m for m in picked["modes"] if m != mode and m in SWITCH_MODES] if candidate["kind"] == "gap" else [],
                 **built}
-    log(intent, {"turn": intent["turn"], "event": "ask", "candidate": {k: v for k, v in candidate.items() if k != "base"},
+    log(intent, {"turn": intent["turn"], "event": "ask", "candidate": {k: v for k, v in candidate.items() if k not in ("base", "scales")},
                  "decision": decision, "ranking": top, "question_id": question["question_id"],
                  "positions": [o["id"] for o in question["options"]]})
     asked = {"target_id": candidate["target_id"], "axis": candidate.get("axis"), "turn": intent["turn"], "kind": candidate["kind"]}
@@ -590,10 +604,13 @@ def _confirm(intent: dict[str, Any], key: str) -> None:
     intent["excluded"] = [k for k in intent["excluded"] if k != key]
 
 
-def relative_values(axis: str, base: float, direction: int, step: str) -> tuple[float, list[str]]:
+def relative_values(axis: str, base: float, direction: int, step: str,
+                    scale: dict[str, float] | None = None) -> tuple[float, list[str]]:
     """Target score and the values beyond the base in that direction closest to it (ADR 0016 relative step)."""
     move = (TONE_STEP if axis == "Tone" else STEP)[step]
-    scale = VALUE_SCORE[axis]
+    scale = scale or VALUE_SCORE.get(axis) or {}
+    if not scale:
+        return base, []
     low, high = (0.0, 100.0) if axis == "Tone" else (min(scale.values()), max(scale.values()))
     target = min(max(base + direction * move, low), high)
     beyond = {v: s for v, s in scale.items() if (s - base) * direction > 0}
@@ -604,7 +621,7 @@ def relative_values(axis: str, base: float, direction: int, step: str) -> tuple[
 
 
 def interpret(intent: dict[str, Any], question: dict[str, Any], answer: dict[str, Any], scope: str,
-              base_view: dict[str, Any] | None = None) -> list[str]:
+              base_view: dict[str, Any] | None = None, scales: dict[str, Any] | None = None) -> list[str]:
     """Apply one answer (2-feedback.md 3·4절). Returns the changed keys; [] = the value state is unchanged.
 
     Progress signals (requeue, skipped axes, unsure count, base trigger) are left on intent for the next plan.
@@ -675,7 +692,8 @@ def interpret(intent: dict[str, Any], question: dict[str, Any], answer: dict[str
             o = chosen[0]
             score = v3_score(base_view, o["axis"])
             if score is not None:  # a missing base score changes nothing (P7)
-                target, values = relative_values(o["axis"], score, o["direction"], o["step"])
+                table = value_scores(o["axis"], v3_group(base_view, o["axis"]), scales)
+                target, values = relative_values(o["axis"], score, o["direction"], o["step"], table)
                 for value in values:
                     _gain(intent, key(o["axis"], value), a=scoring.REASON_GAIN)
                     changed.append(key(o["axis"], value))

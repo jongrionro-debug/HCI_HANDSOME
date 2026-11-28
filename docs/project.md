@@ -22,7 +22,7 @@
 | [Team4_mid-term_report.pdf](sources/Team4_mid-term_report.pdf) | 시스템·연구 설계 원문. 3.2~3.6: 메모리·조회·목표 Map·상품 검색·피드백, 3.7: UI, 2장·4~5장: RQ·평가 |
 | [Team4_mid-term_presentation.pdf](sources/Team4_mid-term_presentation.pdf) | 발표용 보조 자료. 보고서와 승인된 결정을 덮어쓰지 않음 |
 | [Feature Map JSON](../output/feature-map/park-2025-feature-map.json) | 논문에서 차용한 값·FEA 분류·출처·라이선스와 현재 실행 사전의 기계 판독 정본. 수집 후 확정할 PI value 사전과 구분. [CSV](../output/feature-map/park-2025-feature-map.csv)는 보기용 |
-| [ADR 목록](adr/README.md) | 결정 이유·승인·대체 관계. 현재 시스템의 직접 근거는 0006(FEA→PI 가설)·0007(종료 후 동의)·0010(수집 기반 value)·0013(graph 엔진)·0014·0016(PI v2·v3)·0015(기억 warm start)·0017(질문 설계 작업 공간)·0020(질문 루프 v1) |
+| [ADR 목록](adr/README.md) | 결정 이유·승인·대체 관계. 현재 시스템의 직접 근거는 0006(FEA→PI 가설)·0007(종료 후 동의)·0010(수집 기반 value)·0013(graph 엔진)·0014·0016(PI v2·v3)·0015(기억 warm start)·0017(질문 설계 작업 공간)·0020(질문 루프 v1)·0021(통합 PI map v5.1 실행) |
 
 두 PDF는 인계된 원본을 보존한다. 중간보고서는 20쪽·737,007 bytes·SHA-256 `97cdd6791d4aed737d3faae93d46e26ef112d06346ecef34b3a3c3af4b8a69f5`, 발표자료는 14쪽·41,281,335 bytes·SHA-256 `5b708cbef817a999fec1b1ee5ba0c2119ed7d07e9d08164b53146521bf1d2248`다.
 
@@ -30,7 +30,7 @@
 
 ## 현재 시스템
 
-주 실행 경로는 **graph 엔진([ADR 0013](adr/0013-langgraph-intent-loop.md))이 돌리는 로컬 소비자 서비스**다. Python 3.11+, 메모리 SQLite·상품 SQLite·graph 체크포인트 SQLite, 로컬 HTML/CSS/JavaScript로 구성한다. 기본값은 엔진 `graph`(선택 의존성 langgraph), 실행 사전 `lumi-pi-v3`, provider `fake`(외부 호출 없음)다. 패키지·환경변수의 `stylemate_memory`·`STYLEMATE_` 이름은 유지한다.
+주 실행 경로는 **graph 엔진([ADR 0013](adr/0013-langgraph-intent-loop.md))이 돌리는 로컬 소비자 서비스**다. Python 3.11+, 메모리 SQLite·상품 SQLite·graph 체크포인트 SQLite, 로컬 HTML/CSS/JavaScript로 구성한다. 기본값은 엔진 `graph`(선택 의존성 langgraph), 실행 사전 `lumi-pi-v5.1`([ADR 0021](adr/0021-pi-v5-1-runtime.md)), provider `fake`(외부 호출 없음)다. 패키지·환경변수의 `stylemate_memory`·`STYLEMATE_` 이름은 유지한다.
 
 ```text
 시작: 성별·상황 칩 → 동의한 장기 기억으로 warm start(ADR 0015)
@@ -144,7 +144,8 @@ PI 분류와 FEA 30개 태그의 출처는 Park, H., Kim, S., Choi, Y., &amp; An
 
 | 버전 | 정본 | 범위 |
 |---|---|---|
-| `lumi-pi-v3` (기본) | [lumi-pi-v3.json](../output/feature-map/lumi-pi-v3.json) | PI v3 12축(+Brand) 영어 value, 상·하의(품목 `Top`·`Bottom`), 모델 보완값도 비교. Silhouette은 하의 전용. 축마다 `value_shape`(형태·채우는 경로)를 둔다. 2026-11-25 로컬 1,748개(상의 1,098·하의 650)로 적재·Map과 graph 시작 그리드(상·하의 각 8장)를 확인했다 |
+| `lumi-pi-v5.1` (기본) | [lumi-pi-v5.1.json](../output/feature-map/lumi-pi-v5.1.json) | 통합 PI map의 12축(+Brand) 영어 value, 29CM 상·하의·아우터·스커트(품목 `Top`·`Bottom`·`Outer`·`Skirt`), 모델 보완값도 비교. 품목군별 값은 `values_by_garment_type`, 기장 점수는 품목군별 표(`value_shape.scale`)다. 2026-11-28 로컬 9,202개(상의 4,156·하의 2,246·아우터 2,000·스커트 800)를 적재해 Map과 네 품목군의 질문 루프를 확인했다([ADR 0021](adr/0021-pi-v5-1-runtime.md)) |
+| `lumi-pi-v3` | [lumi-pi-v3.json](../output/feature-map/lumi-pi-v3.json) | PI v3 12축(+Brand) 영어 value, 상·하의(품목 `Top`·`Bottom`), 모델 보완값도 비교. Silhouette은 하의 전용. 축마다 `value_shape`(형태·채우는 경로)를 둔다. 2026-11-25 로컬 1,748개(상의 1,098·하의 650)로 적재·Map과 graph 시작 그리드(상·하의 각 8장)를 확인했다 |
 | `park-2025-source-v1` | [park-2025-feature-map.json](../output/feature-map/park-2025-feature-map.json) | 논문 차용 값, Pants만, confirmed 상품 값만 비교. 단위 테스트·오프라인 평가의 fixture 사전이자 FEA 분류의 출처 정본 |
 
 [registry.py](../src/stylemate_memory/registry.py)의 `load_registry(version)`이 실행 사전을 공급한다. [패키지 resources](../src/stylemate_memory/resources)의 JSON은 정본의 생성 사본이다. `python3 scripts/sync_feature_registry.py`로 동기화하며 수동 편집하지 않는다. 전체 enum을 이 문서에 복제하지 않는다. graph 엔진의 가설·이유 축은 사전의 축을 그대로 읽는다.
@@ -164,6 +165,8 @@ PI 분류와 FEA 30개 태그의 출처는 Park, H., Kim, S., Choi, Y., &amp; An
 **PI v4 아우터([ADR 0018](adr/0018-pi-v4-outer.md), Proposed).** [build_lumi_pi_v4.py](../scripts/build_lumi_pi_v4.py)가 v3 위에 품목군 `outer`(29CM 남성 아우터)를 더한다. Type은 소분류 24개에서 19개 값으로 정하고(후드 집업은 별도 `Zip hoodie`, 기타 아우터는 비움), Length는 몸판 기장 5단계(Cropped~Long), Weight는 아우터 키워드·품목 규칙, Fabric에 Leather·Fur, Texture에 Suede·Quilted·Shearling·Melton·Ripstop·Tweed를 더한다. Silhouette은 아우터에서 쓰지 않는다. `--schema`로 스키마를 출력하고 `outer_pi`가 규칙으로 채운다. 실제 아우터 수집·빌드와 실측 기장 경계값 조정은 남았다.
 
 **PI v5 스커트([ADR 0019](adr/0019-pi-v5-skirt.md), Proposed).** [build_lumi_pi_v5.py](../scripts/build_lumi_pi_v5.py)가 v4 위에 품목군 `skirt`(29CM 여성 스커트)를 더한다. Type은 Skirt·Skort이고 Skirt는 하의 Type에서 빠진다. Length는 밑단 기장 4단계(Mini·Knee·Midi·Long)이며 상품명, 소분류, 판매자 문구, 실측 총장 순서로 정한다. Silhouette에 Pencil·H-line·A-line·Flare·Mermaid를 두고 Fit은 쓰지 않는다. Texture에 Velvet·Lace·Satin·Tulle, Detail에 Wrap·Tiered·Ruffle, Pattern에 Dot, 스커트 Style에 Feminine을 더한다. `skirt_pi`가 규칙으로 채운다. 원피스는 넣지 않았다. 800개 전체 빌드와 총장 경계값 조정은 남았다.
+
+**통합 PI map(lumi-pi-v5.1).** [build_lumi_pi_unified.py](../scripts/build_lumi_pi_unified.py)가 팀 드라이브 Handsome 폴더의 29CM 패키지(PI v3, 여성 아우터 v4.2, 여성 니트 v4.3, 남성 아우터 v4, 미라벨 남성 상의·니트·스커트 원문)를 v5 스키마에 v4.3 확장 값을 더한 `lumi-pi-v5.1` 하나로 합친다. 결과는 `data/catalog/lumi-pi-unified.jsonl`(+`-schema.json`·`-report.json`)과 이미지 폴더 `data/images/lumi-pi-unified/`(`29cm-<상품ID>.<확장자>`, 상품과 1:1)이다. 원본 zip을 푼 `data/raw/drive/`를 읽고, 미라벨 상품의 빈 축은 [fill_pi_unified.py](../scripts/fill_pi_unified.py)가 DeepSeek 이미지+텍스트로 채운다(신뢰도 0.7 이상만 `inferred`). 2026-11-28 실행에서 9,202개(상의 4,156·하의 2,246·아우터 2,000·스커트 800)를 만들었다. DeepSeek는 3,546회 호출해 9,075개 축을 채웠고, 이미지가 없는 168개는 뺐다. 같은 상대 경로로 푸는 `lumi-pi-unified.zip`을 드라이브 Handsome 폴더에 둔다. 모델 값은 사람이 검수하지 않았고, `--export-runtime`이 이 jsonl에서 실행 사전 `lumi-pi-v5.1`과 가져오기 파일(12 MiB 조각)을 만든다([ADR 0021](adr/0021-pi-v5-1-runtime.md)).
 
 ### 수집
 
@@ -219,10 +222,11 @@ TargetMap은 사전의 모든 PI/FEA 항목을 반환하며 미정 PI `values`�
 python3 -m venv ~/.venvs/lumi-graph && ~/.venvs/lumi-graph/bin/pip install -e '.[graph]'
 export STYLEMATE_DB=/private/tmp/lumi-local/memory.sqlite3
 export STYLEMATE_CATALOG_DB=/private/tmp/lumi-local/catalog.sqlite3
-export STYLEMATE_IMAGE_ROOT=<저장소 밖>/images   # data/images를 같은 상대 경로로 복사
+export STYLEMATE_IMAGE_ROOT=<저장소 밖>/images   # data/images/lumi-pi-unified를 같은 상대 경로로 복사(약 3.4 GB)
 
-python3 scripts/build_lumi_pi_v3.py --data data --export-runtime && python3 scripts/sync_feature_registry.py   # 모델 호출 없음, Pillow 필요
-PYTHONPATH=src python3 -m stylemate_memory.cli catalog-import --file data/catalog/lumi-pi-v3-import.jsonl
+# lumi-pi-unified.zip을 저장소 루트에서 풀어 data/catalog/lumi-pi-unified.jsonl과 data/images/lumi-pi-unified/를 둔다
+python3 scripts/build_lumi_pi_unified.py --data data --export-runtime && python3 scripts/sync_feature_registry.py   # 모델 호출 없음
+for f in data/catalog/lumi-pi-v5.1-import-*.jsonl; do PYTHONPATH=src python3 -m stylemate_memory.cli catalog-import --file "$f"; done
 PYTHONPATH=src python3 -m stylemate_memory.cli catalog-map
 PYTHONPATH=src ~/.venvs/lumi-graph/bin/python -m stylemate_memory.consumer --provider fake
 ```
@@ -245,7 +249,7 @@ PYTHONPATH=src ~/.venvs/lumi-graph/bin/python -m stylemate_memory.consumer --pro
 | OPENCODE_API_KEY | opencode-go를 명시적으로 선택할 때만 조회 |
 | STYLEMATE_OPENAI_MODEL | openai 경로의 `--model`, 기본 gpt-6-luna. 새 실제 평가에는 사용하지 않음 |
 | STYLEMATE_PORT | `--port`, 기본 8766 |
-| STYLEMATE_REGISTRY | `--registry lumi-pi-v3 / park-2025-source-v1`, 기본 `lumi-pi-v3`. 카탈로그 적재·Map·서버에 같은 값을 쓴다 |
+| STYLEMATE_REGISTRY | `--registry lumi-pi-v5.1 / lumi-pi-v3 / park-2025-source-v1`, 기본 `lumi-pi-v5.1`. 카탈로그 적재·Map·서버에 같은 값을 쓴다 |
 | OPENAI_API_KEY | openai를 명시적으로 선택할 때만 조회 |
 | STYLEMATE_PROFILE_REWRITE | graph 종료 요약 뒤 프로필 다시 쓰기. 기본 on, `off`면 고른 문장을 그대로 두고 다시 묻지 않음 |
 | STYLEMATE_QUESTION_LOOP | graph 엔진의 질문 루프([questions.py](../src/stylemate_memory/graph/questions.py), [ADR 0020](adr/0020-question-loop-v1.md)). 기본 on, `off`면 질문 없이 그리드만 쓴다 |
@@ -389,15 +393,15 @@ LUMI_GRAPH_PYTHON=~/.venvs/lumi-graph/bin/python node tests/check_graph_browser.
 | 미구현·미검증 범위 | 필요한 확인 |
 |---|---|
 | 질문 루프 | v1은 구현·기본 on([ADR 0020](adr/0020-question-loop-v1.md)). 최종 카탈로그로 축 중요도 생성·팀 검토, 실제 DeepSeek 방식 선택 품질, 글 답 보강, 말과 선택 충돌 질문([#41](https://github.com/jongrionro-debug/HCI_HANDSOME/issues/41)) |
-| 상품 카탈로그 | 크롤링 완료 뒤 최종 카탈로그 연결, v3 사람 검수 30개 일치율([#41](https://github.com/jongrionro-debug/HCI_HANDSOME/issues/41)) |
+| 상품 카탈로그 | 통합 v5.1 9,202개는 연결됨([ADR 0021](adr/0021-pi-v5-1-runtime.md)). 모델 보완값 사람 검수 30개 일치율([#41](https://github.com/jongrionro-debug/HCI_HANDSOME/issues/41)) |
 | DeepSeek(OpenCode Go) 품질·한도 | 합성 한국어 추출 16개×2회: 검증 통과 31/32, 중앙 지연 약 3초([ADR 0011](adr/0011-use-deepseek-api-for-real-model.md)). 참가자 말투·선택 이유·FEA→PI 가설 품질과 사용량 한도는 미평가 |
 | 써 보기 | 실제 DeepSeek로 요청 3~4회를 써 보고 ADR 0015의 수치·새로움 칸 비율·프로필 말투·값 라벨을 정한다 |
 | 실제 의미 검색 | 모델 선정 후 관련 근거 회수·오탐·근거 완전성·삭제/재색인·비용 비교 |
 | 사용자 연구 | 보고서 기준 파일럿·동의/과제 안내·설문·Baseline 환경·분석 준비. 참여자 자료는 저장소 밖 관리 |
-| Proposed ADR | 0013·0014·0015·0016·0018·0019·0020이 Proposed다. 구현이 들어간 0013~0016은 써 보기 결과와 함께 승인·수정 여부를 정한다 |
+| Proposed ADR | 0013·0014·0015·0016·0018·0019·0020·0021이 Proposed다. 구현이 들어간 0013~0016은 써 보기 결과와 함께 승인·수정 여부를 정한다 |
 
 ### 지금 할 일 (2026-11-28 기준)
 
-질문 설계 세 파트(#26~#30·#38)는 main에 합쳐져 질문 루프가 켜진 1차 시스템이 됐다([ADR 0020](adr/0020-question-loop-v1.md)). 남은 일은 크롤링을 마친 최종 카탈로그를 연결하고 프로토타입을 만드는 것, 그리고 그 데이터·실제 모델로 확인할 가정([#41](https://github.com/jongrionro-debug/HCI_HANDSOME/issues/41))이다.
+질문 설계 세 파트(#26~#30·#38)는 main에 합쳐져 질문 루프가 켜진 1차 시스템이 됐다([ADR 0020](adr/0020-question-loop-v1.md)). 최종 카탈로그(통합 PI map v5.1, 9,202개)는 실행 사전 `lumi-pi-v5.1`로 연결했다([ADR 0021](adr/0021-pi-v5-1-runtime.md)). 남은 일은 프로토타입을 만드는 것, 그리고 이 데이터·실제 모델로 확인할 가정([#41](https://github.com/jongrionro-debug/HCI_HANDSOME/issues/41))이다.
 
 미결정: 실행 사전에 아우터 포함 여부, 참가자 20~24명 모집 시점.

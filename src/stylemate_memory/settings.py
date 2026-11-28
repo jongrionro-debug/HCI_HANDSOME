@@ -23,7 +23,7 @@ class ConsumerSettings:
     model: str = "gpt-6-luna"
     port: int = 8766
     endpoint: str | None = None
-    registry: str = "lumi-pi-v3"  # ADR 0016 runtime dictionary; park-2025-source-v1 stays selectable
+    registry: str = "lumi-pi-v5.1"  # ADR 0021 unified runtime dictionary; lumi-pi-v3 and park-2025-source-v1 stay selectable
     engine: str = "graph"  # ADR 0013 LangGraph intent loop; legacy keeps the earlier comparison flow
 
     @classmethod
@@ -58,8 +58,8 @@ class ConsumerSettings:
         else:
             model = pick("model", "STYLEMATE_OPENAI_MODEL", "gpt-6-luna")
         endpoint = pick("endpoint", "STYLEMATE_OPENCODE_ENDPOINT") if provider == "opencode-go" else None
-        from .contracts import LUMI_PI_V3_REGISTRY_VERSION, V1_REGISTRY_VERSIONS
-        registry = pick("registry", "STYLEMATE_REGISTRY", LUMI_PI_V3_REGISTRY_VERSION)
+        from .contracts import LUMI_PI_V51_REGISTRY_VERSION, V1_REGISTRY_VERSIONS
+        registry = pick("registry", "STYLEMATE_REGISTRY", LUMI_PI_V51_REGISTRY_VERSION)
         if registry not in V1_REGISTRY_VERSIONS:
             raise StyleMateError("invalid_input", "registry는 " + " 또는 ".join(V1_REGISTRY_VERSIONS) + "로 지정해 주세요.")
         engine = pick("engine", "STYLEMATE_ENGINE", "graph")
