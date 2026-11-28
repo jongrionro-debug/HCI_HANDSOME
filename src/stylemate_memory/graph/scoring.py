@@ -6,6 +6,7 @@ The update sizes are pilot assumptions (decision 15), not tuned values.
 
 from __future__ import annotations
 
+import math
 import random
 from typing import Any
 
@@ -13,11 +14,48 @@ PRIOR = (1.0, 1.0)
 SELECT_GAIN = 1.0
 MISS_PENALTY = 0.3
 REASON_GAIN = 2.0
+CONFIRM_GAIN = 3.0  # L3: a confirmed interpretation (2-feedback.md 3절, 가정)
 MISS_STREAK_LIMIT = 3
 DISLIKE_HIDE = 2
 CHIP_MEAN = 0.6
 CHIP_UPDATES = 2
 IMAGE_BLIND_AXES = ("Fabric",)  # not verifiable from a photo
+
+
+def delta_e2000(lab1: tuple[float, ...] | list[float], lab2: tuple[float, ...] | list[float]) -> float:
+    """CIEDE2000 colour difference (Sharma, Wu & Dalal 2005), same formula as scripts/build_lumi_pi_v3.py."""
+    l1, a1, b1 = lab1
+    l2, a2, b2 = lab2
+    c1, c2 = math.hypot(a1, b1), math.hypot(a2, b2)
+    cbar7 = ((c1 + c2) / 2) ** 7
+    g = 0.5 * (1 - math.sqrt(cbar7 / (cbar7 + 25 ** 7)))
+    a1p, a2p = (1 + g) * a1, (1 + g) * a2
+    c1p, c2p = math.hypot(a1p, b1), math.hypot(a2p, b2)
+    h1p = math.degrees(math.atan2(b1, a1p)) % 360 if c1p else 0.0
+    h2p = math.degrees(math.atan2(b2, a2p)) % 360 if c2p else 0.0
+    dlp, dcp = l2 - l1, c2p - c1p
+    if c1p * c2p == 0:
+        dhp = 0.0
+    elif abs(h2p - h1p) <= 180:
+        dhp = h2p - h1p
+    else:
+        dhp = h2p - h1p - 360 if h2p > h1p else h2p - h1p + 360
+    dhp_big = 2 * math.sqrt(c1p * c2p) * math.sin(math.radians(dhp / 2))
+    lbar, cbarp = (l1 + l2) / 2, (c1p + c2p) / 2
+    if c1p * c2p == 0:
+        hbarp = h1p + h2p
+    elif abs(h1p - h2p) <= 180:
+        hbarp = (h1p + h2p) / 2
+    else:
+        hbarp = (h1p + h2p + 360) / 2 if h1p + h2p < 360 else (h1p + h2p - 360) / 2
+    t = (1 - 0.17 * math.cos(math.radians(hbarp - 30)) + 0.24 * math.cos(math.radians(2 * hbarp))
+         + 0.32 * math.cos(math.radians(3 * hbarp + 6)) - 0.20 * math.cos(math.radians(4 * hbarp - 63)))
+    sl = 1 + 0.015 * (lbar - 50) ** 2 / math.sqrt(20 + (lbar - 50) ** 2)
+    sc, sh = 1 + 0.045 * cbarp, 1 + 0.015 * cbarp * t
+    cbarp7 = cbarp ** 7
+    rt = (-2 * math.sqrt(cbarp7 / (cbarp7 + 25 ** 7))
+          * math.sin(math.radians(60 * math.exp(-(((hbarp - 275) / 25) ** 2)))))
+    return math.sqrt((dlp / sl) ** 2 + (dcp / sc) ** 2 + (dhp_big / sh) ** 2 + rt * (dcp / sc) * (dhp_big / sh))
 
 
 def score_key(target_id: str, scope: str, axis: str, value: str) -> str:
@@ -130,19 +168,21 @@ def apply_dislikes(state: dict[str, Any], product_ids: list[str], turn: int) -> 
 
 
 def chips(state: dict[str, Any], scope: str, labels: dict[str, str]) -> list[dict[str, Any]]:
-    """Understanding chips: pinned values plus values whose score clearly rose."""
+    """Understanding chips: pinned and confirmed (L3) values plus values whose score clearly rose."""
     result = []
     pinned = {p["key"] for p in state["pinned"]}
+    confirmed = set(state.get("confirmed", []))
     for key, entry in sorted(state["scores"].items()):
         target_id, key_scope, axis, value = split_key(key)
         if key_scope != scope or key in state["excluded"]:
             continue
-        if key in pinned or (entry["n"] >= CHIP_UPDATES and mean(entry) >= CHIP_MEAN):
+        if key in pinned or key in confirmed or (entry["n"] >= CHIP_UPDATES and mean(entry) >= CHIP_MEAN):
             result.append({"key": key, "target_id": target_id, "feature": axis, "label_ko": labels.get(axis, axis),
-                           "value": value, "pinned": key in pinned, "mean": round(mean(entry), 3)})
+                           "value": value, "pinned": key in pinned, "confirmed": key in confirmed,
+                           "mean": round(mean(entry), 3)})
     for pin in state["pinned"]:
         if not any(c["key"] == pin["key"] for c in result):
             target_id, _, axis, value = split_key(pin["key"])
             result.append({"key": pin["key"], "target_id": target_id, "feature": axis, "label_ko": labels.get(axis, axis),
-                           "value": value, "pinned": True, "mean": None})
+                           "value": value, "pinned": True, "confirmed": False, "mean": None})
     return result

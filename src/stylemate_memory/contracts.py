@@ -766,6 +766,7 @@ class AnswerQuestionUI(TypedDict):
     choice: Literal["options", "neither", "unsure", "skip", "switch"]
     option_ids: list[str]
     switch_to: str | None  # a mode listed in the question's switch_to, only with choice="switch"
+    strengths: NotRequired[dict[str, str]]  # Issue #29: per chosen option "only" | "more" (reason_chips)
 
 
 class SummaryChoice(TypedDict):

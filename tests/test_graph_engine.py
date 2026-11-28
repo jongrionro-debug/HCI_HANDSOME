@@ -541,34 +541,113 @@ class PIV3RuntimeTests(unittest.TestCase):
             self.assertEqual(facts.get("Weight"), ["Heavy" if garment == "Bottom" else "Light"])
             self.send({"op": "end_request"})
 
-    def test_question_loop_asks_once_and_a_text_answer_pins_the_value(self):
+    grid = GraphEngineTests.grid
+
+    def ask(self):
+        return self.service.state()["graph"]["ask"]
+
+    def answer(self, ask, choice="options", ids=(), strengths=None, switch_to=None, ok=True):
+        action = {"op": "answer_question", "question_id": ask["question_id"], "choice": choice, "option_ids": list(ids),
+                  "switch_to": switch_to}
+        if strengths:
+            action["strengths"] = strengths
+        return self.send(action, ok=ok)
+
+    def intent(self):
+        return self.service._graph.intent(self.service.state()["request"]["id"])
+
+    def start_top(self):
+        self.send({"op": "start_request", "mode": "shopping", "timezone": "Asia/Seoul",
+                   "targets": [{"target_id": "t", "garment_type": "Top"}], "text": None, "gender": "men", "situation": None})
+
+    def test_question_loop_v1_modes_answers_and_comparison(self):
+        """ADR 0020 scenario: photo chips -> skip -> shared-value chips -> relative adjust -> comparison offer."""
+        self.start_top()
+        s = self.service.state()
+        self.assertTrue(s["graph"]["question_loop"])  # default on
+        ask = s["graph"]["ask"]
+        # T1: Type is not settled, so it is asked with photo options (multi-select), each with its image.
+        self.assertEqual((ask["mode"], ask["axis"], ask["multi"]), ("photo_chips", "Type", True))
+        self.assertTrue(all(o["image_url"].startswith("/api/images/") for o in ask["options"]))
+        self.assertNotIn("value", ask["options"][0])
+        self.answer({"question_id": "q-unknown"}, choice="skip", ok=False)
+        set_id = s["graph"]["set_id"]
+        shirt = next(o for o in ask["options"] if o["label"] in ("셔츠", "Shirt"))
+        self.answer(ask, ids=[shirt["id"]])
+        s = self.service.state()
+        intent = self.intent()
+        self.assertNotEqual(s["graph"]["set_id"], set_id)  # a confirmed value redraws the grid
+        self.assertEqual(intent["pinned"], [])  # multi photo answer = L3, not "이 값들만"
+        self.assertTrue(any(c["feature"] == "Type" and c["confirmed"] for c in s["graph"]["chips"]))
+        # T2: the next gap (Color by name, or Fit with photos while types are mixed); skipping changes nothing.
+        ask = s["graph"]["ask"]
+        self.assertIn((ask["mode"], ask["axis"]), [("text_options", "Color"), ("photo_chips", "Fit")])
+        set_id = s["graph"]["set_id"]
+        before = (dict(self.intent()["scores"]), list(self.intent()["pinned"]))
+        self.answer(ask, choice="skip")
+        s = self.service.state()
+        self.assertIsNone(s["graph"]["ask"])
+        self.assertEqual(s["graph"]["set_id"], set_id)  # skip keeps the grid and changes no value
+        self.assertEqual((self.intent()["scores"], self.intent()["pinned"]), before)
+        self.assertEqual(self.intent()["skipped_axes"], [["t", ask["axis"]]])
+        # T3: two fresh picks sharing Type and Color raise the shared-value chips (reactive, no ASK_GAP).
+        cards = self.intent()["last_grid"]["cards"]
+        pair = next((a, b) for a in cards for b in cards if a["candidate_id"] < b["candidate_id"]
+                    and a["facts"].get("Type") == b["facts"].get("Type") and a["facts"].get("Color") == b["facts"].get("Color"))
+        self.send(self.grid(selections=[{"target_id": "t", "candidate_id": c["candidate_id"], "part_ref": None} for c in pair]))
+        s = self.service.state()
+        ask = s["graph"]["ask"]
+        self.assertEqual(ask["mode"], "reason_chips")
+        self.assertIsNone(s["graph"]["reason_prompt"])  # one question per screen
+        by_axis = {o["axis"]: o for o in ask["options"]}
+        self.assertTrue({"Type", "Color"} <= set(by_axis))
+        self.answer(ask, ids=[by_axis["Type"]["id"], by_axis["Color"]["id"]],
+                    strengths={by_axis["Type"]["id"]: "only", by_axis["Color"]["id"]: "more"})
+        intent = self.intent()
+        self.assertEqual([p["key"].split("|")[2] for p in intent["pinned"]], ["Type"])  # 꼭 있어야 해요 = L4
+        # T4: "있으면 좋아요" asks the relative adjustment around the first picked product.
+        ask = self.ask()
+        self.assertEqual(ask["mode"], "relative_adjust")
+        self.assertIn(ask["base"]["product_id"], [c["product_id"] for c in pair])
+        self.assertTrue(ask["base"]["image_url"])
+        looser = next(o for o in ask["options"] if o["label"] == "조금 더 여유롭게")
+        self.answer(ask, ids=[looser["id"]])
+        intent = self.intent()
+        self.assertEqual(intent["v3_targets"], [{"target_id": "t", "axis": "Fit", "score": 2.5}])
+        # T5: enough turns and two shortlisted picks -> offer the comparison; "비교해 볼게요" opens the shortlist grid.
+        ask = self.ask()
+        self.assertEqual(ask["mode"], "propose_compare")
+        self.answer(ask, ids=["compare"])
+        s = self.service.state()
+        self.assertTrue(s["graph"]["compare"])
+        log = self.intent()["question_log"]
+        self.assertEqual([e["event"] for e in log if e["event"] == "ask"], ["ask"] * 5)
+        self.assertTrue(all(e["decision"]["decided_by"] == "rule" for e in log if e["event"] == "ask"))
+        self.assertEqual(s["memories"], [])  # answers never create memory (ADR 0007, 0013 decision 9)
+
+    def test_text_reply_closes_the_question_and_an_unknown_term_asks_with_photos(self):
+        self.start_top()
+        ask = self.ask()
+        self.answer(ask, choice="switch", switch_to="text_options")
+        ask = self.ask()
+        self.assertEqual((ask["mode"], ask["axis"]), ("text_options", "Type"))
+        self.send(self.grid(text="그게 뭐예요?"))
+        intent = self.intent()
+        self.assertIn("text_answer", [e["event"] for e in intent["question_log"]])
+        self.assertEqual(intent["term_unknown"], ["Type"])
+        self.assertEqual(intent["mode_pref"], {"t:Type": "text_options"})
+        ask = self.ask()
+        self.assertEqual((ask["mode"], ask["axis"]), ("photo_chips", "Type"))  # 3-mapping 7절 낯선 용어
+
+    def test_loop_off_keeps_the_grid_only_flow(self):
         import os
         from unittest import mock
-        with mock.patch.dict(os.environ, {"STYLEMATE_QUESTION_LOOP": "on"}):
-            self.send({"op": "start_request", "mode": "shopping", "timezone": "Asia/Seoul",
-                       "targets": [{"target_id": "t", "garment_type": "Top"}], "text": None, "gender": "men",
-                       "situation": None})
+        with mock.patch.dict(os.environ, {"STYLEMATE_QUESTION_LOOP": "off"}):
+            self.start_top()
             s = self.service.state()
-            ask = s["graph"]["ask"]
-            self.assertTrue(s["graph"]["question_loop"])
-            self.assertEqual(ask["mode"], "text_options")
-            self.assertNotIn("value", ask["options"][0])
-            set_id = s["graph"]["set_id"]
-            self.send({"op": "answer_question", "question_id": "q-unknown", "choice": "skip", "option_ids": [],
-                       "switch_to": None}, ok=False)
-            option = ask["options"][0]
-            self.send({"op": "answer_question", "question_id": ask["question_id"], "choice": "options",
-                       "option_ids": [option["id"]], "switch_to": None})
-            s = self.service.state()
-            intent = self.service._graph.intent(s["request"]["id"])
+            self.assertFalse(s["graph"]["question_loop"])
             self.assertIsNone(s["graph"]["ask"])
-            self.assertNotEqual(s["graph"]["set_id"], set_id)  # a pinned value redraws the grid
-            pinned = [p["key"].split("|") for p in intent["pinned"]]
-            self.assertEqual([(k[2], k[3]) for k in pinned], [(ask["axis"], intent["question_log"][0]["candidate"]["values"][0])])
-            axis, value = pinned[0][2], pinned[0][3]
-            self.assertTrue(all(value in card["facts"].get(axis, []) for card in intent["last_grid"]["cards"]))
-            self.assertEqual([e["event"] for e in intent["question_log"]], ["ask", "answer"])
-
+            self.assertEqual(len(s["cards"]), 8)
 
 if __name__ == "__main__":
     unittest.main()

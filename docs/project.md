@@ -22,7 +22,7 @@
 | [Team4_mid-term_report.pdf](sources/Team4_mid-term_report.pdf) | 시스템·연구 설계 원문. 3.2~3.6: 메모리·조회·목표 Map·상품 검색·피드백, 3.7: UI, 2장·4~5장: RQ·평가 |
 | [Team4_mid-term_presentation.pdf](sources/Team4_mid-term_presentation.pdf) | 발표용 보조 자료. 보고서와 승인된 결정을 덮어쓰지 않음 |
 | [Feature Map JSON](../output/feature-map/park-2025-feature-map.json) | 논문에서 차용한 값·FEA 분류·출처·라이선스와 현재 실행 사전의 기계 판독 정본. 수집 후 확정할 PI value 사전과 구분. [CSV](../output/feature-map/park-2025-feature-map.csv)는 보기용 |
-| [ADR 목록](adr/README.md) | 결정 이유·승인·대체 관계. 현재 시스템의 직접 근거는 0006(FEA→PI 가설)·0007(종료 후 동의)·0010(수집 기반 value)·0013(graph 엔진)·0014·0016(PI v2·v3)·0015(기억 warm start)·0017(질문 설계 작업 공간) |
+| [ADR 목록](adr/README.md) | 결정 이유·승인·대체 관계. 현재 시스템의 직접 근거는 0006(FEA→PI 가설)·0007(종료 후 동의)·0010(수집 기반 value)·0013(graph 엔진)·0014·0016(PI v2·v3)·0015(기억 warm start)·0017(질문 설계 작업 공간)·0020(질문 루프 v1) |
 
 두 PDF는 인계된 원본을 보존한다. 중간보고서는 20쪽·737,007 bytes·SHA-256 `97cdd6791d4aed737d3faae93d46e26ef112d06346ecef34b3a3c3af4b8a69f5`, 발표자료는 14쪽·41,281,335 bytes·SHA-256 `5b708cbef817a999fec1b1ee5ba0c2119ed7d07e9d08164b53146521bf1d2248`다.
 
@@ -35,7 +35,7 @@
 ```text
 시작: 성별·상황 칩 → 동의한 장기 기억으로 warm start(ADR 0015)
 → 글 해석(parse_turn) → 의도 갱신: 직접 PI · FEA 요구 → FEA→PI 가설
-→ 8장 이미지 그리드 (+ 질문 루프가 켜지면 질문 하나) ↺ 값별 점수·이해 칩·후보함
+→ 8장 이미지 그리드 또는 질문 하나(이미지 질문이면 그리드 대신) ↺ 값별 점수·이해 칩·후보함
 → 후보함에서 최종 선택(선택 사항) → 종료 요약의 제안 문장
 → 내용 확인 → 별도 이후 활용 동의 → 장기 기억
 ```
@@ -45,8 +45,8 @@
 | 경계 | 현재 코드·동작 | 남은 범위 |
 |---|---|---|
 | 글 해석 | [graph/parse.py](../src/stylemate_memory/graph/parse.py)(parse_turn v2), [model_io.py](../src/stylemate_memory/model_io.py)·[llm.py](../src/stylemate_memory/llm.py): 인용·출처 alias 검사, 실패 시 pending 재처리 | 실제 한국어·선택 이유 해석 품질 |
-| 의도·가설·그리드 | [graph/](../src/stylemate_memory/graph/): [engine.py](../src/stylemate_memory/graph/engine.py) 턴 루프(parse_turn → 의도 갱신 → 가설 → route → 그리드 → interrupt), [scoring.py](../src/stylemate_memory/graph/scoring.py) 값별 Beta 점수·대비 귀속, [grid.py](../src/stylemate_memory/graph/grid.py) hard 필터·8장 구성, [hypotheses.py](../src/stylemate_memory/graph/hypotheses.py), 상황 사전 [situation-dictionary-v1.json](../src/stylemate_memory/resources/situation-dictionary-v1.json) | 실제 카탈로그의 대조 칸 구성률·수렴 판정, PI v3 점수·색 거리를 쓰는 비교 |
-| 질문 루프 | [graph/questions.py](../src/stylemate_memory/graph/questions.py) v0: 후보 → 허용 방식 → 방식 선택 → 질문 → 답 반영, 결정 로그. `text_options`만 있고 기본 off(`STYLEMATE_QUESTION_LOOP=on`) | 세 파트의 방식·반영·선택([질문 설계 작업 공간](../research/question-design/README.md)) |
+| 의도·가설·그리드 | [graph/](../src/stylemate_memory/graph/): [engine.py](../src/stylemate_memory/graph/engine.py) 턴 루프(parse_turn → 의도 갱신 → 가설 → route → 그리드 → interrupt), [scoring.py](../src/stylemate_memory/graph/scoring.py) 값별 Beta 점수·대비 귀속, [grid.py](../src/stylemate_memory/graph/grid.py) hard 필터·8장 구성, [hypotheses.py](../src/stylemate_memory/graph/hypotheses.py), 상황 사전 [situation-dictionary-v1.json](../src/stylemate_memory/resources/situation-dictionary-v1.json) | 실제 카탈로그의 대조 칸 구성률·수렴 판정. PI v3 점수(상대 조정 목표)·CIEDE2000 색 유사도·`price_krw` 예산은 반영됨 |
+| 질문 루프 | [graph/questions.py](../src/stylemate_memory/graph/questions.py) v1([ADR 0020](adr/0020-question-loop-v1.md)): 반응형·선제형 후보 → 허용 방식 → 규칙(+실제 모델이면 LLM) 방식 선택 → 질문 → 강도 단계 반영, 결정 로그. 방식 6개와 비교 제안, 기본 on | 품목별 축 중요도 생성, 실제 DeepSeek 방식 선택 품질, 글 답 보강([#41](https://github.com/jongrionro-debug/HCI_HANDSOME/issues/41)) |
 | 기억 warm start·종료 요약 | [graph/memory.py](../src/stylemate_memory/graph/memory.py)([ADR 0015](adr/0015-top-memory-warm-start.md)): 기억을 Beta 사전값으로, 새로움 칸, 취향 변화 질문, 제안 문장 → 기존 확인·동의 계약, LLM 프로필 다시 쓰기 | ADR 0015 결정 8의 수치·새로움 칸 비율·프로필 말투(써 보고 정함) |
 | 메모리 저장 | [store.py](../src/stylemate_memory/store.py)·[store_v1.py](../src/stylemate_memory/store_v1.py)·[store_feedback.py](../src/stylemate_memory/store_feedback.py)·[store_cleanup.py](../src/stylemate_memory/store_cleanup.py): 근거·문장·선택적 binding, 확인·동의·교체·철회·삭제 | 실제 사용자 DB 이관·운영 자료 검증 |
 | 조회·목표 | [retrieval.py](../src/stylemate_memory/retrieval.py)·[inference.py](../src/stylemate_memory/inference.py): 유효성/대상/요청 필터, 구조+키워드 검색, PI/FEA 목표·최신성 검사 | 실제 의미 검색 모델 선정·관련성 평가 |
@@ -71,7 +71,12 @@
 
 ### 질문 루프
 
-[질문 설계 작업 공간](../research/question-design/README.md)의 세 파트(1 질문 방식·2 답 해석·3 언제 어떤 방식)가 [questions.py](../src/stylemate_memory/graph/questions.py)의 같은 계약을 채운다([ADR 0017](adr/0017-question-design-research-workspace.md)). 지금 코드는 v0(`text_options` 선택 → 그 값 고정)이고 기본 off다. 켜면 그리드 위 배너에 질문 하나를 띄우고 답을 반영하며, 질문·결정·답을 결정 로그로 남긴다. 방식 목록·반영 규칙·선택 규칙은 파트 결정 문서가 확정되면 이 절을 고친다.
+[질문 설계 작업 공간](../research/question-design/README.md)의 세 파트 결정 문서 v1을 [questions.py](../src/stylemate_memory/graph/questions.py)가 구현한다([ADR 0020](adr/0020-question-loop-v1.md)). 기본으로 켜져 있고 `STYLEMATE_QUESTION_LOOP=off`면 그리드만 쓴다.
+
+- **방식**: 이미지 여러 장(`select_images`, 한 Type 안에서 그 축만 다른 2~4장, 2장이면 대조), 사진 붙은 선택지(`photo_chips`, Type이 정해지기 전·용어 모름 뒤), 단어 정렬(`explain_images`, 사용자가 쓴 말의 가설 값이 한 축에 2개 이상), 공통점 칩(`reason_chips`, 2장 이상 골라 공통 값 2개 이상), 기준 이미지 조정(`relative_adjust`, v3 점수 ±0.5/±1.0), 자연어 질문(`text_options`)과 비교 제안(`propose_compare`).
+- **언제**: 행동 직후의 반응형 질문이 먼저이고 간격 규칙이 없다. 선제형은 축 순위(중요도 × 분할력 × 불확실성) 1위를 묻고, 답 없이 넘긴 질문 뒤 2턴 쉬며 요청당 4개까지다. 후보함 2개 이상에서 남은 축이 1개 이하이거나 4턴이 지나거나 "보여 줘"면 비교를 제안한다. 한 화면에 질문은 하나이고, 이미지 질문은 8장 그리드를 대신한다.
+- **반영**: 2-feedback의 강도 단계를 따른다. 글 선택지·단일 사진 선택은 고정(L4), 다중 사진 선택·단어 정렬은 확인(L3, 실선 이해 칩), 공통점 칩은 꼭(L4)/있으면 좋아요(L2), 이미지 여러 장은 물은 축만 L1/L−1이다. 모르겠음·건너뛰기·방식 바꾸기·다 별로는 값을 바꾸지 않고 다음 질문에만 영향을 준다. 질문이 열려 있을 때 글을 보내면 질문이 닫히고 글은 parse_turn이 해석한다.
+- **선택 주체**: fake provider는 규칙만 쓴다. 실제 모델이면 LLM이 허용 목록 안에서 고르고, 목록 밖이거나 근거 신호가 사실과 다르면 규칙 결정을 쓴다. 규칙 결정은 항상 그림자로 결정 로그(`question_log`)에 남는다. 답은 기억을 만들지 않는다.
 
 ## 메모리 실행 계약
 
@@ -243,7 +248,7 @@ PYTHONPATH=src ~/.venvs/lumi-graph/bin/python -m stylemate_memory.consumer --pro
 | STYLEMATE_REGISTRY | `--registry lumi-pi-v3 / park-2025-source-v1`, 기본 `lumi-pi-v3`. 카탈로그 적재·Map·서버에 같은 값을 쓴다 |
 | OPENAI_API_KEY | openai를 명시적으로 선택할 때만 조회 |
 | STYLEMATE_PROFILE_REWRITE | graph 종료 요약 뒤 프로필 다시 쓰기. 기본 on, `off`면 고른 문장을 그대로 두고 다시 묻지 않음 |
-| STYLEMATE_QUESTION_LOOP | graph 엔진의 질문 루프([questions.py](../src/stylemate_memory/graph/questions.py)). 기본 off, `on`이면 그리드 위에 질문 하나를 띄우고 답을 반영한다 |
+| STYLEMATE_QUESTION_LOOP | graph 엔진의 질문 루프([questions.py](../src/stylemate_memory/graph/questions.py), [ADR 0020](adr/0020-question-loop-v1.md)). 기본 on, `off`면 질문 없이 그리드만 쓴다 |
 | STYLEMATE_ENGINE | `--engine graph / legacy`, 기본 graph. graph는 선택 의존성 `pip install -e '.[graph]'`(langgraph)이 필요하고, 없으면 안내 오류로 멈춘다. 체크포인트는 메모리 DB 옆 `<이름>.graph.sqlite3`에 둔다. `catalog-import`·`catalog-map`은 엔진과 무관하게 의존성 없이 돈다 |
 
 [settings.py](../src/stylemate_memory/settings.py)가 경로·설정·gateway를 구성한다. 실제 API 실행이 요청된 경우에만 사용자가 로컬 환경에 `OPENCODE_API_KEY`를 설정하고 `PYTHONPATH=src python3 -m stylemate_memory.consumer --provider opencode-go --endpoint <확인한 https 주소>`로 시작한다. 기존 `--provider openai`는 호환 경로다. 키를 CLI 인자·예제 파일·로그에 넣지 않는다. import·기본 fake·상품 가져오기/Map 생성·읽기 관찰에는 키가 필요 없다.
@@ -383,23 +388,16 @@ LUMI_GRAPH_PYTHON=~/.venvs/lumi-graph/bin/python node tests/check_graph_browser.
 
 | 미구현·미검증 범위 | 필요한 확인 |
 |---|---|
-| 질문 루프 | 세 파트의 결정 문서 v1 → 구현 → 루프 기본 on과 [시나리오](specs/agent-scenario.md) T1~T5 통합([#26](https://github.com/jongrionro-debug/HCI_HANDSOME/issues/26)~[#30](https://github.com/jongrionro-debug/HCI_HANDSOME/issues/30)) |
-| 상품 카탈로그 | v3 사람 검수 일치율, 원격 3,600개의 로컬 반영, 점수·색 거리·`price_krw` 예산을 쓰는 비교([#27](https://github.com/jongrionro-debug/HCI_HANDSOME/issues/27)) |
+| 질문 루프 | v1은 구현·기본 on([ADR 0020](adr/0020-question-loop-v1.md)). 최종 카탈로그로 축 중요도 생성·팀 검토, 실제 DeepSeek 방식 선택 품질, 글 답 보강, 말과 선택 충돌 질문([#41](https://github.com/jongrionro-debug/HCI_HANDSOME/issues/41)) |
+| 상품 카탈로그 | 크롤링 완료 뒤 최종 카탈로그 연결, v3 사람 검수 30개 일치율([#41](https://github.com/jongrionro-debug/HCI_HANDSOME/issues/41)) |
 | DeepSeek(OpenCode Go) 품질·한도 | 합성 한국어 추출 16개×2회: 검증 통과 31/32, 중앙 지연 약 3초([ADR 0011](adr/0011-use-deepseek-api-for-real-model.md)). 참가자 말투·선택 이유·FEA→PI 가설 품질과 사용량 한도는 미평가 |
 | 써 보기 | 실제 DeepSeek로 요청 3~4회를 써 보고 ADR 0015의 수치·새로움 칸 비율·프로필 말투·값 라벨을 정한다 |
 | 실제 의미 검색 | 모델 선정 후 관련 근거 회수·오탐·근거 완전성·삭제/재색인·비용 비교 |
 | 사용자 연구 | 보고서 기준 파일럿·동의/과제 안내·설문·Baseline 환경·분석 준비. 참여자 자료는 저장소 밖 관리 |
-| Proposed ADR | 0013·0014·0015·0016·0018·0019가 Proposed다. 구현이 들어간 0013~0016은 써 보기 결과와 함께 승인·수정 여부를 정한다 |
+| Proposed ADR | 0013·0014·0015·0016·0018·0019·0020이 Proposed다. 구현이 들어간 0013~0016은 써 보기 결과와 함께 승인·수정 여부를 정한다 |
 
-### 지금 할 일 (2026-11-26 기준)
+### 지금 할 일 (2026-11-28 기준)
 
-핵심은 질문 설계 세 파트다. 세 파트가 main에 합쳐지면 질문 루프가 켜진 1차 시스템이 된다. 공통 계약은 [graph/questions.py](../src/stylemate_memory/graph/questions.py), 진행 방법은 [질문 설계 작업 공간](../research/question-design/README.md)에 있고, 완료 조건은 각 Issue에서 관리한다.
+질문 설계 세 파트(#26~#30·#38)는 main에 합쳐져 질문 루프가 켜진 1차 시스템이 됐다([ADR 0020](adr/0020-question-loop-v1.md)). 남은 일은 크롤링을 마친 최종 카탈로그를 연결하고 프로토타입을 만드는 것, 그리고 그 데이터·실제 모델로 확인할 가정([#41](https://github.com/jongrionro-debug/HCI_HANDSOME/issues/41))이다.
 
-| 파트 | 맡는 것 | Issue |
-|---|---|---|
-| 1 · 질문 방식 | 방식별 질문 만들기와 질문 화면 | [#26](https://github.com/jongrionro-debug/HCI_HANDSOME/issues/26) |
-| 2 · 답 해석·반영 | 방식별 답의 반영 규칙, PI v3 점수·색 거리·예산을 쓰는 반영, v3 값 검수 | [#27](https://github.com/jongrionro-debug/HCI_HANDSOME/issues/27) |
-| 3 · 언제 어떤 방식 | 물을 축·시점·멈춤 판정, 규칙+LLM 방식 선택, 결정 로그, 루프 기본 on과 통합 시나리오 | [#28](https://github.com/jongrionro-debug/HCI_HANDSOME/issues/28) |
-| 공통 | 계약 변경(여러 축 칩·정도·사용자 단어·글 답) · 사건 기반 질문의 시점 | [#29](https://github.com/jongrionro-debug/HCI_HANDSOME/issues/29) · [#30](https://github.com/jongrionro-debug/HCI_HANDSOME/issues/30) |
-
-미결정: 확인 지점 날짜(각 Issue), 실행 사전에 아우터 포함 여부, 참가자 20~24명 모집 시점.
+미결정: 실행 사전에 아우터 포함 여부, 참가자 20~24명 모집 시점.

@@ -11,12 +11,23 @@ import { chromium } from "playwright";
 
 const captures = process.argv[2] || await mkdtemp(join(tmpdir(), "lumi-graph-"));
 await mkdir(captures, { recursive: true });
-const backend = spawn(process.env.LUMI_GRAPH_PYTHON || "python3", ["-u", "-B", "-W", "ignore", "-m", "tests.graph_browser_fixture"],
-  { env: { ...process.env, PYTHONPATH: "src" }, stdio: ["pipe", "pipe", "pipe"] });
-const lines = createInterface({ input: backend.stdout })[Symbol.asyncIterator]();
+// The grid-only flow runs with the question loop off (its default is on, ADR 0020); a second backend checks the loop.
+function startBackend(loop) {
+  const proc = spawn(process.env.LUMI_GRAPH_PYTHON || "python3", ["-u", "-B", "-W", "ignore", "-m", "tests.graph_browser_fixture"],
+    { env: { ...process.env, PYTHONPATH: "src", STYLEMATE_QUESTION_LOOP: loop }, stdio: ["pipe", "pipe", "pipe"] });
+  proc.stderr.on("data", data => { stderr += data; });
+  proc.stdin.on("error", () => {});
+  return proc;
+}
+async function stopBackend(proc) {
+  if (proc.exitCode !== null) return;
+  const stopped = new Promise(resolve => proc.once("close", resolve));
+  proc.stdin.end(`${JSON.stringify({ op: "close" })}\n`);
+  await stopped;
+}
 let stderr = "", browser;
-backend.stderr.on("data", data => { stderr += data; });
-backend.stdin.on("error", () => {});
+let backend = startBackend("off");
+let lines = createInterface({ input: backend.stdout })[Symbol.asyncIterator]();
 async function next() {
   let timer;
   try { const line = await Promise.race([lines.next(), new Promise((_, reject) => {
@@ -108,14 +119,67 @@ try {
   assert.ok(view.state.request.final_selection);
   await page.screenshot({ path: join(captures, "final.png"), fullPage: true });
   assert.deepEqual(errors, []);
+  await page.close();
+
+  // Question loop on (ADR 0020): one question per screen; an image question replaces the 8-card grid.
+  await stopBackend(backend);
+  backend = startBackend("on");
+  lines = createInterface({ input: backend.stdout })[Symbol.asyncIterator]();
+  const loopUrl = (await next()).url;
+  const qpage = await browser.newPage({ viewport: { width: 1360, height: 940 }, reducedMotion: "reduce" });
+  const qerrors = [], qcommands = [];
+  qpage.on("pageerror", e => qerrors.push(e.message));
+  qpage.on("request", req => { if (req.url() === `${loopUrl}/api/command`) qcommands.push(req.postDataJSON()); });
+  await qpage.goto(loopUrl);
+  const banner = qpage.locator(".banner.ask");
+  await banner.waitFor();
+  view = await rpc("inspect");
+  const ask = view.state.graph.ask;
+  assert.ok(ask, "the loop asks a question on the first grid");
+  assert.equal(await banner.getAttribute("data-mode"), ask.mode);
+  assert.equal(await qpage.locator(".banner").count(), 1, "one question per screen");
+  const photos = qpage.locator(".banner.ask .ask-photo");
+  if (["photo_chips", "select_images", "explain_images"].includes(ask.mode)) {
+    assert.equal(await photos.count(), ask.options.length);
+    assert.equal(await qpage.locator(".candidates.grid").isHidden(), true, "an image question replaces the grid");
+    await qpage.locator(".banner.ask img").first().evaluate(img => img.complete || new Promise(r => { img.onload = img.onerror = r; }));
+  }
+  await qpage.screenshot({ path: join(captures, "question-desktop.png"), fullPage: true });
+  await qpage.setViewportSize({ width: 390, height: 844 });
+  assert.equal(await qpage.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true);
+  await qpage.screenshot({ path: join(captures, "question-mobile.png"), fullPage: true });
+  await qpage.setViewportSize({ width: 1360, height: 940 });
+  if (ask.multi) {
+    await qpage.locator('.banner.ask [data-action="ask-pick"]').first().click();
+    await qpage.locator('.banner.ask [data-action="ask-pick"][aria-pressed="true"]').first().waitFor();
+    await qpage.locator('.banner.ask [data-action="ask-submit"]').click();
+  } else {
+    await qpage.locator('.banner.ask [data-action="answer-q"][data-choice="options"]').first().click();
+  }
+  await qpage.waitForFunction(id => document.querySelector(".banner.ask")?.dataset.question !== id, ask.question_id);
+  view = await rpc("inspect");
+  const sentAnswer = qcommands.findLast(c => c.action.op === "answer_question");
+  assert.equal(sentAnswer.action.question_id, ask.question_id);
+  assert.equal(sentAnswer.action.choice, "options");
+  assert.notEqual(view.state.graph.ask?.question_id, ask.question_id, "an answered question closes");
+  assert.equal(view.intent.question_log.filter(e => e.event === "answer").length, 1);
+  await qpage.locator(".banner.ask, article.card").first().waitFor();
+  await qpage.screenshot({ path: join(captures, "question-answered.png"), fullPage: true });
+  // Skipping the next question keeps the screen and records no value.
+  view = await rpc("inspect");
+  if (view.state.graph.ask) {
+    const before = JSON.stringify(view.intent.scores);
+    await qpage.locator('.banner.ask [data-action="answer-q"][data-choice="skip"]').click();
+    await qpage.locator('.candidates.grid:not([hidden]) article.card').first().waitFor();
+    view = await rpc("inspect");
+    assert.equal(JSON.stringify(view.intent.scores), before);
+  }
+  assert.deepEqual(qerrors, []);
   console.log(JSON.stringify({ status: "PASS", checks: ["8-card grid desktop/mobile", "image click multi-select, no side panel", "earlier picks kept first",
-    "no memory from image reactions", "다 별로 clears draft", "chip appears after repeated contrast", "pin narrows grid", "shortlist comparison → final", "no runtime errors"], captures }));
+    "no memory from image reactions", "다 별로 clears draft", "chip appears after repeated contrast", "pin narrows grid", "shortlist comparison → final",
+    "loop on: one question, image question replaces grid, desktop/mobile", "answer_question sent and closed", "skip keeps values", "no runtime errors"], captures }));
 } finally {
   if (browser) await browser.close();
-  if (backend.exitCode === null) {
-    const stopped = new Promise(resolve => backend.once("close", resolve));
-    backend.stdin.end(`${JSON.stringify({ op: "close" })}\n`);
-    await stopped;
-  }
+  await stopBackend(backend);
   if (!process.argv[2]) await rm(captures, { recursive: true, force: true });
 }

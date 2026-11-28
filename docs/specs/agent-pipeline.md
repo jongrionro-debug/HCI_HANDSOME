@@ -2,7 +2,7 @@
 
 팀원이 낸 **tool 안**(턴당 LLM 1회 + tool)을 뼈대로 삼고, **플래너 안**(LLM 플래너가 코드가 정한 행동 중 하나를 고르는 구조)의 규칙 다섯 가지를 얹은 설계다. [Issue #18](https://github.com/jongrionro-debug/HCI_HANDSOME/issues/18)의 "대화형으로 바꾸기" 논의에서 나왔다.
 
-**현재 상태:** 2026-11-24에 뼈대와 아래 [결정 사항](#결정-사항)을 정했다. 아직 구현하지 않았고 ADR로 남기지 않았다. 질문 방식·답 반영·방식 선택은 [질문 설계 작업 공간](../../research/question-design/README.md)([ADR 0017](../adr/0017-question-design-research-workspace.md))이 근거 기반으로 정해 graph 엔진의 [questions.py](../../src/stylemate_memory/graph/questions.py)에 구현하는 중이며, 그 결정이 이 문서의 해당 부분보다 우선한다. 기존 결정 중 FEA→PI 가설은 [ADR 0006](../adr/0006-fea-to-pi-hypothesis-comparison.md), 종료 후 동의는 [ADR 0007](../adr/0007-joint-feedback-and-end-consent.md), 카탈로그는 [ADR 0014](../adr/0014-crawled-catalog-pi-v2.md), PI 축과 값 형태는 [ADR 0016](../adr/0016-pi-v3-value-shapes.md)(v3), 기억 warm start는 [ADR 0015](../adr/0015-top-memory-warm-start.md)를 따른다. 한 사용자가 이 구조 전체를 거치는 예시는 [agent-scenario.md](agent-scenario.md)에 있다.
+**현재 상태:** 2026-11-24에 뼈대와 아래 [결정 사항](#결정-사항)을 정했다. 아직 구현하지 않았고 ADR로 남기지 않았다. 질문 방식·답 반영·방식 선택은 [질문 설계 작업 공간](../../research/question-design/README.md)([ADR 0017](../adr/0017-question-design-research-workspace.md))이 정해 graph 엔진의 [questions.py](../../src/stylemate_memory/graph/questions.py)에 구현했고 기본으로 켜져 있다([ADR 0020](../adr/0020-question-loop-v1.md)). 이 문서의 `ask_question`·질문 후보 계산·충분 판정은 그 실행 계약을 따른다. 나머지 tool(`update_pi`·`add_impression`·`add_visual_condition`·`critique`)과 단계별 tool은 아직 구현하지 않았다. 기존 결정 중 FEA→PI 가설은 [ADR 0006](../adr/0006-fea-to-pi-hypothesis-comparison.md), 종료 후 동의는 [ADR 0007](../adr/0007-joint-feedback-and-end-consent.md), 카탈로그는 [ADR 0014](../adr/0014-crawled-catalog-pi-v2.md), PI 축과 값 형태는 [ADR 0016](../adr/0016-pi-v3-value-shapes.md)(v3), 기억 warm start는 [ADR 0015](../adr/0015-top-memory-warm-start.md)를 따른다. 한 사용자가 이 구조 전체를 거치는 예시는 [agent-scenario.md](agent-scenario.md)에 있다.
 
 ## 결정 사항
 
@@ -62,7 +62,7 @@ tool 안에서 아직 비어 있거나 위험한 부분 여덟 가지다. 두 �
 | 문장이 tool 결과보다 먼저 쓰인다 | `critique`에서 코드가 상품을 못 찾았는데 "더 밝은 걸 찾았어요"라고 말함 | 결과에 따라 달라지는 문장은 코드 템플릿으로 붙인다. 실패했을 때만 짧게 한 번 더 호출하는 방법도 있다 |
 | PI 밖 조건을 담을 곳이 없다 | "큰 로고 없었으면"은 `update_pi`로도, `add_impression`의 PI 가설로도 표현이 안 된다 | `add_visual_condition` tool을 더하고, 상품 고르는 단계에서 VLM으로 상위 8~12개를 확인한다 |
 | 질문 방식을 LLM이 혼자 고른다 | 글 질문 쪽으로 쏠리거나, 그 축만 다른 상품이 없는데 이미지 비교를 고름 | 질문 후보마다 허용 방식을 코드가 붙여서 넘긴다. 조건 충돌은 글로 확인 고정 |
-| 가설 수명이 정해지지 않았다 | 점선 칩을 무시하거나 거절하면? | 확인하면 고정, 거절하면 제거. 새 욕구가 나오거나 2턴 동안 가설 밖 선택이 이어질 때만 다시 만든다 |
+| 가설 수명이 정해지지 않았다 | 점선 칩을 무시하거나 거절하면? | 확인하면 확인된 해석(L3, 고정은 아님, [ADR 0020](../adr/0020-question-loop-v1.md)), 거절하면 제거. 새 욕구가 나오거나 2턴 동안 가설 밖 선택이 이어질 때만 다시 만든다 |
 | 멈춤 기준이 없다 | "후보가 충분하면" 비교를 제안 | 빈칸 1개 이하, 4턴, "보여 줘" 중 하나면 코드가 충분하다고 판정한다 |
 | 검증 실패 처리가 없다 | tool 인자가 사전 밖 값 | 그 호출만 버리고 규칙 점수식으로 다음 행동을 고르고, 로그에 남긴다 |
 | 시작 단계가 그림에 없다 | 초기 프로필, 동의된 기억 불러오기 | 첫 턴 전에 코드가 불러와 상태에 넣는다. 빠뜨린 건지 확인이 필요하다 |

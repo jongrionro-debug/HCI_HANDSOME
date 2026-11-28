@@ -21,7 +21,7 @@
   - 상품·비교: `catalog*.py`, `product_search.py`, `comparison.py`, `hypotheses.py`
   - 모델: `llm.py`, `model_io.py`, `settings.py`
   - 계약·사전: `contracts.py`, `errors.py`, `registry.py`, `resources/*.json`(`output/feature-map/` 정본의 생성 사본, 직접 편집 금지)
-  - 의도 순환 엔진(기본 엔진, langgraph 필요. `--engine legacy`는 이전 비교 흐름): `graph/`(`engine.py`, `service.py`, `grid.py`, `scoring.py`, `parse.py`, `intent.py`, `hypotheses.py`, `memory.py`, `situations.py`)
+  - 의도 순환 엔진(기본 엔진, langgraph 필요. `--engine legacy`는 이전 비교 흐름): `graph/`(`engine.py`, `service.py`, `grid.py`, `scoring.py`, `questions.py`(질문 루프, ADR 0020), `parse.py`, `intent.py`, `hypotheses.py`, `memory.py`, `situations.py`)
 - 수집 스크립트: `scripts/crawl_29cm.mjs`, `scripts/crawl_naver.mjs`, `scripts/probe_sites.mjs` (Node, Playwright), `scripts/fetch_shopify_first_images.py`
 - 카탈로그 빌드: `scripts/build_lumi_pi_v2.py` → `fill_pi_v2_text.py`·`fill_pi_v2_image.py`(DeepSeek, 실행 요청 시만) → `build_lumi_pi_v3.py`(Pillow, `--export-runtime`으로 실행 사전 `lumi-pi-v3`·가져오기 파일). 29CM 원문 정규화는 `build_29cm_registry.py`(v2 빌드가 import), 원문 PI 보완은 `fill_pi_deepseek.py`
 - 테스트: `tests/test_*.py`(unittest), `tests/*.mjs`(node --test / Playwright 브라우저 검사)

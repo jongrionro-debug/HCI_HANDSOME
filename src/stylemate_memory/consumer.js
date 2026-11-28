@@ -4,8 +4,10 @@
 const esc = value => String(value ?? "").replace(/[&<>"']/g, ch => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[ch]));
 const clone = value => structuredClone(value);
 // Question loop seam: label of the "다른 방식으로 볼게요" buttons per mode (graph/questions.py MODE_NAMES).
-const MODE_SWITCH_LABEL = { text_options: "글로 고를게요", select_images: "사진으로 볼게요", contrast_pair: "두 장 비교로 볼게요",
-  explain_images: "예시 사진으로 볼게요", propose_compare: "후보 비교로 넘어갈게요" };
+const MODE_SWITCH_LABEL = { text_options: "글로 고를게요", photo_chips: "사진 선택지로 볼게요", select_images: "사진으로 비교할게요" };
+// Image questions take the place of the 8-card grid while they are open (3-mapping 9절).
+const IMAGE_ASK_MODES = ["select_images", "photo_chips", "explain_images", "relative_adjust"];
+const imageAsk = ask => Boolean(ask && IMAGE_ASK_MODES.includes(ask.mode));
 const blankDraft = () => ({ text: "", selections: [], reaction: "text_only", question: null, hypothesis: null,
   dislikes: [], similar: null, allBad: false, liked: {}, version: 0 });
 const purposeLabel = {
@@ -54,6 +56,7 @@ export function mountConsumer(root, adapter, { fixture = false, scenarios = {} }
   // jaehyun_work UI: composer on demand (U2), previous grid while the next is computed (U9),
   // chips that appeared on the latest turn (U3).
   let composerOpen = false;
+  let askPick = { id: null, picks: [], strengths: {} };  // draft of a multi-select question answer
   let ghostCards = null;
   let seenChips = { request: null, keys: new Set() };
   let freshChips = new Set();
@@ -214,19 +217,44 @@ export function mountConsumer(root, adapter, { fixture = false, scenarios = {} }
       <div class="actions">${button("adjust", "네", 'data-adjust="novelty_yes"', off)}${button("adjust", "아니요", 'data-adjust="novelty_no" class="quiet"', off)}</div></section>`);
     if (m.taste_prompt) banners.push(`<section class="banner" aria-label="취향 변화"><p>“${esc(m.taste_prompt.text)}”와 다르게 고르고 계세요. 취향이 바뀌었나요?</p>
       <div class="actions">${button("adjust", "네, 이번엔 빼 주세요", 'data-adjust="taste_yes"', off)}${button("adjust", "아니요", 'data-adjust="taste_no" class="quiet"', off)}</div></section>`);
-    if (g.ask) {
-      // Question loop seam (graph/questions.py). v0 renders text options; image modes extend this block (① Issue).
-      const allow = g.ask.allow ?? [];
-      banners.push(`<section class="banner ask" aria-label="질문" data-mode="${esc(g.ask.mode)}"><p>${esc(g.ask.prompt)}</p>
-        <div class="actions">${g.ask.options.map(o => button("answer-q", esc(o.label), `data-choice="options" data-option="${esc(o.id)}"`, off)).join("")}
-        ${allow.includes("neither") ? button("answer-q", "둘 다 아니에요", 'data-choice="neither" class="quiet"', off) : ""}
-        ${allow.includes("unsure") ? button("answer-q", "잘 모르겠어요", 'data-choice="unsure" class="quiet"', off) : ""}
-        ${(g.ask.switch_to ?? []).map(m => button("answer-q", MODE_SWITCH_LABEL[m] ?? m, `data-choice="switch" data-mode="${esc(m)}" class="quiet"`, off)).join("")}
-        ${button("answer-q", "건너뛰기", 'data-choice="skip" class="quiet"', off)}</div></section>`);
-    }
+    if (g.ask) banners.push(askMarkup(g.ask, off));
     if (g.question && !g.reason_prompt) banners.push(`<section class="banner" aria-label="질문"><p>${esc(questionLabel(g.question))}</p>
       <div class="actions">${button("compose-toggle", "말로 답하기", "", off)}</div></section>`);
     return banners[0] ?? "";
+  }
+  function askMarkup(q, off) {
+    // Question loop (graph/questions.py): one question per screen, the input stays open in every mode (1-modes.md).
+    if (askPick.id !== q.question_id) askPick = { id: q.question_id, picks: [], strengths: {} };
+    const allow = q.allow ?? [];
+    const picked = id => askPick.picks.includes(id);
+    const pair = q.layout === "pair";
+    let body = "";
+    if (q.mode === "reason_chips") {
+      body = `<ul class="ask-chips">${q.options.map(o => `<li class="${picked(o.id) ? "picked" : ""}">
+        ${button("ask-pick", esc(o.label), `data-option="${esc(o.id)}" aria-pressed="${picked(o.id)}" class="chip-main"`, off)}
+        ${picked(o.id) ? `<span class="ask-strength" role="group" aria-label="${esc(o.label)} 정도">${[["only", "꼭 있어야 해요"], ["more", "있으면 좋아요"]].map(([s, label]) =>
+          button("ask-strength", label, `data-option="${esc(o.id)}" data-strength="${s}" aria-pressed="${(askPick.strengths[o.id] ?? "more") === s}" class="quiet"`, off)).join("")}</span>` : ""}</li>`).join("")}</ul>`;
+    } else if (q.options.some(o => o.image_url)) {
+      body = `<ul class="ask-photos ${pair ? "pair" : ""}">${q.options.map(o => `<li>${q.multi
+        ? button("ask-pick", `<img src="${esc(o.image_url)}" alt=""><span>${esc(o.label)}</span>`, `data-option="${esc(o.id)}" aria-pressed="${picked(o.id)}" class="ask-photo"`, off)
+        : button("answer-q", `<img src="${esc(o.image_url)}" alt=""><span>${esc(o.label)}</span>`, `data-choice="options" data-option="${esc(o.id)}" class="ask-photo"`, off)}</li>`).join("")}</ul>`;
+    } else {
+      const base = q.base?.image_url ? `<img class="ask-base" src="${esc(q.base.image_url)}" alt="기준 상품">` : "";
+      body = `${base}<div class="actions">${q.options.map(o => q.multi
+        ? button("ask-pick", esc(o.label), `data-option="${esc(o.id)}" aria-pressed="${picked(o.id)}"`, off)
+        : button("answer-q", esc(o.label), `data-choice="options" data-option="${esc(o.id)}"`, off)).join("")}</div>`;
+    }
+    const submit = q.multi ? button("ask-submit", "골랐어요", 'class="primary"', off || !askPick.picks.length) : "";
+    const both = q.multi && pair ? button("ask-both", "둘 다 좋아요", 'class="secondary"', off) : "";
+    const textAnswer = composerOpen || draft().text
+      ? `<button type="submit" form="feedback-form" class="secondary" data-submit="grid" ${off ? "disabled" : ""}>글로 답하기</button>`
+      : button("compose-toggle", "말로 답할게요", 'class="quiet"', off);
+    return `<section class="banner ask" aria-label="질문" data-mode="${esc(q.mode)}" data-question="${esc(q.question_id)}"><p>${esc(q.prompt)}</p>${body}
+      <div class="actions">${submit}${both}
+      ${allow.includes("neither") ? button("answer-q", pair ? "둘 다 아니에요" : "다 별로예요", 'data-choice="neither" class="quiet"', off) : ""}
+      ${allow.includes("unsure") ? button("answer-q", "잘 모르겠어요", 'data-choice="unsure" class="quiet"', off) : ""}
+      ${(q.switch_to ?? []).map(m => button("answer-q", MODE_SWITCH_LABEL[m] ?? m, `data-choice="switch" data-mode="${esc(m)}" class="quiet"`, off)).join("")}
+      ${q.mode === "propose_compare" ? "" : button("answer-q", "건너뛰기", 'data-choice="skip" class="quiet"', off)}${textAnswer}</div></section>`;
   }
   function memoryNoticeMarkup(g) {
     const n = g.memory_notice;
@@ -287,9 +315,9 @@ export function mountConsumer(root, adapter, { fixture = false, scenarios = {} }
     return `${reviewMarkup()}<div class="g-head"><div><h1>${title}</h1>${counts.length ? `<p class="hint">${counts.map(esc).join(" · ")}</p>` : ""}</div>${graphChipsMarkup(g)}</div>
       ${memoryNoticeMarkup(g)}${ready}${graphBannerMarkup(g)}
       <div class="workspace graph ${loading ? "is-loading" : ""}"><section aria-label="이미지 고르기"><h2 class="visually-hidden">이미지 고르기</h2>
-        <div class="candidates grid" aria-busy="${loading}">${cards}</div>${cards ? "" : empty}
+        <div class="candidates grid" aria-busy="${loading}" ${imageAsk(g.ask) ? "hidden" : ""}>${cards}</div>${cards || imageAsk(g.ask) ? "" : empty}
         ${cards && !ghostCards && (!refs.round || !refs.set) ? `<p class="selection-note">화면 정보를 확인하지 못했어요.</p>${button("refresh", "최신 화면 불러오기")}` : ""}
-        ${composer}${final ? graphFinalMarkup() : shortlistMarkup(g)}${final ? "" : bar}${graphSummaryMarkup()}${wrapMarkup()}</section></div>`;
+        ${composer}${final ? graphFinalMarkup() : shortlistMarkup(g)}${final || imageAsk(g.ask) ? "" : bar}${graphSummaryMarkup()}${wrapMarkup()}</section></div>`;
   }
   function graphFinalMarkup() {
     const final = state.request.final_selection;
@@ -779,6 +807,23 @@ export function mountConsumer(root, adapter, { fixture = false, scenarios = {} }
         if (!state.graph?.ask) return;
         await send({ op: "answer_question", question_id: state.graph.ask.question_id, choice: b.dataset.choice,
           option_ids: b.dataset.option ? [b.dataset.option] : [], switch_to: b.dataset.mode ?? null }); break;
+      case "ask-pick": {
+        const id = b.dataset.option;
+        askPick.picks = askPick.picks.includes(id) ? askPick.picks.filter(p => p !== id) : [...askPick.picks, id];
+        if (!askPick.picks.includes(id)) delete askPick.strengths[id];
+        render(); root.querySelector(`[data-action="ask-pick"][data-option="${CSS.escape(id)}"]`)?.focus({ preventScroll: true }); break;
+      }
+      case "ask-strength": askPick.strengths[b.dataset.option] = b.dataset.strength; render(); break;
+      case "ask-both":
+      case "ask-submit": {
+        const q = state.graph?.ask;
+        if (!q) return;
+        const ids = b.dataset.action === "ask-both" ? q.options.map(o => o.id) : askPick.picks;
+        if (!ids.length) return;
+        const strengths = q.strengths?.length ? Object.fromEntries(ids.map(id => [id, askPick.strengths[id] ?? "more"])) : null;
+        await send({ op: "answer_question", question_id: q.question_id, choice: "options", option_ids: [...ids], switch_to: null,
+          ...(strengths ? { strengths } : {}) }); break;
+      }
       case "reaction": d.hypothesis = null; d.reaction = b.dataset.reaction; d.selections = []; d.question = null; d.version += 1; render(); root.querySelector("#free-text")?.focus(); break;
       case "part": d.hypothesis = null; part = { cardId: card.candidate_id, imageId: card.image_id, imageVersion: card.image_version, box: [0.15, 0.4, 0.85, 0.9] }; render(); root.querySelector('[data-coordinate="0"]')?.focus(); break;
       case "cancel-part": part = null; render(); break;
