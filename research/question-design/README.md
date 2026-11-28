@@ -47,6 +47,7 @@ research/question-design/
 │   ├── _template.md       새 카드를 만들 때 복사하는 틀
 │   └── <카드 ID>.md
 ├── 1-modes.md             1 질문 방식
+├── 1-modes-screens/      1의 방식별 예시 화면(PNG)
 ├── 2-feedback.md          2 답 해석·반영
 └── 3-mapping.md           3 언제 어떤 방식
 ```
