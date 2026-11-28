@@ -17,7 +17,7 @@ from typing import Any, get_args
 from .contracts import (
     BindingSpec, FEAObservation, FEAValue, FeaturePath, LEGACY_REGISTRY_VERSION,
     MapStatus, PIObservation, PIValue, Polarity, Strength, Target,
-    LUMI_PI_V3_REGISTRY_VERSION, V1_REGISTRY_VERSION, V1_REGISTRY_VERSIONS, validate_ref,
+    LUMI_PI_V3_REGISTRY_VERSION, LUMI_PI_V51_REGISTRY_VERSION, V1_REGISTRY_VERSION, V1_REGISTRY_VERSIONS, validate_ref,
 )
 from .errors import StyleMateError
 
@@ -708,6 +708,8 @@ def _validate_pi_v2_resource(document: Any, version: str = LUMI_PI_V3_REGISTRY_V
 _RESOURCES = {
     V1_REGISTRY_VERSION: ("park-2025-feature-map.json", _validate_resource),
     LUMI_PI_V3_REGISTRY_VERSION: ("lumi-pi-v3.json", _validate_pi_v2_resource),
+    LUMI_PI_V51_REGISTRY_VERSION: ("lumi-pi-v5.1.json",
+                                   lambda document: _validate_pi_v2_resource(document, LUMI_PI_V51_REGISTRY_VERSION)),
 }
 
 

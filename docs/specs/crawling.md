@@ -57,6 +57,6 @@ python3 scripts/fetch_shopify_first_images.py --catalog data/raw/waxlondon/catal
 
 앱 공급 시에는 기존 [CatalogRecord](../../src/stylemate_memory/contracts.py)의 `format_version/product_id/source/title/description/garment_type/raw_metadata/images/labels`로 변환한다. 원자료는 `raw_metadata`에, 근거 있는 PI 해석은 `labels`에 연결하며 사용자 기억과 섞지 않는다. 원자료 가져오기와 실행 사전의 PI 매핑 지원은 별개다.
 
-[매퍼](../../src/stylemate_memory/catalog_mapping.py)·[사전](../../src/stylemate_memory/registry.py)은 실행 사전 `lumi-pi-v3`의 값으로 상품 Map을 만든다. 새 출처나 새 값은 v3 빌드와 사전을 다시 만든 뒤에만 실행에 쓰인다. 수집 성공만으로 검색에 반영됐다고 보고하지 않는다.
+[매퍼](../../src/stylemate_memory/catalog_mapping.py)·[사전](../../src/stylemate_memory/registry.py)은 실행 사전 `lumi-pi-v5.1`(통합 map, [ADR 0021](../adr/0021-pi-v5-1-runtime.md))의 값으로 상품 Map을 만든다. 새 출처나 새 값은 통합 빌드와 `--export-runtime`으로 사전을 다시 만든 뒤에만 실행에 쓰인다. 수집 성공만으로 검색에 반영됐다고 보고하지 않는다.
 
 기존 [가져오기 검증](../../src/stylemate_memory/catalog_validation.py)의 레코드 256 KiB, 제목·설명 각각 4,000자, 이미지 참조 최대 32개 제한을 고려한다. 전체 상세 HTML·이미지 바이트를 CatalogRecord 안에 넣지 않는다. 원격 이미지 참조는 현재 소비자 화면에 자동 표시되지 않으므로 실제 비교에는 로컬 이미지 공급이 필요하다. 형식·크기 등 현재 이미지 계약은 [상품과 이미지](../project.md#상품과-이미지)를 따른다.

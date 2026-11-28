@@ -45,8 +45,8 @@ def eligible(products: list[dict[str, Any]], target_id: str, intent: dict[str, A
     for product in products:
         if product["target_id"] != target_id or not product["image_id"]:
             continue
-        if gender and product.get("gender") != gender:
-            continue  # ADR 0015: an unknown gender only shows under "전체"
+        if gender and product.get("gender") not in (gender, "unisex"):
+            continue  # ADR 0015: an unknown gender only shows under "전체"; unisex shows under both
         ok = True
         for h in hard:
             if h["kind"] == "price":

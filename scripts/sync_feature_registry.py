@@ -6,8 +6,9 @@ from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parents[1]
-# Park 원문 사전(fixture·출처 메타데이터)과 PI v3 상·하의 실행 사전(scripts/build_lumi_pi_v3.py --export-runtime).
-NAMES = ("park-2025-feature-map.json", "lumi-pi-v3.json")
+# Park 원문 사전(fixture·출처 메타데이터), PI v3 상·하의 실행 사전(scripts/build_lumi_pi_v3.py --export-runtime),
+# PI v5.1 통합 실행 사전(scripts/build_lumi_pi_unified.py --export-runtime, 기본).
+NAMES = ("park-2025-feature-map.json", "lumi-pi-v3.json", "lumi-pi-v5.1.json")
 
 
 def main() -> int:
